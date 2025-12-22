@@ -5,11 +5,12 @@ import { addPrayer, incrementPrayCount } from '@/lib/prayer-db';
 
 export async function submitPrayerAction(formData: FormData) {
     const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
     const topic = formData.get('topic') as string;
     const content = formData.get('content') as string;
 
-    if (!name || !topic || !content) {
-        return { success: false, error: 'Vinsamlegast fylltu út alla reiti.' };
+    if (!topic || !content) {
+        return { success: false, error: 'Vinsamlegast fylltu út efni og bæn.' };
     }
 
     // Basic spam filter (optional: simple length check)
@@ -18,7 +19,8 @@ export async function submitPrayerAction(formData: FormData) {
     }
 
     await addPrayer({
-        name,
+        name: name || "Nafnlauser",
+        email,
         topic,
         content
     });

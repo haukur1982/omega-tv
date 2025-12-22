@@ -4,6 +4,7 @@ import path from 'path';
 export interface Prayer {
     id: string;
     name: string;
+    email?: string; // Private contact field
     topic: string;
     content: string;
     timestamp: number;

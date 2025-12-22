@@ -94,6 +94,16 @@ export default function PrayerForm() {
                         </div>
 
                         <div>
+                            <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">Netfang (Aðeins fyrir oss, birtist ekki á vefnum)</label>
+                            <input
+                                name="email"
+                                type="email"
+                                placeholder="netfang@dæmi.is"
+                                className="w-full bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-[var(--radius-md)] px-4 py-3 text-white focus:outline-none focus:border-[var(--accent-gold)] transition-colors"
+                            />
+                        </div>
+
+                        <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2">Efni</label>
                             <select name="topic" className="w-full bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-[var(--radius-md)] px-4 py-3 text-white focus:outline-none focus:border-[var(--accent-gold)] transition-colors appearance-none cursor-pointer">
                                 <option>Lækning</option>
