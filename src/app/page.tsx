@@ -16,10 +16,7 @@ export default function Home() {
         {/* 33 Years Legacy Section */}
         <LegacySection />
 
-        {/* Placeholder for Content Grid (Coming Soon) */}
-        <section className="container mx-auto px-6 text-center text-[var(--text-muted)]">
-          <p className="tracking-widest uppercase text-sm font-semibold">Latest Sermons Loading...</p>
-        </section>
+
       </div>
     </main>
   );
