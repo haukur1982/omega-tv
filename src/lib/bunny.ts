@@ -30,10 +30,12 @@ export function getThumbnailUrl(videoId: string) {
 // Instead of uploading a custom image for every episode, we map the "Show Name"
 // to a single master image. This saves hours of work.
 const SERIES_THUMBNAILS: Record<string, string> = {
-    "Í snertingu": "https://images.unsplash.com/photo-1542382156909-9ae37b3f56fd?q=80&w=2675&auto=format&fit=crop", // Autumn/Deep
-    "Jólaskraut": "https://images.unsplash.com/photo-1512389142860-9c449e58a543?q=80&w=2669&auto=format&fit=crop", // Christmas
-    "Bænakvöld": "https://images.unsplash.com/photo-1616012480717-fd9867059ca0?q=80&w=2564&auto=format&fit=crop", // Praying Hands
-    "Omega": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2672&auto=format&fit=crop", // Default Network
+    // Vertical Posters (2:3 Aspect Ratio)
+    "Í snertingu": "https://images.unsplash.com/photo-1507643179173-ec8273836376?q=80&w=1000&auto=format&fit=crop", // Forest/Nature
+    "Jólaskraut": "https://images.unsplash.com/photo-1544967082-d9d25d867d66?q=80&w=1000&auto=format&fit=crop", // Red Ornament
+    "Bænakvöld": "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=1000&auto=format&fit=crop", // Praying Hands
+    "Omega": "https://images.unsplash.com/photo-1519750157634-b6d493a0f77c?q=80&w=1000&auto=format&fit=crop", // Blue/Abstract
+    "Sunnudagssamkoma": "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=1000&auto=format&fit=crop",
 };
 
 export function parseVideoMetadata(video: BunnyVideo) {

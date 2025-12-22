@@ -20,6 +20,12 @@ interface VideoProps {
 
 export default function VODCard({ video, index }: { video: VideoProps; index: number }) {
     const [isHovered, setIsHovered] = useState(false);
+    const [imageError, setImageError] = useState(false);
+
+    // Fallback image if source fails
+    const displayImage = imageError
+        ? "https://images.unsplash.com/photo-1519750157634-b6d493a0f77c?q=80&w=1000&auto=format&fit=crop"
+        : video.thumbnail;
 
     return (
         <motion.div
@@ -28,7 +34,8 @@ export default function VODCard({ video, index }: { video: VideoProps; index: nu
             transition={{ delay: index * 0.05 }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className="group relative aspect-video rounded-[var(--radius-md)] cursor-pointer z-0 hover:z-10"
+            // Changed to Vertical Aspect Ratio (2:3) for Cinematic/Netflix Poster look
+            className="group relative aspect-[2/3] rounded-[var(--radius-md)] cursor-pointer z-0 hover:z-10"
         >
             <Link href={`/sermons/${video.id}`} className="block w-full h-full">
                 {/* Container that expands on hover - Netflix style effect */}
@@ -46,43 +53,48 @@ export default function VODCard({ video, index }: { video: VideoProps; index: nu
                     {/* Thumbnail Layer */}
                     <div className="relative w-full h-full">
                         <Image
-                            src={video.thumbnail}
+                            src={displayImage}
                             alt={video.title}
                             fill
                             className="object-cover transition-opacity duration-500"
                             style={{ opacity: isHovered ? 0.4 : 1 }}
+                            onError={() => setImageError(true)}
                         />
-                        {/* Dark Gradient Overlay for text readability */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                        {/* Dark Gradient Overlay for text readability - Stronger at bottom */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90" />
                     </div>
 
-                    {/* Hover Video Preview (Placeholder logic) */}
+                    {/* Hover Video Preview (Play Button) */}
                     {isHovered && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <motion.div
                                 initial={{ scale: 0.5, opacity: 0 }}
                                 animate={{ scale: 1, opacity: 1 }}
-                                className="w-12 h-12 rounded-full bg-[var(--primary-glow)] flex items-center justify-center shadow-[0_0_20px_var(--primary-glow)]"
+                                className="w-14 h-14 rounded-full bg-[var(--primary-glow)] flex items-center justify-center shadow-[0_0_20px_var(--primary-glow)]"
                             >
-                                <Play size={20} fill="white" className="ml-1" />
+                                <Play size={24} fill="white" className="ml-1" />
                             </motion.div>
                         </div>
                     )}
 
                     {/* Info Layer (Always visible but enhanced on hover) */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300">
-                        <div className="flex items-center gap-2 text-[var(--text-muted)] text-xs font-medium mb-2">
-                            <Clock size={12} />
-                            <span>{video.duration}</span>
-                        </div>
+                        <p className="text-[var(--accent-gold)] text-xs font-bold uppercase tracking-wider mb-1 opacity-80">
+                            {video.preacher || "Omega TV"}
+                        </p>
 
-                        <h3 className="text-white font-bold text-lg leading-tight mb-1 group-hover:text-[var(--accent-gold)] transition-colors line-clamp-2">
+                        <h3 className="text-white font-bold text-lg leading-tight mb-2 group-hover:text-[var(--accent-gold)] transition-colors line-clamp-3">
                             {video.title}
                         </h3>
 
-                        <p className="text-sm text-white/70 line-clamp-1 group-hover:text-white transition-colors">
-                            {video.preacher}
-                        </p>
+                        <div className="flex items-center gap-3 text-[var(--text-muted)] text-xs font-medium">
+                            <span className="flex items-center gap-1">
+                                <Clock size={12} />
+                                {video.duration} Mín
+                            </span>
+                            <span>•</span>
+                            <span>{new Date(video.date).getFullYear()}</span>
+                        </div>
 
                         {/* Extra Actions appearing on hover */}
                         <motion.div
@@ -91,10 +103,7 @@ export default function VODCard({ video, index }: { video: VideoProps; index: nu
                             className="overflow-hidden mt-2"
                         >
                             <div className="flex gap-2 pt-2">
-                                <button className="flex-1 py-1.5 bg-white text-black text-xs font-bold rounded hover:bg-gray-200">Horfa</button>
-                                <button className="p-1.5 bg-white/10 text-white rounded hover:bg-white/20">
-                                    <MoreVertical size={16} />
-                                </button>
+                                <button className="flex-1 py-2 bg-white text-black text-xs font-bold rounded hover:bg-gray-200 uppercase tracking-wide">Horfa</button>
                             </div>
                         </motion.div>
                     </div>
