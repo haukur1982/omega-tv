@@ -43,8 +43,8 @@ export default function PrayerForm() {
                 setPromise(VERSES[Math.floor(Math.random() * VERSES.length)]);
                 setStatus('success');
                 formRef.current?.reset();
-                // Reset success message after 3 seconds
-                setTimeout(() => setStatus('idle'), 3000);
+                // Reset success message after 15 seconds
+                setTimeout(() => setStatus('idle'), 15000);
             } else {
                 setStatus('error'); // Handle error msg if needed
                 alert(result.error || "Villa kom upp.");
