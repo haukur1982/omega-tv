@@ -48,22 +48,25 @@ export function parseVideoMetadata(video: BunnyVideo) {
     let category = video.category || "Almennt";
     let dateStr = video.date;
 
-    // Try to parse "Show - Date - Title" format
+    // Enhanced Detection: Check if title starts with any known Series Name
+    // This fixes the issue where "Í snertingu" (no date/hyphen) wasn't being detected
+    for (const knownShow of Object.keys(SERIES_THUMBNAILS)) {
+        if (cleanName.startsWith(knownShow)) {
+            show = knownShow;
+            // If the name is basically just the show name, keep title as is or clean it slightly
+            // e.g. "Í snertingu" -> show="Í snertingu", title="Í snertingu"
+            break;
+        }
+    }
+
+    // Try to parse "Show - Date - Title" format for better Metadata if possible
     // Example: "Í snertingu - 21. des - Jólin"
     const parts = cleanName.split(' - ');
 
     if (parts.length >= 3) {
         show = parts[0].trim();
-        // Try to parse the middle part as date if it looks like one, otherwise it might be part of title
-        // For now, assume strict formatting: Show - Date - Title
         const potentialDate = parts[1].trim();
-        title = parts.slice(2).join(' - ').trim(); // Join rest as title
-
-        // Very basic date check or just treat as string
-        // If the user puts the date in the filename, we can use it as the display date
-        // But for sorting, we might still rely on upload date unless we parse this into a Date object.
-        // Let's just return the string for display purposes to override the specific visual.
-        // Actually, VODCard takes a `date` string.
+        title = parts.slice(2).join(' - ').trim();
         dateStr = potentialDate;
     } else if (parts.length === 2) {
         show = parts[0].trim();
