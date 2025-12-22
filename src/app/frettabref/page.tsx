@@ -47,11 +47,11 @@ export default async function NewsletterPage() {
                             <footer className="mt-16 pt-8 border-t border-gray-200 flex items-center justify-between">
                                 <div>
                                     <p className="font-bold font-serif text-lg">{latest.author}</p>
-                                    <p className="text-sm text-gray-500 uppercase tracking-wider">Stofnandi Omega</p>
+                                    <p className="text-sm text-gray-500 uppercase tracking-wider">Sjónvarpsstöðin OMEGA</p>
                                 </div>
                                 {/* Signature effect could go here */}
                                 <div className="text-4xl opacity-20 font-serif italic font-black">
-                                    GÞ
+                                    ES
                                 </div>
                             </footer>
                         </div>
