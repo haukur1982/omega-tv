@@ -18,7 +18,7 @@ export default async function NewsletterPage() {
                     <div className="inline-flex items-center justify-center p-4 bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] rounded-full mb-6">
                         <BookOpen size={32} />
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">Bréf frá Gunnari</h1>
+                    <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-4">Bréf frá Eiríki</h1>
                     <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto">
                         Hugleiðingar, fréttir og hvatning frá stofnanda Omega.
                     </p>
