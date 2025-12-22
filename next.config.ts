@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'video.bunnycdn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'omega-tv.b-cdn.net',
       }
     ],
   },

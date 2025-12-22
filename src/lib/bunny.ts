@@ -31,7 +31,7 @@ export function getThumbnailUrl(videoId: string) {
 // to a single master image. This saves hours of work.
 const SERIES_THUMBNAILS: Record<string, string> = {
     // Vertical Posters (2:3 Aspect Ratio)
-    "Í snertingu": "https://images.unsplash.com/photo-1507643179173-ec8273836376?q=80&w=1000&auto=format&fit=crop", // Forest/Nature
+    "Í snertingu": "https://omega-tv.b-cdn.net/InTouch.png", // Dr. Charles Stanley
     "Jólaskraut": "https://images.unsplash.com/photo-1544967082-d9d25d867d66?q=80&w=1000&auto=format&fit=crop", // Red Ornament
     "Bænakvöld": "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?q=80&w=1000&auto=format&fit=crop", // Praying Hands
     "Omega": "https://images.unsplash.com/photo-1519750157634-b6d493a0f77c?q=80&w=1000&auto=format&fit=crop", // Blue/Abstract
