@@ -66,7 +66,7 @@ export default async function SermonsPage() {
             <Navbar />
 
             {/* Cinematic Hero (Dynamically Featured: Latest Video) */}
-            {latestVideo && (
+            {latestVideo && heroMeta && (
                 <div className="relative h-[85vh] w-full flex items-center">
                     {/* Background Image */}
                     <div className="absolute inset-0">
