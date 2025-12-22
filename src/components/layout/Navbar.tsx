@@ -39,13 +39,13 @@ export default function Navbar() {
 
                 {/* Actions */}
                 <div className="relative z-10 flex items-center gap-4">
-                    <button className="p-2 rounded-full hover:bg-[var(--glass-shine)] transition-colors text-white/80 hover:text-white">
+                    <Link href="/sermons" className="p-2 rounded-full hover:bg-[var(--glass-shine)] transition-colors text-white/80 hover:text-white">
                         <Search size={20} />
-                    </button>
-                    <button className="hidden md:flex items-center gap-2 bg-[var(--text-primary)] text-black px-4 py-2 rounded-full font-medium hover:scale-105 transition-transform">
+                    </Link>
+                    <Link href="/live" className="hidden md:flex items-center gap-2 bg-[var(--text-primary)] text-black px-4 py-2 rounded-full font-medium hover:scale-105 transition-transform">
                         <Tv size={16} />
                         <span>Horfa</span>
-                    </button>
+                    </Link>
                     <button
                         className="md:hidden p-2 text-white"
                         onClick={() => setIsMobileMenuOpen(true)}
@@ -84,10 +84,10 @@ export default function Navbar() {
                         </div>
 
                         <div className="mt-auto">
-                            <button className="w-full flex items-center justify-center gap-2 bg-[var(--text-primary)] text-black px-4 py-4 rounded-xl font-bold">
+                            <Link href="/live" onClick={() => setIsMobileMenuOpen(false)} className="w-full flex items-center justify-center gap-2 bg-[var(--text-primary)] text-black px-4 py-4 rounded-xl font-bold">
                                 <Tv size={20} />
                                 <span>Horfa</span>
-                            </button>
+                            </Link>
                         </div>
                     </motion.div>
                 )}
