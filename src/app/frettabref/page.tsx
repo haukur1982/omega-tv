@@ -1,6 +1,7 @@
 import { getNewsletters } from '@/lib/newsletter-db';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen } from 'lucide-react';
+import EmailSignupForm from '@/components/forms/EmailSignupForm';
 
 export default async function NewsletterPage() {
     const newsletters = await getNewsletters();
@@ -24,10 +25,21 @@ export default async function NewsletterPage() {
                     </p>
                 </div>
 
+                {/* Email Signup */}
+                <div className="max-w-xl mx-auto mb-20 bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-[var(--radius-lg)] p-8 text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-gold)] to-[var(--primary-glow)]" />
+                    <h3 className="text-2xl font-bold mb-2 text-white">Vertu með í hópnum</h3>
+                    <p className="text-[var(--text-secondary)] mb-6">Skráðu þig á póstlistann og fáðu vikulega uppörvun og fréttir af starfinu.</p>
+                    <EmailSignupForm
+                        segment="newsletter"
+                        layout="stacked"
+                        placeholder="Netfangið þitt"
+                        successMessage="Takk! Við munum hafa samband. 📬"
+                    />
+                </div>
+
                 {latest ? (
                     <article className="bg-[#fcfbf9] text-gray-900 rounded-[var(--radius-lg)] p-8 md:p-16 shadow-2xl relative overflow-hidden">
-                        {/* Paper Texture Effect overlay if needed, using simple color for now */}
-
                         <div className="relative z-10">
                             <header className="mb-10 text-center border-b border-gray-200 pb-10">
                                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-4 leading-tight">
@@ -49,7 +61,6 @@ export default async function NewsletterPage() {
                                     <p className="font-bold font-serif text-lg">{latest.author}</p>
                                     <p className="text-sm text-gray-500 uppercase tracking-wider">Sjónvarpsstöðin OMEGA</p>
                                 </div>
-                                {/* Signature effect could go here */}
                                 <div className="text-4xl opacity-20 font-serif italic font-black">
                                     ES
                                 </div>

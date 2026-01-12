@@ -6,10 +6,10 @@ import { useRef } from "react";
 import { Globe, Heart, Radio, Users } from "lucide-react";
 
 const milestones = [
-    { year: "1990", title: "Sýnin Fæðist", desc: "Fyrsta útsendingin fór í loftið yfir Reykjavík." },
-    { year: "1998", title: "Landsdekkandi", desc: "Útsendingar náðu til allra landsmanna." },
-    { year: "2010", title: "Stafræn Bylting", desc: "Farið yfir í háskerpuútsendingar og netstreymi." },
-    { year: "2023", title: "Alþjóðleg Áhrif", desc: "Áhorfendur frá yfir 50 þjóðum fylgjast með í viku hverri." },
+    { year: "1992", title: "Sýnin Fæðist", desc: "Sumarið 1992 hóf Eiríkur Sigurbjörnsson rekstur sjónvarpsstöðvarinnar Omega í Reykjavík." },
+    { year: "1994", title: "Stórviðburðir", desc: "Benny Hinn heimsótti Ísland 1994 og 1995. Ríflega 11 þúsund manns sóttu samkomurnar." },
+    { year: "2002", title: "Gospel Channel", desc: "Útsendingar hófust um gervihnött til Skandinavíu og náðu síðar til milljóna heimila í Evrópu, Mið-Austurlöndum og Norður-Afríku." },
+    { year: "Í Dag", title: "Landsdekkandi", desc: "Dagskrá Omega er aðgengileg um allt land gegnum Sjónvarp Símans og á netinu. Heimakirkja Omega er starfandi söfnuður okkar." },
 ];
 
 const values = [
@@ -43,7 +43,7 @@ export default function AboutPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="inline-block mb-4 text-[var(--accent-gold)] font-bold tracking-[0.3em] uppercase text-sm"
                     >
-                        SÍÐAN 1990
+                        SÍÐAN 1992
                     </motion.span>
                     <motion.h1
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -59,7 +59,7 @@ export default function AboutPage() {
                         transition={{ delay: 0.4 }}
                         className="text-xl md:text-2xl text-[var(--text-secondary)] leading-relaxed"
                     >
-                        Í 33 ár höfum við verið hjartsláttur kristinnar miðlunar á Íslandi.
+                        Í rúmlega 30 ár höfum við verið hjartsláttur kristinnar miðlunar á Íslandi.
                         <br className="hidden md:block" /> Nýsköpun er okkar hefð. Fagnaðarerindið er okkar boðskapur.
                     </motion.p>
                 </div>
@@ -133,6 +133,59 @@ export default function AboutPage() {
                 <div className="inline-block p-1 bg-[var(--glass-border)] rounded-full">
                     <div className="px-8 py-4 bg-[var(--bg-surface)] rounded-full text-[var(--text-muted)]">
                         Myndir af Teyminu Væntanlegar
+                    </div>
+                </div>
+            </section>
+
+
+            {/* History Gallery */}
+            <section className="py-20 bg-black/40">
+                <div className="container mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-bold mb-4">Söguleg Augnablik</h2>
+                        <p className="text-[var(--text-secondary)]">Glimt af vegferð okkar í gegnum árin.</p>
+                    </div>
+
+                    <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+                        {[
+                            { src: "/history/broadcast-1992.jpg", title: "Fyrstu skrefin", date: "1992" },
+                            { src: "/history/founders-racks.jpg", title: "Stofnendur", date: "1994" },
+                            { src: "/history/satellite-dish.jpg", title: "Gervihnattadiskurinn", date: "2000" },
+                            { src: "/history/telethon-phones.jpg", title: "Söfnunarsímar", date: "Upphafsárin" },
+                            { src: "/history/large-event.jpg", title: "Stórviðburður", date: "1995" },
+                            { src: "/history/master-control.jpg", title: "Stjórnstöð", date: "2000s" },
+                            { src: "/history/transmission-room.jpg", title: "Tæknibúnaður", date: "1992" },
+                            { src: "/history/israel-agreement.jpg", title: "Alþjóðlegt samstarf", date: "1996" },
+                            { src: "/history/editing-suite.jpg", title: "Klippistöð", date: "1998" },
+                            { src: "/history/staff-lunch.jpg", title: "Góðar stundir", date: "1998" },
+                            { src: "/history/station-exterior.jpg", title: "Húsnæðið", date: "1996" },
+                            { src: "/history/studio-interview.jpg", title: "Viðtal í setti", date: "1995" },
+                            { src: "/history/vision-planning.jpg", title: "Sýnin mótuð", date: "1990s" },
+                            { src: "/history/building-transmission.jpg", title: "Uppbygging", date: "1992" },
+                            { src: "/history/founders.jpg", title: "Brautryðjendur", date: "Upphafið" },
+                        ].map((item, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="relative break-inside-avoid rounded-[var(--radius-lg)] overflow-hidden group border border-[var(--glass-border)] mb-4"
+                            >
+                                <div className="relative">
+                                    <img
+                                        src={item.src}
+                                        alt={item.title}
+                                        className="w-full h-auto object-cover grayscale opacity-80 group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-700"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                                    <div className="absolute bottom-0 left-0 p-4 translate-y-2 group-hover:translate-y-0 transition-transform">
+                                        <span className="text-[var(--accent-gold)] text-xs font-bold tracking-widest uppercase mb-1 block">{item.date}</span>
+                                        <h3 className="text-white text-sm font-bold">{item.title}</h3>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
                 </div>
             </section>

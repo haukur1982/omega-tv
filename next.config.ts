@@ -28,3 +28,5 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
+
+// Force restart for Legacy Section update

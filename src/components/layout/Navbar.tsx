@@ -34,6 +34,7 @@ export default function Navbar() {
                     <NavLink href="/sermons">Brunnurinn</NavLink>
                     <NavLink href="/baenatorg">Bænatorg</NavLink>
                     <NavLink href="/frettabref">Fréttir</NavLink>
+                    <NavLink href="/framtid">Sýnin</NavLink>
                     <NavLink href="/about">Hjartað</NavLink>
                     <NavLink href="/give">Sáðkorn</NavLink>
                 </div>
@@ -81,6 +82,7 @@ export default function Navbar() {
                             <MobileNavLink href="/sermons" onClick={() => setIsMobileMenuOpen(false)}>Brunnurinn</MobileNavLink>
                             <MobileNavLink href="/baenatorg" onClick={() => setIsMobileMenuOpen(false)}>Bænatorg</MobileNavLink>
                             <MobileNavLink href="/frettabref" onClick={() => setIsMobileMenuOpen(false)}>Fréttir</MobileNavLink>
+                            <MobileNavLink href="/framtid" onClick={() => setIsMobileMenuOpen(false)}>Sýnin</MobileNavLink>
                             <MobileNavLink href="/about" onClick={() => setIsMobileMenuOpen(false)}>Hjartað</MobileNavLink>
                             <MobileNavLink href="/give" onClick={() => setIsMobileMenuOpen(false)}>Sáðkorn</MobileNavLink>
                         </div>

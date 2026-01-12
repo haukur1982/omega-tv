@@ -1,0 +1,326 @@
+/* ==========================================================================
+   OMEGA ADMIN DASHBOARD - Design System
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Color Tokens
+   -------------------------------------------------------------------------- */
+:root {
+    /* Backgrounds */
+    --admin-bg: #09090b;
+    --admin-surface: #18181b;
+    --admin-surface-hover: #27272a;
+    --admin-surface-active: #3f3f46;
+
+    /* Borders */
+    --admin-border: rgba(255, 255, 255, 0.06);
+    --admin-border-strong: rgba(255, 255, 255, 0.12);
+
+    /* Text */
+    --admin-text: #fafafa;
+    --admin-text-secondary: #a1a1aa;
+    --admin-text-muted: #52525b;
+
+    /* Accent - Warm Gold */
+    --admin-accent: #d4af37;
+    --admin-accent-hover: #e5c158;
+    --admin-accent-subtle: rgba(212, 175, 55, 0.1);
+
+    /* Semantic */
+    --admin-success: #22c55e;
+    --admin-success-subtle: rgba(34, 197, 94, 0.1);
+    --admin-warning: #f59e0b;
+    --admin-warning-subtle: rgba(245, 158, 11, 0.1);
+    --admin-error: #ef4444;
+    --admin-error-subtle: rgba(239, 68, 68, 0.1);
+    --admin-info: #6366f1;
+    --admin-info-subtle: rgba(99, 102, 241, 0.1);
+
+    /* Sizing */
+    --admin-sidebar-width: 260px;
+    --admin-radius-sm: 6px;
+    --admin-radius-md: 10px;
+    --admin-radius-lg: 14px;
+    --admin-radius-xl: 20px;
+
+    /* Shadows */
+    --admin-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --admin-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --admin-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    /* Transitions */
+    --admin-transition-fast: 150ms ease;
+    --admin-transition-normal: 200ms ease;
+}
+
+/* --------------------------------------------------------------------------
+   Typography
+   -------------------------------------------------------------------------- */
+.admin-h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--admin-text);
+}
+
+.admin-h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--admin-text);
+}
+
+.admin-h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text);
+}
+
+.admin-body {
+    font-size: 0.875rem;
+    color: var(--admin-text-secondary);
+    line-height: 1.6;
+}
+
+.admin-caption {
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    letter-spacing: 0.01em;
+}
+
+.admin-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Stat Numbers
+   -------------------------------------------------------------------------- */
+.admin-stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--admin-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-stat-number-lg {
+    font-size: 2.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: var(--admin-radius-md);
+    transition: all var(--admin-transition-fast);
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.admin-btn-primary {
+    background: var(--admin-accent);
+    color: #000;
+}
+
+.admin-btn-primary:hover {
+    background: var(--admin-accent-hover);
+    transform: translateY(-1px);
+}
+
+.admin-btn-secondary {
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    border: 1px solid var(--admin-border-strong);
+}
+
+.admin-btn-secondary:hover {
+    background: var(--admin-surface-hover);
+    border-color: var(--admin-border-strong);
+}
+
+.admin-btn-ghost {
+    background: transparent;
+    color: var(--admin-text-secondary);
+}
+
+.admin-btn-ghost:hover {
+    background: var(--admin-surface);
+    color: var(--admin-text);
+}
+
+.admin-btn-icon {
+    padding: 0.625rem;
+}
+
+/* --------------------------------------------------------------------------
+   Cards
+   -------------------------------------------------------------------------- */
+.admin-card {
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
+    padding: 1.5rem;
+}
+
+.admin-card-hover:hover {
+    border-color: var(--admin-border-strong);
+    transition: border-color var(--admin-transition-normal);
+}
+
+/* --------------------------------------------------------------------------
+   Inputs
+   -------------------------------------------------------------------------- */
+.admin-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    background: var(--admin-bg);
+    border: 1px solid var(--admin-border-strong);
+    border-radius: var(--admin-radius-md);
+    color: var(--admin-text);
+    transition: all var(--admin-transition-fast);
+}
+
+.admin-input::placeholder {
+    color: var(--admin-text-muted);
+}
+
+.admin-input:focus {
+    outline: none;
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px var(--admin-accent-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   Tables
+   -------------------------------------------------------------------------- */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--admin-text-muted);
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table td {
+    padding: 1rem;
+    font-size: 0.875rem;
+    color: var(--admin-text-secondary);
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-table tr:hover td {
+    background: var(--admin-surface-hover);
+}
+
+/* --------------------------------------------------------------------------
+   Badges
+   -------------------------------------------------------------------------- */
+.admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border-radius: 9999px;
+}
+
+.admin-badge-success {
+    background: var(--admin-success-subtle);
+    color: var(--admin-success);
+}
+
+.admin-badge-warning {
+    background: var(--admin-warning-subtle);
+    color: var(--admin-warning);
+}
+
+.admin-badge-error {
+    background: var(--admin-error-subtle);
+    color: var(--admin-error);
+}
+
+.admin-badge-info {
+    background: var(--admin-info-subtle);
+    color: var(--admin-info);
+}
+
+.admin-badge-neutral {
+    background: var(--admin-surface-hover);
+    color: var(--admin-text-secondary);
+}
+
+/* --------------------------------------------------------------------------
+   Empty State
+   -------------------------------------------------------------------------- */
+.admin-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.admin-empty-icon {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+    color: var(--admin-text-muted);
+    opacity: 0.5;
+}
+
+/* --------------------------------------------------------------------------
+   Loading States
+   -------------------------------------------------------------------------- */
+@keyframes admin-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.admin-skeleton {
+    background: var(--admin-surface-hover);
+    border-radius: var(--admin-radius-md);
+    animation: admin-pulse 2s ease-in-out infinite;
+}
+
+@keyframes admin-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.admin-spinner {
+    animation: admin-spin 0.8s linear infinite;
+}
