@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from "@/components/layout/Navbar";
 import FuturisticPlayer from "@/components/player/FuturisticPlayer";
 
@@ -9,6 +9,32 @@ import LiveSchedule from "@/components/live/LiveSchedule";
 
 export default function LivePage() {
     const [currentProgram, setCurrentProgram] = useState<any>(null);
+    const [liveStreamId, setLiveStreamId] = useState<string | undefined>(undefined);
+    const [streamEmbedUrl, setStreamEmbedUrl] = useState<string | undefined>(undefined);
+
+    // Fetch the Live Stream ID on mount
+    useEffect(() => {
+        async function fetchLiveStream() {
+            try {
+                // Check for Generic Embed URL first (Restream/Castr)
+                const embedUrl = process.env.NEXT_PUBLIC_LIVE_STREAM_EMBED_URL;
+                if (embedUrl) {
+                    setStreamEmbedUrl(embedUrl);
+                    return;
+                }
+
+                // Fallback to Bunny ID logic
+                const { getLiveStream } = await import('@/lib/bunny');
+                const stream = await getLiveStream();
+                if (stream.videoId) {
+                    setLiveStreamId(stream.videoId);
+                }
+            } catch (error) {
+                console.error("Failed to fetch live stream", error);
+            }
+        }
+        fetchLiveStream();
+    }, []);
 
     return (
         <main className="min-h-screen bg-[var(--bg-deep)] text-white overflow-x-hidden">
@@ -37,7 +63,7 @@ export default function LivePage() {
                 {/* Main Content Layout */}
                 <div className="flex-1 flex flex-col items-center justify-center -mt-6">
                     <div className="w-full max-w-6xl aspect-video relative shadow-[0_0_100px_rgba(var(--primary-glow-rgb),0.2)] rounded-[var(--radius-lg)] overflow-hidden border border-[var(--glass-border)] bg-black group">
-                        <FuturisticPlayer />
+                        <FuturisticPlayer videoId={liveStreamId} embedUrl={streamEmbedUrl} />
 
                         {/* NOW PLAYING OVERLAY (Top Left) */}
                         <div className="absolute top-6 left-6 z-20 transition-opacity duration-300 opacity-0 group-hover:opacity-100 pointer-events-none">

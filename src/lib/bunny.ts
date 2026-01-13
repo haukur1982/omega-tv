@@ -1,5 +1,6 @@
 const API_KEY = process.env.BUNNY_API_KEY;
 const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID;
+const LIVE_STREAM_ID = process.env.NEXT_PUBLIC_BUNNY_LIVE_STREAM_ID;
 const BASE_URL = `https://video.bunnycdn.com/library/${LIBRARY_ID}/videos`;
 // Note: You should configure a Pull Zone in Bunny for optimized delivery.
 // For now we use the direct thumbnail pattern:
@@ -112,10 +113,19 @@ export async function getVideos(page = 1, itemsPerPage = 50): Promise<BunnyVideo
 }
 
 export async function getLiveStream() {
-    // Bunny Stream Live API logic (placeholder until Stream created)
+    // Return the configured Live Stream ID if available
+    if (LIVE_STREAM_ID) {
+        return {
+            isLive: true, // The player handles the offline state gracefully
+            videoId: LIVE_STREAM_ID,
+            viewerCount: 0, // Would need value from API
+        };
+    }
+
+    // Fallback/Placeholder
     return {
         isLive: true,
         viewerCount: 125,
-        hlsUrl: `https://video.bunnycdn.com/play/${LIBRARY_ID}/default` // Logic to be refined
+        videoId: undefined
     };
 }

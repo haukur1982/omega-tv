@@ -34,11 +34,11 @@ export default function VODCard({ video, index }: { video: VideoProps; index: nu
             transition={{ delay: index * 0.05 }}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            // Changed to Vertical Aspect Ratio (2:3) for Cinematic/Netflix Poster look
+            // Vertical Aspect Ratio (2:3) for Cinematic Poster look
             className="group relative aspect-[2/3] rounded-[var(--radius-md)] cursor-pointer z-0 hover:z-10"
         >
             <Link href={`/sermons/${video.id}`} className="block w-full h-full">
-                {/* Container that expands on hover - Netflix style effect */}
+                {/* Container that expands on hover - Cinematic effect */}
                 <motion.div
                     animate={{
                         scale: isHovered ? 1.05 : 1,

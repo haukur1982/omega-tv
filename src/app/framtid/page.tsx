@@ -9,25 +9,25 @@ import EmailSignupForm from "@/components/forms/EmailSignupForm";
 
 const projects = [
     {
-        title: "Nýr Efnisveitur (VOD)",
-        desc: "Við erum að smíða 'Netflix' fyrir kristið efni. Aðgengilegt í síma, spjaldtölvu og sjónvarpi. Allt efni Omega safnað saman á einn stað.",
+        title: "Íslensk Dagskrárgerð",
+        desc: "Við leggjum alla áherslu á vandað íslenskt efni sem talar til þjóðarinnar. Markmiðið er að bjóða opið safn af þáttum og fræðslu sem eflir trú á okkar eigin tungumáli.",
         icon: Smartphone,
         color: "from-blue-500 to-cyan-500",
-        status: "Í smíðum"
+        href: "/framtid/dagskrargerd"
     },
     {
-        title: "Þýðingarbyltingin",
-        desc: "Ný tækni gerir okkur kleift að þýða bækur og kennsluefni hraðar en nokkru sinni fyrr. Markmiðið er að gefa út 10 nýjar bækur á ári.",
+        title: "Nýr Tækjabúnaður",
+        desc: "Við fjárfestum í nýrri tækni til að skila boðskapnum með sem bestum hætti. Nýjar myndavélar og lýsing gera okkur kleift að framleiða efni í hæsta gæðaflokki.",
         icon: Globe,
         color: "from-purple-500 to-pink-500",
-        status: "Væntanlegt"
+        href: "/framtid/taekjabunadur"
     },
     {
         title: "Næsta Kynslóð",
-        desc: "Við erum að brúa bilið með efni sem talar til unga fólksins á þeirra forsendum. Samfélagsmiðlar, stuttmyndir og podcast.",
+        desc: "Með podcast-stúdíói og samfélagsmiðlum tryggjum við að boðskapurinn berist til nýrrar kynslóðar á þeirra forsendum.",
         icon: Rocket,
         color: "from-amber-500 to-orange-500",
-        status: "Í þróun"
+        href: "/framtid/naesta-kynslod"
     }
 ];
 
@@ -55,17 +55,16 @@ export default function VisionPage() {
                         transition={{ duration: 0.8 }}
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] border border-[var(--accent-gold)]/20 mb-8"
                     >
-                        <Sparkles size={16} />
-                        <span className="font-bold tracking-wider text-sm uppercase">Framtíðin er björt</span>
+                        <Heart size={16} />
+                        <span className="font-bold tracking-wider text-sm uppercase">Okkar Áherslur</span>
                     </motion.div>
 
                     <h1 className="text-5xl md:text-8xl font-bold mb-8 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/50">
-                        Nýr Kafli <br /> í Sögu Omega
+                        Hjartað í <br /> Starfi Omega
                     </h1>
 
                     <p className="text-xl md:text-2xl text-[var(--text-secondary)] max-w-2xl mx-auto leading-relaxed mb-12">
-                        Við erum að taka stökk inn í stafræna framtíð til að ná til nýrra kynslóða.
-                        Vertu með okkur í ferðalaginu.
+                        Omega er í sókn. Við erum að uppfæra tækni, stúdíó og dagskrárgerð til að þjóna íslensku þjóðinni enn betur á stafrænum grunni.
                     </p>
 
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6">
@@ -73,47 +72,44 @@ export default function VisionPage() {
                             <Heart size={20} fill="black" />
                             Gerast Bakhjarl
                         </Link>
-                        <a href="#projects" className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full hover:bg-white/20 transition-colors">
-                            Skoða Verkefnin
+                        <a href="#focus" className="px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full hover:bg-white/20 transition-colors">
+                            Kynntu þér málin
                         </a>
                     </div>
                 </motion.div>
             </div>
 
-            {/* Projects Grid */}
-            <section id="projects" className="py-32 container mx-auto px-6 relative z-10">
+            {/* Focus Grid */}
+            <section id="focus" className="py-32 container mx-auto px-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {projects.map((proj, idx) => (
-                        <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: idx * 0.2 }}
-                            className="group relative p-8 rounded-[2rem] bg-[var(--bg-surface)] border border-[var(--glass-border)] hover:border-[var(--accent-gold)]/50 transition-all overflow-hidden"
-                        >
-                            <div className={`absolute inset-0 bg-gradient-to-br ${proj.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+                        <Link key={idx} href={proj.href || "#"}>
+                            <motion.div
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.2 }}
+                                className="group h-full relative p-8 rounded-[2rem] bg-[var(--bg-surface)] border border-[var(--glass-border)] hover:border-[var(--accent-gold)]/50 transition-all overflow-hidden"
+                            >
+                                <div className={`absolute inset-0 bg-gradient-to-br ${proj.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
 
-                            <div className="relative z-10">
-                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${proj.color} flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                                    <proj.icon size={28} className="text-white" />
+                                <div className="relative z-10">
+                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${proj.color} flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                                        <proj.icon size={28} className="text-white" />
+                                    </div>
+
+                                    <h3 className="text-2xl font-bold mb-4">{proj.title}</h3>
+                                    <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
+                                        {proj.desc}
+                                    </p>
+
+                                    <div className="flex items-center text-[var(--accent-gold)] font-bold group/link cursor-pointer">
+                                        <span className="mr-2">Sjá meira</span>
+                                        <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
+                                    </div>
                                 </div>
-
-                                <div className="inline-block px-3 py-1 rounded-full bg-white/5 text-xs font-bold tracking-wider uppercase mb-4 text-[var(--text-muted)] border border-white/5">
-                                    {proj.status}
-                                </div>
-
-                                <h3 className="text-2xl font-bold mb-4">{proj.title}</h3>
-                                <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
-                                    {proj.desc}
-                                </p>
-
-                                <div className="flex items-center text-[var(--accent-gold)] font-bold group/link cursor-pointer">
-                                    <span className="mr-2">Lesa meira</span>
-                                    <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
-                                </div>
-                            </div>
-                        </motion.div>
+                            </motion.div>
+                        </Link>
                     ))}
                 </div>
             </section>

@@ -9,9 +9,10 @@ interface PlayerProps {
     videoId?: string;
     libraryId?: string;
     title?: string;
+    embedUrl?: string;
 }
 
-export default function FuturisticPlayer({ videoId, libraryId, title }: PlayerProps) {
+export default function FuturisticPlayer({ videoId, libraryId, title, embedUrl }: PlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -61,13 +62,24 @@ export default function FuturisticPlayer({ videoId, libraryId, title }: PlayerPr
                     )}
 
                     {isPlaying && (
-                        <iframe
-                            src={`https://iframe.mediadelivery.net/embed/${activeLibraryId}/${activeVideoId}?autoplay=true&loop=${!isVOD}&muted=false&preload=true`}
-                            loading="lazy"
-                            className="w-full h-full border-0 absolute inset-0 z-10"
-                            allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-                            allowFullScreen={true}
-                        />
+                        <>
+                            {embedUrl ? (
+                                <iframe
+                                    src={embedUrl}
+                                    className="w-full h-full border-0 absolute inset-0 z-10"
+                                    allow="autoplay; fullscreen; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            ) : (
+                                <iframe
+                                    src={`https://iframe.mediadelivery.net/embed/${activeLibraryId}/${activeVideoId}?autoplay=true&loop=${!isVOD}&muted=false&preload=true`}
+                                    loading="lazy"
+                                    className="w-full h-full border-0 absolute inset-0 z-10"
+                                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                                    allowFullScreen={true}
+                                />
+                            )}
+                        </>
                     )}
                 </div>
 
