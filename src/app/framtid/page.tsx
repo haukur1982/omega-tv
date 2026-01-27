@@ -6,6 +6,7 @@ import { useRef } from "react";
 import { Rocket, Smartphone, Globe, ArrowRight, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
 import EmailSignupForm from "@/components/forms/EmailSignupForm";
+import VisionProgress from "@/components/vision/VisionProgress";
 
 const projects = [
     {
@@ -78,6 +79,9 @@ export default function VisionPage() {
                     </div>
                 </motion.div>
             </div>
+
+            {/* Vision Progress Dashboard */}
+            <VisionProgress />
 
             {/* Focus Grid */}
             <section id="focus" className="py-32 container mx-auto px-6 relative z-10">

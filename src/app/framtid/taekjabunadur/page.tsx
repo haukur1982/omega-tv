@@ -93,25 +93,42 @@ export default function TaekjabunadurPage() {
                     </motion.div>
                 </div>
 
-                {/* Technical Focus Grid */}
-                <div className="grid md:grid-cols-3 gap-8 mb-32">
-                    {[
-                        { title: "Myndavélar", desc: "Nýjar einingar sem skila dýpt og litum í hæsta gæðaflokki.", delay: 0 },
-                        { title: "Lýsing", desc: "Nútímaleg LED lýsing sem skapar andrúmsloft og fagmannlegt útlit.", delay: 0.1 },
-                        { title: "Hljóð", desc: "Hágæða hljóðnemar og hljóðkerfi fyrir kristaltæran boðskap.", delay: 0.2 }
-                    ].map((item, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: item.delay }}
-                            className="p-8 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
-                        >
-                            <h3 className="text-xl font-bold mb-4 group-hover:text-[var(--accent-gold)] transition-colors">{item.title}</h3>
-                            <p className="text-[var(--text-secondary)]">{item.desc}</p>
-                        </motion.div>
-                    ))}
+                {/* Technical Focus Grid & Progress */}
+                <div className="space-y-16 mb-32">
+                    <div className="grid md:grid-cols-3 gap-8">
+                        {[
+                            { title: "Myndavélar", desc: "85% lokið - Nýjar einingar sem skila dýpt og litum í hæsta gæðaflokki.", progress: 85, color: "from-purple-500 to-blue-500" },
+                            { title: "Lýsing", desc: "40% lokið - Nútímaleg LED lýsing sem skapar andrúmsloft og fagmannlegt útlit.", progress: 40, color: "from-blue-500 to-cyan-500" },
+                            { title: "Hljóð & Subtitles", desc: "20% lokið - Hágæða hljóðkerfi og tækni fyrir sjálfvirka textun.", progress: 20, color: "from-cyan-500 to-teal-500" }
+                        ].map((item, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1 }}
+                                className="p-8 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group"
+                            >
+                                <h3 className="text-xl font-bold mb-2 group-hover:text-[var(--accent-gold)] transition-colors">{item.title}</h3>
+                                <p className="text-sm text-[var(--text-secondary)] mb-6">{item.desc}</p>
+
+                                <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: `${item.progress}%` }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 1.5, ease: "easeOut" }}
+                                        className={`h-full bg-gradient-to-r ${item.color}`}
+                                    />
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    <div className="p-8 rounded-2xl bg-[var(--accent-gold)]/5 border border-[var(--accent-gold)]/10 text-center">
+                        <p className="text-sm font-bold uppercase tracking-widest text-[var(--accent-gold)] mb-2">Næsti áfangi</p>
+                        <p className="text-[var(--text-secondary)]">Þegar 100% markinu er náð í lýsingu, getum við hafið upptökur á nýrri þáttaröð í háskerpu.</p>
+                    </div>
                 </div>
 
                 {/* Call to Action */}

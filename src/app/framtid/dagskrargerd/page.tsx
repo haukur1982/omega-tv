@@ -55,6 +55,40 @@ export default function DagskrargerdPage() {
                         <h2 className="text-3xl md:text-4xl font-bold font-serif leading-tight">
                             Af hverju íslenskt efni skiptir máli
                         </h2>
+                        <div className="space-y-6">
+                            {[
+                                { title: "Þýðingar 2026", progress: 65, color: "from-blue-500 to-cyan-500", desc: "Vinna við textun á nýjum þáttum er í fullum gangi." },
+                                { title: "Íslensk Framleiðsla", progress: 45, color: "from-cyan-500 to-teal-500", desc: "4 nýir íslenskir þættir í tökum." }
+                            ].map((item, i) => (
+                                <div key={i} className="space-y-3">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-sm font-bold uppercase tracking-wider">{item.title}</span>
+                                        <span className="text-xs font-bold text-[var(--accent-gold)]">{item.progress}%</span>
+                                    </div>
+                                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            whileInView={{ width: `${item.progress}%` }}
+                                            transition={{ duration: 1.5 }}
+                                            className={`h-full bg-gradient-to-r ${item.color}`}
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-[var(--text-muted)] italic">{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 pt-6">
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                                <div className="text-2xl font-bold text-white mb-1">1.200+</div>
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Klukkustundir af efni</div>
+                            </div>
+                            <div className="p-4 rounded-xl bg-white/5 border border-white/5">
+                                <div className="text-2xl font-bold text-white mb-1">100%</div>
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Íslensk rödd</div>
+                            </div>
+                        </div>
+
                         <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
                             Þótt mikið sé til af góðu erlendu efni, þá er það okkar eigin tungumál sem nær dýpst. Guð talar íslensku líka, og við viljum skapa vettvang þar sem íslenskir kristnir menn, kennarar og tónlistarfólk fær að njóta sín.
                         </p>

@@ -61,6 +61,29 @@ export default function NaestaKynslodPage() {
                         </p>
 
                         <div className="space-y-6">
+                            {[
+                                { title: "Hlaðvörp", progress: 35, color: "from-orange-500 to-red-500", desc: "Hljóðeinangrun og púlt í vinnslu." },
+                                { title: "TikTok & Reels", progress: 75, color: "from-amber-500 to-orange-500", desc: "Daglega nýtt efni fyrir unga fólkið." }
+                            ].map((item, i) => (
+                                <div key={i} className="space-y-3">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-sm font-bold uppercase tracking-wider">{item.title}</span>
+                                        <span className="text-xs font-bold text-[var(--accent-gold)]">{item.progress}%</span>
+                                    </div>
+                                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            whileInView={{ width: `${item.progress}%` }}
+                                            transition={{ duration: 1.5 }}
+                                            className={`h-full bg-gradient-to-r ${item.color}`}
+                                        />
+                                    </div>
+                                    <p className="text-[10px] text-[var(--text-muted)] italic">{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="space-y-6 pt-6">
                             <div className="flex gap-4 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all">
                                 <div className="p-3 rounded-lg bg-orange-500/20 text-orange-400 h-fit">
                                     <Mic2 size={24} />
