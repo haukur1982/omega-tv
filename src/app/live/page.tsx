@@ -19,7 +19,7 @@ export default function LivePage() {
             <Navbar />
 
             {/* Player — full width, immersive, autoplay */}
-            <div className="pt-[60px]">
+            <div className="pt-[72px]">
                 <div className="w-full bg-black">
                     <div className="max-w-[1400px] mx-auto">
                         <div className="relative w-full aspect-video">
