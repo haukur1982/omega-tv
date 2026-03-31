@@ -22,7 +22,7 @@ export default function Navbar() {
 
                 {/* Brand */}
                 <Link href="/" className="relative z-10 flex items-center gap-3">
-                    <span className="text-[var(--accent-gold)] font-bold text-2xl">Ω</span>
+                    <span className="text-[var(--accent)] font-bold text-2xl">Ω</span>
                     <span className="text-[var(--text-primary)] font-semibold tracking-[0.15em] text-sm uppercase">Omega</span>
                 </Link>
 
@@ -41,7 +41,7 @@ export default function Navbar() {
                     <Link href="/sermons" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                         <Search size={18} />
                     </Link>
-                    <Link href="/live" className="hidden md:flex items-center gap-2 bg-[var(--accent-gold)] text-[var(--bg-deep)] px-5 py-2 font-semibold text-xs uppercase tracking-[0.1em] hover:brightness-110 transition-all">
+                    <Link href="/live" className="hidden md:flex items-center gap-2 bg-[var(--accent)] text-[var(--bg-deep)] px-5 py-2 font-semibold text-xs uppercase tracking-[0.1em] hover:brightness-110 transition-all">
                         <Play size={14} fill="currentColor" />
                         <span>Horfa</span>
                     </Link>
@@ -65,7 +65,7 @@ export default function Navbar() {
                         className="fixed inset-0 z-[60] bg-[var(--bg-deep)] flex flex-col p-8 md:hidden"
                     >
                         <div className="flex justify-between items-center mb-16">
-                            <span className="text-[var(--accent-gold)] font-bold text-2xl">Ω</span>
+                            <span className="text-[var(--accent)] font-bold text-2xl">Ω</span>
                             <button
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="p-2 text-[var(--text-primary)]"
@@ -84,7 +84,7 @@ export default function Navbar() {
                         </div>
 
                         <div className="mt-auto">
-                            <Link href="/live" onClick={() => setIsMobileMenuOpen(false)} className="w-full flex items-center justify-center gap-3 bg-[var(--accent-gold)] text-[var(--bg-deep)] py-4 font-bold text-sm uppercase tracking-[0.1em]">
+                            <Link href="/live" onClick={() => setIsMobileMenuOpen(false)} className="w-full flex items-center justify-center gap-3 bg-[var(--accent)] text-[var(--bg-deep)] py-4 font-bold text-sm uppercase tracking-[0.1em]">
                                 <Play size={16} fill="currentColor" />
                                 <span>Horfa núna</span>
                             </Link>
@@ -112,7 +112,7 @@ function MobileNavLink({ href, children, onClick }: { href: string; children: Re
         <Link
             href={href}
             onClick={onClick}
-            className="text-2xl font-bold text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors"
+            className="text-2xl font-bold text-[var(--text-primary)] hover:text-white transition-colors"
         >
             {children}
         </Link>

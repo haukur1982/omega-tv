@@ -24,7 +24,7 @@ export default async function Home() {
           <section className="py-16 max-w-7xl mx-auto px-6">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold tracking-tight">Nýtt efni</h2>
-              <Link href="/sermons" className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors flex items-center gap-1">
+              <Link href="/sermons" className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors flex items-center gap-1">
                 Sjá allt <ChevronRight size={14} />
               </Link>
             </div>
@@ -66,8 +66,8 @@ export default async function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               <div className="relative z-10 p-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <Flame size={14} className="text-[var(--accent-gold)]" />
-                  <span className="text-[var(--accent-gold)] text-[10px] font-semibold uppercase tracking-[0.2em]">Bænatorg</span>
+                  <Flame size={14} className="text-[var(--accent)]" />
+                  <span className="text-[var(--accent)] text-[10px] font-semibold uppercase tracking-[0.2em]">Bænatorg</span>
                 </div>
                 <h3 className="text-xl font-bold leading-tight">Samfélag í bæn</h3>
               </div>
@@ -84,8 +84,8 @@ export default async function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               <div className="relative z-10 p-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <BookOpen size={14} className="text-[var(--accent-gold)]" />
-                  <span className="text-[var(--accent-gold)] text-[10px] font-semibold uppercase tracking-[0.2em]">Fréttabréf</span>
+                  <BookOpen size={14} className="text-[var(--accent)]" />
+                  <span className="text-[var(--accent)] text-[10px] font-semibold uppercase tracking-[0.2em]">Fréttabréf</span>
                 </div>
                 <h3 className="text-xl font-bold leading-tight">Nýjasta bréfið</h3>
               </div>
@@ -102,8 +102,8 @@ export default async function Home() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
               <div className="relative z-10 p-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <Heart size={14} className="text-[var(--accent-gold)]" />
-                  <span className="text-[var(--accent-gold)] text-[10px] font-semibold uppercase tracking-[0.2em]">Styrkja</span>
+                  <Heart size={14} className="text-[var(--accent)]" />
+                  <span className="text-[var(--accent)] text-[10px] font-semibold uppercase tracking-[0.2em]">Styrkja</span>
                 </div>
                 <h3 className="text-xl font-bold leading-tight">Vertu hluti af þessu</h3>
               </div>

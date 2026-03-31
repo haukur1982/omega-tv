@@ -35,7 +35,7 @@ export default function Legacy34YearsComponent() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="space-y-8"
                     >
-                        <p className="text-[var(--accent-gold)] text-xs font-semibold uppercase tracking-[0.2em]">
+                        <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em]">
                             Síðan 1992
                         </p>
 
@@ -51,7 +51,7 @@ export default function Legacy34YearsComponent() {
 
                         <Link
                             href="/about"
-                            className="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-primary)] border-b border-[var(--accent-gold)] pb-2 hover:text-[var(--accent-gold)] transition-colors"
+                            className="inline-flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-primary)] border-b border-[var(--text-secondary)] pb-2 hover:text-[var(--text-secondary)] transition-colors"
                         >
                             Lestu Söguna
                             <span>→</span>
