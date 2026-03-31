@@ -18,7 +18,7 @@ export default function Navbar() {
                 className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex justify-between items-center"
             >
                 {/* Glass Background */}
-                <div className="absolute inset-0 backdrop-blur-xl bg-[var(--bg-deep)]/80 border-b border-[var(--border)]" />
+                <div className="absolute inset-0 backdrop-blur-xl bg-[var(--bg-deep)]/60 border-b border-white/[0.04]" />
 
                 {/* Brand */}
                 <Link href="/" className="relative z-10 flex items-center gap-3">

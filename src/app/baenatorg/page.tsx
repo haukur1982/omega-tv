@@ -18,7 +18,7 @@ export default async function PrayerPage() {
     const activeCampaign = campaigns[0] || null;
 
     return (
-        <main className="min-h-screen bg-[var(--bg-deep)]">
+        <main className="min-h-screen bg-[#121210]">
             <Navbar />
 
             {/* Immersive Hero with Counter */}

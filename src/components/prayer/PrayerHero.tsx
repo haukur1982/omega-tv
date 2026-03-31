@@ -14,13 +14,13 @@ export default function PrayerHero({ totalPrayCount }: { totalPrayCount: number 
 
     return (
         <div className="relative min-h-[70vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-            {/* Subtle ambient background */}
+            {/* Warm, lighter background */}
             <img
-                src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2600&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=2600&auto=format&fit=crop"
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover opacity-10"
+                className="absolute inset-0 w-full h-full object-cover opacity-25"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-deep)]/60 to-[var(--bg-deep)]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-deep)]/40 to-[var(--bg-deep)]/90" />
 
             <div className="relative z-10">
                 <motion.p
