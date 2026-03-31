@@ -3,11 +3,12 @@
 import { useState, useRef, useTransition } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
 import { submitPrayerAction } from '@/actions/prayer';
-import { PRAYER_CATEGORIES, CategoryType } from '@/lib/prayer-categories';
+import { PRAYER_CATEGORIES, TOPIC_SCRIPTURES, CategoryType } from '@/lib/prayer-categories';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PrayerForm() {
     const [categoryType, setCategoryType] = useState<CategoryType>('personal');
+    const [selectedTopic, setSelectedTopic] = useState('Lækning');
     const [isPending, startTransition] = useTransition();
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [promise, setPromise] = useState("");
@@ -68,7 +69,7 @@ export default function PrayerForm() {
                         <div className="grid grid-cols-2 gap-2 mb-2">
                             <button
                                 type="button"
-                                onClick={() => setCategoryType('personal')}
+                                onClick={() => { setCategoryType('personal'); setSelectedTopic('Lækning'); }}
                                 className={`py-2 text-xs font-semibold uppercase tracking-[0.1em] transition-colors ${
                                     categoryType === 'personal'
                                         ? 'bg-[var(--accent)] text-[var(--bg-deep)]'
@@ -79,7 +80,7 @@ export default function PrayerForm() {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setCategoryType('national')}
+                                onClick={() => { setCategoryType('national'); setSelectedTopic('Ísland'); }}
                                 className={`py-2 text-xs font-semibold uppercase tracking-[0.1em] transition-colors ${
                                     categoryType === 'national'
                                         ? 'bg-[var(--accent)] text-[var(--bg-deep)]'
@@ -114,6 +115,8 @@ export default function PrayerForm() {
                             <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-2">Efni</label>
                             <select
                                 name="topic"
+                                value={selectedTopic}
+                                onChange={(e) => setSelectedTopic(e.target.value)}
                                 className="w-full bg-[var(--bg-deep)] border border-[var(--border)] px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors appearance-none cursor-pointer"
                             >
                                 {topics.map(t => (
@@ -121,6 +124,18 @@ export default function PrayerForm() {
                                 ))}
                             </select>
                         </div>
+
+                        {/* Scripture prompt tied to selected topic */}
+                        {TOPIC_SCRIPTURES[selectedTopic] && (
+                            <div className="py-3 px-4 bg-[var(--accent)]/5 border-l-2 border-[var(--accent)]/30">
+                                <p className="text-sm text-[var(--text-secondary)] italic leading-relaxed">
+                                    "{TOPIC_SCRIPTURES[selectedTopic].verse}"
+                                </p>
+                                <p className="text-xs text-[var(--text-muted)] mt-1">
+                                    — {TOPIC_SCRIPTURES[selectedTopic].reference}
+                                </p>
+                            </div>
+                        )}
 
                         <div>
                             <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-2">Bænaefni</label>
