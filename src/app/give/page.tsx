@@ -42,8 +42,8 @@ export default function GivePage() {
                         transition={{ delay: 0.3 }}
                         className="text-lg md:text-xl text-[var(--text-secondary)] leading-relaxed max-w-2xl mx-auto"
                     >
-                        Framlag þitt heldur einustu kristnu sjónvarpsstöðinni á Íslandi á lofti.
-                        Saman tryggjum við að boðskapurinn nái til næstu kynslóðar.
+                        Vertu hluti af því að bera ljós vonarinnar til íslensku þjóðarinnar.
+                        Saman erum við rödd fagnaðarerindisins á Íslandi.
                     </motion.p>
                 </div>
             </div>
@@ -144,7 +144,7 @@ export default function GivePage() {
                         >
                             <span className="text-[var(--accent)] text-xs font-semibold tracking-[0.15em] block mb-6">02</span>
                             <h3 className="text-2xl font-bold mb-4">Millifærsla</h3>
-                            <p className="text-[var(--text-secondary)] text-sm mb-8">Millifærðu hvaða upphæð sem er beint á reikninginn okkar.</p>
+                            <p className="text-[var(--text-secondary)] text-sm mb-8">Styrktu boðskapinn með millifærslu — sérhver króna skiptir máli.</p>
 
                             <div className="space-y-5 text-left max-w-xs mx-auto">
                                 <div>
