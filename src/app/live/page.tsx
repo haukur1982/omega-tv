@@ -40,10 +40,7 @@ export default function LivePage() {
         <main className="min-h-screen bg-[var(--bg-deep)] text-white overflow-x-hidden">
             <Navbar />
 
-            {/* Background Ambient Glow for the entire page */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[20%] w-[60%] h-[60%] bg-[var(--primary-glow)] opacity-[0.08] blur-[150px]" />
-            </div>
+            {/* Clean background */}
 
             <div className="relative z-10 pt-28 pb-10 container mx-auto px-4 md:px-8 min-h-screen flex flex-col">
 
@@ -62,7 +59,7 @@ export default function LivePage() {
 
                 {/* Main Content Layout */}
                 <div className="flex-1 flex flex-col items-center justify-center -mt-6">
-                    <div className="w-full max-w-6xl aspect-video relative shadow-[0_0_100px_rgba(var(--primary-glow-rgb),0.2)] rounded-[var(--radius-lg)] overflow-hidden border border-[var(--glass-border)] bg-black group">
+                    <div className="w-full max-w-6xl aspect-video relative overflow-hidden border border-[var(--border)] bg-black group">
                         <FuturisticPlayer videoId={liveStreamId} embedUrl={streamEmbedUrl} />
 
                         {/* NOW PLAYING OVERLAY (Top Left) */}
@@ -78,32 +75,22 @@ export default function LivePage() {
                     </div>
 
 
-                    {/* Quick Actions Bar */}
+                    {/* Quick Actions */}
                     <div className="w-full max-w-6xl mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
-                        <Link href="/baenatorg" className="group relative flex items-center justify-between p-5 rounded-xl bg-blue-950/30 border border-blue-500/20 hover:border-blue-400/50 hover:bg-blue-900/40 transition-all duration-300">
-                            {/* Ambient Glow */}
-                            <div className="absolute inset-0 bg-blue-500/5 blur-xl group-hover:bg-blue-500/10 transition-all rounded-xl opacity-50" />
-
-                            <div className="relative z-10">
-                                <h3 className="font-bold text-lg text-blue-100 group-hover:text-white transition-colors">Senda Bæn</h3>
-                                <p className="text-xs text-blue-200/70">Við biðjum fyrir þér</p>
+                        <Link href="/baenatorg" className="group flex items-center justify-between p-5 border border-[var(--border)] hover:border-[var(--accent)] transition-all">
+                            <div>
+                                <h3 className="font-bold text-lg group-hover:text-white transition-colors">Senda Bæn</h3>
+                                <p className="text-xs text-[var(--text-secondary)]">Við biðjum fyrir þér</p>
                             </div>
-                            <div className="relative z-10 w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-blue-500/20 transition-all border border-blue-500/20">
-                                <Sparkles size={18} className="text-blue-300" />
-                            </div>
+                            <Sparkles size={18} className="text-[var(--accent)]" />
                         </Link>
 
-                        <Link href="/give" className="group relative flex items-center justify-between p-5 rounded-xl bg-amber-950/30 border border-amber-500/20 hover:border-amber-400/50 hover:bg-amber-900/40 transition-all duration-300">
-                            {/* Ambient Glow */}
-                            <div className="absolute inset-0 bg-amber-500/5 blur-xl group-hover:bg-amber-500/10 transition-all rounded-xl opacity-50" />
-
-                            <div className="relative z-10">
-                                <h3 className="font-bold text-lg text-amber-100 group-hover:text-white transition-colors">Styrkja</h3>
-                                <p className="text-xs text-amber-200/70">Gerast bakhjarl</p>
+                        <Link href="/give" className="group flex items-center justify-between p-5 border border-[var(--border)] hover:border-[var(--accent)] transition-all">
+                            <div>
+                                <h3 className="font-bold text-lg group-hover:text-white transition-colors">Styrkja</h3>
+                                <p className="text-xs text-[var(--text-secondary)]">Gerast bakhjarl</p>
                             </div>
-                            <div className="relative z-10 w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-amber-500/20 transition-all border border-amber-500/20">
-                                <Heart size={18} className="text-amber-300" />
-                            </div>
+                            <Heart size={18} className="text-[var(--accent)]" />
                         </Link>
                     </div>
 

@@ -17,22 +17,22 @@ const libre = Libre_Baskerville({
 
 export const metadata: Metadata = {
   title: {
-    default: "Omega | Kristin sjónvarpsstöð síðan 1992",
-    template: "%s | Omega",
+    default: "Omega Stöðin | Allt á einum stað",
+    template: "%s | Omega Stöðin",
   },
-  description: "Kristin sjónvarpsstöð á Íslandi síðan 1992. Horfa beint, bænir, fréttabréf og fræðsluefni á íslensku.",
+  description: "Omega Stöðin — kristin fjölmiðlastöð á Íslandi síðan 1992. Bein útsending, þáttasafn, bænir, fræðsluefni og námskeið á íslensku.",
   metadataBase: new URL("https://omega.is"),
   openGraph: {
     type: "website",
     locale: "is_IS",
     siteName: "Omega",
-    title: "Omega | Kristin sjónvarpsstöð síðan 1992",
-    description: "Horfa beint, bænir, fréttabréf og fræðsluefni á íslensku.",
+    title: "Omega Stöðin | Allt á einum stað",
+    description: "Kristin fjölmiðlastöð á Íslandi síðan 1992.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Omega | Kristin sjónvarpsstöð síðan 1992",
-    description: "Horfa beint, bænir, fréttabréf og fræðsluefni á íslensku.",
+    title: "Omega Stöðin | Allt á einum stað",
+    description: "Kristin fjölmiðlastöð á Íslandi síðan 1992.",
   },
   icons: {
     icon: "/favicon.ico",

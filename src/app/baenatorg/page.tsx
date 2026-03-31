@@ -14,22 +14,18 @@ export default async function PrayerPage() {
             <Navbar />
 
             {/* Hero Section */}
-            <div className="relative py-24 md:py-32 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-                <div className="absolute inset-0 bg-[var(--primary-glow)] opacity-[0.05] blur-[100px]" />
-
-                <div
-                    className="mb-8 p-6 rounded-full bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/30 text-[var(--accent-gold)] shadow-[0_0_50px_rgba(245,158,11,0.2)]"
-                >
-                    <Flame size={48} className="animate-pulse" />
-                </div>
-
-                <h1 className="relative z-10 text-5xl md:text-7xl font-bold mb-6">
-                    Bænatorgið
-                </h1>
-                <p className="relative z-10 text-xl text-[var(--text-secondary)] max-w-2xl">
-                    "Komið því fram með djörfung að hásæti náðarinnar, til þess að við öðlumst miskunn og finnum náð."
-                    <br /><span className="text-sm font-serif italic mt-2 block">- Hebreabréfið 4:16</span>
+            <div className="relative pt-40 pb-24 flex flex-col items-center justify-center text-center px-6">
+                <p className="text-[var(--accent-gold)] text-xs font-semibold uppercase tracking-[0.2em] mb-8">
+                    Bænatorg
                 </p>
+
+                <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[0.9] tracking-tight">
+                    Samfélag í bæn.
+                </h1>
+                <p className="text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
+                    "Komið því fram með djörfung að hásæti náðarinnar, til þess að við öðlumst miskunn og finnum náð."
+                </p>
+                <p className="text-sm text-[var(--text-muted)] italic mt-3">— Hebreabréfið 4:16</p>
             </div>
 
             {/* Main Content Grid */}

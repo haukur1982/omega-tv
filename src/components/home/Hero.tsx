@@ -16,7 +16,7 @@ export default function Hero() {
                     loop
                     playsInline
                     className="w-full h-full object-cover"
-                    poster="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?q=80&w=2600&auto=format&fit=crop"
+                    poster="https://images.unsplash.com/photo-1504829857797-ddff29c27927?q=80&w=2600&auto=format&fit=crop"
                 >
                     {/* When we have a trailer/promo reel, it goes here */}
                 </video>
@@ -46,13 +46,12 @@ export default function Hero() {
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-[0.95] tracking-tight mb-5">
-                        Omega Sjónvarp
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tight mb-4">
+                        Omega Stöðin
                     </h1>
 
-                    <p className="text-base md:text-lg text-[var(--text-secondary)] leading-relaxed mb-8 max-w-lg">
-                        Kristin sjónvarpsstöð á Íslandi síðan 1992. Bein útsending, þáttasafn,
-                        bænir og fræðsluefni — allt á íslensku.
+                    <p className="text-lg md:text-xl text-[var(--text-secondary)] leading-relaxed mb-10 max-w-lg">
+                        Kristinn miðill — von og sannleikur fyrir Ísland.
                     </p>
 
                     {/* Actions */}

@@ -86,7 +86,7 @@ export default async function SermonsPage() {
                         <div className="max-w-2xl">
                             {/* Metadata Badge */}
                             <div className="flex items-center gap-3 mb-6">
-                                <span className="bg-[var(--accent-gold)] text-black font-bold px-3 py-1 text-xs rounded uppercase tracking-wider shadow-[0_0_15px_rgba(251,191,36,0.4)]">
+                                <span className="bg-[var(--accent-gold)] text-black font-bold px-3 py-1 text-xs rounded uppercase tracking-wider shadow-none">
                                     Nýtt Efni
                                 </span>
                                 <span className="flex items-center gap-2 text-[var(--text-secondary)] font-medium text-sm tracking-wide bg-black/40 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
@@ -109,12 +109,12 @@ export default async function SermonsPage() {
                             <div className="flex gap-4">
                                 <Link
                                     href={`/sermons/${latestVideo.guid}`}
-                                    className="flex items-center gap-3 px-8 py-4 bg-white text-black font-bold rounded-[var(--radius-md)] hover:scale-105 transition-transform shadow-[0_0_25px_rgba(255,255,255,0.2)]"
+                                    className="flex items-center gap-3 px-8 py-4 bg-white text-black font-bold  hover:scale-105 transition-transform shadow-none"
                                 >
                                     <Play size={20} fill="currentColor" />
                                     <span>Spila Þátt</span>
                                 </Link>
-                                <button className="flex items-center gap-3 px-8 py-4 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white font-bold rounded-[var(--radius-md)] hover:bg-[var(--glass-shine)] transition-colors">
+                                <button className="flex items-center gap-3 px-8 py-4 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white font-bold  hover:bg-[var(--glass-shine)] transition-colors">
                                     <Info size={20} />
                                     <span>Meira</span>
                                 </button>
@@ -143,7 +143,7 @@ export default async function SermonsPage() {
                                 <Link
                                     href={`/sermons/${show.guid}`}
                                     key={show.guid}
-                                    className="group relative aspect-[2/3] bg-[var(--bg-surface)] rounded-[var(--radius-md)] overflow-hidden cursor-pointer shadow-lg border border-[var(--glass-border)] transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl"
+                                    className="group relative aspect-[2/3] bg-[var(--bg-surface)]  overflow-hidden cursor-pointer shadow-lg border border-[var(--glass-border)] transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl"
                                 >
                                     <Image
                                         src={show.meta.thumbnail}
@@ -155,7 +155,7 @@ export default async function SermonsPage() {
 
                                     {/* Hover Play Icon */}
                                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <div className="w-12 h-12 rounded-full bg-[var(--primary-glow)] flex items-center justify-center shadow-[0_0_20px_var(--primary-glow)] scale-75 group-hover:scale-100 transition-transform">
+                                        <div className="w-12 h-12 rounded-full bg-[var(--primary-glow)] flex items-center justify-center shadow-none scale-75 group-hover:scale-100 transition-transform">
                                             <Play size={20} fill="white" className="ml-1 text-white" />
                                         </div>
                                     </div>
