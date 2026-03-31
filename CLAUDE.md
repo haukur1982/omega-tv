@@ -18,7 +18,7 @@ Icelandic Christian TV streaming platform. Public website + admin portal for man
 | Supabase | Database, auth | [Dashboard](https://supabase.com/dashboard/project/dvzwpwlgucsdyrkhrpah) | haukur1982@gmail.com |
 | Bunny.net | Video streaming & CDN | [Stream Library](https://dash.bunny.net/stream/628621) | Shared account (also used by subtitle system) |
 | Resend | Email (newsletters, welcome) | [Dashboard](https://resend.com) | haukur1982@gmail.com |
-| Vercel | Hosting & deployment | TODO | haukur1982@gmail.com |
+| Vercel | Hosting & deployment | [Dashboard](https://vercel.com/haukur1982-1838s-projects/omega-tv) | haukur1982@gmail.com |
 | GitHub | Source code | [Repo](https://github.com/haukur1982/omega-tv) | haukur1982 |
 
 ### Service IDs (quick reference)
@@ -36,7 +36,7 @@ UNSPLASH_ACCESS_KEY (optional)
 ```
 
 ## Key URLs
-- Production: TODO (omega.is)
+- Production: https://omega-tv-lovat.vercel.app (will be omega.is once domain is connected)
 - Admin: /admin (login with Supabase Auth — haukur1982@gmail.com)
 
 ## Important commands
