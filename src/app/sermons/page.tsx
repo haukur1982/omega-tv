@@ -6,81 +6,109 @@ import Link from "next/link";
 
 export const revalidate = 60;
 
+// Mock content for preview — will be replaced by real Bunny content
+const MOCK_SHOWS = [
+    {
+        title: "Í Snertingu",
+        episodes: [
+            { id: "mock-1", title: "Trúin sem sigrar", thumbnail: "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=400&h=600&fit=crop", duration: 28, show: "Í Snertingu" },
+            { id: "mock-2", title: "Kraftur bænarinnar", thumbnail: "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=400&h=600&fit=crop", duration: 25, show: "Í Snertingu" },
+            { id: "mock-3", title: "Náð sem læknar", thumbnail: "https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=400&h=600&fit=crop", duration: 30, show: "Í Snertingu" },
+            { id: "mock-4", title: "Vonin lifir", thumbnail: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=600&fit=crop", duration: 27, show: "Í Snertingu" },
+            { id: "mock-5", title: "Guðs áætlun", thumbnail: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&h=600&fit=crop", duration: 32, show: "Í Snertingu" },
+        ]
+    },
+    {
+        title: "Sunnudagssamkoma",
+        episodes: [
+            { id: "mock-6", title: "Framtíð Miðlunar", thumbnail: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=400&h=600&fit=crop", duration: 65, show: "Sunnudagssamkoma" },
+            { id: "mock-7", title: "Gleði Drottins", thumbnail: "https://images.unsplash.com/photo-1476610182048-b716b8515aaa?w=400&h=600&fit=crop", duration: 58, show: "Sunnudagssamkoma" },
+            { id: "mock-8", title: "Kærleikur án skilyrða", thumbnail: "https://images.unsplash.com/photo-1473773508845-188df298d2d1?w=400&h=600&fit=crop", duration: 62, show: "Sunnudagssamkoma" },
+            { id: "mock-9", title: "Breyting innan frá", thumbnail: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=600&fit=crop", duration: 55, show: "Sunnudagssamkoma" },
+            { id: "mock-10", title: "Frelsi í Kristi", thumbnail: "https://images.unsplash.com/photo-1509225770129-c9951ab42a9d?w=400&h=600&fit=crop", duration: 60, show: "Sunnudagssamkoma" },
+        ]
+    },
+    {
+        title: "Bænakvöld",
+        episodes: [
+            { id: "mock-11", title: "Bæn fyrir Íslandi", thumbnail: "https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=400&h=600&fit=crop", duration: 45, show: "Bænakvöld" },
+            { id: "mock-12", title: "Bæn fyrir fjölskyldunni", thumbnail: "https://images.unsplash.com/photo-1474418397713-7ede21d49118?w=400&h=600&fit=crop", duration: 40, show: "Bænakvöld" },
+            { id: "mock-13", title: "Bæn fyrir kirkjunni", thumbnail: "https://images.unsplash.com/photo-1504829857797-ddff29c27927?w=400&h=600&fit=crop", duration: 38, show: "Bænakvöld" },
+            { id: "mock-14", title: "Bæn fyrir Ísrael", thumbnail: "https://images.unsplash.com/photo-1547036967-23d11aacaee0?w=400&h=600&fit=crop", duration: 42, show: "Bænakvöld" },
+            { id: "mock-15", title: "Bæn um leiðsögn", thumbnail: "https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?w=400&h=600&fit=crop", duration: 35, show: "Bænakvöld" },
+        ]
+    },
+    {
+        title: "Fræðsla",
+        episodes: [
+            { id: "mock-16", title: "Grundvallaratriði trúarinnar", thumbnail: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=400&h=600&fit=crop", duration: 35, show: "Fræðsla" },
+            { id: "mock-17", title: "Biblían á auðveldan hátt", thumbnail: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop", duration: 28, show: "Fræðsla" },
+            { id: "mock-18", title: "Sögulegur Jesús", thumbnail: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=400&h=600&fit=crop", duration: 42, show: "Fræðsla" },
+            { id: "mock-19", title: "Heilagur Andi", thumbnail: "https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=400&h=600&fit=crop", duration: 33, show: "Fræðsla" },
+            { id: "mock-20", title: "Bænin sem breytir", thumbnail: "https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=400&h=600&fit=crop", duration: 30, show: "Fræðsla" },
+        ]
+    },
+];
+
 export default async function SermonsPage() {
     const videos = await getVideos(1, 100);
+    const hasRealContent = videos.length > 0;
 
-    const latestVideo = videos[0];
-    const heroMeta = latestVideo ? parseVideoMetadata(latestVideo) : null;
+    // Use real content if available, otherwise show mock
+    let categories: { title: string; episodes: any[] }[];
 
-    // Group by show
-    const grouped: Record<string, any[]> = {};
-    videos.forEach(video => {
-        const meta = parseVideoMetadata(video);
-        if (!grouped[meta.show]) grouped[meta.show] = [];
-        grouped[meta.show].push({ ...video, meta });
-    });
+    if (hasRealContent) {
+        const grouped: Record<string, any[]> = {};
+        videos.forEach(video => {
+            const meta = parseVideoMetadata(video);
+            if (!grouped[meta.show]) grouped[meta.show] = [];
+            grouped[meta.show].push({
+                id: video.guid,
+                title: meta.title,
+                thumbnail: meta.thumbnail,
+                duration: Math.floor(video.length / 60),
+                show: meta.show,
+            });
+        });
+        categories = Object.keys(grouped).map(key => ({ title: key, episodes: grouped[key] }));
+    } else {
+        categories = MOCK_SHOWS;
+    }
 
-    const categories = [
-        { title: "Nýtt Efni", series: videos.slice(0, 10).map(v => ({ ...v, meta: parseVideoMetadata(v) })) },
-        ...Object.keys(grouped).map(key => ({ title: key, series: grouped[key] }))
-    ];
+    // Featured content (first episode of first category)
+    const featured = categories[0]?.episodes[0];
 
     return (
-        <main className="min-h-screen bg-[#faf9f7]">
-            {/* Light page uses a dark navbar variant */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center bg-white/90 backdrop-blur-xl border-b border-black/5">
-                <Link href="/" className="flex items-center gap-3">
-                    <span className="text-[#5b8abf] font-bold text-2xl">Ω</span>
-                    <span className="text-gray-900 font-semibold tracking-[0.15em] text-sm uppercase">Omega</span>
-                </Link>
-                <div className="hidden md:flex items-center gap-8">
-                    {[
-                        { href: '/live', label: 'Beint' },
-                        { href: '/sermons', label: 'Þáttasafn' },
-                        { href: '/baenatorg', label: 'Bænatorg' },
-                        { href: '/frettabref', label: 'Fréttir' },
-                        { href: '/about', label: 'Um okkur' },
-                        { href: '/give', label: 'Styrkja' },
-                    ].map(link => (
-                        <Link key={link.href} href={link.href} className="text-xs font-medium uppercase tracking-[0.1em] text-gray-500 hover:text-gray-900 transition-colors">
-                            {link.label}
-                        </Link>
-                    ))}
-                </div>
-                <Link href="/live" className="flex items-center gap-2 bg-[#5b8abf] text-white px-5 py-2 font-semibold text-xs uppercase tracking-[0.1em] hover:brightness-110 transition-all">
-                    <Play size={14} fill="currentColor" />
-                    Horfa
-                </Link>
-            </nav>
+        <main className="min-h-screen bg-[var(--bg-deep)]">
+            <Navbar />
 
-            {/* Hero — Featured content (if available) */}
-            {latestVideo && heroMeta ? (
-                <div className="relative h-[75vh] w-full flex items-end pt-16">
+            {/* Hero — Featured Content */}
+            {featured && (
+                <div className="relative h-[80vh] w-full flex items-end">
                     <div className="absolute inset-0">
-                        <Image
-                            src={heroMeta.thumbnail}
-                            alt={heroMeta.title}
-                            fill
-                            className="object-cover"
-                            priority
+                        <img
+                            src={featured.thumbnail}
+                            alt={featured.title}
+                            className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#faf9f7] via-black/30 to-black/10" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-deep)] via-[var(--bg-deep)]/50 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-deep)]/80 via-[var(--bg-deep)]/30 to-transparent" />
                     </div>
 
-                    <div className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-16">
-                        <div className="max-w-xl">
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="bg-[#5b8abf] text-white font-bold px-3 py-1 text-xs uppercase tracking-wider">
-                                    Nýtt
-                                </span>
-                                <span className="text-white/80 text-sm font-medium">{heroMeta.show}</span>
-                            </div>
-                            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white tracking-tight leading-tight drop-shadow-lg">
-                                {heroMeta.title}
+                    <div className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-20">
+                        <div className="max-w-lg">
+                            <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-4">
+                                {featured.show}
+                            </p>
+                            <h1 className="text-4xl md:text-6xl font-bold mb-4 tracking-tight leading-[0.95]">
+                                {featured.title}
                             </h1>
-                            <div className="flex gap-4 mt-6">
-                                <Link href={`/sermons/${latestVideo.guid}`} className="flex items-center gap-2 bg-white text-black px-8 py-3 font-bold text-sm hover:bg-gray-100 transition-colors">
+                            <p className="text-[var(--text-secondary)] mb-6 flex items-center gap-2 text-sm">
+                                <Clock size={14} />
+                                {featured.duration} mín
+                            </p>
+                            <div className="flex gap-3">
+                                <Link href={hasRealContent ? `/sermons/${featured.id}` : '#'} className="flex items-center gap-2 bg-[var(--text-primary)] text-[var(--bg-deep)] px-8 py-4 font-bold text-sm hover:bg-white transition-colors">
                                     <Play size={18} fill="currentColor" />
                                     Spila
                                 </Link>
@@ -88,69 +116,55 @@ export default async function SermonsPage() {
                         </div>
                     </div>
                 </div>
-            ) : (
-                /* Empty state */
-                <div className="pt-32 pb-20 text-center max-w-3xl mx-auto px-6">
-                    <p className="text-[#5b8abf] text-xs font-semibold uppercase tracking-[0.2em] mb-8">Þáttasafn</p>
-                    <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[0.9] tracking-tight text-gray-900">
-                        Efni í vinnslu.
-                    </h1>
-                    <p className="text-lg text-gray-500 leading-relaxed">
-                        Við erum að undirbúa þáttasafnið. Fljótlega verður hægt að horfa á þætti,
-                        fræðsluefni og guðsþjónustur beint hér.
-                    </p>
-                </div>
             )}
 
-            {/* Content Rows */}
-            {videos.length > 0 && (
-                <div className="relative z-20 py-12 max-w-7xl mx-auto px-6 space-y-16">
-                    {categories.map((cat) => (
-                        <section key={cat.title}>
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-gray-900">{cat.title}</h2>
-                                <button className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-400 hover:text-gray-900 transition-colors flex items-center gap-1">
-                                    Sjá allt <ChevronRight size={14} />
-                                </button>
-                            </div>
+            {/* Content Rows — Netflix/Apple TV style */}
+            <div className="relative z-20 -mt-16 pb-20 max-w-7xl mx-auto px-6 space-y-12">
+                {categories.map((cat) => (
+                    <section key={cat.title}>
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-lg font-bold tracking-tight">{cat.title}</h2>
+                            <span className="text-xs text-[var(--text-muted)] uppercase tracking-[0.15em] flex items-center gap-1 cursor-pointer hover:text-[var(--text-primary)] transition-colors">
+                                Sjá allt <ChevronRight size={14} />
+                            </span>
+                        </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                {cat.series.slice(0, 5).map((show: any) => (
-                                    <Link
-                                        href={`/sermons/${show.guid}`}
-                                        key={show.guid}
-                                        className="group"
-                                    >
-                                        <div className="relative aspect-[2/3] overflow-hidden bg-gray-100 mb-3">
-                                            <Image
-                                                src={show.meta.thumbnail}
-                                                alt={show.meta.title}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                            />
-                                            {/* Play overlay on hover */}
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
-                                                <div className="w-12 h-12 bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                    <Play size={20} fill="black" className="ml-0.5 text-black" />
-                                                </div>
+                        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none -mx-6 px-6">
+                            {cat.episodes.map((ep: any) => (
+                                <Link
+                                    href={hasRealContent ? `/sermons/${ep.id}` : '#'}
+                                    key={ep.id}
+                                    className="group flex-shrink-0 w-[160px] md:w-[185px]"
+                                >
+                                    <div className="relative aspect-[2/3] overflow-hidden rounded-lg mb-2 bg-[var(--bg-surface)]">
+                                        <img
+                                            src={ep.thumbnail}
+                                            alt={ep.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        {/* Hover overlay */}
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                                            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+                                                <Play size={18} fill="black" className="ml-0.5 text-black" />
                                             </div>
                                         </div>
-                                        <h3 className="text-sm font-semibold text-gray-900 leading-tight group-hover:text-[#5b8abf] transition-colors line-clamp-2">
-                                            {show.meta.title}
-                                        </h3>
-                                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
-                                            <span>{show.meta.show}</span>
-                                            <span>·</span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock size={10} />
-                                                {Math.floor(show.length / 60)} mín
-                                            </span>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </section>
-                    ))}
+                                    </div>
+                                    <h3 className="text-sm font-medium text-[var(--text-primary)] leading-tight line-clamp-2 group-hover:text-white transition-colors">
+                                        {ep.title}
+                                    </h3>
+                                    <p className="text-xs text-[var(--text-muted)] mt-1">{ep.duration} mín</p>
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                ))}
+            </div>
+
+            {!hasRealContent && (
+                <div className="text-center pb-20">
+                    <p className="text-xs text-[var(--text-muted)] uppercase tracking-[0.2em]">
+                        Forskoðun — raunverulegt efni kemur fljótlega
+                    </p>
                 </div>
             )}
         </main>
