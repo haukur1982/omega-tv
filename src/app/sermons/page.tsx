@@ -151,7 +151,7 @@ export default async function SermonsPage() {
                         {cat.style === 'landscape' ? (
                             <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none -mx-8 px-8">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href="#" key={ep.id} className="group flex-shrink-0 w-[280px] md:w-[320px]">
+                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group flex-shrink-0 w-[280px] md:w-[320px]">
                                         <div className="relative aspect-video overflow-hidden rounded-2xl mb-3 bg-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.08)] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-shadow duration-300">
                                             <img
                                                 src={ep.thumbnail}
@@ -176,7 +176,7 @@ export default async function SermonsPage() {
                         ) : (
                             <div className="flex gap-3.5 overflow-x-auto pb-2 scrollbar-none -mx-8 px-8">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href="#" key={ep.id} className="group flex-shrink-0 w-[140px] md:w-[160px]">
+                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group flex-shrink-0 w-[140px] md:w-[160px]">
                                         <div className="relative aspect-[2/3] overflow-hidden rounded-2xl mb-2 bg-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.06)] group-hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
                                             <img
                                                 src={ep.thumbnail}
