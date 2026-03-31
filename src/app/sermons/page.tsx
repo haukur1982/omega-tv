@@ -76,7 +76,7 @@ export default async function SermonsPage() {
     const featured = categories[0]?.episodes[0];
 
     return (
-        <main className="min-h-screen bg-[#141414] text-white">
+        <main className="min-h-screen bg-[#1c1c1e] text-white">
             <Navbar />
 
             {/* Hero — massive, cinematic, Netflix-style */}
@@ -110,62 +110,55 @@ export default async function SermonsPage() {
                 </div>
             )}
 
-            {/* Content Rows */}
-            <div className="relative z-20 -mt-[5vh] space-y-10 pb-24">
+            {/* Content Rows — Apple TV style: rounder, warmer, more spacious */}
+            <div className="relative z-20 -mt-[4vh] space-y-10 pb-24">
                 {categories.map((cat) => (
                     <section key={cat.title} className="px-[4%]">
-                        <h2 className="text-[15px] font-semibold text-[#e5e5e5] mb-3 flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors" style={{ fontFamily: 'var(--font-sans)' }}>
+                        <h2 className="text-[17px] font-bold text-[#e5e5e5] mb-4 flex items-center gap-1" style={{ fontFamily: 'var(--font-sans)' }}>
                             {cat.title}
-                            <ChevronRight size={15} className="text-[#5b8abf] opacity-0 group-hover:opacity-100" />
+                            <ChevronRight size={18} className="text-white/30" />
                         </h2>
 
                         {cat.style === 'landscape' ? (
-                            /* ── Landscape Row: 16:9 episode cards ── */
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[6px]">
+                            /* ── Landscape Row: episodes with info overlay ── */
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group relative">
-                                        <div className="relative aspect-video overflow-hidden rounded-md bg-[#1a1a1a] ring-0 group-hover:ring-1 group-hover:ring-white/20 transition-all duration-200">
+                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group">
+                                        <div className="relative aspect-video overflow-hidden rounded-xl bg-[#2c2c2e] group-hover:scale-[1.03] transition-transform duration-300 ease-out shadow-[0_2px_8px_rgba(0,0,0,0.3)] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
                                             <img
                                                 src={ep.thumbnail}
                                                 alt={ep.title}
-                                                className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.08]"
+                                                className="w-full h-full object-cover"
                                             />
-                                            {/* Gradient overlay — always subtle, stronger on hover */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-200" />
-
-                                            {/* Play indicator on hover */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                <div className="w-10 h-10 rounded-full bg-white/95 flex items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.4)]">
-                                                    <Play size={16} fill="black" className="ml-0.5 text-black" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                                            {/* Bottom info */}
+                                            <div className="absolute bottom-0 left-0 right-0 p-3.5 flex items-end justify-between">
+                                                <div>
+                                                    <p className="text-white text-[14px] font-semibold leading-snug drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">{ep.title}</p>
+                                                    <p className="text-white/40 text-[11px] mt-0.5 flex items-center gap-1">
+                                                        <Play size={9} fill="currentColor" className="opacity-60" /> {ep.show} · {ep.duration} mín
+                                                    </p>
                                                 </div>
-                                            </div>
-
-                                            {/* Bottom info — always visible */}
-                                            <div className="absolute bottom-0 left-0 right-0 p-3">
-                                                <p className="text-white text-[13px] font-semibold leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{ep.title}</p>
-                                                <p className="text-white/40 text-[11px] mt-0.5 font-normal">{ep.show} · {ep.duration} mín</p>
                                             </div>
                                         </div>
                                     </Link>
                                 ))}
                             </div>
                         ) : (
-                            /* ── Portrait Row: 2:3 show posters ── */
-                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-[6px]">
+                            /* ── Portrait Row: show posters with title below ── */
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group relative">
-                                        <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-[#1a1a1a] ring-0 group-hover:ring-1 group-hover:ring-white/20 transition-all duration-200">
+                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group">
+                                        <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-[#2c2c2e] group-hover:scale-[1.03] transition-transform duration-300 ease-out shadow-[0_2px_8px_rgba(0,0,0,0.3)] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
                                             <img
                                                 src={ep.thumbnail}
                                                 alt={ep.title}
-                                                className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.08]"
+                                                className="w-full h-full object-cover"
                                             />
-                                            {/* Title overlay on hover */}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                                            <div className="absolute bottom-0 left-0 right-0 p-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                <p className="text-white text-[11px] font-semibold leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] line-clamp-2">{ep.title}</p>
-                                            </div>
                                         </div>
+                                        <p className="text-[12px] text-white/60 mt-2 font-medium leading-tight line-clamp-1 text-center" style={{ fontFamily: 'var(--font-sans)' }}>
+                                            {ep.title}
+                                        </p>
                                     </Link>
                                 ))}
                             </div>
