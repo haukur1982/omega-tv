@@ -1,48 +1,18 @@
 import Navbar from "@/components/layout/Navbar";
 import { getVideos, parseVideoMetadata } from "@/lib/bunny";
-import { Play, Info, ChevronRight, Clock } from "lucide-react";
+import { Play, Clock, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion"; // Note: Server Component wrapping Client Component logic needed if using framer-motion directly in page. 
-// ACTUALLY: SermonsPage is a Server Component. We cannot use `motion` directly here unless we export a Client Component part.
-// FIX: I will keep the page simple server-side and make a Client Component for the Card if needed, OR just use standard CSS/Tailwind for hover effects to avoid "use client" pollution?
-// User likes the "Series" page which uses Framer Motion. The Series page was "use client".
-// To keep it simple and high quality, I will make this page "use client" but fetch data in a separate Server Action or just keep it Server Side and pass data to a Client "SermonsBrowser" component?
-// Simplest path: Make it `use client` and fetch data inside `useEffect` OR keep it `use client` and prop drill data? 
-// No, Next.js 13+ App Router: Page can be Async Server Component.
-// I will create a Client Component `CategoryRow` or `SeriesCard` to handle the motion/interactivity.
-// Let's define the client components at the bottom or import them? Next.js allows defining strictly client components.
-// BETTER: I will make the whole page `use client` like `SeriesPage` was, but data fetching `await getVideos` needs to happen server side.
-// SO: Page (Server) -> passes data to -> ContentBrowser (Client).
-
-// Wait, simplest structure for "Launch":
-// Keep `page.tsx` as Server Component.
-// Create `SermonsBrowser.tsx` (Client Component) that takes the grouped data and renders the potentially interactive UI.
-// But I can't create new files easily without overhead.
-// I will try to make the page `export default async function` (Server) and only use simple Tailwind transitions for the cards to avoid Client Component needing `framer-motion` for everything.
-// OR: I can just make the whole page `use client` and fetch data via a `useEffect`? No, that's a downgrade from the current SSR.
-// PLAN: Page is Server. Button/Card is Client. 
-// I'll inline a simple "SeriesCard" that is a Client Component? No, that's messy in one file.
-// I will make the `SeriesCard` a separate file in components if I have to.
-// Actually, `VODCard.tsx` exists! I can just use `VODCard` but style it differently?
-// No, `VODCard` is horizontal/standard.
-// I will make this file `use client` and fetch data using a direct import? No, `getVideos` uses `process.env` which is fine in Client if prefixed NEXT_PUBLIC, but `API_KEY` is usually private.
-// `bunny.ts` uses `process.env.BUNNY_API_KEY` (Server Only usually).
-// So Page MUST be Server.
-// So I will render the Hero (Static) and Rows (Server loops) and use `Link` for interaction.
-// The "Motion" effects from `SeriesPage` (lines 112-118 in series/page.tsx) need a client wrapper.
-// I will remove `motion` for the cards to keep it pure Server Component for now (faster load) and use CSS hover effects. It will still look 95% as good.
 
 export const revalidate = 60;
 
 export default async function SermonsPage() {
     const videos = await getVideos(1, 100);
 
-    // Dynamic Hero Logic
     const latestVideo = videos[0];
     const heroMeta = latestVideo ? parseVideoMetadata(latestVideo) : null;
 
-    // Grouping Logic
+    // Group by show
     const grouped: Record<string, any[]> = {};
     videos.forEach(video => {
         const meta = parseVideoMetadata(video);
@@ -50,25 +20,42 @@ export default async function SermonsPage() {
         grouped[meta.show].push({ ...video, meta });
     });
 
-    const showCategories = Object.keys(grouped).map(key => ({
-        title: key,
-        series: grouped[key]
-    }));
-
-    // Add "New Releases" Row first
     const categories = [
         { title: "Nýtt Efni", series: videos.slice(0, 10).map(v => ({ ...v, meta: parseVideoMetadata(v) })) },
-        ...showCategories
+        ...Object.keys(grouped).map(key => ({ title: key, series: grouped[key] }))
     ];
 
     return (
-        <main className="min-h-screen bg-[var(--bg-deep)] text-white overflow-hidden pb-32">
-            <Navbar />
+        <main className="min-h-screen bg-[#faf9f7]">
+            {/* Light page uses a dark navbar variant */}
+            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center bg-white/90 backdrop-blur-xl border-b border-black/5">
+                <Link href="/" className="flex items-center gap-3">
+                    <span className="text-[#5b8abf] font-bold text-2xl">Ω</span>
+                    <span className="text-gray-900 font-semibold tracking-[0.15em] text-sm uppercase">Omega</span>
+                </Link>
+                <div className="hidden md:flex items-center gap-8">
+                    {[
+                        { href: '/live', label: 'Beint' },
+                        { href: '/sermons', label: 'Þáttasafn' },
+                        { href: '/baenatorg', label: 'Bænatorg' },
+                        { href: '/frettabref', label: 'Fréttir' },
+                        { href: '/about', label: 'Um okkur' },
+                        { href: '/give', label: 'Styrkja' },
+                    ].map(link => (
+                        <Link key={link.href} href={link.href} className="text-xs font-medium uppercase tracking-[0.1em] text-gray-500 hover:text-gray-900 transition-colors">
+                            {link.label}
+                        </Link>
+                    ))}
+                </div>
+                <Link href="/live" className="flex items-center gap-2 bg-[#5b8abf] text-white px-5 py-2 font-semibold text-xs uppercase tracking-[0.1em] hover:brightness-110 transition-all">
+                    <Play size={14} fill="currentColor" />
+                    Horfa
+                </Link>
+            </nav>
 
-            {/* Cinematic Hero (Dynamically Featured: Latest Video) */}
-            {latestVideo && heroMeta && (
-                <div className="relative h-[85vh] w-full flex items-center">
-                    {/* Background Image */}
+            {/* Hero — Featured content (if available) */}
+            {latestVideo && heroMeta ? (
+                <div className="relative h-[75vh] w-full flex items-end pt-16">
                     <div className="absolute inset-0">
                         <Image
                             src={heroMeta.thumbnail}
@@ -77,120 +64,95 @@ export default async function SermonsPage() {
                             className="object-cover"
                             priority
                         />
-                        {/* Deep Gradient Overlays for Readability */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-deep)] via-[var(--bg-deep)]/80 to-[var(--bg-deep)]/20" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-deep)] via-[var(--bg-deep)]/40 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#faf9f7] via-black/30 to-black/10" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
                     </div>
 
-                    <div className="relative z-10 w-full container mx-auto px-6 pt-20">
-                        <div className="max-w-2xl">
-                            {/* Metadata Badge */}
-                            <div className="flex items-center gap-3 mb-6">
-                                <span className="bg-[var(--accent-gold)] text-black font-bold px-3 py-1 text-xs rounded uppercase tracking-wider shadow-none">
-                                    Nýtt Efni
+                    <div className="relative z-10 w-full max-w-7xl mx-auto px-6 pb-16">
+                        <div className="max-w-xl">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="bg-[#5b8abf] text-white font-bold px-3 py-1 text-xs uppercase tracking-wider">
+                                    Nýtt
                                 </span>
-                                <span className="flex items-center gap-2 text-[var(--text-secondary)] font-medium text-sm tracking-wide bg-black/40 px-3 py-1 rounded-full border border-white/10 backdrop-blur-md">
-                                    <Clock size={12} className="text-[var(--accent-gold)]" />
-                                    {Math.floor(latestVideo.length / 60)} mín
-                                </span>
-                                <span className="text-white/80 font-medium text-sm border-l border-white/20 pl-3">
-                                    {heroMeta.show}
-                                </span>
+                                <span className="text-white/80 text-sm font-medium">{heroMeta.show}</span>
                             </div>
-
-                            <h1 className="text-5xl md:text-7xl font-bold mb-6 font-serif tracking-tight drop-shadow-2xl leading-[1.1]">
+                            <h1 className="text-4xl md:text-6xl font-bold mb-4 text-white tracking-tight leading-tight drop-shadow-lg">
                                 {heroMeta.title}
                             </h1>
-
-                            <p className="text-lg md:text-xl text-[var(--text-secondary)] mb-10 leading-relaxed drop-shadow-md line-clamp-3">
-                                {heroMeta.category !== "Almennt" ? heroMeta.category : "Horfðu á nýjasta þáttinn frá Omega TV. Uppbyggilegt efni fyrir alla fjölskylduna."}
-                            </p>
-
-                            <div className="flex gap-4">
-                                <Link
-                                    href={`/sermons/${latestVideo.guid}`}
-                                    className="flex items-center gap-3 px-8 py-4 bg-white text-black font-bold  hover:scale-105 transition-transform shadow-none"
-                                >
-                                    <Play size={20} fill="currentColor" />
-                                    <span>Spila Þátt</span>
+                            <div className="flex gap-4 mt-6">
+                                <Link href={`/sermons/${latestVideo.guid}`} className="flex items-center gap-2 bg-white text-black px-8 py-3 font-bold text-sm hover:bg-gray-100 transition-colors">
+                                    <Play size={18} fill="currentColor" />
+                                    Spila
                                 </Link>
-                                <button className="flex items-center gap-3 px-8 py-4 bg-[var(--glass-bg)] border border-[var(--glass-border)] text-white font-bold  hover:bg-[var(--glass-shine)] transition-colors">
-                                    <Info size={20} />
-                                    <span>Meira</span>
-                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            )}
-
-            {/* Empty state when no videos */}
-            {videos.length === 0 && (
-                <div className="pt-40 pb-32 text-center max-w-3xl mx-auto px-6">
-                    <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-8">Þáttasafn</p>
-                    <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[0.9] tracking-tight">Efni í vinnslu.</h1>
-                    <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
-                        Við erum að undirbúa þáttasafnið. Fljótlega verður hægt að horfa á þætti, fræðsluefni og guðsþjónustur beint hér.
+            ) : (
+                /* Empty state */
+                <div className="pt-32 pb-20 text-center max-w-3xl mx-auto px-6">
+                    <p className="text-[#5b8abf] text-xs font-semibold uppercase tracking-[0.2em] mb-8">Þáttasafn</p>
+                    <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[0.9] tracking-tight text-gray-900">
+                        Efni í vinnslu.
+                    </h1>
+                    <p className="text-lg text-gray-500 leading-relaxed">
+                        Við erum að undirbúa þáttasafnið. Fljótlega verður hægt að horfa á þætti,
+                        fræðsluefni og guðsþjónustur beint hér.
                     </p>
                 </div>
             )}
 
             {/* Content Rows */}
-            <div className={`relative z-20 space-y-20 container mx-auto px-6 ${latestVideo ? '-mt-24' : 'pt-32'}`}>
-                {categories.map((cat) => (
-                    <section key={cat.title}>
-                        <div className="flex items-end justify-between mb-8 border-b border-white/5 pb-4">
-                            <h2 className="text-2xl font-bold flex items-center gap-3 cursor-pointer hover:text-[var(--accent-gold)] transition-colors">
-                                <span className="w-1 h-6 bg-[var(--accent-gold)] rounded-full"></span>
-                                {cat.title}
-                            </h2>
-                            <button className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-white transition-colors flex items-center gap-1 group">
-                                Sjá Allt <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-                            </button>
-                        </div>
+            {videos.length > 0 && (
+                <div className="relative z-20 py-12 max-w-7xl mx-auto px-6 space-y-16">
+                    {categories.map((cat) => (
+                        <section key={cat.title}>
+                            <div className="flex items-center justify-between mb-6">
+                                <h2 className="text-xl font-bold text-gray-900">{cat.title}</h2>
+                                <button className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-400 hover:text-gray-900 transition-colors flex items-center gap-1">
+                                    Sjá allt <ChevronRight size={14} />
+                                </button>
+                            </div>
 
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                            {cat.series.map((show: any) => (
-                                <Link
-                                    href={`/sermons/${show.guid}`}
-                                    key={show.guid}
-                                    className="group relative aspect-[2/3] bg-[var(--bg-surface)]  overflow-hidden cursor-pointer shadow-lg border border-[var(--glass-border)] transition-all duration-300 hover:scale-105 hover:z-10 hover:shadow-2xl"
-                                >
-                                    <Image
-                                        src={show.meta.thumbnail}
-                                        alt={show.meta.title}
-                                        fill
-                                        className="object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90" />
-
-                                    {/* Hover Play Icon */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <div className="w-12 h-12 rounded-full bg-[var(--primary-glow)] flex items-center justify-center shadow-none scale-75 group-hover:scale-100 transition-transform">
-                                            <Play size={20} fill="white" className="ml-1 text-white" />
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                {cat.series.slice(0, 5).map((show: any) => (
+                                    <Link
+                                        href={`/sermons/${show.guid}`}
+                                        key={show.guid}
+                                        className="group"
+                                    >
+                                        <div className="relative aspect-[2/3] overflow-hidden bg-gray-100 mb-3">
+                                            <Image
+                                                src={show.meta.thumbnail}
+                                                alt={show.meta.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            />
+                                            {/* Play overlay on hover */}
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                                                <div className="w-12 h-12 bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                    <Play size={20} fill="black" className="ml-0.5 text-black" />
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                                        <div className="flex items-center gap-2 text-[9px] uppercase font-bold text-[var(--accent-gold)] tracking-wider mb-2">
-                                            <Clock size={10} />
-                                            <span>{Math.floor(show.length / 60)} min</span>
-                                        </div>
-                                        <h3 className="text-white font-bold leading-tight drop-shadow-md line-clamp-2 text-sm mb-1 group-hover:text-[var(--accent-gold)] transition-colors">
+                                        <h3 className="text-sm font-semibold text-gray-900 leading-tight group-hover:text-[#5b8abf] transition-colors line-clamp-2">
                                             {show.meta.title}
                                         </h3>
-                                        <div className="flex items-center justify-between text-[10px] text-white/50 border-t border-white/10 pt-2 mt-2">
+                                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
                                             <span>{show.meta.show}</span>
-                                            <span>{show.meta.dateDisplay}</span>
+                                            <span>·</span>
+                                            <span className="flex items-center gap-1">
+                                                <Clock size={10} />
+                                                {Math.floor(show.length / 60)} mín
+                                            </span>
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-                ))}
-            </div>
-
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    ))}
+                </div>
+            )}
         </main>
     );
 }
