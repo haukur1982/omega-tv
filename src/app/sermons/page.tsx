@@ -124,6 +124,17 @@ export default async function SermonsPage() {
                 </div>
             )}
 
+            {/* Empty state when no videos */}
+            {videos.length === 0 && (
+                <div className="pt-40 pb-32 text-center max-w-3xl mx-auto px-6">
+                    <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-8">Þáttasafn</p>
+                    <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[0.9] tracking-tight">Efni í vinnslu.</h1>
+                    <p className="text-lg text-[var(--text-secondary)] leading-relaxed">
+                        Við erum að undirbúa þáttasafnið. Fljótlega verður hægt að horfa á þætti, fræðsluefni og guðsþjónustur beint hér.
+                    </p>
+                </div>
+            )}
+
             {/* Content Rows */}
             <div className={`relative z-20 space-y-20 container mx-auto px-6 ${latestVideo ? '-mt-24' : 'pt-32'}`}>
                 {categories.map((cat) => (

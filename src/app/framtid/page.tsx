@@ -26,7 +26,15 @@ export default function VisionPage() {
             <Navbar />
 
             {/* Hero */}
-            <div className="pt-40 pb-24 text-center max-w-4xl mx-auto px-6">
+            <div className="relative min-h-[80vh] flex items-center justify-center text-center px-6 overflow-hidden">
+                <img
+                    src="https://images.unsplash.com/photo-1504829857797-ddff29c27927?q=80&w=2600&auto=format&fit=crop"
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover opacity-20"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-deep)] via-[var(--bg-deep)]/70 to-transparent" />
+
+                <div className="relative z-10 max-w-4xl">
                 <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -62,6 +70,7 @@ export default function VisionPage() {
                         Gerast Bakhjarl
                     </Link>
                 </motion.div>
+                </div>
             </div>
 
             {/* Focus Areas */}
