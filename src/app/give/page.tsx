@@ -9,9 +9,18 @@ export default function GivePage() {
         <main className="min-h-screen bg-[var(--bg-deep)] overflow-hidden">
             <Navbar />
 
-            {/* Hero — Typography-driven like IMEC, no image dependency */}
-            <div className="min-h-[85vh] flex items-center justify-center px-6">
-                <div className="max-w-4xl text-center">
+            {/* Hero — Cinematic with Icelandic imagery */}
+            <div className="relative min-h-[85vh] flex items-center justify-center px-6 overflow-hidden">
+                {/* Background image */}
+                <img
+                    src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=2600&auto=format&fit=crop"
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-[var(--bg-deep)]/75" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-deep)] via-transparent to-[var(--bg-deep)]/40" />
+
+                <div className="relative z-10 max-w-4xl text-center">
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -82,11 +91,11 @@ export default function GivePage() {
                         viewport={{ once: true }}
                         className="text-2xl md:text-3xl font-bold leading-relaxed tracking-tight"
                     >
-                        "Omega er eini kristni miðillinn á Íslandi sem framleiðir efni á íslensku
-                        fyrir íslensku þjóðina. Án stuðnings þíns getur þetta starf ekki haldið áfram."
+                        "Það er forréttindi að búa á Íslandi. Saman getum við borið ljós vonarinnar
+                        inn á hvert heimili í landinu. Þetta er okkar kall — og það er fagnaðarefni."
                     </motion.p>
                     <p className="text-[var(--text-muted)] mt-6 text-sm italic">
-                        — Eiríkur Sigurbjörnsson, stofnandi
+                        — Omega Stöðin
                     </p>
                 </div>
             </section>
@@ -135,7 +144,7 @@ export default function GivePage() {
                         >
                             <span className="text-[var(--accent)] text-xs font-semibold tracking-[0.15em] block mb-6">02</span>
                             <h3 className="text-2xl font-bold mb-4">Millifærsla</h3>
-                            <p className="text-[var(--text-secondary)] text-sm mb-8">Fyrir stærri gjafir og fyrirtæki.</p>
+                            <p className="text-[var(--text-secondary)] text-sm mb-8">Millifærðu hvaða upphæð sem er beint á reikninginn okkar.</p>
 
                             <div className="space-y-5 text-left max-w-xs mx-auto">
                                 <div>
