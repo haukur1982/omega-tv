@@ -79,14 +79,14 @@ export default async function SermonsPage() {
     const featured = categories[0]?.episodes[0];
 
     return (
-        <main className="min-h-screen bg-[#f5f5f0]">
-            {/* Light navbar for browsing */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center bg-[#f5f5f0]/90 backdrop-blur-xl border-b border-black/[0.06]">
-                <Link href="/" className="flex items-center gap-3">
-                    <span className="text-[#5b8abf] font-bold text-2xl">Ω</span>
-                    <span className="text-gray-900 font-semibold tracking-[0.15em] text-sm uppercase">Omega</span>
+        <main className="min-h-screen bg-[#f8f7f4]">
+            {/* Refined light navbar */}
+            <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-3.5 flex justify-between items-center bg-[#f8f7f4]/80 backdrop-blur-2xl border-b border-black/[0.04]">
+                <Link href="/" className="flex items-center gap-2.5">
+                    <span className="text-[#5b8abf] font-bold text-xl">Ω</span>
+                    <span className="text-gray-800 font-semibold tracking-[0.12em] text-[13px] uppercase">Omega</span>
                 </Link>
-                <div className="hidden md:flex items-center gap-8">
+                <div className="hidden md:flex items-center gap-7">
                     {[
                         { href: '/live', label: 'Beint' },
                         { href: '/sermons', label: 'Þáttasafn' },
@@ -94,106 +94,97 @@ export default async function SermonsPage() {
                         { href: '/about', label: 'Um okkur' },
                         { href: '/give', label: 'Styrkja' },
                     ].map(link => (
-                        <Link key={link.href} href={link.href} className="text-xs font-medium uppercase tracking-[0.1em] text-gray-500 hover:text-gray-900 transition-colors">
+                        <Link key={link.href} href={link.href} className="text-[13px] font-medium text-gray-400 hover:text-gray-800 transition-colors">
                             {link.label}
                         </Link>
                     ))}
                 </div>
-                <Link href="/live" className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-full font-semibold text-xs uppercase tracking-[0.05em] hover:bg-black transition-colors">
-                    <Play size={12} fill="currentColor" />
+                <Link href="/live" className="flex items-center gap-2 bg-[#5b8abf] text-white px-5 py-2 rounded-full font-medium text-[13px] hover:brightness-110 transition-all">
+                    <Play size={11} fill="currentColor" />
                     Horfa
                 </Link>
             </nav>
 
-            {/* Hero — Cinematic featured content on dark */}
+            {/* Hero — Cinematic, blends smoothly into warm background */}
             {featured && (
-                <div className="relative h-[70vh] w-full flex items-end bg-black">
+                <div className="relative h-[68vh] w-full flex items-end">
                     <img
                         src={featured.thumbnail}
                         alt={featured.title}
-                        className="absolute inset-0 w-full h-full object-cover opacity-60"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+                    {/* Smooth gradient from content into warm bg */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#f8f7f4] via-black/50 to-black/20" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" />
 
-                    <div className="relative z-10 w-full max-w-7xl mx-auto px-8 pb-16">
-                        <div className="max-w-lg">
-                            <p className="text-white/60 text-xs font-semibold uppercase tracking-[0.2em] mb-3">
+                    <div className="relative z-10 w-full max-w-7xl mx-auto px-8 pb-12">
+                        <div className="max-w-md">
+                            <p className="text-white/50 text-[11px] font-medium uppercase tracking-[0.18em] mb-2">
                                 {featured.show} · {(featured as any).episode || ''}
                             </p>
-                            <h1 className="text-4xl md:text-5xl font-bold mb-3 text-white tracking-tight">
+                            <h1 className="text-3xl md:text-5xl font-bold mb-2 text-white tracking-tight leading-[1.1]" style={{ fontFamily: 'var(--font-sans)' }}>
                                 {featured.title}
                             </h1>
                             {(featured as any).desc && (
-                                <p className="text-white/60 text-sm leading-relaxed mb-6 line-clamp-2">
+                                <p className="text-white/50 text-[13px] leading-relaxed mb-5 line-clamp-2 max-w-sm">
                                     {(featured as any).desc}
                                 </p>
                             )}
-                            <div className="flex gap-3">
-                                <button className="flex items-center gap-2 bg-white text-black px-7 py-3 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors">
-                                    <Play size={16} fill="currentColor" />
-                                    Spila
-                                </button>
-                            </div>
+                            <button className="flex items-center gap-2 bg-white/95 text-black px-6 py-2.5 rounded-lg font-semibold text-[13px] hover:bg-white transition-colors shadow-lg shadow-black/20">
+                                <Play size={14} fill="currentColor" />
+                                Spila
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Content Rows — Apple TV+ style on warm light background */}
-            <div className="py-10 max-w-7xl mx-auto px-8 space-y-10">
+            {/* Content Rows — refined Apple TV+ style */}
+            <div className="pt-6 pb-16 max-w-7xl mx-auto px-8 space-y-8">
                 {categories.map((cat) => (
                     <section key={cat.title}>
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                {cat.title}
-                                <ChevronRight size={18} className="text-gray-400" />
-                            </h2>
-                        </div>
+                        <h2 className="text-[17px] font-bold text-gray-900 mb-4 flex items-center gap-1.5" style={{ fontFamily: 'var(--font-sans)' }}>
+                            {cat.title}
+                            <ChevronRight size={16} className="text-gray-300" />
+                        </h2>
 
                         {cat.style === 'landscape' ? (
-                            /* Landscape cards — like Apple TV episode rows */
-                            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none -mx-8 px-8">
+                            <div className="flex gap-5 overflow-x-auto pb-2 scrollbar-none -mx-8 px-8">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href="#" key={ep.id} className="group flex-shrink-0 w-[300px] md:w-[340px]">
-                                        <div className="relative aspect-video overflow-hidden rounded-xl mb-3 bg-gray-200 shadow-sm">
+                                    <Link href="#" key={ep.id} className="group flex-shrink-0 w-[280px] md:w-[320px]">
+                                        <div className="relative aspect-video overflow-hidden rounded-2xl mb-3 bg-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.08)] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] transition-shadow duration-300">
                                             <img
                                                 src={ep.thumbnail}
                                                 alt={ep.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                                             />
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center">
-                                                <div className="w-12 h-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300">
-                                                    <Play size={18} fill="black" className="ml-0.5 text-black" />
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-all duration-300 flex items-center justify-center">
+                                                <div className="w-11 h-11 rounded-full bg-white/95 shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all duration-300">
+                                                    <Play size={16} fill="black" className="ml-0.5 text-black" />
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-start justify-between gap-2">
-                                            <div>
-                                                {ep.episode && <p className="text-[11px] text-gray-400 uppercase tracking-wider mb-0.5">{ep.episode}</p>}
-                                                <h3 className="text-[15px] font-semibold text-gray-900 leading-tight">{ep.title}</h3>
-                                                {ep.desc && <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{ep.desc}</p>}
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
-                                            <Play size={10} fill="currentColor" /> {ep.duration} mín
+                                        {ep.episode && <p className="text-[10px] text-gray-400 uppercase tracking-[0.08em] mb-0.5 font-medium">{ep.episode}</p>}
+                                        <h3 className="text-[14px] font-semibold text-gray-900 leading-snug" style={{ fontFamily: 'var(--font-sans)' }}>{ep.title}</h3>
+                                        {ep.desc && <p className="text-[12px] text-gray-400 mt-0.5 line-clamp-2 leading-relaxed font-normal">{ep.desc}</p>}
+                                        <p className="text-[11px] text-gray-300 mt-1 flex items-center gap-1">
+                                            <Play size={8} fill="currentColor" /> {ep.duration} mín
                                         </p>
                                     </Link>
                                 ))}
                             </div>
                         ) : (
-                            /* Portrait cards — like Apple TV show posters */
-                            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-none -mx-8 px-8">
+                            <div className="flex gap-3.5 overflow-x-auto pb-2 scrollbar-none -mx-8 px-8">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href="#" key={ep.id} className="group flex-shrink-0 w-[150px] md:w-[170px]">
-                                        <div className="relative aspect-[2/3] overflow-hidden rounded-xl mb-2 bg-gray-200 shadow-sm">
+                                    <Link href="#" key={ep.id} className="group flex-shrink-0 w-[140px] md:w-[160px]">
+                                        <div className="relative aspect-[2/3] overflow-hidden rounded-2xl mb-2 bg-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.06)] group-hover:shadow-[0_8px_25px_rgba(0,0,0,0.12)] transition-all duration-300">
                                             <img
                                                 src={ep.thumbnail}
                                                 alt={ep.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700 ease-out"
                                             />
                                         </div>
-                                        <h3 className="text-[13px] font-medium text-gray-800 leading-tight line-clamp-2">
+                                        <h3 className="text-[12px] font-medium text-gray-700 leading-tight line-clamp-2" style={{ fontFamily: 'var(--font-sans)' }}>
                                             {ep.title}
                                         </h3>
                                     </Link>
