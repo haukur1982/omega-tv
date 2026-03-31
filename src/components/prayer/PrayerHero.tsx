@@ -16,7 +16,7 @@ export default function PrayerHero({ totalPrayCount }: { totalPrayCount: number 
         <div className="relative min-h-[70vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
             {/* Subtle ambient background */}
             <img
-                src="https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=2600&auto=format&fit=crop"
+                src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?q=80&w=2600&auto=format&fit=crop"
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover opacity-10"
             />

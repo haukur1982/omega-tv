@@ -33,7 +33,7 @@ export async function submitPrayerAction(formData: FormData) {
 /**
  * Quick national prayer — pre-written text, auto-approved
  */
-export async function submitQuickPrayerAction(topic: string) {
+export async function submitQuickPrayerAction(topic: string, name: string = 'Nafnlaus/t') {
     const messages: Record<string, string> = {
         'Ísland': 'Ég bid fyrir Íslandi — fyrir friði, einingu og veru Guðs yfir þjóðinni.',
         'Ríkisstjórnin': 'Ég bid fyrir leiðtogum landsins — fyrir visku, réttlæti og auðmýkt.',
@@ -45,7 +45,7 @@ export async function submitQuickPrayerAction(topic: string) {
     if (!content) return { success: false, error: 'Óþekkt efni.' };
 
     await addPrayer({
-        name: 'Bænasamfélagið',
+        name,
         topic,
         content,
         categoryType: 'national',
