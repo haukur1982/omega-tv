@@ -203,10 +203,13 @@ export type Database = {
                     email: string | null
                     topic: string
                     content: string
+                    category_type: string
+                    campaign_id: string | null
                     pray_count: number
                     is_approved: boolean
                     is_answered: boolean
                     created_at: string
+                    updated_at: string
                 }
                 Insert: {
                     id?: string
@@ -214,6 +217,8 @@ export type Database = {
                     email?: string | null
                     topic: string
                     content: string
+                    category_type?: string
+                    campaign_id?: string | null
                     pray_count?: number
                     is_approved?: boolean
                     is_answered?: boolean
@@ -225,10 +230,46 @@ export type Database = {
                     email?: string | null
                     topic?: string
                     content?: string
+                    category_type?: string
+                    campaign_id?: string | null
                     pray_count?: number
                     is_approved?: boolean
                     is_answered?: boolean
                     created_at?: string
+                }
+                Relationships: []
+            }
+            prayer_campaigns: {
+                Row: {
+                    id: string
+                    title: string
+                    description: string | null
+                    image_url: string | null
+                    start_date: string
+                    end_date: string
+                    is_active: boolean
+                    pray_count: number
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    title: string
+                    description?: string | null
+                    image_url?: string | null
+                    start_date: string
+                    end_date: string
+                    is_active?: boolean
+                    pray_count?: number
+                }
+                Update: {
+                    id?: string
+                    title?: string
+                    description?: string | null
+                    image_url?: string | null
+                    start_date?: string
+                    end_date?: string
+                    is_active?: boolean
+                    pray_count?: number
                 }
                 Relationships: []
             }

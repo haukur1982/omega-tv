@@ -30,6 +30,7 @@ const navItems = [
     { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
     { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
     { href: '/admin/videos', label: 'Myndbönd', icon: Film },
+    { href: '/admin/campaigns', label: 'Bænaherferðir', icon: Heart },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {

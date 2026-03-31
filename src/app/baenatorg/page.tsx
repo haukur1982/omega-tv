@@ -1,47 +1,51 @@
 import Navbar from "@/components/layout/Navbar";
 import PrayerCard from "@/components/prayer/PrayerCard";
 import PrayerForm from "@/components/prayer/PrayerForm";
-import { getPrayers } from "@/lib/prayer-db";
+import PrayerHero from "@/components/prayer/PrayerHero";
+import PrayerCampaignBanner from "@/components/prayer/PrayerCampaignBanner";
+import QuickPrayerButtons from "@/components/prayer/QuickPrayerButtons";
+import { getPrayers, getTotalPrayCount, getActiveCampaigns } from "@/lib/prayer-db";
 
 export const dynamic = 'force-dynamic';
 
 export default async function PrayerPage() {
-    const prayers = await getPrayers();
+    const [prayers, totalCount, campaigns] = await Promise.all([
+        getPrayers(),
+        getTotalPrayCount(),
+        getActiveCampaigns(),
+    ]);
+
+    const activeCampaign = campaigns[0] || null;
+
     return (
-        <main className="min-h-screen bg-[var(--bg-deep)] text-white">
+        <main className="min-h-screen bg-[var(--bg-deep)]">
             <Navbar />
 
-            {/* Hero — with background image */}
-            <div className="relative pt-40 pb-24 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=2600&auto=format&fit=crop"
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover opacity-15"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-deep)]/50 to-[var(--bg-deep)]" />
+            {/* Immersive Hero with Counter */}
+            <PrayerHero totalPrayCount={totalCount + prayers.length} />
 
-                <div className="relative z-10">
-                    <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-8">
-                        Bænatorg
-                    </p>
+            {/* Active Campaign */}
+            {activeCampaign && (
+                <section className="max-w-6xl mx-auto px-6 -mt-8 relative z-10 mb-12">
+                    <PrayerCampaignBanner campaign={activeCampaign} />
+                </section>
+            )}
 
-                    <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-[0.9] tracking-tight">
-                        Samfélag í bæn.
-                    </h1>
-                    <p className="text-lg text-[var(--text-secondary)] max-w-2xl leading-relaxed">
-                        "Komið því fram með djörfung að hásæti náðarinnar, til þess að við öðlumst miskunn og finnum náð."
-                    </p>
-                    <p className="text-sm text-[var(--text-muted)] italic mt-3">— Hebreabréfið 4:16</p>
-                </div>
-            </div>
+            {/* Quick National Prayer Buttons */}
+            <section className="max-w-6xl mx-auto px-6 mb-16">
+                <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-6">
+                    Biðja í einu smelli
+                </p>
+                <QuickPrayerButtons />
+            </section>
 
-            {/* Main Content Grid */}
-            <div className="max-w-6xl mx-auto px-6 pb-32">
+            {/* Prayer Feed + Form */}
+            <section className="max-w-6xl mx-auto px-6 pb-32">
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
 
-                    {/* Left: Prayer Wall Feed */}
+                    {/* Left: Prayer Feed */}
                     <div>
-                        <h2 className="text-xl font-bold mb-8">Nýjustu Bænirnar</h2>
+                        <h2 className="text-xl font-bold mb-8">Bænir samfélagsins</h2>
 
                         {prayers.length > 0 ? (
                             <div className="space-y-6">
@@ -50,20 +54,20 @@ export default async function PrayerPage() {
                                 ))}
                             </div>
                         ) : (
-                            <div className="py-20 text-center">
+                            <div className="py-20 text-center border border-[var(--border)]">
                                 <p className="text-[var(--text-secondary)] text-lg mb-2">Engar bænir ennþá.</p>
                                 <p className="text-[var(--text-muted)] text-sm">Vertu fyrst/ur til að senda bænabeiðni.</p>
                             </div>
                         )}
                     </div>
 
-                    {/* Right: Form */}
-                    <div className="relative">
+                    {/* Right: Submission Form */}
+                    <div>
                         <PrayerForm />
                     </div>
 
                 </div>
-            </div>
+            </section>
 
         </main>
     );
