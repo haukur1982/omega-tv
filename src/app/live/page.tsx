@@ -1,76 +1,73 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Navbar from "@/components/layout/Navbar";
-import FuturisticPlayer from "@/components/player/FuturisticPlayer";
 import Link from "next/link";
 import { Heart, Sparkles } from "lucide-react";
 import LiveSchedule from "@/components/live/LiveSchedule";
 
 export default function LivePage() {
     const [currentProgram, setCurrentProgram] = useState<any>(null);
-    const [liveStreamId, setLiveStreamId] = useState<string | undefined>(undefined);
-    const [streamEmbedUrl, setStreamEmbedUrl] = useState<string | undefined>(undefined);
+    const [embedUrl, setEmbedUrl] = useState<string | undefined>(undefined);
 
     useEffect(() => {
-        async function fetchLiveStream() {
-            try {
-                const embedUrl = process.env.NEXT_PUBLIC_LIVE_STREAM_EMBED_URL;
-                if (embedUrl) {
-                    setStreamEmbedUrl(embedUrl);
-                    return;
-                }
-                const { getLiveStream } = await import('@/lib/bunny');
-                const stream = await getLiveStream();
-                if (stream.videoId) setLiveStreamId(stream.videoId);
-            } catch (error) {
-                console.error("Failed to fetch live stream", error);
-            }
-        }
-        fetchLiveStream();
+        const url = process.env.NEXT_PUBLIC_LIVE_STREAM_EMBED_URL;
+        if (url) setEmbedUrl(url);
     }, []);
 
     return (
         <main className="min-h-screen bg-[var(--bg-deep)]">
             <Navbar />
 
-            <div className="pt-24 pb-10 max-w-6xl mx-auto px-6">
+            {/* Player — full width, immersive, autoplay */}
+            <div className="pt-[60px]">
+                <div className="w-full bg-black">
+                    <div className="max-w-[1400px] mx-auto">
+                        <div className="relative w-full aspect-video">
+                            {embedUrl ? (
+                                <iframe
+                                    src={`${embedUrl}&autoplay=1`}
+                                    className="absolute inset-0 w-full h-full border-0"
+                                    allow="autoplay; fullscreen; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            ) : (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-[var(--text-muted)] text-sm uppercase tracking-[0.2em]">
+                                        Engin útsending í gangi
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                {/* Header */}
-                <div className="mb-6">
-                    <div className="flex items-center gap-3 mb-3">
+            {/* Info bar below player */}
+            <div className="max-w-[1400px] mx-auto px-6 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border)]">
+                <div>
+                    <div className="flex items-center gap-3 mb-1">
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                         <span className="text-red-400 font-semibold uppercase tracking-[0.15em] text-xs">Bein Útsending</span>
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
                         {currentProgram ? currentProgram.title : 'Omega Stöðin'}
                     </h1>
                 </div>
 
-                {/* Player */}
-                <div className="w-full border border-[var(--border)] bg-black mb-8">
-                    <FuturisticPlayer videoId={liveStreamId} embedUrl={streamEmbedUrl} />
-                </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
-                    <Link href="/baenatorg" className="group flex items-center justify-between p-5 border border-[var(--border)] hover:border-[var(--accent)] transition-all">
-                        <div>
-                            <h3 className="font-bold group-hover:text-white transition-colors">Senda Bæn</h3>
-                            <p className="text-xs text-[var(--text-secondary)]">Við biðjum fyrir þér</p>
-                        </div>
-                        <Sparkles size={18} className="text-[var(--accent)]" />
+                <div className="flex gap-3">
+                    <Link href="/baenatorg" className="flex items-center gap-2 px-5 py-3 border border-[var(--border)] hover:border-[var(--accent)] text-sm font-semibold transition-all">
+                        <Sparkles size={14} className="text-[var(--accent)]" />
+                        Senda Bæn
                     </Link>
-
-                    <Link href="/give" className="group flex items-center justify-between p-5 border border-[var(--border)] hover:border-[var(--accent)] transition-all">
-                        <div>
-                            <h3 className="font-bold group-hover:text-white transition-colors">Styrkja</h3>
-                            <p className="text-xs text-[var(--text-secondary)]">Gerast bakhjarl</p>
-                        </div>
-                        <Heart size={18} className="text-[var(--accent)]" />
+                    <Link href="/give" className="flex items-center gap-2 px-5 py-3 bg-[var(--accent)] text-[var(--bg-deep)] text-sm font-semibold hover:brightness-110 transition-all">
+                        <Heart size={14} />
+                        Styrkja
                     </Link>
                 </div>
+            </div>
 
-                {/* Schedule */}
+            {/* Schedule */}
+            <div className="max-w-[1400px] mx-auto px-6">
                 <LiveSchedule onUpdate={setCurrentProgram} />
             </div>
         </main>
