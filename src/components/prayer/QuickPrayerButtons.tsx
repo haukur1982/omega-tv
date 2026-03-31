@@ -29,9 +29,9 @@ export default function QuickPrayerButtons() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nafnið þitt..."
-                className="w-full md:w-64 bg-[var(--bg-surface)] border border-[var(--border)] px-4 py-3 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                className="w-full md:w-80 bg-white/5 border border-white/10 px-5 py-4 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
             />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {PRAYER_CATEGORIES.national.topics.map((topic) => {
                     const isDone = sent[topic.value];
                     const isLoading = sending === topic.value;
@@ -43,12 +43,12 @@ export default function QuickPrayerButtons() {
                             onClick={() => handleQuickPrayer(topic.value)}
                             disabled={isDone || !!sending || noName}
                             className={`
-                                py-4 px-4 text-center text-sm font-semibold transition-all duration-300
+                                py-5 px-4 text-center text-sm font-semibold transition-all duration-300
                                 ${isDone
-                                    ? 'bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20'
+                                    ? 'bg-[var(--accent)]/20 text-[var(--accent)] border border-[var(--accent)]/30'
                                     : noName
-                                        ? 'bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed'
-                                        : 'bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--accent)] text-[var(--text-primary)]'
+                                        ? 'bg-white/5 border border-white/8 text-white/20 cursor-not-allowed'
+                                        : 'bg-white/10 border border-white/15 hover:bg-[var(--accent)] hover:text-[var(--bg-deep)] text-[var(--text-primary)]'
                                 }
                                 ${isLoading ? 'opacity-60' : ''}
                             `}
