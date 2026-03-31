@@ -110,44 +110,61 @@ export default async function SermonsPage() {
                 </div>
             )}
 
-            {/* Content Rows — Netflix style, tight, image-forward */}
-            <div className="relative z-20 -mt-[5vh] space-y-8 pb-20">
+            {/* Content Rows */}
+            <div className="relative z-20 -mt-[5vh] space-y-10 pb-24">
                 {categories.map((cat) => (
                     <section key={cat.title} className="px-[4%]">
-                        <h2 className="text-[16px] font-semibold text-white/90 mb-2 flex items-center gap-1" style={{ fontFamily: 'var(--font-sans)' }}>
+                        <h2 className="text-[15px] font-semibold text-[#e5e5e5] mb-3 flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors" style={{ fontFamily: 'var(--font-sans)' }}>
                             {cat.title}
-                            <ChevronRight size={16} className="text-white/30" />
+                            <ChevronRight size={15} className="text-[#5b8abf] opacity-0 group-hover:opacity-100" />
                         </h2>
 
                         {cat.style === 'landscape' ? (
-                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                            /* ── Landscape Row: 16:9 episode cards ── */
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[6px]">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group flex-shrink-0 w-[calc(25%-6px)]">
-                                        <div className="relative aspect-video overflow-hidden rounded-[4px] bg-[#2a2a2a]">
+                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group relative">
+                                        <div className="relative aspect-video overflow-hidden rounded-md bg-[#1a1a1a] ring-0 group-hover:ring-1 group-hover:ring-white/20 transition-all duration-200">
                                             <img
                                                 src={ep.thumbnail}
                                                 alt={ep.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.08]"
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                                            <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                                                <p className="text-white text-[13px] font-semibold leading-tight">{ep.title}</p>
-                                                <p className="text-white/50 text-[11px] mt-0.5">{ep.show} · {ep.duration} mín</p>
+                                            {/* Gradient overlay — always subtle, stronger on hover */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-200" />
+
+                                            {/* Play indicator on hover */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                <div className="w-10 h-10 rounded-full bg-white/95 flex items-center justify-center shadow-[0_2px_10px_rgba(0,0,0,0.4)]">
+                                                    <Play size={16} fill="black" className="ml-0.5 text-black" />
+                                                </div>
+                                            </div>
+
+                                            {/* Bottom info — always visible */}
+                                            <div className="absolute bottom-0 left-0 right-0 p-3">
+                                                <p className="text-white text-[13px] font-semibold leading-snug drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{ep.title}</p>
+                                                <p className="text-white/40 text-[11px] mt-0.5 font-normal">{ep.show} · {ep.duration} mín</p>
                                             </div>
                                         </div>
                                     </Link>
                                 ))}
                             </div>
                         ) : (
-                            <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none">
+                            /* ── Portrait Row: 2:3 show posters ── */
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-[6px]">
                                 {cat.episodes.map((ep: any) => (
-                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group flex-shrink-0 w-[calc(14.28%-4px)] min-w-[130px]">
-                                        <div className="relative aspect-[2/3] overflow-hidden rounded-[4px] bg-[#2a2a2a]">
+                                    <Link href={`/sermons/${ep.id}`} key={ep.id} className="group relative">
+                                        <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-[#1a1a1a] ring-0 group-hover:ring-1 group-hover:ring-white/20 transition-all duration-200">
                                             <img
                                                 src={ep.thumbnail}
                                                 alt={ep.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                className="w-full h-full object-cover transition-transform duration-[400ms] ease-out group-hover:scale-[1.08]"
                                             />
+                                            {/* Title overlay on hover */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                                            <div className="absolute bottom-0 left-0 right-0 p-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                <p className="text-white text-[11px] font-semibold leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] line-clamp-2">{ep.title}</p>
+                                            </div>
                                         </div>
                                     </Link>
                                 ))}
