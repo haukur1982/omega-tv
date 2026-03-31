@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, supabaseAdmin } from './supabase';
 
 export interface Prayer {
     id: string;
@@ -44,7 +44,7 @@ export async function getPrayers(): Promise<Prayer[]> {
  * Get ALL prayers (for admin dashboard)
  */
 export async function getAllPrayers(): Promise<Prayer[]> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('prayers')
         .select('*')
         .order('created_at', { ascending: false });
@@ -138,7 +138,7 @@ export async function incrementPrayCount(id: string): Promise<number | null> {
  * Approve a prayer (admin action)
  */
 export async function approvePrayer(id: string): Promise<boolean> {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('prayers')
         .update({ is_approved: true, updated_at: new Date().toISOString() })
         .eq('id', id);
@@ -150,7 +150,7 @@ export async function approvePrayer(id: string): Promise<boolean> {
  * Mark a prayer as answered (admin action)
  */
 export async function markPrayerAnswered(id: string): Promise<boolean> {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('prayers')
         .update({ is_answered: true, updated_at: new Date().toISOString() })
         .eq('id', id);
@@ -162,7 +162,7 @@ export async function markPrayerAnswered(id: string): Promise<boolean> {
  * Delete a prayer (admin action)
  */
 export async function deletePrayer(id: string): Promise<boolean> {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('prayers')
         .delete()
         .eq('id', id);

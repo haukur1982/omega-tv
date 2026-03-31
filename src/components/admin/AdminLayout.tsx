@@ -16,6 +16,7 @@ import {
     Loader2,
     MessageSquare
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import '@/styles/admin.css';
 
 interface AdminLayoutProps {
@@ -29,8 +30,6 @@ const navItems = [
     { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
     { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
     { href: '/admin/videos', label: 'Myndbönd', icon: Film },
-    { href: '/admin/testimonials', label: 'Vitnisburðir', icon: MessageSquare }, // Changed form Quote to MessageSquare
-    { href: '/admin/quotes', label: 'Tilvitnanir', icon: Quote },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -40,17 +39,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const auth = localStorage.getItem('omega_admin');
-        if (auth !== 'true') {
-            router.push('/admin');
-        } else {
-            setIsAuthed(true);
-        }
-        setIsLoading(false);
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!session) {
+                router.push('/admin');
+            } else {
+                setIsAuthed(true);
+            }
+            setIsLoading(false);
+        });
     }, [router]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('omega_admin');
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
         router.push('/admin');
     };
 

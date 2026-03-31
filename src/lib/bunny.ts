@@ -4,7 +4,7 @@ const LIVE_STREAM_ID = process.env.NEXT_PUBLIC_BUNNY_LIVE_STREAM_ID;
 const BASE_URL = `https://video.bunnycdn.com/library/${LIBRARY_ID}/videos`;
 // Note: You should configure a Pull Zone in Bunny for optimized delivery.
 // For now we use the direct thumbnail pattern:
-const CDN_HOSTNAME = 'https://pull.b-cdn.net'; // Placeholder, user might need to configure this
+const CDN_HOSTNAME = 'https://vz-dd90f302-e7e.b-cdn.net';
 
 export interface BunnyVideo {
     guid: string;

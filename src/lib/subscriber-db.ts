@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, supabaseAdmin } from './supabase';
 
 export interface Subscriber {
     id: string;
@@ -49,7 +49,7 @@ export async function addSubscriber(
  * Get all subscribers (for admin dashboard)
  */
 export async function getSubscribers(): Promise<Subscriber[]> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('subscribers')
         .select('*')
         .order('created_at', { ascending: false });
@@ -73,7 +73,7 @@ export async function getSubscribers(): Promise<Subscriber[]> {
  * Get subscriber count (for admin stats)
  */
 export async function getSubscriberCount(): Promise<number> {
-    const { count, error } = await supabase
+    const { count, error } = await supabaseAdmin
         .from('subscribers')
         .select('*', { count: 'exact', head: true });
 
@@ -89,7 +89,7 @@ export async function getSubscriberCount(): Promise<number> {
  * Delete a subscriber (admin action or unsubscribe)
  */
 export async function deleteSubscriber(id: string): Promise<boolean> {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('subscribers')
         .delete()
         .eq('id', id);

@@ -1,99 +1,121 @@
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
-import FeatureGrid from "@/components/home/FeatureGrid";
 import Legacy34YearsComponent from "@/components/home/Legacy34Years";
 import { getVideos, parseVideoMetadata } from "@/lib/bunny";
 import VODCard from "@/components/vod/VODCard";
 import Link from "next/link";
-import { ChevronRight, Play } from "lucide-react";
+import { ChevronRight, Flame, BookOpen, Heart } from "lucide-react";
+import Image from "next/image";
 
-export const revalidate = 60; // Revalidate every minute
+export const revalidate = 60;
 
 export default async function Home() {
-  const latestVideos = await getVideos(1, 4);
+  const latestVideos = await getVideos(1, 8);
 
   return (
-    <main className="min-h-screen bg-[var(--bg-deep)] text-white selection:bg-[var(--primary-glow)] selection:text-white">
+    <main className="min-h-screen bg-[var(--bg-deep)]">
       <Navbar />
       <Hero />
 
-      <div className="relative z-20 -mt-20 pb-20 space-y-24">
-        {/* Features Strip (High visibility for older users) */}
-        <FeatureGrid />
+      <div className="relative z-20">
 
-        {/* NÝTT EFNI (Latest Videos) - Replaces the static gap */}
-        <section className="px-6 max-w-7xl mx-auto">
-          <div className="flex items-end justify-between mb-8 border-b border-white/5 pb-4">
-            <h2 className="text-2xl font-bold flex items-center gap-3">
-              <span className="w-1 h-6 bg-[var(--accent-gold)] rounded-full"></span>
-              Nýtt Efni
-            </h2>
-            <Link href="/sermons" className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] hover:text-white transition-colors flex items-center gap-1 group">
-              Sjá Allt <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {latestVideos.map((video, idx) => {
-              const meta = parseVideoMetadata(video);
-              const videoProps = {
-                id: video.guid, // Assuming VODCard uses ID for link construction
-                title: meta.title,
-                preacher: meta.show, // Using show name as preacher/category subtitle
-                duration: Math.floor(video.length / 60).toString(),
-                thumbnail: meta.thumbnail,
-                date: video.date,
-                category: meta.category
-              };
-              return <VODCard key={video.guid} video={videoProps} index={idx} />;
-            })}
-          </div>
-
-          {/* CTA to Sermons */}
-          <div className="mt-8 text-center md:hidden">
-            <Link href="/sermons" className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-full font-bold text-sm hover:bg-[var(--glass-shine)] transition-all">
-              <span>Skoða safnið</span>
-              <Play size={12} fill="currentColor" />
-            </Link>
-          </div>
-        </section>
-
-        {/* Latest Newsletter Teaser - Elegant Card */}
-        <section className="px-6 max-w-7xl mx-auto">
-          <div className="relative overflow-hidden rounded-[var(--radius-lg)] bg-[#fcfbf9] text-gray-900 shadow-2xl">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent-gold)]/10 rounded-bl-full -mr-16 -mt-16" />
-
-            <div className="grid md:grid-cols-[1fr_300px] gap-8 p-8 md:p-12 items-center relative z-10">
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 bg-[var(--accent-gold)] text-black text-xs font-bold uppercase tracking-wider rounded-full">Nýtt</span>
-                  <span className="text-gray-500 text-sm font-medium uppercase tracking-wide">frá Sjónvarpsstöðinni</span>
-                </div>
-                <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4 leading-tight">
-                  Janúarbréf Omega 2026
-                </h2>
-                <p className="text-gray-600 font-serif text-lg leading-relaxed mb-8 line-clamp-3">
-                  Kæri vinur, Ég vil nota þetta tækifæri til að þakka þér af öllu hjarta fyrir allan þann kærleika, bænir og stuðning sem þú hefur sýnt Omega á árinu sem er að líða...
-                </p>
-                <a href="/frettabref" className="inline-flex items-center gap-2 text-black font-bold border-b-2 border-[var(--accent-gold)] pb-1 hover:text-[var(--accent-gold)] transition-colors">
-                  <span>Lesa allt bréfið</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                </a>
-              </div>
-
-              {/* Visual Stamp / Icon */}
-              <div className="hidden md:flex justify-center">
-                <div className="w-32 h-32 rounded-full border-4 border-[var(--accent-gold)]/30 flex items-center justify-center">
-                  <span className="text-4xl font-serif font-bold text-[var(--accent-gold)] opacity-50">ES</span>
-                </div>
-              </div>
+        {/* Content Rows */}
+        {latestVideos.length > 0 && (
+          <section className="py-16 max-w-7xl mx-auto px-6">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold tracking-tight">Nýtt efni</h2>
+              <Link href="/sermons" className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--text-muted)] hover:text-[var(--accent-gold)] transition-colors flex items-center gap-1">
+                Sjá allt <ChevronRight size={14} />
+              </Link>
             </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+              {latestVideos.slice(0, 4).map((video, idx) => {
+                const meta = parseVideoMetadata(video);
+                return (
+                  <VODCard
+                    key={video.guid}
+                    video={{
+                      id: video.guid,
+                      title: meta.title,
+                      preacher: meta.show,
+                      duration: Math.floor(video.length / 60).toString(),
+                      thumbnail: meta.thumbnail,
+                      date: video.date,
+                      category: meta.category
+                    }}
+                    index={idx}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Editorial Cards — Visual, not text-only */}
+        <section className="py-8 max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            {/* Prayer Wall */}
+            <Link href="/baenatorg" className="group relative overflow-hidden aspect-[4/3] flex items-end">
+              <Image
+                src="https://images.unsplash.com/photo-1507692049790-de58290a4334?q=80&w=1200&auto=format&fit=crop"
+                alt="Bæn"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="relative z-10 p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Flame size={14} className="text-[var(--accent-gold)]" />
+                  <span className="text-[var(--accent-gold)] text-[10px] font-semibold uppercase tracking-[0.2em]">Bænatorg</span>
+                </div>
+                <h3 className="text-xl font-bold leading-tight">Samfélag í bæn</h3>
+              </div>
+            </Link>
+
+            {/* Newsletter / Fréttir */}
+            <Link href="/frettabref" className="group relative overflow-hidden aspect-[4/3] flex items-end">
+              <Image
+                src="https://images.unsplash.com/photo-1457369804613-52c61a468e7d?q=80&w=1200&auto=format&fit=crop"
+                alt="Fræðsla"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="relative z-10 p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen size={14} className="text-[var(--accent-gold)]" />
+                  <span className="text-[var(--accent-gold)] text-[10px] font-semibold uppercase tracking-[0.2em]">Fréttabréf</span>
+                </div>
+                <h3 className="text-xl font-bold leading-tight">Nýjasta bréfið</h3>
+              </div>
+            </Link>
+
+            {/* Give / Styrkja */}
+            <Link href="/give" className="group relative overflow-hidden aspect-[4/3] flex items-end">
+              <Image
+                src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1200&auto=format&fit=crop"
+                alt="Styrkja"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="relative z-10 p-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Heart size={14} className="text-[var(--accent-gold)]" />
+                  <span className="text-[var(--accent-gold)] text-[10px] font-semibold uppercase tracking-[0.2em]">Styrkja</span>
+                </div>
+                <h3 className="text-xl font-bold leading-tight">Vertu hluti af þessu</h3>
+              </div>
+            </Link>
+
           </div>
         </section>
 
-        {/* 33 Years Legacy Section */}
-        <Legacy34YearsComponent />
-
+        {/* Legacy */}
+        <div className="mt-16">
+          <Legacy34YearsComponent />
+        </div>
 
       </div>
     </main>

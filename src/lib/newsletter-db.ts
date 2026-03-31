@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, supabaseAdmin } from './supabase';
 
 export interface Newsletter {
     id: string;
@@ -36,7 +36,7 @@ export async function getNewsletters(): Promise<Newsletter[]> {
  * Get all newsletters (for admin dashboard)
  */
 export async function getAllNewsletters(): Promise<Newsletter[]> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('newsletters')
         .select('*')
         .order('published_at', { ascending: false });
@@ -59,7 +59,7 @@ export async function getAllNewsletters(): Promise<Newsletter[]> {
  * Create a new newsletter (admin action)
  */
 export async function createNewsletter(newsletter: Omit<Newsletter, 'id' | 'date'>): Promise<Newsletter | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('newsletters')
         .insert([{
             title: newsletter.title,
@@ -89,7 +89,7 @@ export async function createNewsletter(newsletter: Omit<Newsletter, 'id' | 'date
  * Delete a newsletter (admin action)
  */
 export async function deleteNewsletter(id: string): Promise<boolean> {
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('newsletters')
         .delete()
         .eq('id', id);

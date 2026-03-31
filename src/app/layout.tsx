@@ -16,8 +16,24 @@ const libre = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  title: "Omega TV | Christian Television Network",
-  description: "A State-of-the-Art Digital Sanctuary. Watch Live TV and On-Demand Sermons.",
+  title: {
+    default: "Omega | Kristin sjónvarpsstöð síðan 1992",
+    template: "%s | Omega",
+  },
+  description: "Kristin sjónvarpsstöð á Íslandi síðan 1992. Horfa beint, bænir, fréttabréf og fræðsluefni á íslensku.",
+  metadataBase: new URL("https://omega.is"),
+  openGraph: {
+    type: "website",
+    locale: "is_IS",
+    siteName: "Omega",
+    title: "Omega | Kristin sjónvarpsstöð síðan 1992",
+    description: "Horfa beint, bænir, fréttabréf og fræðsluefni á íslensku.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Omega | Kristin sjónvarpsstöð síðan 1992",
+    description: "Horfa beint, bænir, fréttabréf og fræðsluefni á íslensku.",
+  },
   icons: {
     icon: "/favicon.ico",
   },
@@ -36,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="is">
       <body className={`min-h-screen flex flex-col antialiased selection:bg-[var(--primary-glow)] selection:text-black ${inter.variable} ${libre.variable} font-sans`}>
         <main className="flex-grow">
           {children}

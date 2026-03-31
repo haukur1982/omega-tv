@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Send, Save, Eye } from 'lucide-react';
+import { ArrowLeft, Send, Save, Eye, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useRouter } from 'next/navigation';
@@ -12,14 +12,65 @@ export default function NewNewsletterPage() {
     const [subject, setSubject] = useState('');
     const [content, setContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-    const handleSave = async (status: 'draft' | 'published') => {
+    const handleSave = async () => {
+        if (!title || !content) {
+            setFeedback({ type: 'error', message: 'Titill og innihald vantar' });
+            return;
+        }
         setIsSaving(true);
-        // TODO: Implement save logic
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setIsSaving(false);
-        router.push('/admin/newsletters');
+        setFeedback(null);
+
+        try {
+            const res = await fetch('/api/admin/newsletters', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, subject, content, send: false }),
+            });
+
+            if (!res.ok) throw new Error();
+            setFeedback({ type: 'success', message: 'Fréttabréf vistað!' });
+            setTimeout(() => router.push('/admin/newsletters'), 1000);
+        } catch {
+            setFeedback({ type: 'error', message: 'Villa við vistun' });
+        } finally {
+            setIsSaving(false);
+        }
     };
+
+    const handleSend = async () => {
+        if (!title || !content) {
+            setFeedback({ type: 'error', message: 'Titill og innihald vantar' });
+            return;
+        }
+        if (!confirm('Ertu viss um að þú viljir senda þetta fréttabréf til allra áskrifenda?')) return;
+
+        setIsSending(true);
+        setFeedback(null);
+
+        try {
+            const res = await fetch('/api/admin/newsletters', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, subject, content, send: true }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+
+            const sentCount = data.sent || 0;
+            setFeedback({ type: 'success', message: `Sent til ${sentCount} áskrifenda!` });
+            setTimeout(() => router.push('/admin/newsletters'), 2000);
+        } catch (err: any) {
+            setFeedback({ type: 'error', message: err.message || 'Villa við sendingu' });
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    const isWorking = isSaving || isSending;
 
     return (
         <AdminLayout>
@@ -39,27 +90,36 @@ export default function NewNewsletterPage() {
                         </div>
                     </div>
                     <div className="flex gap-3">
-                        <button className="admin-btn admin-btn-secondary">
-                            <Eye size={18} />
-                            <span>Forskoða</span>
-                        </button>
                         <button
-                            onClick={() => handleSave('draft')}
+                            onClick={handleSave}
                             className="admin-btn admin-btn-secondary"
-                            disabled={isSaving}
+                            disabled={isWorking}
                         >
                             <Save size={18} />
-                            <span>Vista drög</span>
+                            <span>{isSaving ? 'Vista...' : 'Vista drög'}</span>
                         </button>
                         <button
+                            onClick={handleSend}
                             className="admin-btn admin-btn-primary"
-                            disabled={isSaving}
+                            disabled={isWorking}
                         >
                             <Send size={18} />
-                            <span>Senda</span>
+                            <span>{isSending ? 'Sendi...' : 'Senda'}</span>
                         </button>
                     </div>
                 </div>
+
+                {/* Feedback */}
+                {feedback && (
+                    <div className={`flex items-center gap-2 px-4 py-3 rounded-lg mb-6 ${
+                        feedback.type === 'success'
+                            ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                    }`}>
+                        {feedback.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                        {feedback.message}
+                    </div>
+                )}
 
                 {/* Editor Card */}
                 <div className="admin-card space-y-6">
@@ -99,9 +159,6 @@ export default function NewNewsletterPage() {
                             placeholder="Skrifaðu bréfið hér..."
                             className="admin-input min-h-[400px] font-mono text-sm leading-relaxed"
                         />
-                        <p className="text-xs text-[var(--admin-text-muted)] mt-2 text-right">
-                            Markdown stutt
-                        </p>
                     </div>
                 </div>
             </div>

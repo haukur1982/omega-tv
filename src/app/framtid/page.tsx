@@ -3,7 +3,7 @@
 import Navbar from "@/components/layout/Navbar";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { Rocket, Smartphone, Globe, ArrowRight, Heart, Sparkles } from "lucide-react";
+import { Rocket, Smartphone, Globe, Heart } from "lucide-react";
 import Link from "next/link";
 import EmailSignupForm from "@/components/forms/EmailSignupForm";
 import VisionProgress from "@/components/vision/VisionProgress";
@@ -14,21 +14,18 @@ const projects = [
         desc: "Við leggjum alla áherslu á vandað íslenskt efni sem talar til þjóðarinnar. Markmiðið er að bjóða opið safn af þáttum og fræðslu sem eflir trú á okkar eigin tungumáli.",
         icon: Smartphone,
         color: "from-blue-500 to-cyan-500",
-        href: "/framtid/dagskrargerd"
     },
     {
         title: "Nýr Tækjabúnaður",
         desc: "Við fjárfestum í nýrri tækni til að skila boðskapnum með sem bestum hætti. Nýjar myndavélar og lýsing gera okkur kleift að framleiða efni í hæsta gæðaflokki.",
         icon: Globe,
         color: "from-purple-500 to-pink-500",
-        href: "/framtid/taekjabunadur"
     },
     {
         title: "Næsta Kynslóð",
         desc: "Með podcast-stúdíói og samfélagsmiðlum tryggjum við að boðskapurinn berist til nýrrar kynslóðar á þeirra forsendum.",
         icon: Rocket,
         color: "from-amber-500 to-orange-500",
-        href: "/framtid/naesta-kynslod"
     }
 ];
 
@@ -87,33 +84,27 @@ export default function VisionPage() {
             <section id="focus" className="py-32 container mx-auto px-6 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {projects.map((proj, idx) => (
-                        <Link key={idx} href={proj.href || "#"}>
-                            <motion.div
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: idx * 0.2 }}
-                                className="group h-full relative p-8 rounded-[2rem] bg-[var(--bg-surface)] border border-[var(--glass-border)] hover:border-[var(--accent-gold)]/50 transition-all overflow-hidden"
-                            >
-                                <div className={`absolute inset-0 bg-gradient-to-br ${proj.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+                        <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: idx * 0.2 }}
+                            className="group h-full relative p-8 rounded-[2rem] bg-[var(--bg-surface)] border border-[var(--glass-border)] hover:border-[var(--accent-gold)]/50 transition-all overflow-hidden"
+                        >
+                            <div className={`absolute inset-0 bg-gradient-to-br ${proj.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
 
-                                <div className="relative z-10">
-                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${proj.color} flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
-                                        <proj.icon size={28} className="text-white" />
-                                    </div>
-
-                                    <h3 className="text-2xl font-bold mb-4">{proj.title}</h3>
-                                    <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
-                                        {proj.desc}
-                                    </p>
-
-                                    <div className="flex items-center text-[var(--accent-gold)] font-bold group/link cursor-pointer">
-                                        <span className="mr-2">Sjá meira</span>
-                                        <ArrowRight size={16} className="group-hover/link:translate-x-1 transition-transform" />
-                                    </div>
+                            <div className="relative z-10">
+                                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${proj.color} flex items-center justify-center mb-8 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                                    <proj.icon size={28} className="text-white" />
                                 </div>
-                            </motion.div>
-                        </Link>
+
+                                <h3 className="text-2xl font-bold mb-4">{proj.title}</h3>
+                                <p className="text-[var(--text-secondary)] leading-relaxed">
+                                    {proj.desc}
+                                </p>
+                            </div>
+                        </motion.div>
                     ))}
                 </div>
             </section>

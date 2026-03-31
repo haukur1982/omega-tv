@@ -1,41 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  /* Icelandic Kingdom - Fire & Ice Palette */
+  /* Omega — Nordic Authority Palette */
+  --bg-deep: #0a0a10;
+  --bg-surface: #12121a;
+  --bg-elevated: #1a1a24;
 
-  /* Basalt & Ash (Deep, Cool Greys) */
-  --bg-deep: #0B0F19;
-  /* Volcanic Rock */
-  --bg-surface: #151B2B;
-  /* Deep Atlantic */
+  /* The Sacred Gold — warm, luminous, candlelight */
+  --accent-gold: #d4a843;
+  --accent-gold-dim: rgba(212, 168, 67, 0.12);
 
-  /* The Glacial Light (Aurora) */
-  --primary-glow: #2DD4BF;
-  /* Teal/Cyan */
+  /* Text Hierarchy */
+  --text-primary: #f0ece4;
+  --text-secondary: #9a958d;
+  --text-muted: #5a554d;
 
-  /* The Divine Fire (Spirit) */
-  --accent-gold: #F59E0B;
-  /* Burning Amber */
+  /* Subtle warm tone */
+  --accent-blue: #7a7068;
 
-  --text-primary: #F8FAFC;
-  /* Snow White */
-  --text-secondary: #94A3B8;
-  /* Fog Grey */
-  --text-muted: #475569;
+  /* Borders */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-hover: rgba(255, 255, 255, 0.12);
 
-  /* Glassmorphism Tokens */
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-shine: rgba(255, 255, 255, 0.1);
+  /* Legacy aliases for components not yet updated */
+  --primary-glow: var(--accent-gold);
+  --glass-bg: rgba(255, 255, 255, 0.02);
+  --glass-border: var(--border);
+  --glass-shine: var(--border-hover);
 
   /* Typography */
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
-
-  /* Spacing */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
 }
 
 body {
@@ -46,31 +41,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
-/* Scrollbar beautification */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-deep);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--glass-shine);
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }

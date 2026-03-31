@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Tv } from 'lucide-react';
+import { Lock, Tv, Mail } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function AdminLoginPage() {
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -15,13 +17,15 @@ export default function AdminLoginPage() {
         setIsLoading(true);
         setError('');
 
-        // Simple client-side check - in production, use a proper auth system
-        // For now, we'll use a simple password stored in localStorage
-        if (password === 'omega') {
-            localStorage.setItem('omega_admin', 'true');
-            router.push('/admin/dashboard');
+        const { error: authError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (authError) {
+            setError('Rangt netfang eða lykilorð');
         } else {
-            setError('Rangt lykilorð');
+            router.push('/admin/dashboard');
         }
         setIsLoading(false);
     };
@@ -38,15 +42,25 @@ export default function AdminLoginPage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-2xl p-8">
-                    <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-sm font-medium text-[var(--text-secondary)]">
-                                <Lock size={14} className="inline mr-2" />
-                                Lykilorð
-                            </label>
-                            <span className="text-xs text-[var(--accent-gold)] bg-[var(--accent-gold)]/10 px-2 py-1 rounded">Lykilorð: omega</span>
-                        </div>
+                    <div className="mb-4">
+                        <label className="text-sm font-medium text-[var(--text-secondary)] mb-2 flex items-center gap-2">
+                            <Mail size={14} />
+                            Netfang
+                        </label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="admin@omega.is"
+                            className="w-full px-4 py-3 rounded-xl bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent-gold)] focus:outline-none text-white placeholder-white/30"
+                        />
+                    </div>
 
+                    <div className="mb-6">
+                        <label className="text-sm font-medium text-[var(--text-secondary)] mb-2 flex items-center gap-2">
+                            <Lock size={14} />
+                            Lykilorð
+                        </label>
                         <input
                             type="password"
                             value={password}
