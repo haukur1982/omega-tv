@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
+import { verifyAdminSession } from '@/lib/admin-auth';
 
 export async function GET(request: Request) {
+    const auth = await verifyAdminSession(request);
+    if (auth.error) return auth.error;
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('query');
 

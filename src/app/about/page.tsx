@@ -1,6 +1,7 @@
 'use client';
 
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
@@ -47,7 +48,8 @@ export default function AboutPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-8xl font-bold leading-[0.9] tracking-tight mb-6"
+                        className="font-bold leading-[0.9] tracking-tight mb-6"
+                        style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 8vw, 6rem)' }}
                     >
                         Ljós Vonar.
                     </motion.h1>
@@ -69,7 +71,8 @@ export default function AboutPage() {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-2xl md:text-4xl font-bold leading-snug tracking-tight text-[var(--text-primary)]"
+                    className="font-bold leading-snug tracking-tight"
+                    style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', color: 'var(--text-primary)' }}
                 >
                     Eina kristna sjónvarpsstöðin á Íslandi. Stofnuð af trú, rekin af ást, varðveitt af Guði.
                 </motion.p>
@@ -124,7 +127,7 @@ export default function AboutPage() {
             <section className="py-32 border-t border-[var(--border)] bg-[var(--bg-surface)]">
                 <div className="max-w-5xl mx-auto px-6">
                     <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-4">Gildi okkar</p>
-                    <h2 className="text-3xl md:text-5xl font-bold mb-20 tracking-tight leading-tight">
+                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: 'clamp(3rem, 6vw, 5rem)' }} className="font-bold tracking-tight leading-tight">
                         Stoðirnar sem starf<br />okkar hvílir á.
                     </h2>
 
@@ -153,7 +156,7 @@ export default function AboutPage() {
             <section className="py-24">
                 <div className="max-w-6xl mx-auto px-6">
                     <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-4">Söguleg augnablik</p>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-16 tracking-tight">
+                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', marginBottom: 'clamp(2rem, 4vw, 4rem)' }} className="font-bold tracking-tight">
                         Glimt af vegferð okkar.
                     </h2>
 
@@ -194,6 +197,8 @@ export default function AboutPage() {
                     </div>
                 </div>
             </section>
+
+            <Footer />
         </main>
     );
 }

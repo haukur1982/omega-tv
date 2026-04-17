@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 export default function Legacy34YearsComponent() {
     return (
-        <section className="py-32 relative overflow-hidden">
+        <section className="py-20 relative overflow-hidden">
             <div className="max-w-6xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center">
 

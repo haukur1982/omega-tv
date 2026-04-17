@@ -99,7 +99,7 @@ export default function AdminTestimonialsPage() {
                                                     )}
                                                     <span className="flex items-center gap-1">
                                                         <Calendar size={12} />
-                                                        {new Date(item.created_at).toLocaleDateString('is-IS')}
+                                                        {item.created_at ? new Date(item.created_at).toLocaleDateString('is-IS') : ''}
                                                     </span>
                                                 </div>
                                             </div>

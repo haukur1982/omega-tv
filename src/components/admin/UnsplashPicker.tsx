@@ -53,12 +53,12 @@ export default function UnsplashPicker({ onSelect }: UnsplashPickerProps) {
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && searchImages(query)}
                     placeholder="Leita að mynd (t.d. Stormur, Friður)..."
-                    className="flex-1 bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-xl p-3 text-sm focus:border-[var(--accent-gold)] outline-none"
+                    className="flex-1 bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-xl p-3 text-sm focus:border-[var(--accent)] outline-none"
                 />
                 <button
                     onClick={() => searchImages(query)}
                     disabled={isLoading}
-                    className="p-3 bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-xl hover:border-[var(--accent-gold)] transition-colors"
+                    className="p-3 bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-xl hover:border-[var(--accent)] transition-colors"
                 >
                     {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
                 </button>
@@ -69,7 +69,7 @@ export default function UnsplashPicker({ onSelect }: UnsplashPickerProps) {
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={() => searchImages('')}
-                        className="px-3 py-1.5 rounded-lg bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] text-xs font-semibold hover:bg-[var(--accent-gold)]/20 flex items-center gap-1 transition-colors"
+                        className="px-3 py-1.5 rounded-lg bg-[var(--accent)]/10 text-[var(--accent)] text-xs font-semibold hover:bg-[var(--accent)]/20 flex items-center gap-1 transition-colors"
                     >
                         <Shuffle size={12} />
                         Velja handahófskennt
@@ -94,7 +94,7 @@ export default function UnsplashPicker({ onSelect }: UnsplashPickerProps) {
                 {images.map((img) => (
                     <div
                         key={img.id}
-                        className="group relative aspect-[4/5] rounded-lg overflow-hidden cursor-pointer border border-transparent hover:border-[var(--accent-gold)] transition-all bg-[var(--bg-deep)]"
+                        className="group relative aspect-[4/5] rounded-lg overflow-hidden cursor-pointer border border-transparent hover:border-[var(--accent)] transition-all bg-[var(--bg-deep)]"
                         onClick={() => onSelect(img)}
                     >
                         <img

@@ -26,12 +26,15 @@ interface AdminLayoutProps {
 const navItems = [
     { href: '/admin/dashboard', label: 'Yfirlit', icon: LayoutDashboard },
     { href: '/admin/series', label: 'Þáttaraðir', icon: Film },
+    { href: '/admin/videos', label: 'Myndbönd', icon: Film },
+    { href: '/admin/articles', label: 'Greinar', icon: FileText },
     { href: '/admin/prayers', label: 'Bænir', icon: Heart },
+    { href: '/admin/testimonials', label: 'Vitnisburðir', icon: MessageSquare },
     { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
     { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
-    { href: '/admin/videos', label: 'Myndbönd', icon: Film },
-    { href: '/admin/campaigns', label: 'Bænaherferðir', icon: Heart },
+    { href: '/admin/quotes', label: 'Efnisverksmiðja', icon: Quote },
 ];
+
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
     const router = useRouter();

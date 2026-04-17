@@ -19,10 +19,14 @@ export async function GET() {
     // client.ftp.verbose = true; // Enable for debugging
 
     try {
+        const ftpHost = process.env.FTP_SCHEDULE_HOST || '212.30.195.77';
+        const ftpUser = process.env.FTP_SCHEDULE_USER || 'MBLuser';
+        const ftpPassword = process.env.FTP_SCHEDULE_PASSWORD || 'omegaftp21';
+
         await client.access({
-            host: "212.30.195.77",
-            user: "MBLuser",
-            password: "omegaftp21",
+            host: ftpHost,
+            user: ftpUser,
+            password: ftpPassword,
             secure: false
         });
 
@@ -127,7 +131,8 @@ export async function GET() {
 
         const responseData = {
             current: currentProgram || null,
-            next: nextPrograms
+            next: nextPrograms,
+            all: finalSchedule
         };
 
         // Update cache

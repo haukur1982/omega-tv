@@ -44,7 +44,7 @@ export default function VODCard({ video, index }: { video: VideoProps; index: nu
                         scale: isHovered ? 1.05 : 1,
                         y: isHovered ? -10 : 0,
                         boxShadow: isHovered
-                            ? '0 20px 50px rgba(0,0,0,0.5), 0 0 0 2px var(--accent-gold)'
+                            ? '0 20px 50px rgba(0,0,0,0.5), 0 0 0 2px var(--accent)'
                             : '0 0 0 0px transparent'
                     }}
                     transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -79,11 +79,11 @@ export default function VODCard({ video, index }: { video: VideoProps; index: nu
 
                     {/* Info Layer (Always visible but enhanced on hover) */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 transform transition-transform duration-300">
-                        <p className="text-[var(--accent-gold)] text-xs font-bold uppercase tracking-wider mb-1 opacity-80">
+                        <p className="text-[var(--accent)] text-xs font-bold uppercase tracking-wider mb-1 opacity-80">
                             {video.preacher || "Omega TV"}
                         </p>
 
-                        <h3 className="text-white font-bold text-lg leading-tight mb-2 group-hover:text-[var(--accent-gold)] transition-colors line-clamp-3">
+                        <h3 className="text-white font-bold text-lg leading-tight mb-2 group-hover:text-[var(--accent)] transition-colors line-clamp-3">
                             {video.title}
                         </h3>
 

@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllNewsletters, createNewsletter } from '@/lib/newsletter-db';
+import { verifyAdminSession } from '@/lib/admin-auth';
+import { getAllNewsletters, createNewsletter, deleteNewsletter } from '@/lib/newsletter-db';
 import { getSubscribers } from '@/lib/subscriber-db';
 import { sendNewsletter } from '@/lib/email';
 
-export async function GET() {
+export async function GET(request: Request) {
+    const auth = await verifyAdminSession(request);
+    if (auth.error) return auth.error;
+
     try {
         const newsletters = await getAllNewsletters();
         return NextResponse.json(newsletters);
@@ -13,6 +17,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const auth = await verifyAdminSession(req);
+    if (auth.error) return auth.error;
+
     try {
         const { title, subject, content, send } = await req.json();
 
@@ -47,5 +54,18 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(newsletter);
     } catch (error) {
         return NextResponse.json({ error: "Villa við vistun fréttabréfs" }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    const auth = await verifyAdminSession(req);
+    if (auth.error) return auth.error;
+
+    try {
+        const { id } = await req.json();
+        const success = await deleteNewsletter(id);
+        return NextResponse.json({ success });
+    } catch (error) {
+        return NextResponse.json({ error: "Villa við eyðingu" }, { status: 500 });
     }
 }

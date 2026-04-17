@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAdminSession } from '@/lib/admin-auth';
 import { getAllCampaigns, createCampaign } from '@/lib/prayer-db';
 
-export async function GET() {
+export async function GET(request: Request) {
+    const auth = await verifyAdminSession(request);
+    if (auth.error) return auth.error;
+
     try {
         const campaigns = await getAllCampaigns();
         return NextResponse.json(campaigns);
@@ -11,6 +15,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+    const auth = await verifyAdminSession(req);
+    if (auth.error) return auth.error;
+
     try {
         const { title, description, imageUrl, startDate, endDate } = await req.json();
         if (!title || !endDate) {

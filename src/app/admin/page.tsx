@@ -52,7 +52,7 @@ export default function AdminLoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="admin@omega.is"
-                            className="w-full px-4 py-3 rounded-xl bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent-gold)] focus:outline-none text-white placeholder-white/30"
+                            className="w-full px-4 py-3 rounded-xl bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent)] focus:outline-none text-white placeholder-white/30"
                         />
                     </div>
 
@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Sláðu inn lykilorð"
-                            className="w-full px-4 py-3 rounded-xl bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent-gold)] focus:outline-none text-white placeholder-white/30"
+                            className="w-full px-4 py-3 rounded-xl bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent)] focus:outline-none text-white placeholder-white/30"
                         />
                     </div>
 
@@ -77,7 +77,7 @@ export default function AdminLoginPage() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full py-4 rounded-xl bg-[var(--accent-gold)] text-black font-bold hover:brightness-110 transition-all disabled:opacity-50"
+                        className="w-full py-4 rounded-xl bg-[var(--accent)] text-white font-bold hover:brightness-110 transition-all disabled:opacity-50"
                     >
                         {isLoading ? 'Skrái inn...' : 'Innskrá'}
                     </button>

@@ -21,10 +21,10 @@
     --admin-text-secondary: #a1a1aa;
     --admin-text-muted: #52525b;
 
-    /* Accent - Warm Gold */
-    --admin-accent: #d4af37;
-    --admin-accent-hover: #e5c158;
-    --admin-accent-subtle: rgba(212, 175, 55, 0.1);
+    /* Accent - Nordic Blue */
+    --admin-accent: #5b8abf;
+    --admin-accent-hover: #7aa3d4;
+    --admin-accent-subtle: rgba(91, 138, 191, 0.1);
 
     /* Semantic */
     --admin-success: #22c55e;
@@ -130,7 +130,7 @@
 
 .admin-btn-primary {
     background: var(--admin-accent);
-    color: #000;
+    color: #fff;
 }
 
 .admin-btn-primary:hover {

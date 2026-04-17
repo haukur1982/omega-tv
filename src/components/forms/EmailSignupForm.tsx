@@ -60,7 +60,7 @@ export default function EmailSignupForm({
                     type="text"
                     name="name"
                     placeholder="Nafn (valkvætt)"
-                    className="flex-1 px-6 py-4 rounded-full bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent-gold)] focus:outline-none text-white placeholder-white/30 transition-colors"
+                    className="flex-1 px-6 py-4 rounded-full bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent)] focus:outline-none text-white placeholder-white/30 transition-colors"
                 />
             )}
             <input
@@ -68,12 +68,12 @@ export default function EmailSignupForm({
                 name="email"
                 placeholder={placeholder}
                 required
-                className={`flex-1 px-6 py-4 ${isInline ? 'rounded-full' : 'rounded-lg'} bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent-gold)] focus:outline-none text-white placeholder-white/30 transition-colors`}
+                className={`flex-1 px-6 py-4 ${isInline ? 'rounded-full' : 'rounded-lg'} bg-[var(--bg-deep)] border border-[var(--glass-border)] focus:border-[var(--accent)] focus:outline-none text-white placeholder-white/30 transition-colors`}
             />
             <button
                 type="submit"
                 disabled={isPending}
-                className={`px-8 py-4 ${isInline ? 'rounded-full' : 'rounded-lg'} bg-[var(--accent-gold)] text-black font-bold hover:scale-105 transition-transform shadow-[0_0_20px_var(--accent-gold)] hover:shadow-[0_0_40px_var(--accent-gold)] disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`px-8 py-4 ${isInline ? 'rounded-full' : 'rounded-lg'} bg-[var(--accent)] text-white font-bold hover:scale-105 transition-transform shadow-[0_0_20px_var(--accent)] hover:shadow-[0_0_40px_var(--accent)] disabled:opacity-50 disabled:cursor-not-allowed`}
             >
                 {isPending ? 'Skrái...' : buttonText}
             </button>

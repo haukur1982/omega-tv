@@ -41,13 +41,13 @@ export default function PrayerCard({ prayer, index }: { prayer: PrayerProps; ind
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={`relative p-6 rounded-[var(--radius-lg)] border transition-all duration-300 ${prayer.isAnswered
-                ? 'bg-[var(--bg-surface)] border-[var(--accent-gold)] shadow-[0_0_20px_rgba(245,158,11,0.1)]'
+                ? 'bg-[var(--bg-surface)] border-[var(--accent)] shadow-[0_0_20px_rgba(91,138,191,0.15)]'
                 : 'bg-[var(--glass-bg)] border-[var(--glass-border)] hover:border-[var(--glass-shine)]'
                 }`}
         >
             {/* Answered Badge */}
             {prayer.isAnswered && (
-                <div className="absolute -top-3 -right-3 bg-[var(--accent-gold)] text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                <div className="absolute -top-3 -right-3 bg-[var(--accent)] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                     BÆNHEYRSLA
                 </div>
             )}
@@ -55,7 +55,7 @@ export default function PrayerCard({ prayer, index }: { prayer: PrayerProps; ind
             {/* Header */}
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${prayer.isAnswered ? 'bg-[var(--accent-gold)]/20 text-[var(--accent-gold)]' : 'bg-white/10 text-white'
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${prayer.isAnswered ? 'bg-[var(--accent)]/20 text-[var(--accent)]' : 'bg-white/10 text-white'
                         }`}>
                         {prayer.name.charAt(0)}
                     </div>
@@ -77,11 +77,11 @@ export default function PrayerCard({ prayer, index }: { prayer: PrayerProps; ind
                     onClick={handlePray}
                     disabled={hasPrayed}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${hasPrayed
-                        ? 'bg-[var(--accent-gold)] text-black font-bold'
+                        ? 'bg-[var(--accent)] text-white font-bold'
                         : 'bg-white/5 hover:bg-white/10 text-white'
                         }`}
                 >
-                    <Hand size={18} className={hasPrayed ? "fill-black" : ""} />
+                    <Hand size={18} className={hasPrayed ? "fill-white" : ""} />
                     <span>{hasPrayed ? 'Bæn Beðin' : 'Biðja'}</span>
                     <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${hasPrayed ? 'bg-black/20' : 'bg-white/10'}`}>
                         {count}
@@ -102,7 +102,7 @@ export default function PrayerCard({ prayer, index }: { prayer: PrayerProps; ind
                         exit={{ opacity: 0 }}
                         className="absolute top-1/2 left-1/2 pointer-events-none"
                     >
-                        <Heart size={100} className="text-[var(--accent-gold)]" fill="currentColor" />
+                        <Heart size={100} className="text-[var(--accent)]" fill="currentColor" />
                     </motion.div>
                 )}
             </AnimatePresence>

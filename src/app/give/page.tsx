@@ -1,30 +1,58 @@
 'use client';
 
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import { ShieldCheck } from "lucide-react";
+
+// Inline SVG icons
+const ShieldIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9,12 12,15 16,10"/>
+  </svg>
+);
+
+const HeartIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+  </svg>
+);
+
+const TvIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17,2 12,7 7,2"/>
+  </svg>
+);
+
+const UsersIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
 
 export default function GivePage() {
     return (
         <main className="min-h-screen bg-[var(--bg-deep)] overflow-hidden">
             <Navbar />
 
-            {/* Hero — Cinematic with Icelandic imagery */}
-            <div className="relative min-h-[85vh] flex items-center justify-center px-6 overflow-hidden">
-                {/* Background image */}
+            {/* ═══════════════════════════════════════════════════════════
+                HERO — Cinematic with Icelandic northern lights
+                ═══════════════════════════════════════════════════════════ */}
+            <div className="relative min-h-[90vh] flex items-center justify-center px-6 overflow-hidden">
                 <img
                     src="https://images.unsplash.com/photo-1531366936337-7c912a4589a7?q=80&w=2600&auto=format&fit=crop"
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover"
+                    style={{ willChange: 'transform' }}
                 />
-                <div className="absolute inset-0 bg-[var(--bg-deep)]/75" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-deep)] via-transparent to-[var(--bg-deep)]/40" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--bg-deep) 0%, rgba(12,10,8,0.7) 40%, rgba(12,10,8,0.4) 100%)' }} />
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center bottom, rgba(91,138,191,0.08) 0%, transparent 70%)' }} />
 
                 <div className="relative z-10 max-w-4xl text-center">
                     <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-10"
+                        className="text-xs font-semibold uppercase tracking-[0.25em] mb-10"
+                        style={{ color: 'var(--accent)' }}
                     >
                         Styrkja Omega
                     </motion.p>
@@ -32,7 +60,8 @@ export default function GivePage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-8xl lg:text-9xl font-bold leading-[0.85] tracking-tight mb-10"
+                        className="font-bold leading-[0.85] tracking-tight mb-10"
+                        style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 10vw, 7rem)' }}
                     >
                         Fjárfestu í<br />Eilífðinni.
                     </motion.h1>
@@ -40,16 +69,29 @@ export default function GivePage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 }}
-                        className="text-lg md:text-xl text-[var(--text-secondary)] leading-relaxed max-w-2xl mx-auto"
+                        className="leading-relaxed max-w-2xl mx-auto"
+                        style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'var(--text-secondary)', textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}
                     >
                         Vertu hluti af því að bera ljós vonarinnar til íslensku þjóðarinnar.
                         Saman erum við rödd fagnaðarerindisins á Íslandi.
                     </motion.p>
+
+                    {/* Scroll indicator */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.5, y: [0, 8, 0] }}
+                        transition={{ delay: 1, y: { repeat: Infinity, duration: 2 } }}
+                        className="mt-16"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><polyline points="6,9 12,15 18,9"/></svg>
+                    </motion.div>
                 </div>
             </div>
 
-            {/* Impact — What your gift does */}
-            <section className="py-24 border-t border-[var(--border)]">
+            {/* ═══════════════════════════════════════════════════════════
+                IMPACT STATS — What your gift does
+                ═══════════════════════════════════════════════════════════ */}
+            <section style={{ borderTop: '1px solid var(--border)', padding: 'clamp(4rem, 8vw, 6rem) 0' }}>
                 <div className="max-w-5xl mx-auto px-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-16 text-center">
                         <motion.div
@@ -57,8 +99,8 @@ export default function GivePage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                         >
-                            <p className="text-5xl md:text-6xl font-bold mb-4">34</p>
-                            <p className="text-sm text-[var(--text-secondary)] uppercase tracking-[0.15em]">Ár á lofti</p>
+                            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 6vw, 4rem)', fontWeight: 700, marginBottom: '0.5rem' }}>34</p>
+                            <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600 }}>Ár á lofti</p>
                         </motion.div>
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -66,8 +108,8 @@ export default function GivePage() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
                         >
-                            <p className="text-5xl md:text-6xl font-bold mb-4">24/7</p>
-                            <p className="text-sm text-[var(--text-secondary)] uppercase tracking-[0.15em]">Útsending</p>
+                            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 6vw, 4rem)', fontWeight: 700, marginBottom: '0.5rem' }}>24/7</p>
+                            <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600 }}>Útsending</p>
                         </motion.div>
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
@@ -75,38 +117,102 @@ export default function GivePage() {
                             viewport={{ once: true }}
                             transition={{ delay: 0.2 }}
                         >
-                            <p className="text-5xl md:text-6xl font-bold mb-4">1</p>
-                            <p className="text-sm text-[var(--text-secondary)] uppercase tracking-[0.15em]">Þjóð</p>
+                            <p style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 6vw, 4rem)', fontWeight: 700, marginBottom: '0.5rem' }}>1</p>
+                            <p style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600 }}>Þjóð</p>
                         </motion.div>
                     </div>
                 </div>
             </section>
 
-            {/* Emotional pull */}
-            <section className="py-32">
+            {/* ═══════════════════════════════════════════════════════════
+                IMPACT AREAS — Where your money goes
+                ═══════════════════════════════════════════════════════════ */}
+            <section style={{ padding: 'clamp(3rem, 6vw, 5rem) 0', borderTop: '1px solid var(--border)' }}>
+                <div className="max-w-5xl mx-auto px-6">
+                    <p style={{ color: 'var(--accent)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', textAlign: 'center', marginBottom: '1rem' }}>
+                        Hvert fer stuðningurinn?
+                    </p>
+                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', fontWeight: 700, textAlign: 'center', marginBottom: 'clamp(2rem, 4vw, 3.5rem)', letterSpacing: '-0.02em' }}>
+                        Hver króna skiptir máli.
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[
+                            { icon: <TvIcon />, title: 'Dagleg útsending', desc: 'Framleiðsla og útsending 24/7 sjónvarpsefnis sem nær til allra Íslendinga.' },
+                            { icon: <HeartIcon />, title: 'Nýtt efni', desc: 'Innlend efnisgerð — námskeið, viðtöl, heimildamyndir og uppbyggilegt efni. ' },
+                            { icon: <UsersIcon />, title: 'Samfélag', desc: 'Bænatorg, fréttabréf, og samfélagsverkefni sem styrkja fólk um allt land.' },
+                        ].map((item, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: i * 0.1 }}
+                                style={{
+                                    padding: '2rem',
+                                    borderRadius: '12px',
+                                    background: 'var(--bg-surface)',
+                                    border: '1px solid var(--border)',
+                                    textAlign: 'center',
+                                }}
+                            >
+                                <div style={{ color: 'var(--accent)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>{item.icon}</div>
+                                <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.75rem' }}>{item.title}</h3>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{item.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════════════════════
+                QUOTE — Emotional pull
+                ═══════════════════════════════════════════════════════════ */}
+            <section style={{ padding: 'clamp(4rem, 8vw, 6rem) 0' }}>
                 <div className="max-w-3xl mx-auto px-6 text-center">
-                    <motion.p
+                    <motion.blockquote
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="text-2xl md:text-3xl font-bold leading-relaxed tracking-tight"
+                        style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: 'clamp(1.3rem, 3vw, 1.75rem)',
+                            fontWeight: 500,
+                            lineHeight: 1.6,
+                            fontStyle: 'italic',
+                            color: 'var(--text-primary)',
+                            margin: 0,
+                        }}
                     >
-                        "Það er forréttindi að búa á Íslandi. Saman getum við borið ljós vonarinnar
-                        inn á hvert heimili í landinu. Þetta er okkar kall — og það er fagnaðarefni."
-                    </motion.p>
-                    <p className="text-[var(--text-muted)] mt-6 text-sm italic">
+                        &ldquo;Það er forréttindi að búa á Íslandi. Saman getum við borið ljós vonarinnar
+                        inn á hvert heimili í landinu. Þetta er okkar kall — og það er fagnaðarefni.&rdquo;
+                    </motion.blockquote>
+                    <p style={{ color: 'var(--text-muted)', marginTop: '1.5rem', fontSize: '0.8rem', fontStyle: 'italic' }}>
                         — Omega Stöðin
                     </p>
                 </div>
             </section>
 
-            {/* How to give */}
-            <section className="py-24 border-t border-[var(--border)] bg-[var(--bg-surface)]">
+            {/* ═══════════════════════════════════════════════════════════
+                HOW TO GIVE — Aur + Bank Transfer
+                ═══════════════════════════════════════════════════════════ */}
+            <section style={{
+                padding: 'clamp(4rem, 8vw, 6rem) 0',
+                borderTop: '1px solid var(--border)',
+                background: 'var(--bg-surface)',
+            }}>
                 <div className="max-w-4xl mx-auto px-6">
-                    <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-4 text-center">
+                    <p style={{ color: 'var(--accent)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', textAlign: 'center', marginBottom: '1rem' }}>
                         Hvernig á að styrkja
                     </p>
-                    <h2 className="text-3xl md:text-5xl font-bold mb-20 tracking-tight text-center">
+                    <h2 style={{
+                        fontFamily: 'var(--font-serif)',
+                        fontSize: 'clamp(2rem, 5vw, 3rem)',
+                        fontWeight: 700,
+                        textAlign: 'center',
+                        marginBottom: 'clamp(3rem, 6vw, 5rem)',
+                        letterSpacing: '-0.02em',
+                    }}>
                         Tvær leiðir.
                     </h2>
 
@@ -119,22 +225,38 @@ export default function GivePage() {
                             viewport={{ once: true }}
                             className="text-center"
                         >
-                            <span className="text-[var(--accent)] text-xs font-semibold tracking-[0.15em] block mb-6">01</span>
-                            <h3 className="text-2xl font-bold mb-4">Aur</h3>
-                            <p className="text-[var(--text-secondary)] text-sm mb-8">Einfaldasta leiðin. Opnaðu Aur appið og sendu á:</p>
+                            <span style={{ color: 'var(--accent)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', display: 'block', marginBottom: '1.5rem' }}>01</span>
+                            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>Aur</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+                                Einfaldasta leiðin. Opnaðu Aur appið og sendu á:
+                            </p>
 
                             <motion.a
                                 href="aur://pay?t=6308901019"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                className="inline-block w-full max-w-xs py-5 bg-[#E53E3E] text-white text-center font-bold text-lg transition-all"
+                                style={{
+                                    display: 'inline-block',
+                                    width: '100%',
+                                    maxWidth: '280px',
+                                    padding: '18px 0',
+                                    background: '#E53E3E',
+                                    color: 'white',
+                                    textAlign: 'center',
+                                    fontWeight: 700,
+                                    fontSize: '1.1rem',
+                                    borderRadius: '10px',
+                                    textDecoration: 'none',
+                                    transition: 'box-shadow 0.3s ease',
+                                    boxShadow: '0 8px 30px rgba(229,62,62,0.25)',
+                                }}
                             >
-                                <span className="font-extrabold italic mr-2">aur</span>
+                                <span style={{ fontWeight: 900, fontStyle: 'italic', marginRight: '6px' }}>aur</span>
                                 @Omega
                             </motion.a>
                         </motion.div>
 
-                        {/* Bank */}
+                        {/* Bank Transfer */}
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -142,19 +264,21 @@ export default function GivePage() {
                             transition={{ delay: 0.1 }}
                             className="text-center"
                         >
-                            <span className="text-[var(--accent)] text-xs font-semibold tracking-[0.15em] block mb-6">02</span>
-                            <h3 className="text-2xl font-bold mb-4">Millifærsla</h3>
-                            <p className="text-[var(--text-secondary)] text-sm mb-8">Styrktu boðskapinn með millifærslu — sérhver króna skiptir máli.</p>
+                            <span style={{ color: 'var(--accent)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.15em', display: 'block', marginBottom: '1.5rem' }}>02</span>
+                            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>Millifærsla</h3>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+                                Styrktu boðskapinn með millifærslu — sérhver króna skiptir máli.
+                            </p>
 
-                            <div className="space-y-5 text-left max-w-xs mx-auto">
-                                <div>
-                                    <p className="text-[var(--text-muted)] text-xs uppercase tracking-[0.15em] mb-1">Reikningsnúmer</p>
-                                    <p className="font-mono font-bold text-xl tracking-wider select-all">0113–26–25707</p>
+                            <div style={{ maxWidth: '260px', margin: '0 auto', textAlign: 'left' }}>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '4px', fontWeight: 600 }}>Reikningsnúmer</p>
+                                    <p style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '1.25rem', letterSpacing: '0.05em' }} className="select-all">0113–26–25707</p>
                                 </div>
-                                <div className="w-full h-px bg-[var(--border)]" />
+                                <div style={{ width: '100%', height: '1px', background: 'var(--border)', margin: '0.75rem 0' }} />
                                 <div>
-                                    <p className="text-[var(--text-muted)] text-xs uppercase tracking-[0.15em] mb-1">Kennitala</p>
-                                    <p className="font-mono font-bold text-xl tracking-wider select-all">630890–1019</p>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: '4px', fontWeight: 600 }}>Kennitala</p>
+                                    <p style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '1.25rem', letterSpacing: '0.05em' }} className="select-all">630890–1019</p>
                                 </div>
                             </div>
                         </motion.div>
@@ -162,17 +286,21 @@ export default function GivePage() {
                 </div>
             </section>
 
-            {/* Trust footer */}
-            <section className="py-16 border-t border-[var(--border)]">
-                <div className="flex flex-col md:flex-row items-center justify-center gap-8 text-[var(--text-muted)] text-sm">
-                    <div className="flex items-center gap-2">
-                        <ShieldCheck size={16} />
+            {/* ═══════════════════════════════════════════════════════════
+                TRUST FOOTER
+                ═══════════════════════════════════════════════════════════ */}
+            <section style={{ padding: '2.5rem 0', borderTop: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', gap: '2rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <ShieldIcon />
                         <span>Frjáls félagasamtök</span>
                     </div>
-                    <div className="hidden md:block w-px h-4 bg-[var(--border)]" />
+                    <div style={{ width: '1px', height: '16px', background: 'var(--border)' }} className="hidden md:block" />
                     <div>Skattfrádráttarbært</div>
                 </div>
             </section>
+
+            <Footer />
         </main>
     );
 }

@@ -32,7 +32,7 @@ const THEMES = [
         overlayColor: '#000000',
         overlayOpacity: 0.5,
         textColor: '#ffffff',
-        accentColor: '#fcd34d' // Gold
+        accentColor: '#93c5fd' // Nordic Blue light
     },
     {
         id: 'highlands',
@@ -236,43 +236,35 @@ export default function QuoteGeneratorPage() {
             const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
             if (!blob) throw new Error("Canvas could not export");
 
-            // 2. Upload to Supabase Storage
+            // 2. Upload to Supabase Storage (optional — download works without DB)
             const filename = `quote-${Date.now()}.png`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('quotes')
-                .upload(filename, blob);
-
-            if (uploadError) {
-                // Try fallback bucket 'images' if 'quotes' fails
-                console.warn("Quotes bucket failed, trying images...", uploadError);
-                const { error: fallbackError } = await supabase.storage
-                    .from('images')
-                    .upload(`quotes/${filename}`, blob);
-
-                if (fallbackError) throw fallbackError;
+            try {
+                await supabase.storage
+                    .from('quotes')
+                    .upload(filename, blob);
+            } catch (storageErr) {
+                // Storage upload is optional — the main value is the DB record + download
+                console.warn("Storage upload skipped:", storageErr);
             }
 
-            // 3. Get Public URL
-            // Determine which bucket worked
-            const bucket = uploadError ? 'images' : 'quotes';
-            const path = uploadError ? `quotes/${filename}` : filename;
-
-            const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path);
-
-            // 4. Save to Database
+            // 3. Save quote text + reference to database
+            // Schema: quotes(id, text, author, reference, is_active, created_at)
             const { error: dbError } = await supabase
                 .from('quotes')
                 .insert({
-                    content: text,
-                    author: reference,
-                    image_url: publicUrl,
-                    theme: activeThemeId,
-                    status: 'published'
+                    text: text,
+                    author: activeTheme.font, // Track which style was used
+                    reference: reference,
+                    is_active: true,
                 });
 
-            if (dbError) throw dbError;
-
-            alert("Mynd vistuð í gagnagrunn!");
+            if (dbError) {
+                console.error("DB save error:", dbError);
+                // Still show success if the image was generated — that's the primary value
+                alert("Mynd búin til! (Gagnagrunnsvistun mistókst — athugaðu console)");
+            } else {
+                alert("Mynd vistuð í gagnagrunn!");
+            }
 
         } catch (e) {
             console.error("Save failed:", e);
@@ -295,20 +287,20 @@ export default function QuoteGeneratorPage() {
                     {/* Text Input Block */}
                     <div className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--glass-border)] space-y-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <Type size={18} className="text-[var(--accent-gold)]" />
+                            <Type size={18} className="text-[var(--accent)]" />
                             <h3 className="font-bold">Texti & Vers</h3>
                         </div>
                         <textarea
                             value={text}
                             onChange={(e) => setText(e.target.value)}
-                            className="w-full bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-xl p-3 text-lg focus:border-[var(--accent-gold)] outline-none min-h-[120px]"
+                            className="w-full bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-xl p-3 text-lg focus:border-[var(--accent)] outline-none min-h-[120px]"
                             placeholder="Skrifaðu textann hér..."
                         />
                         <input
                             type="text"
                             value={reference}
                             onChange={(e) => setReference(e.target.value)}
-                            className="w-full bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-xl p-3 font-medium focus:border-[var(--accent-gold)] outline-none"
+                            className="w-full bg-[var(--bg-deep)] border border-[var(--glass-border)] rounded-xl p-3 font-medium focus:border-[var(--accent)] outline-none"
                             placeholder="Tilvísun (t.d. Sálmarnir 23:1)"
                         />
                     </div>
@@ -317,7 +309,7 @@ export default function QuoteGeneratorPage() {
                     <div className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--glass-border)] space-y-4">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                                <ImageIcon size={18} className="text-[var(--accent-gold)]" />
+                                <ImageIcon size={18} className="text-[var(--accent)]" />
                                 <h3 className="font-bold">Bakgrunnur</h3>
                             </div>
                             <div className="flex bg-[var(--bg-deep)] p-1 rounded-lg">
@@ -346,7 +338,7 @@ export default function QuoteGeneratorPage() {
                                             setOverlayOpacity(theme.overlayOpacity);
                                             setUnsplashImage(null); // Clear unsplash
                                         }}
-                                        className={`relative h-24 rounded-xl overflow-hidden border-2 transition-all group ${activeThemeId === theme.id && !unsplashImage ? 'border-[var(--accent-gold)] ring-2 ring-[var(--accent-gold)]/30' : 'border-transparent hover:border-white/20'
+                                        className={`relative h-24 rounded-xl overflow-hidden border-2 transition-all group ${activeThemeId === theme.id && !unsplashImage ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30' : 'border-transparent hover:border-white/20'
                                             }`}
                                     >
                                         <img src={theme.image} className="absolute inset-0 w-full h-full object-cover" />
@@ -355,7 +347,7 @@ export default function QuoteGeneratorPage() {
                                             {theme.name}
                                         </span>
                                         {activeThemeId === theme.id && !unsplashImage && (
-                                            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[var(--accent-gold)] shadow-[0_0_10px_var(--accent-gold)]" />
+                                            <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-[var(--accent)] shadow-[0_0_10px_var(--accent)]" />
                                         )}
                                     </button>
                                 ))}
@@ -379,7 +371,7 @@ export default function QuoteGeneratorPage() {
                     {/* Fine Tuning */}
                     <div className="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--glass-border)] space-y-4">
                         <div className="flex items-center gap-2 mb-2">
-                            <Sliders size={18} className="text-[var(--accent-gold)]" />
+                            <Sliders size={18} className="text-[var(--accent)]" />
                             <h3 className="font-bold">Fínstilling</h3>
                         </div>
 
@@ -390,7 +382,7 @@ export default function QuoteGeneratorPage() {
                                 min="0" max="0.9" step="0.05"
                                 value={overlayOpacity}
                                 onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
-                                className="w-full accent-[var(--accent-gold)]"
+                                className="w-full accent-[var(--accent)]"
                             />
                         </div>
 
@@ -422,7 +414,7 @@ export default function QuoteGeneratorPage() {
                         <button
                             onClick={handleSave}
                             disabled={isSaving}
-                            className="flex-1 py-4 bg-[var(--accent-gold)] text-black font-bold rounded-xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 py-4 bg-[var(--accent)] text-white font-bold rounded-xl hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(91,138,191,0.25)] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isSaving ? <RefreshCw size={20} className="animate-spin" /> : <Save size={20} />}
                             {isSaving ? 'Vistar...' : 'Vista'}

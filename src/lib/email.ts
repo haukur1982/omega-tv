@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 'placeholder');
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Omega TV <onboarding@resend.dev>';
 
 // Email templates
 const WELCOME_EMAIL = {
@@ -19,7 +20,7 @@ const WELCOME_EMAIL = {
                 <table width="600" cellpadding="0" cellspacing="0" style="background-color: #12121a; border-radius: 16px; overflow: hidden;">
                     <!-- Header -->
                     <tr>
-                        <td style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 40px; text-align: center;">
+                        <td style="background: linear-gradient(135deg, #4a7ab5, #5b8abf); padding: 40px; text-align: center;">
                             <h1 style="color: white; margin: 0; font-size: 32px; font-weight: bold;">Ω OMEGA</h1>
                             <p style="color: rgba(255,255,255,0.8); margin: 10px 0 0 0; font-size: 14px;">Sjónvarpsstöðin síðan 1992</p>
                         </td>
@@ -48,7 +49,7 @@ const WELCOME_EMAIL = {
                             <table width="100%" cellpadding="0" cellspacing="0">
                                 <tr>
                                     <td align="center" style="padding: 20px 0;">
-                                        <a href="https://omega.is/baenatorg" style="display: inline-block; background: linear-gradient(135deg, #d4af37, #f4d03f); color: #000; text-decoration: none; padding: 16px 32px; border-radius: 50px; font-weight: bold; font-size: 16px;">
+                                        <a href="https://omega.is/baenatorg" style="display: inline-block; background: linear-gradient(135deg, #4a7ab5, #7aa3d4); color: #fff; text-decoration: none; padding: 16px 32px; border-radius: 50px; font-weight: bold; font-size: 16px;">
                                             Sendu okkur bænabeiðni
                                         </a>
                                     </td>
@@ -58,7 +59,7 @@ const WELCOME_EMAIL = {
                             <p style="color: #a1a1aa; font-size: 16px; line-height: 1.6; margin: 30px 0 0 0;">
                                 <em>"Sá sem hóf gott verk í yður mun fullkomna það allt til dags Krists Jesú."</em>
                                 <br>
-                                <span style="color: #6366f1;">— Filippíbréfið 1:6</span>
+                                <span style="color: #5b8abf;">— Filippíbréfið 1:6</span>
                             </p>
                         </td>
                     </tr>
@@ -89,7 +90,7 @@ const WELCOME_EMAIL = {
 export async function sendWelcomeEmail(to: string, name?: string): Promise<{ success: boolean; error?: string }> {
     try {
         const { error } = await resend.emails.send({
-            from: 'Omega TV <onboarding@resend.dev>', // Change to omega.is when domain is verified
+            from: FROM_EMAIL,
             to: to,
             subject: WELCOME_EMAIL.subject,
             html: WELCOME_EMAIL.getHtml(name)
@@ -123,7 +124,7 @@ export async function sendNewsletter(
     for (const to of recipients) {
         try {
             const { error } = await resend.emails.send({
-                from: 'Omega TV <onboarding@resend.dev>', // Change to omega.is when domain is verified
+                from: FROM_EMAIL,
                 to: to,
                 subject: subject,
                 html: `
@@ -139,7 +140,7 @@ export async function sendNewsletter(
             <td align="center">
                 <table width="600" cellpadding="0" cellspacing="0" style="background-color: #12121a; border-radius: 16px; overflow: hidden;">
                     <tr>
-                        <td style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 30px; text-align: center;">
+                        <td style="background: linear-gradient(135deg, #4a7ab5, #5b8abf); padding: 30px; text-align: center;">
                             <h1 style="color: white; margin: 0; font-size: 24px;">Ω OMEGA</h1>
                         </td>
                     </tr>

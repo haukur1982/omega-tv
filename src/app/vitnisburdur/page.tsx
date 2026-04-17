@@ -1,62 +1,109 @@
 import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import TestimonialForm from '@/components/forms/TestimonialForm';
-import { Quote, User, Calendar } from 'lucide-react';
 import { getTestimonials } from '@/lib/testimonials-db';
 
-export const revalidate = 0; // Ensure fresh data on every request
+export const revalidate = 0;
+
+// Inline SVG icons
+const QuoteIcon = ({ size = 32, className = '' }: { size?: number; className?: string }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/>
+        <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3z"/>
+    </svg>
+);
+
+const UserIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+);
+
+const CalendarIcon = () => (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+);
 
 export default async function TestimonialPage() {
     const testimonials = await getTestimonials();
 
     return (
-        <div className="min-h-screen bg-[var(--bg-deep)] text-white pb-20">
+        <main style={{ minHeight: '100vh', backgroundColor: 'var(--bg-deep)', color: 'white' }}>
             <Navbar />
 
-            <main className="container mx-auto px-6 pt-32 max-w-4xl">
-                <div className="text-center mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] mb-6 ring-1 ring-[var(--accent-gold)]/30">
-                        <Quote size={32} />
+            {/* ═══════════════════════════════════════════════════════════
+                HERO
+                ═══════════════════════════════════════════════════════════ */}
+            <div style={{ maxWidth: '48rem', margin: '0 auto', padding: 'clamp(10rem, 18vh, 14rem) 1.5rem 3rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                    <div style={{
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                        width: '64px', height: '64px', borderRadius: '50%',
+                        background: 'rgba(91,138,191,0.1)', color: 'var(--accent)',
+                        border: '1px solid rgba(91,138,191,0.2)', marginBottom: '1.5rem',
+                    }}>
+                        <QuoteIcon size={28} />
                     </div>
-                    <h1 className="text-4xl font-bold mb-4 font-serif">Deildu þinni sögu</h1>
-                    <p className="text-[var(--text-secondary)] text-lg leading-relaxed max-w-2xl mx-auto">
+                    <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 700, marginBottom: '1rem', letterSpacing: '-0.02em' }}>
+                        Deildu þinni sögu
+                    </h1>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1rem, 2vw, 1.15rem)', lineHeight: 1.6, maxWidth: '32rem', margin: '0 auto' }}>
                         Vitnisburður þinn getur uppörvað og styrkt trú annarra.
                         Við fögnum hverri sögu um Guðs verk í lífi fólks.
                     </p>
                 </div>
 
-                <div className="bg-[var(--bg-surface)] border border-[var(--glass-border)] rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 mb-20">
-                    {/* Decorative Background Elements */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent-gold)]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
-                    <div className="relative z-10">
-                        <TestimonialForm />
-                    </div>
+                {/* Submission Form */}
+                <div style={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '14px',
+                    padding: 'clamp(1.5rem, 3vw, 2.5rem)',
+                    position: 'relative', overflow: 'hidden',
+                    marginBottom: 'clamp(3rem, 6vw, 5rem)',
+                }}>
+                    <TestimonialForm />
                 </div>
 
-                {/* Approved Testimonials Section */}
+                {/* Approved Testimonials */}
                 {testimonials && testimonials.length > 0 && (
-                    <div className="animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
-                        <h2 className="text-2xl font-bold mb-8 text-center">Nýlegir vitnisburðir</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 700, textAlign: 'center', marginBottom: '2rem' }}>
+                            Nýlegir vitnisburðir
+                        </h2>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
                             {testimonials.map((t) => (
-                                <div key={t.id} className="bg-[var(--bg-surface)] border border-[var(--glass-border)] p-6 rounded-xl hover:border-[var(--accent-gold)]/30 transition-colors">
-                                    <div className="flex items-start gap-4 mb-4">
-                                        <div className="w-10 h-10 rounded-full bg-[var(--bg-deep)] border border-[var(--glass-border)] flex items-center justify-center text-[var(--accent-gold)] shrink-0">
-                                            <User size={20} />
+                                <div key={t.id} style={{
+                                    background: 'var(--bg-surface)',
+                                    border: '1px solid var(--border)',
+                                    padding: '1.5rem',
+                                    borderRadius: '12px',
+                                    transition: 'border-color 0.3s ease',
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1rem' }}>
+                                        <div style={{
+                                            width: '40px', height: '40px', borderRadius: '50%',
+                                            background: 'var(--bg-deep)', border: '1px solid var(--border)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: 'var(--accent)', flexShrink: 0,
+                                        }}>
+                                            <UserIcon />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-[var(--text-primary)]">{t.name}</h3>
-                                            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mt-1">
-                                                <Calendar size={12} />
-                                                {new Date(t.created_at).toLocaleDateString('is-IS')}
+                                            <h3 style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{t.name}</h3>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                                <CalendarIcon />
+                                                {t.created_at ? new Date(t.created_at).toLocaleDateString('is-IS') : ''}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="relative">
-                                        <Quote size={16} className="absolute -top-1 -left-1 text-[var(--accent-gold)]/20 rotate-180" />
-                                        <p className="text-[var(--text-secondary)] italic leading-relaxed pl-4">
-                                            "{t.content}"
+                                    <div style={{ position: 'relative', paddingLeft: '1rem' }}>
+                                        <div style={{ position: 'absolute', top: '-2px', left: '-2px', color: 'rgba(91,138,191,0.15)', transform: 'rotate(180deg)' }}>
+                                            <QuoteIcon size={16} />
+                                        </div>
+                                        <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic', lineHeight: 1.6, fontSize: '0.9rem' }}>
+                                            &ldquo;{t.content}&rdquo;
                                         </p>
                                     </div>
                                 </div>
@@ -65,10 +112,12 @@ export default async function TestimonialPage() {
                     </div>
                 )}
 
-                <div className="mt-12 text-center text-sm text-[var(--text-muted)]">
+                <div style={{ marginTop: '3rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                     <p>Allir vitnisburðir eru lesnir yfir áður en þeir eru birtir á vefnum.</p>
                 </div>
-            </main>
-        </div>
+            </div>
+
+            <Footer />
+        </main>
     );
 }

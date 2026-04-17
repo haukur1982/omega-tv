@@ -79,7 +79,7 @@ export async function createNewsletter(newsletter: Omit<Newsletter, 'id' | 'date
     return {
         id: data.id,
         title: data.title,
-        date: data.published_at,
+        date: data.published_at || '',
         author: data.author,
         content: data.content
     };
