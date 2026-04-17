@@ -1,120 +1,386 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Search, Play, Menu, X } from 'lucide-react';
-import clsx from 'clsx';
+import { usePathname } from 'next/navigation';
+
+/* ════════════════════════════════════════════════════════════════
+   Omega Navbar — editorial, transparent-over-hero.
+
+   Design notes (see plans/twinkling-mapping-pizza.md §3.5, §6):
+   - Transparent over hero; warm-dark on scroll.
+   - No pill CTA button that duplicates the hero's action.
+   - Right-hand slot is reserved for state-aware live status:
+     off-air = muted "Næsta sending" link; on-air = warm Live Badge.
+   - Wordmark only in cream; Ω as typographic mark, not a blue disc.
+   - Active route gets a subtle kerti-amber underline — wayfinding.
+   ════════════════════════════════════════════════════════════════ */
+
+const SearchIcon = ({ size = 18 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+);
+
+const MenuIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+        <line x1="4" y1="7" x2="20" y2="7" />
+        <line x1="4" y1="13" x2="20" y2="13" />
+        <line x1="4" y1="19" x2="20" y2="19" />
+    </svg>
+);
+
+const CloseIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+);
+
+const navLinks = [
+    { href: '/live', label: 'Beint' },
+    { href: '/sermons', label: 'Þáttasafn' },
+    { href: '/greinar', label: 'Greinar' },
+    { href: '/namskeid', label: 'Námskeið' },
+    { href: '/baenatorg', label: 'Bænatorg' },
+    { href: '/about', label: 'Um okkur' },
+    { href: '/give', label: 'Styrkja' },
+];
+
+const isActive = (pathname: string | null, href: string) => {
+    if (!pathname) return false;
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(href + '/');
+};
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const pathname = usePathname();
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 60);
+        handleScroll();
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        if (isMobileMenuOpen) document.body.style.overflow = 'hidden';
+        else document.body.style.overflow = '';
+        return () => { document.body.style.overflow = ''; };
+    }, [isMobileMenuOpen]);
 
     return (
         <>
             <motion.nav
-                initial={{ y: -100 }}
-                animate={{ y: 0 }}
-                transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-                className="fixed top-0 left-0 right-0 z-50 px-6 py-5 flex justify-between items-center"
+                initial={{ y: -24, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 140, damping: 22 }}
+                style={{
+                    position: 'fixed',
+                    top: 0, left: 0, right: 0,
+                    zIndex: 50,
+                    height: '72px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '0 var(--rail-padding)',
+                }}
             >
-                {/* Glass Background */}
-                <div className="absolute inset-0 backdrop-blur-xl bg-[var(--bg-deep)]/60 border-b border-white/[0.04]" />
+                {/* Backdrop — transparent over hero, warm-dark on scroll */}
+                <div
+                    aria-hidden="true"
+                    style={{
+                        position: 'absolute',
+                        inset: 0,
+                        transition: 'background 400ms ease, border-color 400ms ease, backdrop-filter 400ms ease',
+                        backdropFilter: scrolled ? 'blur(20px) saturate(1.2)' : 'none',
+                        WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(1.2)' : 'none',
+                        background: scrolled
+                            ? 'rgba(27, 24, 20, 0.85)'  // --mold at 85% when scrolled
+                            : 'linear-gradient(to bottom, rgba(20,18,15,0.55) 0%, transparent 100%)',
+                        borderBottom: scrolled
+                            ? '1px solid var(--border)'
+                            : '1px solid transparent',
+                    }}
+                />
 
-                {/* Brand */}
-                <Link href="/" className="relative z-10 flex items-center gap-3">
-                    <span className="text-[var(--accent)] font-bold text-2xl">Ω</span>
-                    <span className="text-[var(--text-primary)] font-semibold tracking-[0.15em] text-sm uppercase">Omega</span>
-                </Link>
-
-                {/* Desktop Links */}
-                <div className="relative z-10 hidden md:flex items-center gap-8">
-                    <NavLink href="/live">Beint</NavLink>
-                    <NavLink href="/sermons">Þáttasafn</NavLink>
-                    <NavLink href="/baenatorg">Bænatorg</NavLink>
-                    <NavLink href="/frettabref">Fréttir</NavLink>
-                    <NavLink href="/about">Um okkur</NavLink>
-                    <NavLink href="/give">Styrkja</NavLink>
-                </div>
-
-                {/* Actions */}
-                <div className="relative z-10 flex items-center gap-4">
-                    <Link href="/sermons" className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
-                        <Search size={18} />
-                    </Link>
-                    <Link href="/live" className="hidden md:flex items-center gap-2 bg-[var(--accent)] text-[var(--bg-deep)] px-5 py-2 font-semibold text-xs uppercase tracking-[0.1em] hover:brightness-110 transition-all">
-                        <Play size={14} fill="currentColor" />
-                        <span>Horfa</span>
-                    </Link>
-                    <button
-                        className="md:hidden p-2 text-[var(--text-primary)]"
-                        onClick={() => setIsMobileMenuOpen(true)}
+                {/* Inner — brand left, nav center, actions right */}
+                <div
+                    style={{
+                        position: 'relative',
+                        zIndex: 10,
+                        width: '100%',
+                        maxWidth: '80rem',
+                        margin: '0 auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 'clamp(1rem, 3vw, 2rem)',
+                    }}
+                >
+                    {/* ── Brand ─────────────────────────────────────────── */}
+                    <Link
+                        href="/"
+                        aria-label="Omega — heim"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'baseline',
+                            gap: '10px',
+                            textDecoration: 'none',
+                            color: 'var(--ljos)',
+                        }}
                     >
-                        <Menu size={22} />
-                    </button>
+                        <span
+                            style={{
+                                fontFamily: 'var(--font-display, var(--font-serif))',
+                                fontSize: '1.65rem',
+                                fontWeight: 300,
+                                lineHeight: 1,
+                                letterSpacing: '-0.01em',
+                                color: 'var(--ljos)',
+                            }}
+                        >
+                            Ω
+                        </span>
+                        <span
+                            className="type-merki"
+                            style={{ color: 'var(--moskva)', letterSpacing: '0.24em', fontSize: '0.72rem' }}
+                        >
+                            Omega
+                        </span>
+                    </Link>
+
+                    {/* ── Desktop nav ───────────────────────────────────── */}
+                    <div className="hidden md:flex" style={{ alignItems: 'center', gap: 'clamp(1.25rem, 2.4vw, 2rem)' }}>
+                        {navLinks.map(link => {
+                            const active = isActive(pathname, link.href);
+                            return (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    className="type-merki"
+                                    style={{
+                                        position: 'relative',
+                                        padding: '24px 2px',
+                                        color: active ? 'var(--ljos)' : 'var(--moskva)',
+                                        textDecoration: 'none',
+                                        transition: 'color 300ms ease',
+                                        letterSpacing: '0.18em',
+                                        fontSize: '0.7rem',
+                                    }}
+                                    onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.color = active ? 'var(--ljos)' : 'var(--moskva)'; }}
+                                >
+                                    {link.label}
+                                    {active && (
+                                        <span
+                                            aria-hidden="true"
+                                            style={{
+                                                position: 'absolute',
+                                                left: 0, right: 0, bottom: '18px',
+                                                height: '1px',
+                                                background: 'var(--kerti)',
+                                            }}
+                                        />
+                                    )}
+                                </Link>
+                            );
+                        })}
+                    </div>
+
+                    {/* ── Right: live status + search (+ mobile menu) ───── */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        {/* Off-air schedule teaser (desktop only).
+                            Phase 4 will swap this for a stateful Live Badge when on-air. */}
+                        <Link
+                            href="/live"
+                            className="hidden md:inline-flex type-merki"
+                            style={{
+                                alignItems: 'center',
+                                gap: '8px',
+                                color: 'var(--moskva)',
+                                textDecoration: 'none',
+                                letterSpacing: '0.18em',
+                                fontSize: '0.7rem',
+                                transition: 'color 300ms ease',
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.color = 'var(--moskva)'; }}
+                        >
+                            <span
+                                aria-hidden="true"
+                                style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    borderRadius: '50%',
+                                    background: 'var(--kerti)',
+                                    display: 'inline-block',
+                                }}
+                            />
+                            Næsta sending
+                        </Link>
+
+                        <Link
+                            href="/sermons"
+                            aria-label="Leita"
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '8px',
+                                color: 'var(--moskva)',
+                                transition: 'color 300ms ease',
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.color = 'var(--moskva)'; }}
+                        >
+                            <SearchIcon />
+                        </Link>
+
+                        <button
+                            className="md:hidden"
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                padding: '8px',
+                                color: 'var(--ljos)',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                            }}
+                            aria-label="Opna valmynd"
+                        >
+                            <MenuIcon />
+                        </button>
+                    </div>
                 </div>
             </motion.nav>
 
-            {/* Mobile Menu */}
+            {/* ═══════════════════════════════════════════════════════════
+                Mobile Menu — full-screen overlay
+                ═══════════════════════════════════════════════════════════ */}
             <AnimatePresence>
                 {isMobileMenuOpen && (
                     <motion.div
-                        initial={{ opacity: 0, x: '100%' }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: '100%' }}
-                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                        className="fixed inset-0 z-[60] bg-[var(--bg-deep)] flex flex-col p-8 md:hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="md:hidden"
+                        style={{
+                            position: 'fixed',
+                            inset: 0,
+                            zIndex: 60,
+                            background: 'var(--nott)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            padding: 'clamp(1.5rem, 4vw, 2rem)',
+                        }}
                     >
-                        <div className="flex justify-between items-center mb-16">
-                            <span className="text-[var(--accent)] font-bold text-2xl">Ω</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(3rem, 6vh, 4rem)' }}>
+                            <Link
+                                href="/"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                style={{ display: 'flex', alignItems: 'baseline', gap: '10px', textDecoration: 'none' }}
+                            >
+                                <span
+                                    style={{
+                                        fontFamily: 'var(--font-display, var(--font-serif))',
+                                        fontSize: '1.8rem',
+                                        fontWeight: 300,
+                                        color: 'var(--ljos)',
+                                        lineHeight: 1,
+                                    }}
+                                >
+                                    Ω
+                                </span>
+                                <span className="type-merki" style={{ color: 'var(--moskva)', letterSpacing: '0.24em', fontSize: '0.72rem' }}>
+                                    Omega
+                                </span>
+                            </Link>
                             <button
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="p-2 text-[var(--text-primary)]"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    padding: '8px',
+                                    color: 'var(--ljos)',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                }}
+                                aria-label="Loka valmynd"
                             >
-                                <X size={22} />
+                                <CloseIcon />
                             </button>
                         </div>
 
-                        <div className="flex flex-col gap-8">
-                            <MobileNavLink href="/live" onClick={() => setIsMobileMenuOpen(false)}>Bein útsending</MobileNavLink>
-                            <MobileNavLink href="/sermons" onClick={() => setIsMobileMenuOpen(false)}>Þáttasafn</MobileNavLink>
-                            <MobileNavLink href="/baenatorg" onClick={() => setIsMobileMenuOpen(false)}>Bænatorg</MobileNavLink>
-                            <MobileNavLink href="/frettabref" onClick={() => setIsMobileMenuOpen(false)}>Fréttir</MobileNavLink>
-                            <MobileNavLink href="/about" onClick={() => setIsMobileMenuOpen(false)}>Um okkur</MobileNavLink>
-                            <MobileNavLink href="/give" onClick={() => setIsMobileMenuOpen(false)}>Styrkja</MobileNavLink>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(1.25rem, 2.8vh, 1.75rem)' }}>
+                            {navLinks.map((link, i) => {
+                                const active = isActive(pathname, link.href);
+                                return (
+                                    <motion.div
+                                        key={link.href}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.04 + i * 0.04 }}
+                                    >
+                                        <Link
+                                            href={link.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            style={{
+                                                display: 'inline-block',
+                                                fontFamily: 'var(--font-display, var(--font-serif))',
+                                                fontSize: 'clamp(1.75rem, 5vw, 2.5rem)',
+                                                fontWeight: 300,
+                                                color: active ? 'var(--ljos)' : 'var(--moskva)',
+                                                textDecoration: 'none',
+                                                letterSpacing: '-0.02em',
+                                                lineHeight: 1,
+                                                borderLeft: active ? '2px solid var(--kerti)' : '2px solid transparent',
+                                                paddingLeft: '14px',
+                                            }}
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    </motion.div>
+                                );
+                            })}
                         </div>
 
-                        <div className="mt-auto">
-                            <Link href="/live" onClick={() => setIsMobileMenuOpen(false)} className="w-full flex items-center justify-center gap-3 bg-[var(--accent)] text-[var(--bg-deep)] py-4 font-bold text-sm uppercase tracking-[0.1em]">
-                                <Play size={16} fill="currentColor" />
-                                <span>Horfa núna</span>
+                        <div style={{ marginTop: 'auto', paddingTop: '2.5rem' }}>
+                            <Link
+                                href="/live"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="warm-hover"
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    width: '100%',
+                                    padding: '16px',
+                                    background: 'var(--kerti)',
+                                    color: 'var(--nott)',
+                                    fontFamily: 'var(--font-sans)',
+                                    fontWeight: 600,
+                                    fontSize: '14px',
+                                    letterSpacing: '0.02em',
+                                    textDecoration: 'none',
+                                    borderRadius: '2px',
+                                    border: '1px solid var(--kerti)',
+                                }}
+                            >
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--nott)" aria-hidden="true">
+                                    <polygon points="6,3 20,12 6,21" />
+                                </svg>
+                                Horfa beint
                             </Link>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
         </>
-    );
-}
-
-function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
-    return (
-        <Link
-            href={href}
-            className="text-xs font-medium uppercase tracking-[0.1em] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-        >
-            {children}
-        </Link>
-    );
-}
-
-function MobileNavLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick: () => void }) {
-    return (
-        <Link
-            href={href}
-            onClick={onClick}
-            className="text-2xl font-bold text-[var(--text-primary)] hover:text-white transition-colors"
-        >
-            {children}
-        </Link>
     );
 }
