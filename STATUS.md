@@ -10,8 +10,36 @@
 - **Redesign plan:** `~/.claude/plans/twinkling-mapping-pizza.md` — full 4-phase spec.
 - **Phase 1 shipped:** Altingi palette, Source Serif 4, Broadcast Hero, Styrkja ribbon. Navbar + SectionHeader reworked.
 - **Phase 2 shipped:** Scripture as connective tissue. Sermon detail page rebuilt end to end with passage anchor, caption switcher, chapters, editor note, threads-of-Scripture sidebar.
-- **Phase 3 shipped:** Broadcast awareness + courses un-hidden. Schedule moved to DB with a realistic seed week. Homepage "Dagskráin" strip. /live page rebuilt as server-rendered with day switcher. /namskeid un-hidden, rebuilt editorial-first with new Leið cards. Added Námskeið back to nav.
-- **Nothing committed yet.** Three migrations written, none applied.
+- **Phase 3 shipped:** Broadcast awareness + courses un-hidden. Schedule moved to DB. Homepage "Dagskráin" strip. /live rebuilt server-rendered with day switcher. /namskeid un-hidden with Leið cards.
+- **Phase 4 shipped + reworked (2026-04-18):** Candles dropped entirely per Hawk's feedback. Prayer is now the soul of /beint — full-width `PrayerHall` section with multi-column masonry, real "bið með" pray-along buttons (cookie-rate-limited, atomic count via `increment_prayer_count` RPC), always-visible submission form. `/live` re-laid out single-column: player → now/next bar → PrayerHall → schedule. Home page gained a `PrayerPresence` module that surfaces 3 most recent broadcast prayers with counts. **Not yet committed.**
+- **Phase A shipped (content pipeline inbox + "Nýtt drag"):** `/admin/drafts` inbox listing all draft episodes with readiness chips + Publish/Edit per row. `/admin/drafts/[id]` full edit form with OSIS passage picker (drift-proof) + chapters editor + all Phase 2/3 fields. `/admin/drafts/new` manual entry page for Bunny GUID + optional transcript paste → generates metadata → creates draft. `scripts/generate-metadata.ts` pluggable LLM generator (Gemini if keyed, mock otherwise). Admin nav includes new "Innhólf" link. Protocol documented at `docs/content-pipeline.md`. **Not yet committed.**
+
+### ⚠️ Security debt — rotate Gemini key
+
+The Gemini key pasted in chat on 2026-04-18 (ending `CHnPE`) is considered compromised and must be rotated. Delete at https://aistudio.google.com/app/apikey, create a replacement, update `.env.local` directly. Scheduled for a quiet moment — not blocking daily work.
+
+### Next session TODOs (captured 2026-04-18)
+
+1. **Azotus native-IS mode** (Azotus project, not this one). See `docs/content-pipeline.md` for the plan. One-line branch in `workers/vod_publisher.py` that skips translate+burn when input language == target language, plus a subprocess call to omega-tv's `generate-metadata.ts`.
+2. **Add `GEMINI_API_KEY`** to `.env.local` to flip metadata generation from mock mode to real Gemini output. Instantly upgrades every Azotus-generated draft.
+3. **Commit + push** Phases 4 + A as clean commits (one per logical chunk).
+4. **Optional follow-ups** once Phase A is live and used: thumbnail generator with sharp + Source Serif 4 overlay; in-admin file upload (multipart to Bunny TUS); in-admin ElevenLabs transcription.
+
+### Hawk's Phase 4 feedback (2026-04-17, captured for next session)
+
+1. **Drop the candle mechanic entirely.** Hawk was explicit: "that is not gonna register with Icelandic viewers." My invention, not Icelandic Lutheran practice. Next session: remove `CandleCluster` + `LightCandleButton` from the drawer, remove the "Light candle" API route, drop the `candle_lightings` table (keep the migration, add a reversal that drops it), remove all candle-related UI + copy.
+
+2. **Make prayer the primary surface — not a component, the soul.** Hawk's exact words: *"the owner of the channel is a man of prayer. He loves praying."* Prayer on Omega isn't a UI feature to decorate; it's the network's theological backbone. Next session, design implications:
+   - Prayer wall becomes the full sanctuary drawer (not one section of three).
+   - Bigger, more prominent prayer cards. More affordance for submitting.
+   - Richer interaction: "bið með" (pray-along) count is already in the schema — surface it with a real tap-to-pray button per card. Consider a light "amen" reaction.
+   - Surface prayers beyond /live: a compact prayer ticker on the home page, on sermon detail threads sidebar (already partially there), in the footer. Prayer should feel present across the whole site.
+   - Consider a "bæn vikunnar" curated slot — the CEO picks one prayer each week to lift up.
+
+3. **/live layout needs a design pass.** The two-column player-left / drawer-right grid felt weird to Hawk. Options to try:
+   - Drawer *below* player, full-width, single column on all viewports
+   - Drawer as a collapsible sheet (slides in from bottom on mobile, right on desktop)
+   - Rethink the whole page so prayer is the primary content and the player is embedded within the prayer context, not the other way around. *("The player serves the prayer, not the prayer decorating the player.")*
 
 ## Phase 3 — What landed
 
