@@ -10,6 +10,7 @@ import VODRailCard from "@/components/vod/VODRailCard";
 import PortraitSermonCard from "@/components/vod/PortraitSermonCard";
 import MagazineArticleCard from "@/components/articles/MagazineArticleCard";
 import DagskraStrip from "@/components/home/DagskraStrip";
+import PrayerPresence from "@/components/home/PrayerPresence";
 import Link from "next/link";
 import { getAllArticles } from "@/lib/articles-db";
 import { getCurrentFeaturedWeek } from "@/lib/featured-db";
@@ -104,6 +105,11 @@ export default async function Home() {
             DAGSKRÁIN — Broadcast-aware strip (Núna · Næst · Seinna)
             ═══════════════════════════════════════════════════════════ */}
         <DagskraStrip />
+
+        {/* ═══════════════════════════════════════════════════════════
+            SAMFÉLAG Í BÆN — recent broadcast prayers
+            ═══════════════════════════════════════════════════════════ */}
+        <PrayerPresence />
 
         {/* ═══════════════════════════════════════════════════════════
             ROW 1 — NÝTT EFNI (Latest Videos)

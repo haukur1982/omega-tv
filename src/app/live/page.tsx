@@ -2,18 +2,21 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Link from "next/link";
 import WeekSchedule from "@/components/live/WeekSchedule";
+import PrayerHall from "@/components/sanctuary/PrayerHall";
 import { getCurrentAndNext, formatClockUtc } from "@/lib/schedule-db";
 
 /**
  * /live — "Beint"
  *
- * Full-width broadcast player with a DB-backed week schedule below.
- * Server-rendered now (was client-only). The schedule reads from
- * schedule_slots; the player embed stays on its existing env var.
- * See plan §4.3.
+ * Single-column layout (Phase 4 rework):
+ *   1. Player — full-width cinematic broadcast
+ *   2. Now-playing info bar — live state + program title + CTAs
+ *   3. PrayerHall — the SOUL of this page. Prayer wall, bið-með,
+ *      submission form. Not a sidebar ornament — the main event.
+ *      The player serves the prayer, not the other way around.
+ *   4. Weekly schedule with day-switcher
  *
- * Phase 3 ships: day-switcher, DB schedule, live/featured badges.
- * Phase 4 adds: candle presence drawer, prayer wall, timed notes.
+ * See plan §4.3 + Hawk's 2026-04-17 feedback (captured in STATUS.md).
  */
 
 export const revalidate = 60;
@@ -31,7 +34,7 @@ export default async function LivePage({ searchParams }: LivePageProps) {
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
             <Navbar />
 
-            {/* ═══ PLAYER ═══ */}
+            {/* ═══ PLAYER — full-width 16:9, cinematic ═══ */}
             <div style={{ paddingTop: '72px', background: 'var(--nott)' }}>
                 <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
                     <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', background: 'var(--nott)' }}>
@@ -106,7 +109,11 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                                     fontSize: '0.62rem',
                                 }}
                             >
-                                <span className="live-dot" aria-hidden="true" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--blod)', display: 'inline-block' }} />
+                                <span
+                                    className="live-dot"
+                                    aria-hidden="true"
+                                    style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--blod)', display: 'inline-block' }}
+                                />
                                 Í beinni
                             </span>
                         ) : (
@@ -150,8 +157,8 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                 </div>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-                    <Link
-                        href="/baenatorg"
+                    <a
+                        href="#samfelag"
                         className="ghost-btn"
                         style={{
                             display: 'inline-flex',
@@ -168,8 +175,8 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                             textDecoration: 'none',
                         }}
                     >
-                        Senda bæn
-                    </Link>
+                        Senda bæn ↓
+                    </a>
                     <Link
                         href="/give"
                         className="warm-hover"
@@ -192,8 +199,20 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                 </div>
             </div>
 
+            {/* ═══ PRAYER HALL — the soul of this page ═══ */}
+            <div id="samfelag">
+                <PrayerHall />
+            </div>
+
             {/* ═══ SCHEDULE ═══ */}
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 var(--rail-padding)' }}>
+            <div
+                style={{
+                    maxWidth: '1400px',
+                    margin: '0 auto',
+                    padding: '0 var(--rail-padding)',
+                    borderTop: '1px solid var(--border)',
+                }}
+            >
                 <WeekSchedule selectedDay={day} />
             </div>
 
