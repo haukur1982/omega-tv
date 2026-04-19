@@ -86,8 +86,17 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 6. **Azotus native-IS mode** — in `~/Projects/Azotus/workers/vod_publisher.py`, add a branch: if input_lang == target_lang, skip translate + subtitle-burn, just transcribe and upload. Plus subprocess call to omega-tv's `generate-metadata.ts`. See `docs/content-pipeline.md` for exact instructions. ~20 min in the Azotus project. Standalone CLI `scripts/publish-native-is.ts` exists in omega-tv in the meantime.
 7. **Add `GEMINI_API_KEY` to Azotus if it's going to call omega-tv's metadata generator** — or make the subprocess call pass through the omega-tv `.env.local` (cleaner, since the generator script reads it directly).
 
-### Medium — XML pipeline hands-free mode
-8. **One-time Vercel setup for the cron.** Cron endpoint + `vercel.json` shipped (`b4ce426`). Still needs: generate `CRON_SECRET` via `openssl rand -hex 32`, add it to Vercel → Settings → Environment Variables → Production, redeploy. After that, daily 05:05 UTC sync runs with zero clicks. ~5 min of Vercel-dashboard work.
+### Medium — programs catalog follow-up
+8. **Label the 7 unlabeled programs that today's XML surfaced.** First real cron run on 2026-04-19 imported 29 slots and flagged these titles as missing from `/admin/programs`:
+    - `CBN fréttir`
+    - `I AM Equipping Center`
+    - `Gegnumbrot`
+    - `Krakkaefni`
+    - `CBN - Fréttir frá Ísrael`
+    - `Vegur Meistarans`
+    - `Hinir útvöldu`
+
+    Add each via `/admin/programs` → Ný sýning. Once labeled, the next cron run enriches them with host/description/type automatically.
 
 ### Bigger future projects
 9. **Native TV app (Samsung Tizen + LG webOS)** — documented in `docs/tv-app-considerations.md`. Timeline estimate: 7–10 weeks. Prerequisites: item #4 above should be done first. Skip Apple TV / Google TV / Roku for v1.
@@ -98,7 +107,7 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 ### Done (recently)
 - ✅ **Admin CRUD for `schedule_slots` + `featured_weeks`** — Vikuforsíða + Schedule editors shipped 2026-04-19.
 - ✅ **Chapter click-to-seek** — shipped via `playerBus.ts` + Player.js integration.
-- ✅ **Vercel Cron for hands-free daily XML sync** — shipped `b4ce426`. Shared sync core at `src/lib/schedule-xml-sync.ts`, cron endpoint at `/api/cron/sync-schedule-xml`, `vercel.json` declares `5 5 * * *`. Just needs `CRON_SECRET` added in Vercel settings.
+- ✅ **Vercel Cron for hands-free daily XML sync** — shipped `b4ce426` + deployed to production. Shared sync core at `src/lib/schedule-xml-sync.ts`, cron endpoint at `/api/cron/sync-schedule-xml`, `vercel.json` declares `5 5 * * *`. `CRON_SECRET` generated via `openssl rand -hex 32`, stored encrypted in Vercel Production env + mirrored to local `.env.local` for manual curl testing. First live run on 2026-04-19 imported 29 real slots from the playout XML — proof the whole chain works end-to-end (FTP → parse → enrich → insert).
 - ✅ **Transcript persistence on draft episodes** — shipped `f86c563`. `episodes.transcript` migration + updated metadata generator + draft-create API. Unlocks future regeneration of chapters/descriptions without re-pasting source text.
 
 ### Intentionally deferred / never
