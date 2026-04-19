@@ -201,38 +201,104 @@ editor.** Instead:
 
 See `scripts/seed-programs.ts` for the current reference pattern.
 
-## TODO — Azotus native-IS mode
+## Azotus native-IS mode (shipped 2026-04-19)
 
-**Project**: `~/Projects/Azotus`
-**Where**: likely in `workers/vod_publisher.py` or the pipeline orchestrator
+The Azotus side of the pipeline now has a first-class native-Icelandic
+branch so source files that are already in Icelandic skip translate +
+subtitle burn entirely, still producing an omega-tv draft.
 
-**Change**: add a branch that skips translation + subtitle burn when the input language matches the target language. Simplest form:
+### How Hawk triggers it
 
-```python
-# In the pipeline entry / config
-native_mode = input_language == target_language  # or: filename ends with _NATIVE_IS
+Three equivalent ways — pick whichever's lowest friction for the file
+at hand:
 
-if not native_mode:
-    transcribe_and_translate_and_burn_subtitles(...)  # existing flow
-else:
-    transcribe_only(...)   # still call ElevenLabs for the transcript
-    upload_to_bunny(raw_mp4)  # no subtitle burn
+1. **Filename marker.** Rename the file to include `_NATIVE_IS`
+   anywhere in the stem and drop it in `~/Projects/Azotus/1_INBOX/`:
+   ```
+   sunnudagssamkoma_2026_04_19_NATIVE_IS.mp4
+   trúin_sem_sigrar_NATIVE_IS.mp4
+   ```
+   Case-insensitive. Works with or without a sidecar JSON.
 
-# Then (regardless of mode):
-call_omega_metadata_generator(transcript, bunny_guid)  # new subprocess call
+2. **Sidecar JSON.** Drop the video alongside a `.json` file:
+   ```json
+   { "native_mode": true, "show_slug": "sunnudagssamkoma", "client": "omega-is" }
+   ```
+   Useful when you want to also set program metadata from the wizard.
+
+3. **`source_language` field.** If a sidecar JSON sets
+   `"source_language": "is"`, that triggers native-mode too.
+
+### What happens under the hood
+
+```
+sermon_NATIVE_IS.mp4 drops in 1_INBOX
+   │
+   ├─ ingest: native_mode=True flagged on track.meta
+   │
+   ├─ transcribe: ElevenLabs produces {stem}_SKELETON.json
+   │      (transcript still runs — we need the text for metadata)
+   │
+   ├─ dispatcher short-circuit (omega_manager.py):
+   │      TRANSCRIBED → FINALIZED
+   │      (skips translate + review + burn entirely)
+   │
+   └─ operator clicks "Publish to VOD" in the Azotus UI
+          │
+          ├─ vod_publisher.publish_to_vod branches on meta.native_mode
+          │
+          ├─ _find_native_video() locates the raw source MP4
+          │      (no _SUBBED.mp4 exists)
+          │
+          ├─ bunny_upload.create_video + upload_video + wait_for_encoding
+          │
+          ├─ _supabase_insert creates the episode row
+          │
+          └─ _call_omega_metadata subprocess:
+                 pnpm exec tsx scripts/generate-metadata.ts \
+                     {stem}_SKELETON.json <bunny_guid>
+                 → Gemini writes title/description/chapters/bible_ref/tags
+                 → draft lands in /admin/drafts for 2-3 min review
 ```
 
-The `call_omega_metadata_generator` invocation:
-```python
-subprocess.run([
-    'pnpm', 'exec', 'tsx', '--env-file=.env.local',
-    'scripts/generate-metadata.ts',
-    transcript_path,
-    bunny_guid,
-], cwd=os.path.expanduser('~/Projects/omega-tv'), check=True)
+### Safety
+
+Four guardrails — all must hold before the native-IS short-circuit
+fires in the Azotus dispatcher:
+1. Stage is exactly `TRANSCRIBED` (never interrupts a mid-translation)
+2. `target_language` resolves to `"is"` (belt-and-suspenders vs. CBN Dutch)
+3. `meta.native_mode` was set at ingest
+4. `OMEGA_NATIVE_IS_ENABLED` env var is on (defaults on; set to `0` to kill-switch)
+
+Transition uses the legal state-machine path `PROCESSING → FINALIZING`,
+not `skip_validation`. Zero changes to cloud-worker files, so no cloud
+rebuild needed. CBN Europe Dutch pipeline is structurally isolated:
+three of the four guardrails independently reject any non-IS target.
+
+### Implementation references
+
+- Orchestrator: `~/Projects/Azotus/omega_manager.py`
+  - Helpers: `_native_is_enabled()`, `_is_native_is_source()`
+  - Ingest flag: `_run_ingest()`
+  - Dispatcher short-circuit: translation-stage `for job in jobs` loop
+- Publisher: `~/Projects/Azotus/workers/vod_publisher.py`
+  - `_find_native_video()` — source-MP4 finder
+  - `publish_to_vod()` — `meta.native_mode` branch
+  - `_call_omega_metadata()` — subprocess handoff to omega-tv
+
+### Fallback
+
+If Azotus isn't available (e.g. running from a different Mac, or the
+Mac Mini's down), the same end-state can be produced in one step via
+the standalone omega-tv CLI:
+
+```bash
+pnpm exec tsx --env-file=.env.local scripts/publish-native-is.ts \
+    /path/to/sermon.mp4 --transcript /path/to/transcript.txt \
+    --show "Sunnudagssamkoma" --title "Trúin sem sigrar" --episode 12
 ```
 
-Or — more robustly — a tiny HTTP POST to `/api/admin/drafts/create` on `omega.is` (or local dev) once we expose that as a service-role-authenticated endpoint. The subprocess path is simpler for same-Mac-Mini setups.
+Same result: Bunny upload + Gemini metadata + draft row. See §2 above.
 
 ## Future enhancements (not in scope right now)
 

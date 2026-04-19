@@ -83,8 +83,8 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 5. **Chapter click-to-seek on sermon detail player** — Player.js bus + ChapterList shipped; chapter click seeks the Bunny iframe, and active chapter highlights from `timeupdate`. Leaving this line in the TODO list only to flag the follow-up work: verify active highlighting on a real long sermon with real chapter data, and decide whether to persist last-watched-chapter in a cookie.
 
 ### Cross-project
-6. **Azotus native-IS mode** — in `~/Projects/Azotus/workers/vod_publisher.py`, add a branch: if input_lang == target_lang, skip translate + subtitle-burn, just transcribe and upload. Plus subprocess call to omega-tv's `generate-metadata.ts`. See `docs/content-pipeline.md` for exact instructions. ~20 min in the Azotus project. Standalone CLI `scripts/publish-native-is.ts` exists in omega-tv in the meantime.
-7. **Add `GEMINI_API_KEY` to Azotus if it's going to call omega-tv's metadata generator** — or make the subprocess call pass through the omega-tv `.env.local` (cleaner, since the generator script reads it directly).
+6. **Merge the Azotus feature branch.** `feat/native-is-orchestrator` is pushed to `haukur1982/Azotus` — adds ingest detection + dispatcher short-circuit so native-IS files skip translate + burn and land straight at FINALIZED, ready for the existing "Publish to VOD" flow. Zero cloud-worker changes (no rebuild needed), four independent guardrails isolate the CBN Dutch pipeline. PR URL: https://github.com/haukur1982/Azotus/pull/new/feat/native-is-orchestrator. Ready to merge once Hawk reviews.
+7. **Add `GEMINI_API_KEY` to the Azotus Mac Mini's environment** — the subprocess call to `generate-metadata.ts` runs with `--env-file=.env.local` inside `~/Projects/omega-tv`, so the Mac Mini needs `omega-tv/.env.local` to carry the key. Already true for the dev laptop; verify on the Mac Mini before the first native-IS job drops.
 
 ### Medium — programs catalog follow-up
 8. **Label the 7 unlabeled programs that today's XML surfaced.** First real cron run on 2026-04-19 imported 29 slots and flagged these titles as missing from `/admin/programs`:
@@ -109,6 +109,7 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 - ✅ **Chapter click-to-seek** — shipped via `playerBus.ts` + Player.js integration.
 - ✅ **Vercel Cron for hands-free daily XML sync** — shipped `b4ce426` + deployed to production. Shared sync core at `src/lib/schedule-xml-sync.ts`, cron endpoint at `/api/cron/sync-schedule-xml`, `vercel.json` declares `5 5 * * *`. `CRON_SECRET` generated via `openssl rand -hex 32`, stored encrypted in Vercel Production env + mirrored to local `.env.local` for manual curl testing. First live run on 2026-04-19 imported 29 real slots from the playout XML — proof the whole chain works end-to-end (FTP → parse → enrich → insert).
 - ✅ **Transcript persistence on draft episodes** — shipped `f86c563`. `episodes.transcript` migration + updated metadata generator + draft-create API. Unlocks future regeneration of chapters/descriptions without re-pasting source text.
+- ✅ **Azotus native-IS orchestrator integration** — shipped on `feat/native-is-orchestrator` branch in `~/Projects/Azotus` (commit `b18420b`). Three additive changes to `omega_manager.py`: detection helpers, ingest flag, dispatcher short-circuit TRANSCRIBED → FINALIZED. 123 lines, zero cloud-worker files touched. 8 helper assertions pass. See `docs/content-pipeline.md` §"Azotus native-IS mode (shipped)".
 
 ### Intentionally deferred / never
 - **Article auto-generation from sermons** — do NOT revisit (Hawk scrapped it). Articles are Hawk's voice, written by hand.
