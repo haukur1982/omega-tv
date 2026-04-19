@@ -1,126 +1,127 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-17
-**Last Agent:** Claude Code (Phases 1–3 redesign)
-**Branch:** main (uncommitted changes)
-**Build Status:** Dev server runs on :3005, home / live / sermon detail / namskeid all 200, tsc clean
+**Last Updated:** 2026-04-18 (late)
+**Last Agent:** Claude Code — content pipeline + TV app consideration session
+**Branch:** main
+**Build Status:** Dev on :3005, all pages 200, tsc clean. Four commits pushed to origin/main today.
 
-## Current State
+## Where things stand right now
 
-- **Redesign plan:** `~/.claude/plans/twinkling-mapping-pizza.md` — full 4-phase spec.
-- **Phase 1 shipped:** Altingi palette, Source Serif 4, Broadcast Hero, Styrkja ribbon. Navbar + SectionHeader reworked.
-- **Phase 2 shipped:** Scripture as connective tissue. Sermon detail page rebuilt end to end with passage anchor, caption switcher, chapters, editor note, threads-of-Scripture sidebar.
-- **Phase 3 shipped:** Broadcast awareness + courses un-hidden. Schedule moved to DB. Homepage "Dagskráin" strip. /live rebuilt server-rendered with day switcher. /namskeid un-hidden with Leið cards.
-- **Phase 4 shipped + reworked (2026-04-18):** Candles dropped entirely per Hawk's feedback. Prayer is now the soul of /beint — full-width `PrayerHall` section with multi-column masonry, real "bið með" pray-along buttons (cookie-rate-limited, atomic count via `increment_prayer_count` RPC), always-visible submission form. `/live` re-laid out single-column: player → now/next bar → PrayerHall → schedule. Home page gained a `PrayerPresence` module that surfaces 3 most recent broadcast prayers with counts. **Not yet committed.**
-- **Phase A shipped (content pipeline inbox + "Nýtt drag"):** `/admin/drafts` inbox listing all draft episodes with readiness chips + Publish/Edit per row. `/admin/drafts/[id]` full edit form with OSIS passage picker (drift-proof) + chapters editor + all Phase 2/3 fields. `/admin/drafts/new` manual entry page for Bunny GUID + optional transcript paste → generates metadata → creates draft. `scripts/generate-metadata.ts` pluggable LLM generator (Gemini if keyed, mock otherwise). Admin nav includes new "Innhólf" link. Protocol documented at `docs/content-pipeline.md`. **Not yet committed.**
+Six phases of work shipped + pushed in the last two days. The site is in a very different place than it was 48 hours ago:
 
-### ⚠️ Security debt — rotate Gemini key
+1. **Phase 1** — Altingi palette, Source Serif 4, Broadcast Hero ✓ pushed
+2. **Phase 2** — Scripture as connective tissue (sermon detail rebuilt) ✓ pushed
+3. **Phase 3** — Broadcast schedule + courses un-hidden ✓ pushed
+4. **Phase 4** — Prayer as the soul of /beint (candles dropped, PrayerHall full-width) ✓ pushed
+5. **Phase A** — `/admin/drafts` inbox + metadata generator (Gemini) + "Nýtt drag" ✓ pushed
+6. **Catch-up commit** — pre-existing drift folded in ✓ pushed
 
-The Gemini key pasted in chat on 2026-04-18 (ending `CHnPE`) is considered compromised and must be rotated. Delete at https://aistudio.google.com/app/apikey, create a replacement, update `.env.local` directly. Scheduled for a quiet moment — not blocking daily work.
+Plus ongoing docs:
+- `~/.claude/plans/twinkling-mapping-pizza.md` — full 4-phase plan
+- `docs/content-pipeline.md` — three-entry-point ingestion protocol
+- `docs/tv-app-considerations.md` — Samsung/LG/Apple TV/Android TV app plan (four-platform Tier 1)
+- `docs/icelandic-market-strategy.md` — **NEW 2026-04-18** — strategic reference: telco aggregation, device priorities, payment architecture, infrastructure roadmap. Distilled from deep-research summary.
 
-### Next session TODOs (captured 2026-04-18)
+## Content pipeline is real and proven
 
-1. **Azotus native-IS mode** (Azotus project, not this one). See `docs/content-pipeline.md` for the plan. One-line branch in `workers/vod_publisher.py` that skips translate+burn when input language == target language, plus a subprocess call to omega-tv's `generate-metadata.ts`.
-2. **Add `GEMINI_API_KEY`** to `.env.local` to flip metadata generation from mock mode to real Gemini output. Instantly upgrades every Azotus-generated draft.
-3. **Commit + push** Phases 4 + A as clean commits (one per logical chunk).
-4. **Optional follow-ups** once Phase A is live and used: thumbnail generator with sharp + Source Serif 4 overlay; in-admin file upload (multipart to Bunny TUS); in-admin ElevenLabs transcription.
+**Gemini-powered metadata generation works end-to-end.** Tested 2026-04-18 on a native Icelandic sermon transcript — Gemini correctly identified `ISA.40.31` as the bible_ref (Jesaja 40:31), wrote a warm first-person editor note, segmented 6 pastoral chapters, produced 4 Icelandic thematic tags. Two demo drafts exist in Supabase:
 
-### Hawk's Phase 4 feedback (2026-04-17, captured for next session)
+- `/admin/drafts/25ee50f6-36d5-46c2-ae94-800d222e02ea` — **Vonin sem endurnærir** (full Gemini output — the proof)
+- `/admin/drafts/3e898925-fc57-444b-822c-d356c6c1e560` — demo of mock fallback for comparison
 
-1. **Drop the candle mechanic entirely.** Hawk was explicit: "that is not gonna register with Icelandic viewers." My invention, not Icelandic Lutheran practice. Next session: remove `CandleCluster` + `LightCandleButton` from the drawer, remove the "Light candle" API route, drop the `candle_lightings` table (keep the migration, add a reversal that drops it), remove all candle-related UI + copy.
+Three entry paths (all landing in the same `/admin/drafts` inbox):
+1. **Azotus** (foreign content, subtitled) — needs native-IS branch added in Azotus project
+2. **Azotus Lite** (native Icelandic, no translation) — pending Azotus change
+3. **Manual "Nýtt drag"** — shipped today, `/admin/drafts/new`
 
-2. **Make prayer the primary surface — not a component, the soul.** Hawk's exact words: *"the owner of the channel is a man of prayer. He loves praying."* Prayer on Omega isn't a UI feature to decorate; it's the network's theological backbone. Next session, design implications:
-   - Prayer wall becomes the full sanctuary drawer (not one section of three).
-   - Bigger, more prominent prayer cards. More affordance for submitting.
-   - Richer interaction: "bið með" (pray-along) count is already in the schema — surface it with a real tap-to-pray button per card. Consider a light "amen" reaction.
-   - Surface prayers beyond /live: a compact prayer ticker on the home page, on sermon detail threads sidebar (already partially there), in the footer. Prayer should feel present across the whole site.
-   - Consider a "bæn vikunnar" curated slot — the CEO picks one prayer each week to lift up.
+Review flow: open draft → fix fields → **Vista og birta** → live on omega.is in 2–3 minutes.
 
-3. **/live layout needs a design pass.** The two-column player-left / drawer-right grid felt weird to Hawk. Options to try:
-   - Drawer *below* player, full-width, single column on all viewports
-   - Drawer as a collapsible sheet (slides in from bottom on mobile, right on desktop)
-   - Rethink the whole page so prayer is the primary content and the player is embedded within the prayer context, not the other way around. *("The player serves the prayer, not the prayer decorating the player.")*
+## Today's key decisions (2026-04-18)
 
-## Phase 3 — What landed
+### ✅ Shipped + pushed
+- **Phase 4 rework**: candles dropped entirely. Prayer is the soul of /beint. Full-width `PrayerHall` with multi-column masonry, real "bið með" pray-along (cookie-rate-limited, atomic via `increment_prayer_count` RPC). `PrayerPresence` module on home. Three-cell + submission form flow on /beint.
+- **Phase A**: `/admin/drafts` inbox with readiness chips; full edit form with OSIS picker (drift-proof) + ChaptersEditor; `/admin/drafts/new` manual entry; `scripts/generate-metadata.ts` pluggable Gemini/mock generator.
+- **Content pipeline protocol** documented in `docs/content-pipeline.md`.
+- **Admin auth reset**: used service-role key to set a temp password for `haukur1982@gmail.com`. Hawk logged in successfully and saw the Gemini-generated draft in the inbox.
 
-### New files
-- `supabase/migrations/20260417_phase3_schedule.sql` — `schedule_slots` table (starts/ends, title/subtitle, program_type, episode_id/series_id FKs, host_name, description, is_live_broadcast, is_featured, reminder_count) + indexes + RLS public-read + service-role-write + **27 seed rows** covering a realistic Mon–Sun Omega schedule (Morgunbæn, Í Snertingu reruns, Bænakvöld live Wed, Sunnudagssamkoma live Sun, plus teaching, Ísrael, Tónleikakvöld, etc.).
-- `src/lib/schedule-db.ts` — `ScheduleSlot` type, `getScheduleInRange`, `getScheduleForDay`, `getScheduleForWeek`, `getCurrentAndNext`, `groupByDay`, plus formatter helpers (`formatClockUtc`, `durationMinutes`, `weekdayIs`, `shortWeekdayIs`). Ships a **two-week mock fallback** that kicks in when `schedule_slots` is empty — mirrors the migration seed exactly so the UI is fully usable pre-migration, and drops out the moment even one real row lands.
-- `src/components/live/DaySwitcher.tsx` — client island, 7-tab strip Mán→Sun driven by `?day=YYYY-MM-DD` URL param. Active day gets `--reykur` background + amber `--kerti` weekday label.
-- `src/components/live/WeekSchedule.tsx` — server component, renders the day switcher + the selected day's slots as a timeline (HH:MM in tabular-nums + title + live/beint badge + description + duration). Graceful empty state. Icelandic weekday/month names.
-- `src/components/home/DagskraStrip.tsx` — server component, three-cell strip for the homepage: **Núna / Næst / Seinna**. Self-hides when no data. Each cell shows clock range, serif title, italic description, live badge when applicable. Links to /live.
-- `src/components/courses/LeidCard.tsx` — new course card archetype §3.3. 4:3 split: instructor portrait left half, `--torfa` panel right half with META · title · instructor · description · **module ladder** (filled bars for completed modules) · progress text. On hover, the ladder rungs pulse warm in sequence (50ms stagger, killed under `prefers-reduced-motion`).
+### 🛑 Scrapped (from Hawk feedback)
+- **Article generation from sermons — scrapped.** Hawk was explicit: *"I would rather create my articles myself and have real content that I believe in."* Articles must stay Hawk's voice, written from conviction. `scripts/generate-article.ts` was built and deleted in-session. Respect this going forward.
+- **AirPlay/Chromecast as TV fallback — scrapped.** Hawk's audience is 80% over 50. They don't do phone-to-TV mirroring. The right TV path is native apps (Samsung Tizen + LG webOS), not a phone-cast workaround. See `docs/tv-app-considerations.md`.
 
-### Files changed
-- `src/app/live/page.tsx` — rewrote as a **server component** (was client-only). Player embed + now/next info bar (live badge when current exists, otherwise "Dagskrá" kicker + next-up teaser) + send prayer + give CTAs + WeekSchedule. Reads `?day=` to drive the day switcher.
-- `src/app/page.tsx` — imports `DagskraStrip`, mounts it as the first block after the Broadcast Hero. The home is now unmistakably broadcast-aware on first paint.
-- `src/app/namskeid/page.tsx` — full rewrite. Dropped the "Akademía"-badged masterclass hero + stacked-card pattern (Netflix-y, off-brand). New editorial hero — kicker `OMEGA · NÁMSKEIÐ` + Vaka display headline *"Lærðu af þeim sem ganga með Guði."* + intro paragraph. Responsive grid of Leið cards (4 cards in the mock set, auto-fill 320px min). Fallback mock courses still render before Supabase has rows.
-- `src/components/layout/Navbar.tsx` — un-hid `Námskeið` in the primary nav. It sits between Greinar and Bænatorg per plan §6 IA.
-- `src/app/globals.css` — added `.leid-card:hover .leid-rung` sequential pulse (ladder animation), fully disabled under `prefers-reduced-motion`.
+### 💡 Hawk's aesthetic/editorial affirmations (keep these locked in)
+- **"I love chapters and descriptions"** — the Gemini chapter segmentation + description generation is the central win. Protect this behavior, don't let future refactors break the quality.
+- **"The CEO is a man of prayer"** — prayer is Omega's theological backbone, not UI decoration. Any prayer UI must reflect this seriously.
+- **"Bridge young and old, but 80% over 50"** — every design decision weighted toward tablet/TV readability, big tap targets, hover-independent interaction.
 
-### What the user sees now
+### 🔜 Left on disk, not yet committed (Phase A+ groundwork)
+- `supabase/migrations/20260418_episode_transcript.sql` — adds `episodes.transcript` column for storing source text. Useful for future regeneration of chapters/descriptions + transcript search. **Not yet applied to Supabase.**
+- `scripts/generate-metadata.ts` + `src/app/api/admin/drafts/create/route.ts` — updated to persist transcript on upsert. Backward-compatible with rows that don't have it.
+- These changes are low-risk; can be committed whenever (haven't pushed because session pivoted into TV conversation).
 
-**Home** (`/`):
-- Broadcast Hero (unchanged from phase 1).
-- **Dagskráin strip** — three cards *Núna / Næst / Seinna* with real program names, clock windows, italic descriptions. "Heil vika →" link in the header.
-- Then the Nýtt efni rail, Sunnudagssamkomur rail, Omega Tímaritið bento, Styrkja ribbon, Legacy 34 years.
+## Outstanding to-dos (in rough priority order)
 
-**/live**:
-- Full-width broadcast player (unchanged embed).
-- Info bar: when the schedule places "now" inside a program, shows red "Í beinni" pill + program title in serif + italic description. When off-air, shows "Dagskrá" kicker + "Omega Stöðin" default title.
-- Below: `Dagskrá vikunnar` section. Day switcher (Mán Þri Mið Fim Fös Lau Sun, amber label on active day). Timeline of that day's programs: `07:00 · Morgunbæn · 60 mín`, `18:00 · Bænakvöld · [BEINT badge] · 90 mín` etc. Features the Wed Bænakvöld and Sun Sunnudagssamkoma as live.
+### Quick wins (next focused session, small)
+1. **Apply `20260418_episode_transcript.sql`** to Supabase (copy-paste in SQL editor; one ALTER TABLE). Already has the column for future use.
+2. **Commit the uncommitted transcript-persistence changes** (`generate-metadata.ts` + `drafts/create/route.ts`) — small, low-risk.
+3. **Rotate the Gemini key** — the one ending `CHnPE` was pasted in chat and is compromised. Delete at https://aistudio.google.com/app/apikey, create a replacement, update `.env.local` directly.
 
-**/namskeid** (un-hidden, linked from top nav as "NÁMSKEIÐ"):
-- Editorial hero: small amber kicker + Vaka serif *"Lærðu af þeim sem ganga með Guði."* + 58ch serif paragraph.
-- Grid of four Leið cards. Each: instructor image on the left, right panel has `NÁMSKEIÐ · 6 EININGAR` kicker, serif title, italic instructor name, description, and a ladder of 6 grey bars at the bottom with "6 einingar · byrjaðu í dag" below. Hover the card → ladder rungs pulse warm one after another.
+### Medium-priority UX improvements for the 50+ audience
+4. **Tablet / iPad polish pass on omega.is** — hover → tap conversions, bump the smallest labels above 0.75rem, enforce 44×44px tap targets, verify nav clarity. ~30–45 min session. Called out as prerequisite in `docs/tv-app-considerations.md`.
+5. **Chapter click-to-seek on sermon detail player** — currently chapters are visual only. Making them actually seek the Bunny iframe (via postMessage `setCurrentTime`) is the single highest-leverage move for 50+ viewers. Small session, huge UX win. Hawk specifically loves the chapter feature.
 
-**Navbar**:
-- Now: **BEINT · ÞÁTTASAFN · GREINAR · NÁMSKEIÐ · BÆNATORG · UM OKKUR · STYRKJA**
-- Seven items. Was six.
+### Cross-project
+6. **Azotus native-IS mode** — in `~/Projects/Azotus/workers/vod_publisher.py`, add a branch: if input_lang == target_lang, skip translate + subtitle-burn, just transcribe and upload. Plus subprocess call to omega-tv's `generate-metadata.ts`. See `docs/content-pipeline.md` for exact instructions. ~20 min in the Azotus project.
+7. **Add `GEMINI_API_KEY` to Azotus if it's going to call omega-tv's metadata generator** — or make the subprocess call pass through the omega-tv `.env.local` (cleaner, since the generator script reads it directly).
 
-## What's NOT finished
+### Bigger future projects
+8. **Native TV app (Samsung Tizen + LG webOS)** — documented in `docs/tv-app-considerations.md`. Timeline estimate: 7–10 weeks. Prerequisites: items #4 and #5 above should be done first. Skip Apple TV / Google TV / Roku for v1.
+9. **Admin CRUD for `schedule_slots` + `featured_weeks`** — currently edited in Supabase directly. Simple forms would speed up weekly curation.
+10. **Chapter click-to-seek implementation** — postMessage to Bunny iframe on chapter click.
+11. **In-admin file upload (Bunny TUS)** — multipart upload of MP4 directly from `/admin/drafts/new` without touching the Bunny dashboard.
+12. **In-admin ElevenLabs transcription** — so the "Nýtt drag" flow doesn't require a pre-made transcript for native Icelandic one-offs.
 
-- **Migration `20260417_phase3_schedule.sql` not applied.** Dev mock renders — prod needs the SQL run against project `dvzwpwlgucsdyrkhrpah`.
-- **No admin UI for `schedule_slots`.** Edit in Supabase for now.
-- **Course progress is always 0.** `LeidCard` takes `moduleProgress` but nothing passes real values yet — needs light-auth + `user_lesson_progress` reads (Phase 4).
-- **Course detail page (`/namskeid/[slug]`) still uses the old design.** I didn't touch it this session — focused on the index. It still renders, just doesn't match the Leið card language. Worth a follow-up pass.
-- **Auto-VOD banner on broadcast end — deferred.** Plan §4.3 spec'd it; it needs a cron/webhook that watches `schedule.ended_at` and creates an episode draft. Real infra, not a one-file change.
-- **.ics export per schedule slot — deferred.** The "Áminning" button per slot. Small but out of scope this session.
-- **The old `/api/schedule` FTP route still exists** and still points at 212.30.195.77. Not called by any current component. Safe to leave in place as a deprecated fallback; worth cleaning up when someone has context on that FTP source.
+### Intentionally deferred / never
+- **Article auto-generation from sermons** — do NOT revisit (Hawk scrapped it). Articles are Hawk's voice, written by hand.
+- **Candle presence mechanic** — do NOT revisit. Doesn't land culturally in Lutheran Iceland.
+- **AirPlay/Chromecast as primary TV path** — do NOT push. Wrong for the 50+ audience.
+- **Comments on any surface** — plan §10 flagged this as a management burden Hawk doesn't need.
+- **React Native Apple TV / Google TV / Roku apps** — deferred until Samsung/LG prove demand.
 
-## What should happen next
+## Security debt
 
-**Phase 3 tail** (small follow-ups):
-1. Apply the 3 pending migrations (`20260417_featured_weeks.sql`, `20260417_phase2_passages.sql`, `20260417_phase3_schedule.sql`).
-2. Redesign `/namskeid/[slug]` detail page to match the new system — Reading Column (vellum) for lesson text, new sidebar, instructor card, module ladder view.
-3. Add admin CRUD for `schedule_slots`, `featured_weeks`, and the `bible_ref`/`editor_note`/`chapters` fields on episodes. One screen per table, simple forms.
-4. .ics export on schedule rows ("Áminning" button).
+**Rotate the Gemini API key.** The one ending `CHnPE` was pasted in chat 2026-04-18 and must be considered compromised. Steps:
+1. Go to https://aistudio.google.com/app/apikey
+2. Delete the key ending `CHnPE`
+3. Create a replacement (scope to `sermon-translator-system` project)
+4. Update `GEMINI_API_KEY` in `~/Projects/omega-tv/.env.local` directly (editor, not chat)
+5. Delete this debt line from STATUS.md
 
-**Phase 4 — "The Sanctuary"** (plan §8):
-- Candle presence indicator + prayer wall on /live.
-- Light auth + watch progress + course module progress wiring.
-- Real search: tags + passage + title + transcript.
-- English content pipeline (language switcher in nav, EN article variants, subtitle preference persisted).
-- Postulasögur short-form sermon clip surface.
-- Auto-VOD banner on broadcast end.
+**Future key-sharing pattern with Claude:** paste directly into `.env.local` via editor yourself, then tell Claude *"I added <KEY_NAME> to .env.local"*. Claude uses it without ever seeing the value.
 
 ## Known Issues
 
-- Bunny library `628621` returned 0 videos in local dev — home + sermons fall back to mock data.
-- All three Phase 1–3 tables (`featured_weeks`, `bible_passages`, `schedule_slots`) not yet created in Supabase — UI renders from in-memory dev mocks.
-- Typegen stale — `featured-db.ts`, `threads-db.ts`, `schedule-db.ts`, `passages.ts` use untyped Supabase handles.
+- **Bunny library `628621`** returned 0 videos in local dev when last tested. Home + sermon detail fall back to mock data. Check when Azotus publishes to the same library — might be a local env thing.
+- **`episodes.transcript` column not yet applied** in Supabase (migration on disk but not run). Code gracefully handles missing column.
+- **Typegen stale** — `featured-db.ts`, `threads-db.ts`, `schedule-db.ts`, `sanctuary-db.ts`, `passages.ts` use untyped Supabase handles. Low priority; working as intended.
+
+### Fixed 2026-04-18 (late)
+
+- **UTF-8 double-encoding in `bible_passages` — FIXED.** When the original seed SQL was pasted via the Supabase SQL editor, the clipboard → paste → editor pipeline re-encoded UTF-8 as MacRoman, storing literal mojibake (`"Matteus 5:3‚Äì10"`, `"S√¶lir eru f√°t√¶kir √≠ anda..."`) as real UTF-8 bytes. Browser then faithfully rendered the mojibake. Fixed by UPDATEing all 5 seed rows directly via the service-role client from a Node script (bypassing the clipboard). Migration file `supabase/migrations/20260418_fix_bible_passages_encoding.sql` captures the correct text for reproducibility on fresh installs. **Lesson: avoid clipboard paste for SQL containing Icelandic text. Use `supabase db push`, Supabase CLI, or a direct Node script with the service role key.**
 
 ## Session Log
 
-- **2026-04-17 (latest):** Phase 3 shipped. `schedule_slots` migration + seed + DB helper + two-week mock fallback. `WeekSchedule` server component with 7-day switcher. `DagskraStrip` broadcast-aware home module (Núna/Næst/Seinna). `LeidCard` course archetype with pulsing module ladder. /live rewritten as server component; /namskeid rewritten with editorial hero + Leið grid; Navbar un-hid Námskeið. All 200s, tsc clean.
-- **2026-04-17 (mid):** Phase 2 — Scripture as connective tissue. Migration + passage helpers + threads DB + SermonPlayer with passage badge + caption switcher + ChapterList + ThreadsSidebar (Ritningin/Bæn/Lestur/Næsta útsending) + GluggiCard + ShareCopyLink. Sermon detail page rebuilt. Graceful empty states everywhere.
-- **2026-04-17 (early–mid):** Navbar + SectionHeader reworked after first visual review. Nav goes transparent over hero, warms on scroll. Ω wordmark in cream, no blue disc. Active-route kerti underline.
-- **2026-04-17 (early):** Phase 1 shipped — Altingi palette, Source Serif 4, Broadcast Hero, Styrkja ribbon, ink-arrive + warm-hover motion rules.
+- **2026-04-18 (late):** Phase A shipped ("/admin/drafts" inbox, manual "Nýtt drag", Gemini metadata generator). Phase 4 reworked per Hawk feedback (candles dropped, prayer-first). Gemini key added + proven on real Icelandic sermon (correctly identified ISA.40.31). Admin password reset for haukur1982@gmail.com. Article generator considered, built, scrapped per Hawk's direction. TV app future plan documented in `docs/tv-app-considerations.md`. Four commits pushed to origin/main.
+- **2026-04-17 (latest):** Phase 3 — schedule DB + day switcher + Dagskráin strip + Leið course cards + /namskeid un-hidden.
+- **2026-04-17 (mid):** Phase 2 — Scripture connective tissue, sermon detail rebuilt.
+- **2026-04-17 (early–mid):** Navbar + SectionHeader reworked after initial visual review.
+- **2026-04-17 (early):** Phase 1 — Altingi palette, Source Serif 4, Broadcast Hero, motion rules.
 - **2026-04-12:** Initial onboarding into Architect system.
 
 ## Notes for Cowork / memory.md
 
-- **Pattern to reuse across all Hawk projects**: **database-first with in-memory dev mock fallbacks**. Both `schedule-db.ts` (Phase 3) and `sermons/[id]/page.tsx` (Phase 2) use the same pattern: query Supabase, fall back to a small hand-curated mock that mirrors the migration seed when the query returns empty. Lets design and backend progress in parallel without blocking.
-- **Phase 3 vocabulary**: *Dagskráin* (the programming, the new home strip), *Leið* (course card — the "path" with visible module ladder), *Í beinni / Beint* (live broadcast; amber-on-red pill next to the time).
-- The Leið card's **module ladder is load-bearing design**. It turns "course" from a passive trailer (Netflix "Start watching" card) into an active path with visible milestones. Worth lifting to any Hawk project with multi-step content — Cross Formation discipleship tracks, NHRM Youth reading plans.
-- Navbar is now at **seven items**. Any more and it'll need a second tier. Keep an eye on it.
+- **Pattern to reuse across all Hawk projects**: **database-first with in-memory dev mock fallbacks**. Lets design and backend progress in parallel.
+- **Pattern to reuse**: **pluggable LLM script with mock fallback** (see `scripts/generate-metadata.ts`). Mock mode for design + no-API testing; real Gemini when keyed. Mock intentionally refuses to guess high-risk fields (`bible_ref`). Drift prevention is load-bearing.
+- **Vocabulary now locked in**: Altingi palette (nótt/mold/torfa/reykur/norðurljós/kerti/gull/skrá/ljós/moskva/steinn/blóð), Vaka/Kveða/Greinar/Tilvísun/Yfirskrift/Efni/Lestur/Merki/Meta/Kóði/Ritskrift typography roles, Gluggi/Síða/Leið/Blik card archetypes, Dagskráin/Sending/Bréf content types.
+- **Omega's theological backbone is prayer.** Design decisions must reflect this — prayer is the soul, not a feature.
+- **Omega's audience is 80% over 50.** Every UX decision weighted toward tablet/TV readability, big tap targets, hover-independent interaction. AirPlay/Chromecast is NOT a valid TV fallback for this audience.
+- **Articles stay Hawk's voice.** No auto-generation from sermons, ever.
