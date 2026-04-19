@@ -17,15 +17,32 @@ Videos in a language other than Icelandic go through Azotus's full pipeline:
 Existing at `~/Projects/Azotus/workers/vod_publisher.py`.
 Needs one change (see "Azotus native-IS mode" below) and one wiring update (subprocess call to omega-tv's metadata script).
 
-### 2. Azotus Lite (native Icelandic, no translation)
-Videos already in Icelandic still need a transcript for metadata generation. They go through Azotus with a "native" flag that:
-- Transcribes (ElevenLabs) — always
-- **Skips** translation + subtitle burn — saves tokens + time
-- Uploads the raw MP4 to Bunny
-- Calls `generate-metadata.ts` with the transcript
-- Upserts draft episode
+### 2. Native Icelandic — `scripts/publish-native-is.ts` (shipped 2026-04-19)
+Videos already in Icelandic skip Azotus entirely for now. Hawk runs one CLI command:
 
-This is the `TODO` change in Azotus. See below.
+```bash
+pnpm exec tsx --env-file=.env.local scripts/publish-native-is.ts \
+  /path/to/sermon.mp4 \
+  --transcript /path/to/transcript.txt \
+  --show "Sunnudagssamkoma" \
+  --title "Trúin sem sigrar" \
+  --episode 12
+```
+
+What happens:
+1. Uploads the raw MP4 to Bunny Stream (library 628621)
+2. Waits for Bunny to finish transcoding
+3. Creates or reuses the series row in Supabase
+4. Calls the shared `generateMetadata()` helper (Gemini-backed) against the transcript
+5. Upserts a draft episode (`status='draft'`) with full Gemini metadata —
+   title, description, editor_note, bible_ref, chapters, tags, transcript
+6. Prints the `/admin/drafts/<id>` review URL
+
+Transcript formats supported: `.txt`, `.vtt` (WebVTT timings stripped), or Azotus's `skeleton.json` (extracts from `lines[]` or `segments[]`).
+
+If `--transcript` is omitted, the draft is created with minimal metadata (filename-based title only) and the reviewer fills in everything manually.
+
+**Azotus auto-invocation is a follow-up** — will wire into `omega_manager.py`'s pipeline in a dedicated Azotus session so native-IS folder drops trigger this automatically. See below for the design.
 
 ### 3. Manual "Nýtt drag" (everything else)
 For one-offs that aren't in any Azotus folder watcher:
