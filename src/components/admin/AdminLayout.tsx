@@ -15,7 +15,8 @@ import {
     ChevronRight,
     Loader2,
     MessageSquare,
-    Inbox
+    Inbox,
+    Star
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import '@/styles/admin.css';
@@ -27,6 +28,7 @@ interface AdminLayoutProps {
 const navItems = [
     { href: '/admin/dashboard', label: 'Yfirlit', icon: LayoutDashboard },
     { href: '/admin/drafts', label: 'Innhólf', icon: Inbox },
+    { href: '/admin/featured', label: 'Vikuforsíða', icon: Star },
     { href: '/admin/series', label: 'Þáttaraðir', icon: Film },
     { href: '/admin/videos', label: 'Myndbönd', icon: Film },
     { href: '/admin/articles', label: 'Greinar', icon: FileText },
