@@ -91,6 +91,80 @@ Test end-to-end:
 pnpm exec tsx --env-file=.env.local scripts/generate-metadata.ts path/to/transcript.vtt <bunny_guid>
 ```
 
+## Broadcast schedule enrichment — playout XML + programs table (shipped 2026-04-19)
+
+The playout system posts a daily XML schedule to FTP (same file the cable
+network reads). The website auto-imports and enriches it:
+
+```
+Playout system → YYYY_MM_DD_00_00_00.xml → FTP (212.30.195.77)
+                                              │
+                                              ├→ Cable network (unchanged)
+                                              │
+                                              └→ POST /api/admin/schedule/sync-xml
+                                                     │
+                                                     ├─ fetch XML via basic-ftp
+                                                     ├─ parse (handles _x0032_ encoding)
+                                                     ├─ compute end-times from next starts
+                                                     ├─ title → programs.title lookup
+                                                     ├─ enrich with type / host / desc /
+                                                     │  is_live / is_featured / series_id
+                                                     └─ upsert into schedule_slots
+                                                        (is_manual_override=FALSE,
+                                                         xml_source_id = XML <ID>)
+```
+
+### The `programs` enrichment catalog
+
+Defined once per recurring show in `/admin/programs`. Fields:
+- `title` (unique, matches XML title exactly)
+- `program_type` ('service' | 'prayer_night' | 'teaching' | 'broadcast' | 'rerun' | 'special' | 'filler')
+- `host_name`
+- `description`
+- `is_usually_live` (live by default when this show airs)
+- `is_featured_default`
+- `default_bible_ref` (optional OSIS)
+- `default_tags`
+- `series_id` (optional link into series table)
+
+Seeded with ~31 Omega shows via `scripts/seed-programs.ts`. When new
+titles appear in the XML that don't have a `programs` row, the sync
+endpoint returns them as `unlabeled` — the `/admin/schedule` page
+shows a banner: *"5 óþekktar sýningar — skráðu þær í Sýningarskrá."*
+
+### Manual overrides survive sync
+
+Slots created in `/admin/schedule` manually get `is_manual_override=TRUE`.
+The XML sync only purges rows with `is_manual_override=FALSE` before
+re-importing, so ad-hoc admin edits (special events, guest bookings)
+stay put across daily syncs.
+
+### Future: Vercel Cron for hands-free daily sync
+
+Add to `vercel.json`:
+```json
+{
+  "crons": [
+    { "path": "/api/admin/schedule/sync-xml", "schedule": "5 0 * * *" }
+  ]
+}
+```
+The endpoint currently requires admin-session auth; for cron, wrap in
+a separate endpoint that accepts a service-key header, or use Vercel's
+built-in cron authentication.
+
+### Standing rule: non-ASCII SQL is always service-role path
+
+The Supabase SQL editor clipboard pipeline corrupts UTF-8 into mojibake
+(observed 2026-04-18). **Never paste Icelandic text through the SQL
+editor.** Instead:
+1. Keep DDL (CREATE TABLE, ALTER, policies) in migration files — pure ASCII.
+2. Write seeds in `scripts/seed-*.ts` TypeScript, run via
+   `pnpm exec tsx --env-file=.env.local scripts/seed-*.ts`.
+3. The service-role client preserves UTF-8 end-to-end.
+
+See `scripts/seed-programs.ts` for the current reference pattern.
+
 ## TODO — Azotus native-IS mode
 
 **Project**: `~/Projects/Azotus`

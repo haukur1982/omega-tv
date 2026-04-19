@@ -5,7 +5,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/lib/supabase';
 import {
     Loader2, Plus, Trash2, Save, X, Radio, Star, CheckCircle2, Clock,
-    ChevronLeft, ChevronRight,
+    ChevronLeft, ChevronRight, Download, AlertCircle,
 } from 'lucide-react';
 
 /**
@@ -81,6 +81,8 @@ export default function AdminSchedulePage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [creatingOnDay, setCreatingOnDay] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [syncing, setSyncing] = useState(false);
+    const [syncResult, setSyncResult] = useState<{ imported: number; unlabeled: string[]; skipped_manual: number } | null>(null);
 
     const weekStartIso = useMemo(() => isoDate(weekStart), [weekStart]);
     const days = useMemo(() => {
@@ -132,6 +134,31 @@ export default function AdminSchedulePage() {
         setCreatingOnDay(null);
         setError(null);
     };
+
+    const syncXml = useCallback(async () => {
+        setSyncing(true);
+        setSyncResult(null);
+        setError(null);
+        const { data: { session } } = await supabase.auth.getSession();
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        };
+        const res = await fetch('/api/admin/schedule/sync-xml', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ date: selectedDateIso }),
+        });
+        const data = await res.json().catch(() => ({ error: 'Villa' }));
+        if (!res.ok) {
+            setError(data.error ?? 'Innflutningur tókst ekki.');
+            setSyncing(false);
+            return;
+        }
+        setSyncResult({ imported: data.imported, unlabeled: data.unlabeled ?? [], skipped_manual: data.skipped_manual ?? 0 });
+        setSyncing(false);
+        await load();
+    }, [selectedDateIso, load]);
 
     const handleDelete = async (slotId: string) => {
         if (!confirm('Eyða þessu dagskrárhorfi?')) return;
@@ -243,14 +270,55 @@ export default function AdminSchedulePage() {
 
                 {/* Slots for selected day */}
                 <section>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', gap: '10px', flexWrap: 'wrap' }}>
                         <h2 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--admin-text, #eee)' }}>
                             {WEEKDAY_NAMES_IS[selectedDayIdx]} {selectedDate.getUTCDate()}. {MONTH_NAMES_IS[selectedDate.getUTCMonth()]}
                         </h2>
-                        <button type="button" onClick={() => startCreate(selectedDayIdx)} style={btnAmberSm}>
-                            <Plus size={14} /> Bæta við þætti
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button type="button" onClick={syncXml} disabled={syncing} style={{ ...btnGhostSm, opacity: syncing ? 0.5 : 1 }} title="Fá dagskrá þessa dags frá playout FTP">
+                                {syncing ? <Loader2 size={12} className="admin-spinner" /> : <Download size={12} />}
+                                Flytja inn XML
+                            </button>
+                            <button type="button" onClick={() => startCreate(selectedDayIdx)} style={btnAmberSm}>
+                                <Plus size={14} /> Bæta við þætti
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Sync result banner */}
+                    {syncResult && (
+                        <div
+                            style={{
+                                marginBottom: '12px',
+                                padding: '10px 14px',
+                                background: 'rgba(233, 168, 96, 0.08)',
+                                border: '1px solid rgba(233, 168, 96, 0.3)',
+                                borderRadius: '4px',
+                                fontSize: '0.84rem',
+                                color: 'var(--admin-text, #eee)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '6px',
+                            }}
+                        >
+                            <div>
+                                <CheckCircle2 size={13} style={{ display: 'inline-block', verticalAlign: '-1px', marginRight: '6px', color: 'var(--admin-accent, #E9A860)' }} />
+                                Flutti inn <strong>{syncResult.imported}</strong> þætti
+                                {syncResult.skipped_manual > 0 && <> · varðveitti <strong>{syncResult.skipped_manual}</strong> handvirka</>}
+                            </div>
+                            {syncResult.unlabeled.length > 0 && (
+                                <div style={{ paddingTop: '4px', borderTop: '1px solid rgba(233, 168, 96, 0.2)' }}>
+                                    <AlertCircle size={13} style={{ display: 'inline-block', verticalAlign: '-1px', marginRight: '6px', color: '#e8a14a' }} />
+                                    <strong>{syncResult.unlabeled.length} óþekktar sýningar</strong>, vantar í{' '}
+                                    <a href="/admin/programs" style={{ color: 'var(--admin-accent, #E9A860)', textDecoration: 'underline' }}>Sýningarskrá</a>:{' '}
+                                    <span style={{ fontStyle: 'italic', color: 'var(--admin-text-muted, #aaa)' }}>
+                                        {syncResult.unlabeled.slice(0, 5).join(' · ')}
+                                        {syncResult.unlabeled.length > 5 && ` … og ${syncResult.unlabeled.length - 5} fleiri`}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {loading ? (
                         <p style={{ color: 'var(--admin-text-muted, #888)', fontSize: '0.88rem' }}>
