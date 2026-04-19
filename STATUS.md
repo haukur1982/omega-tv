@@ -87,7 +87,7 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 7. **Add `GEMINI_API_KEY` to Azotus if it's going to call omega-tv's metadata generator** — or make the subprocess call pass through the omega-tv `.env.local` (cleaner, since the generator script reads it directly).
 
 ### Medium — XML pipeline hands-free mode
-8. **Vercel Cron for daily XML sync.** `vercel.json` snippet documented in `docs/content-pipeline.md`. Currently the sync endpoint requires admin-session auth — for cron, either wrap it in a service-key-authenticated sibling endpoint or use Vercel's built-in cron auth header check. ~30 min.
+8. **One-time Vercel setup for the cron.** Cron endpoint + `vercel.json` shipped (`b4ce426`). Still needs: generate `CRON_SECRET` via `openssl rand -hex 32`, add it to Vercel → Settings → Environment Variables → Production, redeploy. After that, daily 05:05 UTC sync runs with zero clicks. ~5 min of Vercel-dashboard work.
 
 ### Bigger future projects
 9. **Native TV app (Samsung Tizen + LG webOS)** — documented in `docs/tv-app-considerations.md`. Timeline estimate: 7–10 weeks. Prerequisites: item #4 above should be done first. Skip Apple TV / Google TV / Roku for v1.
@@ -98,6 +98,8 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 ### Done (recently)
 - ✅ **Admin CRUD for `schedule_slots` + `featured_weeks`** — Vikuforsíða + Schedule editors shipped 2026-04-19.
 - ✅ **Chapter click-to-seek** — shipped via `playerBus.ts` + Player.js integration.
+- ✅ **Vercel Cron for hands-free daily XML sync** — shipped `b4ce426`. Shared sync core at `src/lib/schedule-xml-sync.ts`, cron endpoint at `/api/cron/sync-schedule-xml`, `vercel.json` declares `5 5 * * *`. Just needs `CRON_SECRET` added in Vercel settings.
+- ✅ **Transcript persistence on draft episodes** — shipped `f86c563`. `episodes.transcript` migration + updated metadata generator + draft-create API. Unlocks future regeneration of chapters/descriptions without re-pasting source text.
 
 ### Intentionally deferred / never
 - **Article auto-generation from sermons** — do NOT revisit (Hawk scrapped it). Articles are Hawk's voice, written by hand.
