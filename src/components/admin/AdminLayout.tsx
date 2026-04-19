@@ -16,7 +16,8 @@ import {
     Loader2,
     MessageSquare,
     Inbox,
-    Star
+    Star,
+    CalendarDays
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import '@/styles/admin.css';
@@ -29,6 +30,7 @@ const navItems = [
     { href: '/admin/dashboard', label: 'Yfirlit', icon: LayoutDashboard },
     { href: '/admin/drafts', label: 'Innhólf', icon: Inbox },
     { href: '/admin/featured', label: 'Vikuforsíða', icon: Star },
+    { href: '/admin/schedule', label: 'Dagskrá', icon: CalendarDays },
     { href: '/admin/series', label: 'Þáttaraðir', icon: Film },
     { href: '/admin/videos', label: 'Myndbönd', icon: Film },
     { href: '/admin/articles', label: 'Greinar', icon: FileText },
