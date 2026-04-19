@@ -197,7 +197,12 @@ function generateMock(input: MetadataInput, transcript: string): GeneratedMetada
 export async function upsertDraftEpisode(
     bunnyVideoId: string,
     meta: GeneratedMetadata,
-    extra: { durationSec?: number; language_primary?: 'is' | 'en' } = {},
+    extra: {
+        durationSec?: number;
+        language_primary?: 'is' | 'en';
+        /** Raw transcript text (will be stored for downstream generators). */
+        transcript?: string;
+    } = {},
 ): Promise<string | null> {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -223,6 +228,11 @@ export async function upsertDraftEpisode(
         language_primary: extra.language_primary ?? 'is',
         status: 'draft',
     };
+    // Persist the transcript for downstream generators (articles,
+    // devotionals, study guides). Strip VTT timing so we store clean text.
+    if (extra.transcript) {
+        payload.transcript = stripVttTiming(extra.transcript).trim();
+    }
     // episode_number is NOT NULL — new rows need a default.
     // Reviewer assigns the real number during editing.
     if (!existing) payload.episode_number = 1;
@@ -264,7 +274,7 @@ async function main() {
 
     if (bunnyId) {
         console.log(`\n→ Upserting draft episode for bunny_video_id=${bunnyId}…`);
-        const id = await upsertDraftEpisode(bunnyId, meta);
+        const id = await upsertDraftEpisode(bunnyId, meta, { transcript });
         if (id) console.log(`✓ Draft ready at /admin/drafts/${id}`);
         else console.error('✗ Upsert failed');
     } else {

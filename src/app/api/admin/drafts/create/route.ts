@@ -117,6 +117,11 @@ export async function POST(req: NextRequest) {
         status: 'draft',
         episode_number: 1, // reviewer sets the real number
     };
+    // Persist the transcript so downstream generators (articles etc.)
+    // can re-read it without the user re-pasting.
+    if (body.transcript && body.transcript.trim().length > 40) {
+        payload.transcript = body.transcript.trim();
+    }
 
     const { data: created, error } = await sb
         .from('episodes')
