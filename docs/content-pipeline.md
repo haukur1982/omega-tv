@@ -139,19 +139,55 @@ The XML sync only purges rows with `is_manual_override=FALSE` before
 re-importing, so ad-hoc admin edits (special events, guest bookings)
 stay put across daily syncs.
 
-### Future: Vercel Cron for hands-free daily sync
+### Hands-free daily sync — Vercel Cron (shipped 2026-04-19)
 
-Add to `vercel.json`:
+The admin "Flytja inn XML" button is for one-off resyncs. The day-to-day
+sync runs automatically via Vercel Cron:
+
+```
+Vercel Cron (05:05 UTC daily)
+   │  Authorization: Bearer $CRON_SECRET
+   ▼
+GET /api/cron/sync-schedule-xml
+   │
+   └─ delegates to syncScheduleXmlForDate(today)
+       (shared core with the admin endpoint)
+```
+
+`vercel.json`:
 ```json
 {
   "crons": [
-    { "path": "/api/admin/schedule/sync-xml", "schedule": "5 0 * * *" }
+    { "path": "/api/cron/sync-schedule-xml", "schedule": "5 5 * * *" }
   ]
 }
 ```
-The endpoint currently requires admin-session auth; for cron, wrap in
-a separate endpoint that accepts a service-key header, or use Vercel's
-built-in cron authentication.
+
+**One-time setup in Vercel → Project → Settings → Environment Variables:**
+
+1. Generate a long random secret (e.g. `openssl rand -hex 32`).
+2. Add `CRON_SECRET` with that value to Production (and Preview if you
+   want cron hitting preview deploys — usually no).
+3. Redeploy. Vercel automatically sends
+   `Authorization: Bearer $CRON_SECRET` on cron invocations; the endpoint
+   refuses anything else with 401.
+
+**Manual testing from the terminal:**
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" \
+     https://omega.is/api/cron/sync-schedule-xml
+# ?date=2026-04-20  to force a specific day
+```
+
+**Behavior on a missing XML file:** if the playout system hasn't
+uploaded today's file yet (weekends, late upload), the cron logs
+"not on FTP yet" and returns 200 with `{ok: false, reason: 'not_found'}`
+— no alert, no failure. The admin UI still shows yesterday's data and
+Hawk can click the manual button later if needed.
+
+**Behavior on manual overrides:** identical to the admin path. The
+sync core purges only `is_manual_override=FALSE` rows before
+re-inserting, so ad-hoc admin edits survive the nightly cron forever.
 
 ### Standing rule: non-ASCII SQL is always service-role path
 

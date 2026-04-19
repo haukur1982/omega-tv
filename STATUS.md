@@ -1,20 +1,21 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-18 (late)
-**Last Agent:** Claude Code — content pipeline + TV app consideration session
+**Last Updated:** 2026-04-19 (evening)
+**Last Agent:** Claude Code — admin editors + playout XML enrichment session
 **Branch:** main
-**Build Status:** Dev on :3005, all pages 200, tsc clean. Four commits pushed to origin/main today.
+**Build Status:** Dev on :3010, all pages 200, tsc clean. Seven commits on origin/main; three new today (Vikuforsíða editor, Schedule editor, Playout XML sync + programs catalog).
 
 ## Where things stand right now
 
-Six phases of work shipped + pushed in the last two days. The site is in a very different place than it was 48 hours ago:
+Seven phases of work shipped + pushed across three days. The site went from "Netflix clone with Ken Burns hero" to a broadcast-aware Christian media platform with a fully-automated content + schedule pipeline:
 
 1. **Phase 1** — Altingi palette, Source Serif 4, Broadcast Hero ✓ pushed
 2. **Phase 2** — Scripture as connective tissue (sermon detail rebuilt) ✓ pushed
 3. **Phase 3** — Broadcast schedule + courses un-hidden ✓ pushed
 4. **Phase 4** — Prayer as the soul of /beint (candles dropped, PrayerHall full-width) ✓ pushed
 5. **Phase A** — `/admin/drafts` inbox + metadata generator (Gemini) + "Nýtt drag" ✓ pushed
-6. **Catch-up commit** — pre-existing drift folded in ✓ pushed
+6. **Admin editors** — Vikuforsíða + Schedule CRUD in-browser (no more Supabase dashboard clicks) ✓ pushed
+7. **Playout XML sync + programs catalog** — daily FTP pull auto-enriches schedule slots from `programs` table; manual overrides protected ✓ pushed
 
 Plus ongoing docs:
 - `~/.claude/plans/twinkling-mapping-pizza.md` — full 4-phase plan
@@ -36,7 +37,19 @@ Three entry paths (all landing in the same `/admin/drafts` inbox):
 
 Review flow: open draft → fix fields → **Vista og birta** → live on omega.is in 2–3 minutes.
 
-## Today's key decisions (2026-04-18)
+## Today's key decisions (2026-04-19)
+
+### ✅ Shipped + pushed today
+- **Vikuforsíða editor** (`/admin/featured`) — weekly home hero curation in-browser, replaces hand-editing `featured_weeks` in Supabase.
+- **Schedule editor** (`/admin/schedule`) — weekly Dagskrá CRUD with day switcher + inline forms. Manual slots marked `is_manual_override=TRUE` so they survive the XML sync.
+- **Programs enrichment catalog** (`/admin/programs`) — one row per recurring show (title/type/host/description/live+featured defaults). 31 Omega shows seeded via service-role Node script. Matches XML titles exactly for daily auto-enrichment.
+- **Playout XML importer** — `POST /api/admin/schedule/sync-xml`: fetches today's XML from FTP `212.30.195.77`, parses (handles `_x0032_` Access encoding), computes end-times from next starts, enriches via `programs` lookup, purges non-manual slots for the day, re-inserts. `/admin/schedule` surfaces unlabeled titles as a banner nudge.
+- **Standing rule captured:** never paste Icelandic text through Supabase SQL editor clipboard — it silently corrupts UTF-8 into MacRoman-stored-as-UTF-8 mojibake. DDL migrations stay pure ASCII; seeds live in `scripts/seed-*.ts` via service-role client. See §Standing rule below + `docs/content-pipeline.md`.
+
+### 💡 Hawk's aesthetic call (2026-04-19 afternoon)
+- **Brown/warm palette is not his favorite after 3 days of sitting with it.** "Not my favorite" but he's explicit that the functional work is great — chapters, descriptions, prayer wall, content pipeline polish. My recommendation: don't piecemeal-redesign the palette in-chat. Wait for a proper design pass with better tooling. The Altingi tokens all route through CSS custom properties, so a palette swap later is a one-file change.
+
+## Earlier decisions (2026-04-18)
 
 ### ✅ Shipped + pushed
 - **Phase 4 rework**: candles dropped entirely. Prayer is the soul of /beint. Full-width `PrayerHall` with multi-column masonry, real "bið með" pray-along (cookie-rate-limited, atomic via `increment_prayer_count` RPC). `PrayerPresence` module on home. Three-cell + submission form flow on /beint.
@@ -61,24 +74,30 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 ## Outstanding to-dos (in rough priority order)
 
 ### Quick wins (next focused session, small)
-1. **Apply `20260418_episode_transcript.sql`** to Supabase (copy-paste in SQL editor; one ALTER TABLE). Already has the column for future use.
-2. **Commit the uncommitted transcript-persistence changes** (`generate-metadata.ts` + `drafts/create/route.ts`) — small, low-risk.
+1. **Test the XML sync end-to-end in-browser.** Visit `/admin/schedule`, click **"Flytja inn XML"**, confirm today's slots come in from FTP, verify enrichment (host names, descriptions, live/featured flags), and check the unlabeled-programs banner if unfamiliar titles appear. This is the only unverified piece of the XML pipeline — everything else is typecheck-clean but hasn't been run against the live FTP end-to-end.
+2. **Apply `20260418_episode_transcript.sql`** to Supabase (one ALTER TABLE, ASCII-safe). Adds `episodes.transcript` column for future regeneration of chapters/descriptions + transcript search.
 3. **Rotate the Gemini key** — the one ending `CHnPE` was pasted in chat and is compromised. Delete at https://aistudio.google.com/app/apikey, create a replacement, update `.env.local` directly.
 
 ### Medium-priority UX improvements for the 50+ audience
 4. **Tablet / iPad polish pass on omega.is** — hover → tap conversions, bump the smallest labels above 0.75rem, enforce 44×44px tap targets, verify nav clarity. ~30–45 min session. Called out as prerequisite in `docs/tv-app-considerations.md`.
-5. **Chapter click-to-seek on sermon detail player** — currently chapters are visual only. Making them actually seek the Bunny iframe (via postMessage `setCurrentTime`) is the single highest-leverage move for 50+ viewers. Small session, huge UX win. Hawk specifically loves the chapter feature.
+5. **Chapter click-to-seek on sermon detail player** — Player.js bus + ChapterList shipped; chapter click seeks the Bunny iframe, and active chapter highlights from `timeupdate`. Leaving this line in the TODO list only to flag the follow-up work: verify active highlighting on a real long sermon with real chapter data, and decide whether to persist last-watched-chapter in a cookie.
 
 ### Cross-project
-6. **Azotus native-IS mode** — in `~/Projects/Azotus/workers/vod_publisher.py`, add a branch: if input_lang == target_lang, skip translate + subtitle-burn, just transcribe and upload. Plus subprocess call to omega-tv's `generate-metadata.ts`. See `docs/content-pipeline.md` for exact instructions. ~20 min in the Azotus project.
+6. **Azotus native-IS mode** — in `~/Projects/Azotus/workers/vod_publisher.py`, add a branch: if input_lang == target_lang, skip translate + subtitle-burn, just transcribe and upload. Plus subprocess call to omega-tv's `generate-metadata.ts`. See `docs/content-pipeline.md` for exact instructions. ~20 min in the Azotus project. Standalone CLI `scripts/publish-native-is.ts` exists in omega-tv in the meantime.
 7. **Add `GEMINI_API_KEY` to Azotus if it's going to call omega-tv's metadata generator** — or make the subprocess call pass through the omega-tv `.env.local` (cleaner, since the generator script reads it directly).
 
+### Medium — XML pipeline hands-free mode
+8. **Vercel Cron for daily XML sync.** `vercel.json` snippet documented in `docs/content-pipeline.md`. Currently the sync endpoint requires admin-session auth — for cron, either wrap it in a service-key-authenticated sibling endpoint or use Vercel's built-in cron auth header check. ~30 min.
+
 ### Bigger future projects
-8. **Native TV app (Samsung Tizen + LG webOS)** — documented in `docs/tv-app-considerations.md`. Timeline estimate: 7–10 weeks. Prerequisites: items #4 and #5 above should be done first. Skip Apple TV / Google TV / Roku for v1.
-9. **Admin CRUD for `schedule_slots` + `featured_weeks`** — currently edited in Supabase directly. Simple forms would speed up weekly curation.
-10. **Chapter click-to-seek implementation** — postMessage to Bunny iframe on chapter click.
-11. **In-admin file upload (Bunny TUS)** — multipart upload of MP4 directly from `/admin/drafts/new` without touching the Bunny dashboard.
-12. **In-admin ElevenLabs transcription** — so the "Nýtt drag" flow doesn't require a pre-made transcript for native Icelandic one-offs.
+9. **Native TV app (Samsung Tizen + LG webOS)** — documented in `docs/tv-app-considerations.md`. Timeline estimate: 7–10 weeks. Prerequisites: item #4 above should be done first. Skip Apple TV / Google TV / Roku for v1.
+10. **In-admin file upload (Bunny TUS)** — multipart upload of MP4 directly from `/admin/drafts/new` without touching the Bunny dashboard.
+11. **In-admin ElevenLabs transcription** — so the "Nýtt drag" flow doesn't require a pre-made transcript for native Icelandic one-offs.
+12. **Admin CRUD for programs catalog beyond basics** — the seed covers 31 shows but when new Icelandic titles land in XML, ergonomics for labeling them from the banner would save clicks. Currently: banner shows unlabeled titles → Hawk clicks into `/admin/programs` and adds them. Could be one-click from the banner.
+
+### Done (recently)
+- ✅ **Admin CRUD for `schedule_slots` + `featured_weeks`** — Vikuforsíða + Schedule editors shipped 2026-04-19.
+- ✅ **Chapter click-to-seek** — shipped via `playerBus.ts` + Player.js integration.
 
 ### Intentionally deferred / never
 - **Article auto-generation from sermons** — do NOT revisit (Hawk scrapped it). Articles are Hawk's voice, written by hand.
@@ -134,6 +153,7 @@ The SQL editor clipboard paste is the ONE unsafe path and also the one I kept de
 
 ## Session Log
 
+- **2026-04-19 (evening):** Three big ships: (1) Vikuforsíða editor `/admin/featured` with create/edit/delete + fallback flag. (2) Schedule editor `/admin/schedule` with week navigation + day switcher + inline CRUD, `is_manual_override` protection. (3) Playout XML sync + programs enrichment catalog — daily FTP pull from `212.30.195.77`, 31 Omega recurring shows seeded via service-role script, auto-enrichment on import, manual slots protected. Hot UTF-8 mojibake incident during programs seed (Hawk spotted commented mojibake SQL: *"I usually never look at your coat, but is this correct?"*) — cleaned migration to DDL-only-ASCII, moved seed to service-role Node script, standing rule documented in `docs/content-pipeline.md` §"Standing rule: non-ASCII SQL is always service-role path". Fixed 27 already-corrupted `schedule_slots` rows + 3 prayer rows + 1 `featured_weeks` row with `scripts/fix-utf8-encoding.ts`. Three commits pushed: `5a27426`, `e5bd095`, `ed574b5`.
 - **2026-04-18 (late):** Phase A shipped ("/admin/drafts" inbox, manual "Nýtt drag", Gemini metadata generator). Phase 4 reworked per Hawk feedback (candles dropped, prayer-first). Gemini key added + proven on real Icelandic sermon (correctly identified ISA.40.31). Admin password reset for haukur1982@gmail.com. Article generator considered, built, scrapped per Hawk's direction. TV app future plan documented in `docs/tv-app-considerations.md`. Four commits pushed to origin/main.
 - **2026-04-17 (latest):** Phase 3 — schedule DB + day switcher + Dagskráin strip + Leið course cards + /namskeid un-hidden.
 - **2026-04-17 (mid):** Phase 2 — Scripture connective tissue, sermon detail rebuilt.
@@ -149,3 +169,5 @@ The SQL editor clipboard paste is the ONE unsafe path and also the one I kept de
 - **Omega's theological backbone is prayer.** Design decisions must reflect this — prayer is the soul, not a feature.
 - **Omega's audience is 80% over 50.** Every UX decision weighted toward tablet/TV readability, big tap targets, hover-independent interaction. AirPlay/Chromecast is NOT a valid TV fallback for this audience.
 - **Articles stay Hawk's voice.** No auto-generation from sermons, ever.
+- **Pattern to reuse: XML-driven schedule with manual-override safety.** Daily import pulls bare schedule from upstream, enriches via lookup table, purges only non-manual rows before re-insert. Ad-hoc admin edits survive forever. Generalizes to any project where one upstream system owns the source-of-truth but humans want to override locally.
+- **Pattern to reuse: programs catalog as enrichment lookup.** One row per recurring entity with all the rich metadata defaulted once. Inbound feeds carry only the match key (title). Matching on a TEXT unique constraint keeps it cheap and idempotent. When unmatched rows appear, surface them as a banner nudge rather than silently dropping enrichment.
