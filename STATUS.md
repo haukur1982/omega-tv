@@ -108,6 +108,31 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 
 - **UTF-8 double-encoding in `bible_passages` — FIXED.** When the original seed SQL was pasted via the Supabase SQL editor, the clipboard → paste → editor pipeline re-encoded UTF-8 as MacRoman, storing literal mojibake (`"Matteus 5:3‚Äì10"`, `"S√¶lir eru f√°t√¶kir √≠ anda..."`) as real UTF-8 bytes. Browser then faithfully rendered the mojibake. Fixed by UPDATEing all 5 seed rows directly via the service-role client from a Node script (bypassing the clipboard). Migration file `supabase/migrations/20260418_fix_bible_passages_encoding.sql` captures the correct text for reproducibility on fresh installs. **Lesson: avoid clipboard paste for SQL containing Icelandic text. Use `supabase db push`, Supabase CLI, or a direct Node script with the service role key.**
 
+### 🚨 Still broken (top priority for next session) — same mojibake bug, multiple tables
+
+The UTF-8 corruption wasn't only in `bible_passages`. The same clipboard-paste pipeline corrupted every other seed with Icelandic text. Confirmed corrupted on 2026-04-18 (late):
+
+- **`featured_weeks`** — 1 fallback row. Visible on homepage hero. Kicker, headline (*"fyrir √çsland"*), and body all mojibake-encoded.
+- **`schedule_slots`** — all 27 rows. Visible in /live day switcher + home DagskraStrip. Program titles (*"Morgunb√¶n"*, *"√ç Snertingu"*, *"Fr√¶√∞sla"*) and descriptions.
+- **`prayers`** (broadcast prayers) — 3 rows seeded via `20260417_phase4_sanctuary.sql`. Visible on /live PrayerHall. Names (*"J√≥n"*, *"Sigr√∫n"*) and prayer content.
+
+**Fix pattern is identical to bible_passages:** write a Node script that UPDATEs each affected row with correct UTF-8 text, run via service-role client, bypass clipboard entirely. Should be ~5 minutes per table once the correct-text source is in hand (mostly re-typing from the original migration files).
+
+**Do this FIRST thing next session.** Every surface of the site currently looks broken to Icelandic visitors.
+
+### 📋 Standing rule — non-ASCII SQL pipeline
+
+Never use the Supabase SQL editor clipboard paste for seed data containing Icelandic/UTF-8 characters. Safe alternatives:
+
+1. **Direct service-role Node script** (what worked for bible_passages):
+   ```
+   node --env-file=.env.local -e "const sb = require('@supabase/supabase-js').createClient(...); sb.from('table').update({col: 'íslenskt text'}).eq(...)"
+   ```
+2. **Supabase CLI** (`supabase db push`) — reads local files directly, preserves encoding end-to-end.
+3. **psql connection** — bytes flow over TLS to Postgres without browser interpolation.
+
+The SQL editor clipboard paste is the ONE unsafe path and also the one I kept defaulting to because it's "easy." It's not easy — it's silently corrupting data.
+
 ## Session Log
 
 - **2026-04-18 (late):** Phase A shipped ("/admin/drafts" inbox, manual "Nýtt drag", Gemini metadata generator). Phase 4 reworked per Hawk feedback (candles dropped, prayer-first). Gemini key added + proven on real Icelandic sermon (correctly identified ISA.40.31). Admin password reset for haukur1982@gmail.com. Article generator considered, built, scrapped per Hawk's direction. TV app future plan documented in `docs/tv-app-considerations.md`. Four commits pushed to origin/main.
