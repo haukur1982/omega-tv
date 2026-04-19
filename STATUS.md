@@ -108,17 +108,16 @@ Review flow: open draft → fix fields → **Vista og birta** → live on omega.
 
 - **UTF-8 double-encoding in `bible_passages` — FIXED.** When the original seed SQL was pasted via the Supabase SQL editor, the clipboard → paste → editor pipeline re-encoded UTF-8 as MacRoman, storing literal mojibake (`"Matteus 5:3‚Äì10"`, `"S√¶lir eru f√°t√¶kir √≠ anda..."`) as real UTF-8 bytes. Browser then faithfully rendered the mojibake. Fixed by UPDATEing all 5 seed rows directly via the service-role client from a Node script (bypassing the clipboard). Migration file `supabase/migrations/20260418_fix_bible_passages_encoding.sql` captures the correct text for reproducibility on fresh installs. **Lesson: avoid clipboard paste for SQL containing Icelandic text. Use `supabase db push`, Supabase CLI, or a direct Node script with the service role key.**
 
-### 🚨 Still broken (top priority for next session) — same mojibake bug, multiple tables
+### ✅ UTF-8 mojibake fix — COMPLETE (2026-04-19 morning)
 
-The UTF-8 corruption wasn't only in `bible_passages`. The same clipboard-paste pipeline corrupted every other seed with Icelandic text. Confirmed corrupted on 2026-04-18 (late):
+All seeded Icelandic text is now clean across every table:
 
-- **`featured_weeks`** — 1 fallback row. Visible on homepage hero. Kicker, headline (*"fyrir √çsland"*), and body all mojibake-encoded.
-- **`schedule_slots`** — all 27 rows. Visible in /live day switcher + home DagskraStrip. Program titles (*"Morgunb√¶n"*, *"√ç Snertingu"*, *"Fr√¶√∞sla"*) and descriptions.
-- **`prayers`** (broadcast prayers) — 3 rows seeded via `20260417_phase4_sanctuary.sql`. Visible on /live PrayerHall. Names (*"J√≥n"*, *"Sigr√∫n"*) and prayer content.
+- **`featured_weeks`** — 1 fallback row fixed. Hero headline now renders *"Von og sannleikur fyrir Ísland."*
+- **`schedule_slots`** — all 27 rows fixed. Program titles (`Morgunbæn`, `Bænakvöld`, `Sunnudagssamkoma`, `Ísrael í brennidepli`, etc.) + descriptions + host names all clean.
+- **`prayers`** (broadcast prayers) — 3 rows fixed. Anna / Jón / Sigrún render correctly in the PrayerHall.
+- **`bible_passages`** — 5 rows fixed previously (see earlier entry).
 
-**Fix pattern is identical to bible_passages:** write a Node script that UPDATEs each affected row with correct UTF-8 text, run via service-role client, bypass clipboard entirely. Should be ~5 minutes per table once the correct-text source is in hand (mostly re-typing from the original migration files).
-
-**Do this FIRST thing next session.** Every surface of the site currently looks broken to Icelandic visitors.
+Fix tool: `scripts/fix-utf8-encoding.ts` — reusable repair script. Run via `pnpm exec tsx --env-file=.env.local scripts/fix-utf8-encoding.ts`. Idempotent; safe to re-run. Bypasses the clipboard entirely via service-role client.
 
 ### 📋 Standing rule — non-ASCII SQL pipeline
 
