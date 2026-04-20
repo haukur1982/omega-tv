@@ -9,7 +9,7 @@ import {
     Users,
     FileText,
     Film,
-    Quote,
+    Share2,
     Settings,
     LogOut,
     ChevronRight,
@@ -40,7 +40,7 @@ const navItems = [
     { href: '/admin/testimonials', label: 'Vitnisburðir', icon: MessageSquare },
     { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
     { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
-    { href: '/admin/quotes', label: 'Efnisverksmiðja', icon: Quote },
+    { href: '/admin/social', label: 'Samfélagsmiðlar', icon: Share2 },
 ];
 
 

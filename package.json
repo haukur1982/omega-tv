@@ -9,6 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/libre-baskerville": "^5.2.10",
+    "@fontsource/source-serif-4": "^5.2.9",
+    "@resvg/resvg-js": "^2.6.2",
     "@supabase/supabase-js": "^2.89.0",
     "@types/sharp": "^0.32.0",
     "basic-ftp": "^5.1.0",
@@ -20,6 +24,7 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "resend": "^6.7.0",
+    "satori": "^0.26.0",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
