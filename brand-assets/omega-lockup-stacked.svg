@@ -1,0 +1,46 @@
+<!--
+  Omega — stacked lockup (SECONDARY).
+
+  Structure:
+      [Ω mark]
+       OMEGA
+    LJÓS OG VON FYRIR ÍSLAND
+
+  The mark sits on top. The full wordmark OMEGA (no mark substitution
+  here — the mark is already shown above) appears centered underneath,
+  set in Source Serif 4 Bold at ~60% of hero size. Tagline at the base.
+
+  Used for: vertical contexts — email signature, Facebook profile,
+  newsletter header, print footer.
+
+  Uses currentColor for theming.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 460" fill="none">
+  <defs>
+    <mask id="omegaCutStacked" maskUnits="userSpaceOnUse">
+      <rect width="600" height="460" fill="white"/>
+      <!-- Cut at mark-y 202 + translate(180,30) = y=232, 6px strip -->
+      <rect x="180" y="232" width="240" height="6" fill="black"/>
+    </mask>
+  </defs>
+
+  <g mask="url(#omegaCutStacked)">
+    <!-- Omega mark, centered horizontally, 30px top padding -->
+    <g transform="translate(180, 30)">
+      <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+      <text x="120" y="202" fill="currentColor"
+            font-family="'Source Serif 4', 'Libre Baskerville', Georgia, serif"
+            font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+    </g>
+  </g>
+
+  <!-- OMEGA wordmark (full word, no mark substitution) — centered -->
+  <text x="300" y="358" fill="currentColor"
+        font-family="'Source Serif 4', 'Libre Baskerville', Georgia, serif"
+        font-size="74" font-weight="700" text-anchor="middle" letter-spacing="0.02em">OMEGA</text>
+
+  <!-- Tagline, centered -->
+  <text x="300" y="408" fill="currentColor"
+        font-family="Inter, -apple-system, 'Helvetica Neue', sans-serif"
+        font-size="22" font-weight="600" text-anchor="middle" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+</svg>

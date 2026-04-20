@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="is">
+<head>
+<meta charset="utf-8">
+<title>Omega — lockup system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@300;400;600;700;900&family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nott: #14120F;
+    --mold: #1B1814;
+    --torfa: #242019;
+    --skra: #F3EDE0;
+    --ljos: #F6F2EA;
+    --moskva: #B9B2A6;
+    --steinn: #7A7268;
+    --kerti: #E9A860;
+    --gull: #C88A3E;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0A0907; color: var(--ljos); font: 14px/1.55 -apple-system, sans-serif; }
+  h1 { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 700; margin: 0 0 6px; font-size: 32px; }
+  h1 .sub-serif { font-style: italic; font-weight: 400; color: var(--kerti); }
+  h2 { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 400; font-size: 20px; margin: 64px 0 12px; color: var(--kerti); letter-spacing: 0.02em; }
+  h3 { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 400; font-size: 14px; margin: 0 0 16px; color: var(--moskva); }
+  p.sub { color: var(--moskva); margin: 0 0 32px; max-width: 70ch; line-height: 1.65; }
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 40px; }
+
+  .banner { background: linear-gradient(135deg, #241F1A 0%, #1B1814 100%); border: 1px solid var(--torfa); border-radius: 8px; padding: 32px 40px; margin-bottom: 16px; }
+  .banner-tag { font-size: 11px; letter-spacing: 0.2em; color: var(--kerti); text-transform: uppercase; margin-bottom: 8px; }
+
+  .big-dark, .big-cream {
+    padding: 80px 56px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 420px;
+  }
+  .big-dark  { background: var(--nott);  color: var(--kerti); }
+  .big-cream { background: var(--skra);  color: var(--nott);  }
+
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+  .stack-dark, .stack-cream {
+    padding: 56px 32px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 540px;
+  }
+  .stack-dark  { background: var(--nott);  color: var(--kerti); }
+  .stack-cream { background: var(--skra);  color: var(--nott);  }
+
+  .lockup { display: inline-block; line-height: 0; }
+  .lockup svg { display: block; width: 100%; height: auto; }
+
+  .w-horizontal-xl { width: min(900px, 100%); }
+  .w-horizontal-md { width: 600px; }
+  .w-horizontal-sm { width: 360px; }
+  .w-stacked-md { width: 340px; }
+  .w-stacked-sm { width: 220px; }
+
+  .pane { display: flex; flex-direction: column; gap: 0; }
+  .pane-head { padding: 14px 20px; background: var(--torfa); border-radius: 6px 6px 0 0; font-family: 'Libre Baskerville', serif; font-weight: 700; color: var(--kerti); font-size: 13px; }
+  .pane-body { padding: 48px 32px; border-radius: 0 0 6px 6px; display: flex; align-items: center; justify-content: center; min-height: 280px; }
+
+  .size-strip { display: flex; gap: 48px; align-items: center; justify-content: center; padding: 56px 40px; background: var(--nott); color: var(--kerti); border-radius: 10px; flex-wrap: wrap; }
+  .size-strip > div { text-align: center; }
+  .size-strip .lbl { font-size: 11px; color: var(--moskva); margin-top: 16px; letter-spacing: 0.15em; }
+
+  .footnote { color: var(--moskva); max-width: 72ch; margin-top: 64px; padding: 24px 28px; background: var(--torfa); border-radius: 8px; font-size: 13px; line-height: 1.75; }
+  .footnote strong { color: var(--ljos); }
+  .footnote code { background: var(--nott); color: var(--kerti); padding: 2px 6px; border-radius: 3px; font-family: ui-monospace, monospace; }
+  hr { border: none; border-top: 1px solid var(--torfa); margin: 56px 0 16px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <div class="banner">
+    <div class="banner-tag">Milestone 2 · lockup system</div>
+    <h1>The Omega lockup, <span class="sub-serif">composed</span></h1>
+    <p class="sub" style="margin-bottom: 0; margin-top: 12px;">
+      Mark + wordmark + tagline. Three lockups covering every context: horizontal (primary),
+      stacked (vertical), mark-only (small spaces). All built from <code>omega-mark.svg</code>.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- HERO: horizontal lockup, large -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2>Horizontal lockup — primary, Kerti on Night</h2>
+  <p class="sub">
+    The mark acts as the "O" in OMEGA. MEGA wordmark in Source Serif 4 Bold at the same font-size as the Ω inside the mark — cap-heights align. Tagline beneath in Inter caps with 0.22em tracking for institutional dignity.
+  </p>
+  <div class="big-dark">
+    <span class="lockup w-horizontal-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" fill="none">
+        <defs><mask id="h1" maskUnits="userSpaceOnUse"><rect width="1000" height="300" fill="white"/><rect x="0" y="212" width="240" height="6" fill="black"/></mask></defs>
+        <g mask="url(#h1)">
+          <g transform="translate(0, 10)">
+            <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+            <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+          </g>
+        </g>
+        <text x="248" y="212" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" letter-spacing="-0.005em">MEGA</text>
+        <text x="252" y="262" fill="currentColor" font-family="Inter, sans-serif" font-size="26" font-weight="600" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+      </svg>
+    </span>
+  </div>
+
+  <h2>Horizontal lockup — inverse, Night on Cream</h2>
+  <div class="big-cream">
+    <span class="lockup w-horizontal-xl">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" fill="none">
+        <defs><mask id="h2" maskUnits="userSpaceOnUse"><rect width="1000" height="300" fill="white"/><rect x="0" y="212" width="240" height="6" fill="black"/></mask></defs>
+        <g mask="url(#h2)">
+          <g transform="translate(0, 10)">
+            <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+            <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+          </g>
+        </g>
+        <text x="248" y="212" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" letter-spacing="-0.005em">MEGA</text>
+        <text x="252" y="262" fill="currentColor" font-family="Inter, sans-serif" font-size="26" font-weight="600" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+      </svg>
+    </span>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- Horizontal at smaller scales -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2>Horizontal at different sizes</h2>
+  <p class="sub">Same lockup at three sizes — proves it holds up from large hero (website header, Facebook cover) down to small (email signature).</p>
+  <div class="size-strip">
+    <div>
+      <span class="lockup w-horizontal-md">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" fill="none">
+          <defs><mask id="h3" maskUnits="userSpaceOnUse"><rect width="1000" height="300" fill="white"/><rect x="0" y="212" width="240" height="6" fill="black"/></mask></defs>
+          <g mask="url(#h3)">
+            <g transform="translate(0, 10)">
+              <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+              <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+            </g>
+          </g>
+          <text x="248" y="212" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" letter-spacing="-0.005em">MEGA</text>
+          <text x="252" y="262" fill="currentColor" font-family="Inter, sans-serif" font-size="26" font-weight="600" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+        </svg>
+      </span>
+      <div class="lbl">600 px wide — website header</div>
+    </div>
+  </div>
+  <div class="size-strip" style="margin-top: 16px;">
+    <div>
+      <span class="lockup w-horizontal-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" fill="none">
+          <defs><mask id="h4" maskUnits="userSpaceOnUse"><rect width="1000" height="300" fill="white"/><rect x="0" y="212" width="240" height="6" fill="black"/></mask></defs>
+          <g mask="url(#h4)">
+            <g transform="translate(0, 10)">
+              <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+              <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+            </g>
+          </g>
+          <text x="248" y="212" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" letter-spacing="-0.005em">MEGA</text>
+          <text x="252" y="262" fill="currentColor" font-family="Inter, sans-serif" font-size="26" font-weight="600" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+        </svg>
+      </span>
+      <div class="lbl">360 px wide — email signature, footer</div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <!-- Stacked lockup -->
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <h2>Stacked lockup — vertical contexts</h2>
+  <p class="sub">
+    Mark on top; full <strong>OMEGA</strong> wordmark underneath (no mark substitution here — the mark is already shown above); tagline at the base. Used for: Facebook profile photo layouts, newsletter masthead, print footer, where vertical space is available but horizontal isn't.
+  </p>
+  <div class="row-2">
+    <div class="pane">
+      <div class="pane-head">Stacked — Kerti on Night</div>
+      <div class="pane-body on-dark stack-dark">
+        <span class="lockup w-stacked-md">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 460" fill="none">
+            <defs><mask id="s1" maskUnits="userSpaceOnUse"><rect width="600" height="460" fill="white"/><rect x="180" y="232" width="240" height="6" fill="black"/></mask></defs>
+            <g mask="url(#s1)">
+              <g transform="translate(180, 30)">
+                <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+                <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+              </g>
+            </g>
+            <text x="300" y="358" fill="currentColor" font-family="'Source Serif 4', serif" font-size="74" font-weight="700" text-anchor="middle" letter-spacing="0.02em">OMEGA</text>
+            <text x="300" y="408" fill="currentColor" font-family="Inter, sans-serif" font-size="22" font-weight="600" text-anchor="middle" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+          </svg>
+        </span>
+      </div>
+    </div>
+    <div class="pane">
+      <div class="pane-head">Stacked — Night on Cream</div>
+      <div class="pane-body on-cream stack-cream">
+        <span class="lockup w-stacked-md">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 460" fill="none">
+            <defs><mask id="s2" maskUnits="userSpaceOnUse"><rect width="600" height="460" fill="white"/><rect x="180" y="232" width="240" height="6" fill="black"/></mask></defs>
+            <g mask="url(#s2)">
+              <g transform="translate(180, 30)">
+                <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+                <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+              </g>
+            </g>
+            <text x="300" y="358" fill="currentColor" font-family="'Source Serif 4', serif" font-size="74" font-weight="700" text-anchor="middle" letter-spacing="0.02em">OMEGA</text>
+            <text x="300" y="408" fill="currentColor" font-family="Inter, sans-serif" font-size="22" font-weight="600" text-anchor="middle" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stacked at small size (for Instagram profile etc.) -->
+  <h2>Stacked at small size — social profile avatar</h2>
+  <p class="sub">Rendered at 220px — the actual display size on Instagram and Facebook profile photos. Tests whether the tagline stays legible.</p>
+  <div class="row-3">
+    <div class="pane">
+      <div class="pane-head">220 px — on Night</div>
+      <div class="pane-body on-dark stack-dark" style="min-height: 340px;">
+        <span class="lockup w-stacked-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 460" fill="none">
+            <defs><mask id="s3" maskUnits="userSpaceOnUse"><rect width="600" height="460" fill="white"/><rect x="180" y="232" width="240" height="6" fill="black"/></mask></defs>
+            <g mask="url(#s3)">
+              <g transform="translate(180, 30)">
+                <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+                <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+              </g>
+            </g>
+            <text x="300" y="358" fill="currentColor" font-family="'Source Serif 4', serif" font-size="74" font-weight="700" text-anchor="middle" letter-spacing="0.02em">OMEGA</text>
+            <text x="300" y="408" fill="currentColor" font-family="Inter, sans-serif" font-size="22" font-weight="600" text-anchor="middle" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+          </svg>
+        </span>
+      </div>
+    </div>
+    <div class="pane">
+      <div class="pane-head">220 px — on Cream</div>
+      <div class="pane-body on-cream stack-cream" style="min-height: 340px;">
+        <span class="lockup w-stacked-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 460" fill="none">
+            <defs><mask id="s4" maskUnits="userSpaceOnUse"><rect width="600" height="460" fill="white"/><rect x="180" y="232" width="240" height="6" fill="black"/></mask></defs>
+            <g mask="url(#s4)">
+              <g transform="translate(180, 30)">
+                <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+                <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+              </g>
+            </g>
+            <text x="300" y="358" fill="currentColor" font-family="'Source Serif 4', serif" font-size="74" font-weight="700" text-anchor="middle" letter-spacing="0.02em">OMEGA</text>
+            <text x="300" y="408" fill="currentColor" font-family="Inter, sans-serif" font-size="22" font-weight="600" text-anchor="middle" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+          </svg>
+        </span>
+      </div>
+    </div>
+    <div class="pane">
+      <div class="pane-head">Mark-only — tiny spaces</div>
+      <div class="pane-body on-dark" style="background: var(--nott); color: var(--kerti); border-radius: 0 0 6px 6px; min-height: 340px; display: flex; flex-direction: column; gap: 24px; align-items: center;">
+        <span class="lockup" style="width: 160px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+            <defs><mask id="mo1" maskUnits="userSpaceOnUse"><rect width="240" height="240" fill="white"/><rect x="0" y="202" width="240" height="6" fill="black"/></mask></defs>
+            <g mask="url(#mo1)">
+              <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+              <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+            </g>
+          </svg>
+        </span>
+        <span class="lockup" style="width: 64px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+            <defs><mask id="mo2" maskUnits="userSpaceOnUse"><rect width="240" height="240" fill="white"/><rect x="0" y="202" width="240" height="6" fill="black"/></mask></defs>
+            <g mask="url(#mo2)">
+              <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+              <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+            </g>
+          </svg>
+        </span>
+        <span class="lockup" style="width: 32px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+            <defs><mask id="mo3" maskUnits="userSpaceOnUse"><rect width="240" height="240" fill="white"/><rect x="0" y="202" width="240" height="6" fill="black"/></mask></defs>
+            <g mask="url(#mo3)">
+              <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+              <text x="120" y="202" fill="currentColor" font-family="'Source Serif 4', serif" font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+            </g>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────────────── -->
+  <hr>
+
+  <div class="footnote">
+    <p style="margin-top:0"><strong>The Omega identity system — lockup files saved:</strong></p>
+    <ul>
+      <li><code>brand-assets/omega-mark.svg</code> — mark only (the Ω-in-O)</li>
+      <li><code>brand-assets/omega-lockup-horizontal.svg</code> — primary lockup: [Ω] MEGA + tagline</li>
+      <li><code>brand-assets/omega-lockup-stacked.svg</code> — stacked lockup: mark over OMEGA + tagline</li>
+    </ul>
+    <p><strong>The system:</strong></p>
+    <ul>
+      <li><strong>Horizontal lockup</strong> — website header, Facebook cover, email headers, most everyday contexts</li>
+      <li><strong>Stacked lockup</strong> — social profile photos, print footer, contexts with vertical space</li>
+      <li><strong>Mark only</strong> — favicons, tiny avatars, broadcast corner ident (16-64px range)</li>
+    </ul>
+    <p><strong>Typography:</strong> Source Serif 4 Bold for the wordmark (matches the Ω inside the mark, so MEGA's cap-height aligns with the mark's internal Ω letter). Inter SemiBold caps at 0.22em tracking for the tagline — institutional dignity without competing with the serif wordmark.</p>
+    <p><strong>The rule that makes it all work:</strong> one color, ever. Kerti gold on Night Black (primary). Night Black on Vellum Cream (inverse). Never chrome, never gradient, never glossy. Flat only.</p>
+    <p>Tell me what's off and I iterate. If it's right: <code>locked</code> — and I move to the Facebook cover using this lockup, and the Ritningin vikunnar social template right after.</p>
+  </div>
+
+</main>
+</body>
+</html>

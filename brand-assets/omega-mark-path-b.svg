@@ -1,0 +1,32 @@
+<!--
+  Omega mark — Path B (faithful reconstruction of the original 1990s-era mark).
+
+  Structural elements (all original):
+    - Outer ring with signature cut at 6 o'clock
+    - Closed small inner O in upper portion (the "dome")
+    - Horizontal bar with center notch (the "base")
+    - Bottom crescent arc (the "foundation")
+
+  Uses currentColor for easy theming via parent `color` property:
+    color: #E9A860  → Kerti gold (primary)
+    color: #14120F  → Night Black (inverse on light)
+    color: #F3EDE0  → Vellum Cream (on dark)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <g fill="currentColor" stroke="currentColor">
+    <!-- Outer ring with 18-unit cut at 6 o'clock -->
+    <path d="M 110.93 223.60 A 104 104 0 1 1 129.07 223.60"
+          stroke-width="22" fill="none" />
+
+    <!-- Inner small O (closed) — the dome -->
+    <circle cx="120" cy="78" r="28" stroke-width="12" fill="none" />
+
+    <!-- Horizontal bar with center notch — two solid rects -->
+    <rect x="28" y="130" width="80" height="18" stroke="none" />
+    <rect x="132" y="130" width="80" height="18" stroke="none" />
+
+    <!-- Bottom crescent — quadratic curve echoing outer ring bottom -->
+    <path d="M 50 178 Q 120 212 190 178"
+          stroke-width="16" fill="none" stroke-linecap="round" />
+  </g>
+</svg>

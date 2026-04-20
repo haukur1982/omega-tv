@@ -1,0 +1,40 @@
+<!--
+  Omega mark — FINAL (v10, locked 2026-04-19).
+
+  Structure:
+    - Complete outer ring (no cuts)
+    - Greek letter Ω (Source Serif 4, weight 700) at font-size 235,
+      baseline y=202, serif feet flow into the ring's stroke
+    - A thin transparent horizontal strip (6px tall) is carved out at
+      the level flush with the bottom of the Ω's feet, using SVG mask
+    - The strip creates visual separation between upper and lower
+      portions of the ring, rediscovering the original mark's
+      "bottom crescent" through negative-space geometry
+
+  Uses currentColor for theming via parent `color` property:
+    color: #E9A860  → Kerti gold on Night Black (primary)
+    color: #14120F  → Night Black on Vellum Cream (inverse)
+    color: #F6F2EA  → Warm ivory on Mold (secondary)
+
+  Never render in chrome, glossy, bevel, or gradient. Flat color only.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <mask id="omega-cut" maskUnits="userSpaceOnUse">
+      <rect width="240" height="240" fill="white" />
+      <!-- Transparent horizontal strip, 6px tall, flush with Ω baseline -->
+      <rect x="0" y="202" width="240" height="6" fill="black" />
+    </mask>
+  </defs>
+  <g mask="url(#omega-cut)">
+    <!-- Complete outer ring -->
+    <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none" />
+    <!-- Greek capital Omega, feet flow into ring -->
+    <text x="120" y="202"
+          fill="currentColor"
+          font-family="'Source Serif 4', 'Libre Baskerville', Georgia, serif"
+          font-size="235"
+          font-weight="700"
+          text-anchor="middle">Ω</text>
+  </g>
+</svg>

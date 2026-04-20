@@ -1,0 +1,46 @@
+<!--
+  Omega — horizontal lockup (PRIMARY).
+
+  Structure:
+    [Ω mark] MEGA
+             LJÓS OG VON FYRIR ÍSLAND
+
+  The mark visually substitutes for the "O" in OMEGA. MEGA wordmark is
+  set in Source Serif 4 Bold at the same font-size as the Ω inside the
+  mark, so their cap-heights align. Tagline beneath in Inter caps with
+  generous tracking.
+
+  Uses currentColor for theming:
+    color: #E9A860 → Kerti gold (primary, on Night)
+    color: #14120F → Night Black (inverse, on Cream)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" fill="none">
+  <defs>
+    <mask id="omegaCut" maskUnits="userSpaceOnUse">
+      <rect width="1000" height="300" fill="white"/>
+      <!-- Cut is relative to the mark's position (translated), so carve
+           the strip at y=202+10=212 through 218 in the lockup's coords -->
+      <rect x="0" y="212" width="240" height="6" fill="black"/>
+    </mask>
+  </defs>
+
+  <g mask="url(#omegaCut)">
+    <!-- Omega mark, placed at left, translated down 10px -->
+    <g transform="translate(0, 10)">
+      <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
+      <text x="120" y="202" fill="currentColor"
+            font-family="'Source Serif 4', 'Libre Baskerville', Georgia, serif"
+            font-size="235" font-weight="700" text-anchor="middle">Ω</text>
+    </g>
+  </g>
+
+  <!-- MEGA wordmark — baseline aligned with Ω baseline (y=212 in lockup coords) -->
+  <text x="248" y="212" fill="currentColor"
+        font-family="'Source Serif 4', 'Libre Baskerville', Georgia, serif"
+        font-size="235" font-weight="700" letter-spacing="-0.005em">MEGA</text>
+
+  <!-- Tagline underneath — Inter caps, generous tracking -->
+  <text x="252" y="262" fill="currentColor"
+        font-family="Inter, -apple-system, 'Helvetica Neue', sans-serif"
+        font-size="26" font-weight="600" letter-spacing="0.22em">LJÓS OG VON FYRIR ÍSLAND</text>
+</svg>
