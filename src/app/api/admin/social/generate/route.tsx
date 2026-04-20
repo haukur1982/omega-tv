@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { renderToPng } from '@/lib/social/render';
 import { RitningInVikunnar } from '@/lib/social/templates/ritningin-vikunnar';
+import { AMorgunCard } from '@/lib/social/templates/a-morgun';
 import type { SocialFormat } from '@/lib/social/types';
 
 /**
@@ -56,6 +57,28 @@ export async function GET(req: NextRequest) {
                     <RitningInVikunnar
                         text={text}
                         citation={citation}
+                        scheme={scheme}
+                        format={format}
+                    />,
+                    { format },
+                );
+                break;
+            }
+            case 'a-morgun': {
+                const prefix = sp.get('prefix') ?? 'Á MORGUN';
+                const when = sp.get('when') ?? 'SUNNUDAGUR 20. APRÍL · KL. 20:00';
+                const programTitle = sp.get('programTitle') ?? 'Sunnudagssamkoma';
+                const hostName = sp.get('hostName') ?? 'Eiríki Sigurbjörnssyni';
+                const description = sp.get('description') ??
+                    'Vikulegi lofgjörðar- og prédikunarþátturinn — í beinni útsendingu.';
+
+                png = await renderToPng(
+                    <AMorgunCard
+                        prefix={prefix}
+                        when={when}
+                        programTitle={programTitle}
+                        hostName={hostName}
+                        description={description}
                         scheme={scheme}
                         format={format}
                     />,

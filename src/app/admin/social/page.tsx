@@ -2,98 +2,251 @@
 
 import { useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Download, RefreshCw, Instagram, Facebook, Square } from 'lucide-react';
+import { Download, RefreshCw, Instagram, Facebook, Square, BookOpen, Radio } from 'lucide-react';
 import type { SocialFormat } from '@/lib/social/types';
 
 /**
  * Admin page for social post generation.
  *
- * Phase 1 (current): Hawk edits text + citation + picks format/scheme,
- *   previews live, downloads PNG, posts to Facebook/Instagram manually.
+ * Supports multiple templates:
+ *   - Ritningin vikunnar (Passage of the Week) — Bible verse card
+ *   - Á morgun / Í kvöld (Broadcast Card) — upcoming broadcast announcement
  *
- * Phase 2 (future): auto-loads this week's passage from featured_weeks +
- *   bible_passages; scheduled auto-posting via Meta Graph API.
+ * Phase 1 workflow: Hawk picks template, edits inputs, previews live,
+ * downloads PNG, posts manually.
  */
 
+type TemplateId = 'ritningin-vikunnar' | 'a-morgun';
+
+interface TemplateMeta {
+    id: TemplateId;
+    label: string;
+    description: string;
+    icon: React.ReactNode;
+}
+
+const TEMPLATES: TemplateMeta[] = [
+    {
+        id: 'ritningin-vikunnar',
+        label: 'Ritningin vikunnar',
+        description: 'Ritningarvers í hetjusniði. Mánudagar.',
+        icon: <BookOpen size={16} />,
+    },
+    {
+        id: 'a-morgun',
+        label: 'Á morgun · Í kvöld',
+        description: 'Útsending sem er að koma. Laugardagar og miðvikudagar.',
+        icon: <Radio size={16} />,
+    },
+];
+
 const FORMAT_LABELS: Record<SocialFormat, { label: string; dims: string; icon: React.ReactNode }> = {
-    square:    { label: 'Feed · 1:1',     dims: '1080 × 1080', icon: <Square size={14} /> },
-    story:     { label: 'Story · 9:16',   dims: '1080 × 1920', icon: <Instagram size={14} /> },
-    landscape: { label: 'Landscape · 1.91:1', dims: '1200 × 628', icon: <Facebook size={14} /> },
+    square:    { label: 'Feed · 1:1',         dims: '1080 × 1080', icon: <Square size={14} /> },
+    story:     { label: 'Story · 9:16',       dims: '1080 × 1920', icon: <Instagram size={14} /> },
+    landscape: { label: 'Landscape · 1.91:1', dims: '1200 × 628',  icon: <Facebook size={14} /> },
 };
 
-const DEFAULT_TEXT = 'Sælir eru fátækir í anda, því þeirra er himnaríki.';
-const DEFAULT_CITATION = 'MATT. 5:3';
+// ═══════════════════════════════════════════════════════════════════
+// Per-template input state
+// ═══════════════════════════════════════════════════════════════════
+
+interface RitningState {
+    text: string;
+    citation: string;
+}
+const DEFAULT_RITNING: RitningState = {
+    text: 'Sælir eru fátækir í anda, því þeirra er himnaríki.',
+    citation: 'MATT. 5:3',
+};
+
+interface BroadcastState {
+    prefix: string;
+    when: string;
+    programTitle: string;
+    hostName: string;
+    description: string;
+}
+const DEFAULT_BROADCAST: BroadcastState = {
+    prefix: 'Á MORGUN',
+    when: 'SUNNUDAGUR 20. APRÍL · KL. 20:00',
+    programTitle: 'Sunnudagssamkoma',
+    hostName: 'Eiríki Sigurbjörnssyni',
+    description: 'Vikulegi lofgjörðar- og prédikunarþátturinn — í beinni útsendingu.',
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Page
+// ═══════════════════════════════════════════════════════════════════
 
 export default function SocialAdminPage() {
-    const [text, setText] = useState(DEFAULT_TEXT);
-    const [citation, setCitation] = useState(DEFAULT_CITATION);
+    const [template, setTemplate] = useState<TemplateId>('ritningin-vikunnar');
     const [format, setFormat] = useState<SocialFormat>('square');
     const [scheme, setScheme] = useState<'primary' | 'cream'>('primary');
     const [cacheBust, setCacheBust] = useState(Date.now());
 
+    const [ritning, setRitning] = useState<RitningState>(DEFAULT_RITNING);
+    const [broadcast, setBroadcast] = useState<BroadcastState>(DEFAULT_BROADCAST);
+
     const imgUrl = useMemo(() => {
         const params = new URLSearchParams({
-            template: 'ritningin-vikunnar',
+            template,
             format,
             scheme,
-            text,
-            citation,
             t: String(cacheBust),
         });
+        if (template === 'ritningin-vikunnar') {
+            params.set('text', ritning.text);
+            params.set('citation', ritning.citation);
+        } else if (template === 'a-morgun') {
+            params.set('prefix', broadcast.prefix);
+            params.set('when', broadcast.when);
+            params.set('programTitle', broadcast.programTitle);
+            params.set('hostName', broadcast.hostName);
+            params.set('description', broadcast.description);
+        }
         return `/api/admin/social/generate?${params.toString()}`;
-    }, [text, citation, format, scheme, cacheBust]);
+    }, [template, format, scheme, cacheBust, ritning, broadcast]);
 
-    const filename = `omega-ritningin-${format}-${scheme}-${new Date().toISOString().slice(0, 10)}.png`;
+    const filename = `omega-${template}-${format}-${scheme}-${new Date().toISOString().slice(0, 10)}.png`;
 
     return (
         <AdminLayout>
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <div className="mb-8">
                     <div className="text-[11px] uppercase tracking-[0.2em] text-[var(--admin-text-muted)] mb-2">
                         Efnisverksmiðja
                     </div>
                     <h1 className="text-3xl font-serif text-[var(--admin-text)] mb-2">
-                        Samfélagsmiðlar — Ritningin vikunnar
+                        Samfélagsmiðlar
                     </h1>
                     <p className="text-[var(--admin-text-secondary)] max-w-2xl">
-                        Búðu til ritningarpóst fyrir Instagram og Facebook. Breyttu textanum, veldu snið og lit, hlaðu niður PNG.
+                        Veldu snið, breyttu textanum, hlaðu niður PNG. Birtu handvirkt á Facebook og Instagram.
                     </p>
+                </div>
+
+                {/* Template selector */}
+                <div className="mb-6">
+                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                        Sniðmát
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {TEMPLATES.map((t) => (
+                            <button
+                                key={t.id}
+                                onClick={() => setTemplate(t.id)}
+                                className={`text-left p-4 rounded-lg transition-colors ${template === t.id
+                                    ? 'bg-[var(--admin-accent-subtle)] border border-[var(--admin-accent)] text-[var(--admin-text)]'
+                                    : 'bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text-secondary)] hover:border-[var(--admin-border-hover)]'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-2 mb-1">
+                                    {t.icon}
+                                    <span className="font-semibold text-sm">{t.label}</span>
+                                </div>
+                                <div className="text-xs text-[var(--admin-text-muted)] leading-relaxed">{t.description}</div>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
                     {/* Left: controls */}
                     <div className="space-y-5">
-                        {/* Text input */}
-                        <div>
-                            <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
-                                Ritningartexti
-                            </label>
-                            <textarea
-                                value={text}
-                                onChange={(e) => setText(e.target.value)}
-                                rows={4}
-                                className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 font-serif text-sm resize-none focus:outline-none focus:border-[var(--admin-accent)]"
-                                placeholder="T.d. Sælir eru fátækir í anda…"
-                            />
-                            <div className="text-[11px] text-[var(--admin-text-muted)] mt-1">
-                                {text.length} stafir · mælt með ≤ 220 fyrir læsileika
-                            </div>
-                        </div>
+                        {/* Template-specific inputs */}
+                        {template === 'ritningin-vikunnar' && (
+                            <>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Ritningartexti
+                                    </label>
+                                    <textarea
+                                        value={ritning.text}
+                                        onChange={(e) => setRitning({ ...ritning, text: e.target.value })}
+                                        rows={4}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 font-serif text-sm resize-none focus:outline-none focus:border-[var(--admin-accent)]"
+                                    />
+                                    <div className="text-[11px] text-[var(--admin-text-muted)] mt-1">
+                                        {ritning.text.length} stafir · mælt með ≤ 220
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Tilvísun
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={ritning.citation}
+                                        onChange={(e) => setRitning({ ...ritning, citation: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="t.d. MATT. 5:3"
+                                    />
+                                </div>
+                            </>
+                        )}
 
-                        {/* Citation */}
-                        <div>
-                            <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
-                                Tilvísun
-                            </label>
-                            <input
-                                type="text"
-                                value={citation}
-                                onChange={(e) => setCitation(e.target.value.toUpperCase())}
-                                className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
-                                placeholder="t.d. MATTEUS 5:3"
-                            />
-                        </div>
+                        {template === 'a-morgun' && (
+                            <>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Tímamerki
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={broadcast.prefix}
+                                        onChange={(e) => setBroadcast({ ...broadcast, prefix: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="t.d. Á MORGUN"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Dagsetning + tími
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={broadcast.when}
+                                        onChange={(e) => setBroadcast({ ...broadcast, when: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.12em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="SUNNUDAGUR 20. APRÍL · KL. 20:00"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Þáttur
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={broadcast.programTitle}
+                                        onChange={(e) => setBroadcast({ ...broadcast, programTitle: e.target.value })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 font-serif text-sm focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="Sunnudagssamkoma"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Umsjónarmaður (þolfall)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={broadcast.hostName}
+                                        onChange={(e) => setBroadcast({ ...broadcast, hostName: e.target.value })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 font-serif italic text-sm focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="Eiríki Sigurbjörnssyni"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Lýsing
+                                    </label>
+                                    <textarea
+                                        value={broadcast.description}
+                                        onChange={(e) => setBroadcast({ ...broadcast, description: e.target.value })}
+                                        rows={3}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm resize-none focus:outline-none focus:border-[var(--admin-accent)]"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         {/* Format */}
                         <div>
@@ -168,16 +321,6 @@ export default function SocialAdminPage() {
                                 <Download size={14} />
                                 Hlaða niður PNG
                             </a>
-                        </div>
-
-                        {/* Help text */}
-                        <div className="text-[11px] text-[var(--admin-text-muted)] pt-4 border-t border-[var(--admin-border)] leading-relaxed">
-                            <strong className="text-[var(--admin-text-secondary)]">Hvernig á að birta:</strong>
-                            <ol className="list-decimal pl-4 mt-2 space-y-1">
-                                <li>Hladdu niður PNG í réttu sniði</li>
-                                <li>Birtu handvirkt á Facebook/Instagram</li>
-                                <li>Mundu eftir að setja tengda tilvitnun í lýsingu</li>
-                            </ol>
                         </div>
                     </div>
 
