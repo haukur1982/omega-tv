@@ -57,7 +57,6 @@ function sizesFor(format: SocialFormat) {
                 verseFont: 68,
                 verseLineHeight: 1.22,
                 citationFont: 22,
-                markFont: 80,
             };
         case 'story':
             return {
@@ -66,7 +65,6 @@ function sizesFor(format: SocialFormat) {
                 verseFont: 76,
                 verseLineHeight: 1.22,
                 citationFont: 26,
-                markFont: 110,
             };
         case 'landscape':
             return {
@@ -75,7 +73,6 @@ function sizesFor(format: SocialFormat) {
                 verseFont: 54,
                 verseLineHeight: 1.2,
                 citationFont: 20,
-                markFont: 60,
             };
     }
 }
@@ -186,23 +183,6 @@ export function RitningInVikunnar(props: TemplateProps) {
                 </div>
             </div>
 
-            {/* Corner watermark — tiny Ω in the top-right, in muted color */}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: s.padTop,
-                    right: s.padX,
-                    fontFamily: 'Source Serif 4',
-                    fontWeight: 700,
-                    fontSize: s.markFont,
-                    color: dim,
-                    opacity: 0.4,
-                    lineHeight: 1,
-                    display: 'flex',
-                }}
-            >
-                Ω
-            </div>
         </div>
     );
 }

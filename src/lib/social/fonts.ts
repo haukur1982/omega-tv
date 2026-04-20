@@ -2,15 +2,21 @@
  * src/lib/social/fonts.ts
  *
  * Loads font files from @fontsource packages for server-side Satori
- * rendering. We use `latin-ext` subsets because they include Icelandic
- * diacritics (þ, ð, æ, ö, ý).
+ * rendering.
  *
- * Fonts are loaded once at module init and cached in memory — the
- * route handlers re-import this module but Node dedupes, so the
- * file reads happen once per server process.
+ * IMPORTANT: Google Fonts splits font families into subsets that
+ * DON'T OVERLAP. The `latin` subset contains basic A-Z/a-z/0-9 + common
+ * punctuation. The `latin-ext` subset contains Icelandic/European
+ * extensions (þ, ð, æ, ö, ý, etc.). We MUST load both and register
+ * them with Satori — if we only load latin-ext, basic Latin letters
+ * show up as "NO GLYPH" boxes because those characters aren't in that
+ * subset.
  *
- * Satori font format requires { name, data, weight, style }.
- * See: https://github.com/vercel/satori
+ * Satori's font resolution iterates through the fonts array looking
+ * for each character's glyph. Register both subsets with the same
+ * name/weight/style and Satori will use whichever has each glyph.
+ *
+ * Fonts are loaded once at module init and cached in memory.
  */
 
 import { readFileSync } from 'fs';
@@ -23,30 +29,64 @@ function loadFontFile(pkg: string, basename: string): Buffer {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Font data (raw woff bytes)
+// Source Serif 4 — latin + latin-ext subsets, weights 400 and 700
 // ═══════════════════════════════════════════════════════════════════
 
-export const SOURCE_SERIF_4_REGULAR = loadFontFile('source-serif-4', 'source-serif-4-latin-ext-400-normal');
-export const SOURCE_SERIF_4_BOLD    = loadFontFile('source-serif-4', 'source-serif-4-latin-ext-700-normal');
-
-export const LIBRE_BASKERVILLE_REGULAR = loadFontFile('libre-baskerville', 'libre-baskerville-latin-ext-400-normal');
-export const LIBRE_BASKERVILLE_BOLD    = loadFontFile('libre-baskerville', 'libre-baskerville-latin-ext-700-normal');
-export const LIBRE_BASKERVILLE_ITALIC  = loadFontFile('libre-baskerville', 'libre-baskerville-latin-ext-400-italic');
-
-export const INTER_SEMIBOLD = loadFontFile('inter', 'inter-latin-ext-600-normal');
+const SRCSERIF_400_LATIN     = loadFontFile('source-serif-4', 'source-serif-4-latin-400-normal');
+const SRCSERIF_400_LATIN_EXT = loadFontFile('source-serif-4', 'source-serif-4-latin-ext-400-normal');
+const SRCSERIF_400_GREEK     = loadFontFile('source-serif-4', 'source-serif-4-greek-400-normal');
+const SRCSERIF_700_LATIN     = loadFontFile('source-serif-4', 'source-serif-4-latin-700-normal');
+const SRCSERIF_700_LATIN_EXT = loadFontFile('source-serif-4', 'source-serif-4-latin-ext-700-normal');
+const SRCSERIF_700_GREEK     = loadFontFile('source-serif-4', 'source-serif-4-greek-700-normal');
 
 // ═══════════════════════════════════════════════════════════════════
-// Satori-shaped fonts list
-// Pass this to `satori(element, { fonts: SATORI_FONTS, ... })`
+// Libre Baskerville — 400 regular, 400 italic, 700 bold
+// ═══════════════════════════════════════════════════════════════════
+
+const LBASK_400_LATIN         = loadFontFile('libre-baskerville', 'libre-baskerville-latin-400-normal');
+const LBASK_400_LATIN_EXT     = loadFontFile('libre-baskerville', 'libre-baskerville-latin-ext-400-normal');
+const LBASK_400_IT_LATIN      = loadFontFile('libre-baskerville', 'libre-baskerville-latin-400-italic');
+const LBASK_400_IT_LATIN_EXT  = loadFontFile('libre-baskerville', 'libre-baskerville-latin-ext-400-italic');
+const LBASK_700_LATIN         = loadFontFile('libre-baskerville', 'libre-baskerville-latin-700-normal');
+const LBASK_700_LATIN_EXT     = loadFontFile('libre-baskerville', 'libre-baskerville-latin-ext-700-normal');
+
+// ═══════════════════════════════════════════════════════════════════
+// Inter — 600 semibold
+// ═══════════════════════════════════════════════════════════════════
+
+const INTER_600_LATIN     = loadFontFile('inter', 'inter-latin-600-normal');
+const INTER_600_LATIN_EXT = loadFontFile('inter', 'inter-latin-ext-600-normal');
+
+// ═══════════════════════════════════════════════════════════════════
+// Satori font array — both subsets registered per font/weight/style.
+// Order matters for fallback: latin first (more common glyphs),
+// then latin-ext (Icelandic/European extensions).
 // ═══════════════════════════════════════════════════════════════════
 
 export const SATORI_FONTS: SatoriOptions['fonts'] = [
-    { name: 'Source Serif 4', data: SOURCE_SERIF_4_REGULAR, weight: 400, style: 'normal' },
-    { name: 'Source Serif 4', data: SOURCE_SERIF_4_BOLD,    weight: 700, style: 'normal' },
+    // Source Serif 4 Regular — basic Latin, Icelandic, Greek (for Ω)
+    { name: 'Source Serif 4', data: SRCSERIF_400_LATIN,     weight: 400, style: 'normal' },
+    { name: 'Source Serif 4', data: SRCSERIF_400_LATIN_EXT, weight: 400, style: 'normal' },
+    { name: 'Source Serif 4', data: SRCSERIF_400_GREEK,     weight: 400, style: 'normal' },
 
-    { name: 'Libre Baskerville', data: LIBRE_BASKERVILLE_REGULAR, weight: 400, style: 'normal' },
-    { name: 'Libre Baskerville', data: LIBRE_BASKERVILLE_BOLD,    weight: 700, style: 'normal' },
-    { name: 'Libre Baskerville', data: LIBRE_BASKERVILLE_ITALIC,  weight: 400, style: 'italic' },
+    // Source Serif 4 Bold — basic Latin, Icelandic, Greek (for Ω watermark)
+    { name: 'Source Serif 4', data: SRCSERIF_700_LATIN,     weight: 700, style: 'normal' },
+    { name: 'Source Serif 4', data: SRCSERIF_700_LATIN_EXT, weight: 700, style: 'normal' },
+    { name: 'Source Serif 4', data: SRCSERIF_700_GREEK,     weight: 700, style: 'normal' },
 
-    { name: 'Inter', data: INTER_SEMIBOLD, weight: 600, style: 'normal' },
+    // Libre Baskerville Regular
+    { name: 'Libre Baskerville', data: LBASK_400_LATIN,     weight: 400, style: 'normal' },
+    { name: 'Libre Baskerville', data: LBASK_400_LATIN_EXT, weight: 400, style: 'normal' },
+
+    // Libre Baskerville Italic
+    { name: 'Libre Baskerville', data: LBASK_400_IT_LATIN,     weight: 400, style: 'italic' },
+    { name: 'Libre Baskerville', data: LBASK_400_IT_LATIN_EXT, weight: 400, style: 'italic' },
+
+    // Libre Baskerville Bold
+    { name: 'Libre Baskerville', data: LBASK_700_LATIN,     weight: 700, style: 'normal' },
+    { name: 'Libre Baskerville', data: LBASK_700_LATIN_EXT, weight: 700, style: 'normal' },
+
+    // Inter SemiBold
+    { name: 'Inter', data: INTER_600_LATIN,     weight: 600, style: 'normal' },
+    { name: 'Inter', data: INTER_600_LATIN_EXT, weight: 600, style: 'normal' },
 ];
