@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Download, RefreshCw, Instagram, Facebook, Square, BookOpen, Radio } from 'lucide-react';
+import { Download, RefreshCw, Instagram, Facebook, Square, BookOpen, Radio, Quote } from 'lucide-react';
 import type { SocialFormat } from '@/lib/social/types';
 
 /**
@@ -16,7 +16,7 @@ import type { SocialFormat } from '@/lib/social/types';
  * downloads PNG, posts manually.
  */
 
-type TemplateId = 'ritningin-vikunnar' | 'a-morgun';
+type TemplateId = 'ritningin-vikunnar' | 'a-morgun' | 'ritstjoraroedd';
 
 interface TemplateMeta {
     id: TemplateId;
@@ -37,6 +37,12 @@ const TEMPLATES: TemplateMeta[] = [
         label: 'Á morgun · Í kvöld',
         description: 'Útsending sem er að koma. Laugardagar og miðvikudagar.',
         icon: <Radio size={16} />,
+    },
+    {
+        id: 'ritstjoraroedd',
+        label: 'Ritstjórarödd',
+        description: 'Tilvitnun úr prédikun með rödd ritstjóra. Þegar nýr þáttur er birtur.',
+        icon: <Quote size={16} />,
     },
 ];
 
@@ -74,6 +80,19 @@ const DEFAULT_BROADCAST: BroadcastState = {
     description: 'Vikulegi lofgjörðar- og prédikunarþátturinn — í beinni útsendingu.',
 };
 
+interface RitstjoraroeddState {
+    editorNote: string;
+    sermonTitle: string;
+    bibleRef: string;
+    date: string;
+}
+const DEFAULT_RITSTJORAROEDD: RitstjoraroeddState = {
+    editorNote: 'Þegar heimurinn hrikkur, kallar Guð okkur að treysta á það sem stendur eftir. Þessi orð Jesú eru hvíld fyrir þreytta sál — að auðurinn sem máli skiptir er ekki frá mönnum, heldur frá himnaríki sjálfu.',
+    sermonTitle: 'Trúin sem sigrar',
+    bibleRef: 'MATT. 5:3',
+    date: '3. APRÍL 2026',
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // Page
 // ═══════════════════════════════════════════════════════════════════
@@ -86,6 +105,7 @@ export default function SocialAdminPage() {
 
     const [ritning, setRitning] = useState<RitningState>(DEFAULT_RITNING);
     const [broadcast, setBroadcast] = useState<BroadcastState>(DEFAULT_BROADCAST);
+    const [ritstjoraroedd, setRitstjoraroedd] = useState<RitstjoraroeddState>(DEFAULT_RITSTJORAROEDD);
 
     const imgUrl = useMemo(() => {
         const params = new URLSearchParams({
@@ -103,9 +123,14 @@ export default function SocialAdminPage() {
             params.set('programTitle', broadcast.programTitle);
             params.set('hostName', broadcast.hostName);
             params.set('description', broadcast.description);
+        } else if (template === 'ritstjoraroedd') {
+            params.set('editorNote', ritstjoraroedd.editorNote);
+            params.set('sermonTitle', ritstjoraroedd.sermonTitle);
+            params.set('bibleRef', ritstjoraroedd.bibleRef);
+            params.set('date', ritstjoraroedd.date);
         }
         return `/api/admin/social/generate?${params.toString()}`;
-    }, [template, format, scheme, cacheBust, ritning, broadcast]);
+    }, [template, format, scheme, cacheBust, ritning, broadcast, ritstjoraroedd]);
 
     const filename = `omega-${template}-${format}-${scheme}-${new Date().toISOString().slice(0, 10)}.png`;
 
@@ -179,6 +204,60 @@ export default function SocialAdminPage() {
                                         onChange={(e) => setRitning({ ...ritning, citation: e.target.value.toUpperCase() })}
                                         className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
                                         placeholder="t.d. MATT. 5:3"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {template === 'ritstjoraroedd' && (
+                            <>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Rödd ritstjóra (40–80 orð)
+                                    </label>
+                                    <textarea
+                                        value={ritstjoraroedd.editorNote}
+                                        onChange={(e) => setRitstjoraroedd({ ...ritstjoraroedd, editorNote: e.target.value })}
+                                        rows={7}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 font-serif italic text-sm resize-none focus:outline-none focus:border-[var(--admin-accent)]"
+                                    />
+                                    <div className="text-[11px] text-[var(--admin-text-muted)] mt-1">
+                                        {ritstjoraroedd.editorNote.length} stafir · mælt með 200–500
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Titill prédikunar
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={ritstjoraroedd.sermonTitle}
+                                        onChange={(e) => setRitstjoraroedd({ ...ritstjoraroedd, sermonTitle: e.target.value })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 font-serif text-sm focus:outline-none focus:border-[var(--admin-accent)]"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Dagsetning
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={ritstjoraroedd.date}
+                                        onChange={(e) => setRitstjoraroedd({ ...ritstjoraroedd, date: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="3. APRÍL 2026"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Ritningarvers
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={ritstjoraroedd.bibleRef}
+                                        onChange={(e) => setRitstjoraroedd({ ...ritstjoraroedd, bibleRef: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="MATT. 5:3"
                                     />
                                 </div>
                             </>

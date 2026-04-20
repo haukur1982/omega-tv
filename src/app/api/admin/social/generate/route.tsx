@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { renderToPng } from '@/lib/social/render';
 import { RitningInVikunnar } from '@/lib/social/templates/ritningin-vikunnar';
 import { AMorgunCard } from '@/lib/social/templates/a-morgun';
+import { Ritstjoraroedd } from '@/lib/social/templates/ritstjoraroedd';
 import type { SocialFormat } from '@/lib/social/types';
 
 /**
@@ -57,6 +58,26 @@ export async function GET(req: NextRequest) {
                     <RitningInVikunnar
                         text={text}
                         citation={citation}
+                        scheme={scheme}
+                        format={format}
+                    />,
+                    { format },
+                );
+                break;
+            }
+            case 'ritstjoraroedd': {
+                const editorNote = sp.get('editorNote') ??
+                    'Þegar heimurinn hrikkur, kallar Guð okkur að treysta á það sem stendur eftir. Þessi orð Jesú eru hvíld fyrir þreytta sál — að auðurinn sem máli skiptir er ekki frá mönnum, heldur frá himnaríki sjálfu.';
+                const sermonTitle = sp.get('sermonTitle') ?? 'Trúin sem sigrar';
+                const bibleRef = sp.get('bibleRef') ?? 'MATT. 5:3';
+                const date = sp.get('date') ?? '3. APRÍL 2026';
+
+                png = await renderToPng(
+                    <Ritstjoraroedd
+                        editorNote={editorNote}
+                        sermonTitle={sermonTitle}
+                        bibleRef={bibleRef}
+                        date={date}
                         scheme={scheme}
                         format={format}
                     />,
