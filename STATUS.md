@@ -1,9 +1,9 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-19 (evening)
-**Last Agent:** Claude Code — admin editors + playout XML enrichment session
+**Last Updated:** 2026-04-19 (late evening — brand system session)
+**Last Agent:** Claude Code — visual identity redesign + brand guide authoring
 **Branch:** main
-**Build Status:** Dev on :3010, all pages 200, tsc clean. Seven commits on origin/main; three new today (Vikuforsíða editor, Schedule editor, Playout XML sync + programs catalog).
+**Build Status:** Dev on :3010, all pages 200, tsc clean. Ten+ commits on origin/main today; last three are the brand identity milestone.
 
 ## Where things stand right now
 
@@ -37,7 +37,51 @@ Three entry paths (all landing in the same `/admin/drafts` inbox):
 
 Review flow: open draft → fix fields → **Vista og birta** → live on omega.is in 2–3 minutes.
 
-## Today's key decisions (2026-04-19)
+## Brand identity session — 2026-04-19 (late evening)
+
+### 🎨 Major milestone: Omega visual identity, locked
+
+After ~30 iterations in a single session, the brand identity system is complete and documented:
+
+**Shipped:**
+- `brand-assets/omega-mark.svg` — final mark (v10). Outer ring + Greek Ω (Source Serif 4 Bold, size 235) with feet flowing into ring, 6px transparent horizontal cut flush with Ω baseline.
+- `brand-assets/omega-lockup-horizontal.svg` — primary lockup: [Ω mark] MEGA + tagline
+- `brand-assets/omega-lockup-stacked.svg` — vertical lockup for profile photos, footers
+- `brand-assets/facebook-cover.svg` — ready-to-upload Facebook cover (820×360)
+- `brand-assets/preview.html` — live preview of all lockups at multiple scales on all color variants
+- **`docs/brand-guide.md` — comprehensive brand authority document** (~450 lines). Covers strategy, identity, typography, color, lockups, content strategy, platform mix, rhythm, technical reference, captured decisions. Must be consulted before any future design work.
+
+**Three key decisions (captured in brand-guide §7):**
+1. Keep the Ω mark, retire the chrome treatment. Preserves 34 years of audience recognition.
+2. Horizontal rectangle mask cut (not angular arcs) — v10.1 was tried and rejected because angular arcs broke the O silhouette.
+3. Four social posts per week anchored to real data — Ritningin vikunnar (Mon), Bænakvöldið (Wed), Sunnudagssamkoma announcement (Sat), editor's-voice sermon cards (ad hoc).
+
+**Platform call:**
+- Facebook + Instagram only. TikTok/X/LinkedIn/Pinterest explicitly rejected.
+- Phase 1: manual posting (Hawk downloads PNGs, posts himself)
+- Phase 2 (month 2): Meta Graph API + auto-scheduling
+
+**Commits today (in brand session order):**
+- `5e2d1b8` — Omega mark + lockup system (v10 final)
+- `d34e8d9` — Facebook cover v1 using locked lockup
+- `(next commit)` — comprehensive brand guide at docs/brand-guide.md + STATUS update
+
+### 🔜 Next session — Milestone 4: Satori social templates
+
+**Immediate next steps:**
+1. Install `satori` + `@resvg/resvg-js` — server-side JSX → PNG rendering
+2. Bundle Source Serif 4, Libre Baskerville, Inter as TTF files in `public/fonts/social/`
+3. Build `/admin/social` page showing candidate posts as PNG previews
+4. Add `/api/admin/social/generate` endpoint — takes template ID + data + format, returns PNG bytes
+5. First template: **Ritningin vikunnar** (Passage of the Week) reading from `featured_weeks.featured_passage_id` + `bible_passages.text_is`
+6. If quality bar holds, templates 2-4 (broadcast card, editor's voice, prayer night invite)
+
+**Also on list before resuming templates:**
+- Hawk to upload `facebook-cover.svg` as new Omega FB cover (export to PNG at 1640×720)
+- Hawk to update FB profile photo to mark-only (export `omega-mark.svg` at 512×512)
+- Facebook about-section rewrite in Hawk's voice
+
+## Earlier today (2026-04-19, full-day arc)
 
 ### ✅ Shipped + pushed today
 - **Vikuforsíða editor** (`/admin/featured`) — weekly home hero curation in-browser, replaces hand-editing `featured_weeks` in Supabase.
