@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Download, RefreshCw, Instagram, Facebook, Square, BookOpen, Radio, Quote } from 'lucide-react';
+import { Download, RefreshCw, Instagram, Facebook, Square, BookOpen, Radio, Quote, Flame } from 'lucide-react';
 import type { SocialFormat } from '@/lib/social/types';
 
 /**
@@ -16,7 +16,7 @@ import type { SocialFormat } from '@/lib/social/types';
  * downloads PNG, posts manually.
  */
 
-type TemplateId = 'ritningin-vikunnar' | 'a-morgun' | 'ritstjoraroedd';
+type TemplateId = 'ritningin-vikunnar' | 'a-morgun' | 'ritstjoraroedd' | 'baenakvoldid';
 
 interface TemplateMeta {
     id: TemplateId;
@@ -43,6 +43,12 @@ const TEMPLATES: TemplateMeta[] = [
         label: 'Ritstjórarödd',
         description: 'Tilvitnun úr prédikun með rödd ritstjóra. Þegar nýr þáttur er birtur.',
         icon: <Quote size={16} />,
+    },
+    {
+        id: 'baenakvoldid',
+        label: 'Bænakvöldið',
+        description: 'Boð í bænasamfélag. Miðvikudagar.',
+        icon: <Flame size={16} />,
     },
 ];
 
@@ -93,6 +99,19 @@ const DEFAULT_RITSTJORAROEDD: RitstjoraroeddState = {
     date: '3. APRÍL 2026',
 };
 
+interface BaenakvoldidState {
+    eventLabel: string;
+    eventDate: string;
+    invitation: string;
+    scriptureRef: string;
+}
+const DEFAULT_BAENAKVOLDID: BaenakvoldidState = {
+    eventLabel: 'BÆNAKVÖLDIÐ',
+    eventDate: 'MIÐVIKUDAG 23. APRÍL · KL. 20:00',
+    invitation: 'Biðjum saman.',
+    scriptureRef: 'MATT. 18:20',
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // Page
 // ═══════════════════════════════════════════════════════════════════
@@ -106,6 +125,7 @@ export default function SocialAdminPage() {
     const [ritning, setRitning] = useState<RitningState>(DEFAULT_RITNING);
     const [broadcast, setBroadcast] = useState<BroadcastState>(DEFAULT_BROADCAST);
     const [ritstjoraroedd, setRitstjoraroedd] = useState<RitstjoraroeddState>(DEFAULT_RITSTJORAROEDD);
+    const [baenakvoldid, setBaenakvoldid] = useState<BaenakvoldidState>(DEFAULT_BAENAKVOLDID);
 
     const imgUrl = useMemo(() => {
         const params = new URLSearchParams({
@@ -128,9 +148,14 @@ export default function SocialAdminPage() {
             params.set('sermonTitle', ritstjoraroedd.sermonTitle);
             params.set('bibleRef', ritstjoraroedd.bibleRef);
             params.set('date', ritstjoraroedd.date);
+        } else if (template === 'baenakvoldid') {
+            params.set('eventLabel', baenakvoldid.eventLabel);
+            params.set('eventDate', baenakvoldid.eventDate);
+            params.set('invitation', baenakvoldid.invitation);
+            if (baenakvoldid.scriptureRef) params.set('scriptureRef', baenakvoldid.scriptureRef);
         }
         return `/api/admin/social/generate?${params.toString()}`;
-    }, [template, format, scheme, cacheBust, ritning, broadcast, ritstjoraroedd]);
+    }, [template, format, scheme, cacheBust, ritning, broadcast, ritstjoraroedd, baenakvoldid]);
 
     const filename = `omega-${template}-${format}-${scheme}-${new Date().toISOString().slice(0, 10)}.png`;
 
@@ -204,6 +229,62 @@ export default function SocialAdminPage() {
                                         onChange={(e) => setRitning({ ...ritning, citation: e.target.value.toUpperCase() })}
                                         className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
                                         placeholder="t.d. MATT. 5:3"
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {template === 'baenakvoldid' && (
+                            <>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Viðburðarmerki
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={baenakvoldid.eventLabel}
+                                        onChange={(e) => setBaenakvoldid({ ...baenakvoldid, eventLabel: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="BÆNAKVÖLDIÐ"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Dagsetning + tími
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={baenakvoldid.eventDate}
+                                        onChange={(e) => setBaenakvoldid({ ...baenakvoldid, eventDate: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.12em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="MIÐVIKUDAG 23. APRÍL · KL. 20:00"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Boð (stutt setning)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={baenakvoldid.invitation}
+                                        onChange={(e) => setBaenakvoldid({ ...baenakvoldid, invitation: e.target.value })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 font-serif text-sm focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="Biðjum saman."
+                                    />
+                                    <div className="text-[11px] text-[var(--admin-text-muted)] mt-1">
+                                        {baenakvoldid.invitation.length} stafir · mælt með ≤ 40
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs uppercase tracking-[0.15em] text-[var(--admin-text-muted)] mb-2">
+                                        Ritningarvers (valkvætt)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={baenakvoldid.scriptureRef}
+                                        onChange={(e) => setBaenakvoldid({ ...baenakvoldid, scriptureRef: e.target.value.toUpperCase() })}
+                                        className="w-full rounded-lg bg-[var(--admin-surface)] border border-[var(--admin-border)] text-[var(--admin-text)] p-3 text-sm tracking-[0.15em] uppercase focus:outline-none focus:border-[var(--admin-accent)]"
+                                        placeholder="MATT. 18:20"
                                     />
                                 </div>
                             </>

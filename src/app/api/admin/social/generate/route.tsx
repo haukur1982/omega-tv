@@ -3,6 +3,7 @@ import { renderToPng } from '@/lib/social/render';
 import { RitningInVikunnar } from '@/lib/social/templates/ritningin-vikunnar';
 import { AMorgunCard } from '@/lib/social/templates/a-morgun';
 import { Ritstjoraroedd } from '@/lib/social/templates/ritstjoraroedd';
+import { Baenakvoldid } from '@/lib/social/templates/baenakvoldid';
 import type { SocialFormat } from '@/lib/social/types';
 
 /**
@@ -58,6 +59,25 @@ export async function GET(req: NextRequest) {
                     <RitningInVikunnar
                         text={text}
                         citation={citation}
+                        scheme={scheme}
+                        format={format}
+                    />,
+                    { format },
+                );
+                break;
+            }
+            case 'baenakvoldid': {
+                const eventLabel = sp.get('eventLabel') ?? 'BÆNAKVÖLDIÐ';
+                const eventDate = sp.get('eventDate') ?? 'MIÐVIKUDAG 23. APRÍL · KL. 20:00';
+                const invitation = sp.get('invitation') ?? 'Biðjum saman.';
+                const scriptureRef = sp.get('scriptureRef') || undefined;
+
+                png = await renderToPng(
+                    <Baenakvoldid
+                        eventLabel={eventLabel}
+                        eventDate={eventDate}
+                        invitation={invitation}
+                        scriptureRef={scriptureRef}
                         scheme={scheme}
                         format={format}
                     />,
