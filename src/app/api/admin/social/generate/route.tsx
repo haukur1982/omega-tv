@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
             case 'ritningin-vikunnar': {
                 const text = sp.get('text') ??
                     'Sælir eru fátækir í anda, því þeirra er himnaríki.';
-                const citation = sp.get('citation') ?? 'MATTEUS 5:3';
+                const citation = sp.get('citation') ?? 'MATT. 5:3';
 
                 png = await renderToPng(
                     <RitningInVikunnar

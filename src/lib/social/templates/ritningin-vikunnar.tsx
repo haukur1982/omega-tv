@@ -2,41 +2,39 @@
 /**
  * src/lib/social/templates/ritningin-vikunnar.tsx
  *
- * "Ritningin vikunnar" (Passage of the Week).
+ * "Ritningin vikunnar" (Passage of the Week) — v3.
  *
- * Typography-led Bible passage card. Pure type, Altingi palette, no
- * stock imagery, no gradients, no chrome. The verse is the hero.
+ * Typography-led Bible passage card. Cinematic, Icelandic-first,
+ * with the Omega mark anchored as a true brand signature.
+ *
+ * Design rules this template honors (per docs/brand-guide.md):
+ *   - Real typography (Source Serif 4 Vaka weight 300 for the verse)
+ *   - Altingi palette only (Kerti on Night, or Night on Vellum)
+ *   - Unique-to-Omega signal (the Ω mark presence + palette +
+ *     Icelandic citation format)
+ *   - Flat color only, no gradients, no chrome
+ *
+ * Changes from v1 → v2:
+ *   - Verse bumped to Vaka weight 300 at larger size (hero treatment)
+ *   - Tiny dot divider replaced with Gull-gold horizontal rule
+ *   - Omega mark anchored at bottom-center as brand signature
+ *   - Default citation format uses Icelandic abbreviation (MATT.)
  *
  * Three format variations:
  *   - square    (1080×1080) — Instagram feed, Facebook feed
  *   - story     (1080×1920) — Instagram Story, Facebook Story
- *   - landscape (1200×628)  — Facebook feed wide, shareable link preview
- *
- * Composition rules:
- *   - Kicker at top: "RITNINGIN VIKUNNAR" (Inter SemiBold caps, 0.22em tracking)
- *   - Center: verse text in Source Serif 4, generous line-height
- *   - Bottom: Gull-colored · divider, then citation (e.g., "MATTEUS 5:3")
- *   - Corner watermark: tiny "Ω" in muted Kerti (keeps brand presence without competing)
+ *   - landscape (1200×628)  — Facebook feed wide, link preview
  */
 
 import React from 'react';
 import { ALTINGI, type SocialFormat } from '../types';
 
 export interface RitningInput {
-    /**
-     * The passage text in Icelandic. Can be a single verse or a short
-     * multi-verse block. Longer passages may need truncation; keep
-     * verse blocks under ~220 characters for legibility at social sizes.
-     */
+    /** Verse text in Icelandic. Keep under ~220 chars for legibility. */
     text: string;
-    /**
-     * Display citation in Icelandic uppercase — e.g. "MATTEUS 5:3"
-     * or "SÁLMUR 23:1". Used at the bottom of the card.
-     */
+    /** Display citation — e.g. "MATT. 5:3" or "SÁLM. 23:1" (Icelandic abbreviation). */
     citation: string;
-    /**
-     * Optional color scheme. Default primary is Kerti on Night.
-     */
+    /** Color scheme. Primary = Kerti on Night. Cream = Night on Vellum. */
     scheme?: 'primary' | 'cream';
 }
 
@@ -45,51 +43,69 @@ interface TemplateProps extends RitningInput {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Format-specific sizing
+// Format-specific sizing — tuned so verse reads as HERO
 // ═══════════════════════════════════════════════════════════════════
 
 function sizesFor(format: SocialFormat) {
     switch (format) {
         case 'square':
             return {
-                padTop: 120, padBottom: 120, padX: 96,
-                kickerFont: 22,
-                verseFont: 68,
+                padTop: 110, padBottom: 110, padX: 96,
+                kickerFont: 24,
+                verseFont: 76,               // Large but fits 2-line clean break
                 verseLineHeight: 1.22,
+                ruleWidth: 72,
+                ruleHeight: 2,
+                ruleGap: 26,
                 citationFont: 22,
+                wordmarkFont: 20,            // Smaller — reads as signature, not competing
+                wordmarkGap: 56,             // More air between citation and signature
             };
         case 'story':
+            // Story is 9:16 phone-full-screen. Same 1080 width as square,
+            // so verse size must match square's 76pt to keep the clean
+            // 2-line "Sælir eru fátækir í anda, / því þeirra er himnaríki."
+            // break. Viewer is close on phone anyway — smaller text reads fine.
             return {
-                padTop: 240, padBottom: 240, padX: 100,
+                padTop: 200, padBottom: 200, padX: 110,
                 kickerFont: 26,
                 verseFont: 76,
                 verseLineHeight: 1.22,
-                citationFont: 26,
+                ruleWidth: 80,
+                ruleHeight: 2,
+                ruleGap: 28,
+                citationFont: 22,
+                wordmarkFont: 20,
+                wordmarkGap: 56,
             };
         case 'landscape':
             return {
-                padTop: 72, padBottom: 72, padX: 120,
+                padTop: 56, padBottom: 56, padX: 120,
                 kickerFont: 20,
-                verseFont: 54,
-                verseLineHeight: 1.2,
-                citationFont: 20,
+                verseFont: 56,
+                verseLineHeight: 1.22,
+                ruleWidth: 60,
+                ruleHeight: 2,
+                ruleGap: 20,
+                citationFont: 18,
+                wordmarkFont: 16,
+                wordmarkGap: 36,
             };
     }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// The template — returns a JSX element Satori can render
+// Template
 // ═══════════════════════════════════════════════════════════════════
 
 export function RitningInVikunnar(props: TemplateProps) {
     const { text, citation, scheme = 'primary', format } = props;
     const s = sizesFor(format);
 
-    // Color assignments
-    const bg   = scheme === 'primary' ? ALTINGI.nott   : ALTINGI.skra;
-    const fg   = scheme === 'primary' ? ALTINGI.kerti  : ALTINGI.nott;
-    const dim  = scheme === 'primary' ? ALTINGI.moskva : ALTINGI.steinn;
-    const accent = ALTINGI.gull; // Same on both schemes — warm amber
+    const bg     = scheme === 'primary' ? ALTINGI.nott   : ALTINGI.skra;
+    const fg     = scheme === 'primary' ? ALTINGI.kerti  : ALTINGI.nott;
+    const dim    = scheme === 'primary' ? ALTINGI.moskva : ALTINGI.steinn;
+    const accent = ALTINGI.gull;
 
     return (
         <div
@@ -102,7 +118,6 @@ export function RitningInVikunnar(props: TemplateProps) {
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 padding: `${s.padTop}px ${s.padX}px ${s.padBottom}px`,
-                position: 'relative',
                 fontFamily: 'Source Serif 4',
             }}
         >
@@ -121,7 +136,7 @@ export function RitningInVikunnar(props: TemplateProps) {
                 Ritningin vikunnar
             </div>
 
-            {/* Middle — the verse. flex:1 so it takes remaining space */}
+            {/* Middle — verse at Vaka weight, hero-sized */}
             <div
                 style={{
                     flex: 1,
@@ -130,16 +145,16 @@ export function RitningInVikunnar(props: TemplateProps) {
                     justifyContent: 'center',
                     alignItems: 'center',
                     textAlign: 'center',
-                    padding: `${Math.round(s.verseFont * 0.6)}px 0`,
+                    padding: `${Math.round(s.verseFont * 0.4)}px 0`,
                 }}
             >
                 <div
                     style={{
                         fontFamily: 'Source Serif 4',
-                        fontWeight: 400,
+                        fontWeight: 300,                 // Vaka weight
                         fontSize: s.verseFont,
                         lineHeight: s.verseLineHeight,
-                        letterSpacing: '-0.01em',
+                        letterSpacing: '-0.018em',       // Tighter at display size
                         color: fg,
                         display: 'flex',
                         textAlign: 'center',
@@ -150,24 +165,25 @@ export function RitningInVikunnar(props: TemplateProps) {
                 </div>
             </div>
 
-            {/* Bottom — gold divider + citation */}
+            {/* Bottom — horizontal rule + citation + mark, stacked center */}
             <div
                 style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: 18,
+                    gap: s.ruleGap,
                 }}
             >
-                {/* Small gold dot divider (·) */}
+                {/* Gull horizontal rule — replaces tiny dot, actually reads as intentional */}
                 <div
                     style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: 6,
+                        width: s.ruleWidth,
+                        height: s.ruleHeight,
                         background: accent,
                     }}
                 />
+
+                {/* Citation */}
                 <div
                     style={{
                         fontFamily: 'Inter',
@@ -181,8 +197,27 @@ export function RitningInVikunnar(props: TemplateProps) {
                 >
                     {citation}
                 </div>
-            </div>
 
+                {/* Brand signature — OMEGA wordmark (all-Latin letters
+                    so always renders reliably). Source Serif 4 Bold caps,
+                    small size, generous letter-spacing for institutional
+                    feel. Pairs with the palette + kicker + citation to
+                    make the Omega brand unmistakable. */}
+                <div
+                    style={{
+                        fontFamily: 'Source Serif 4',
+                        fontWeight: 700,
+                        fontSize: s.wordmarkFont,
+                        color: dim,                    // Muted — signature, not headline
+                        letterSpacing: '0.4em',
+                        textTransform: 'uppercase',
+                        marginTop: s.wordmarkGap - s.ruleGap,
+                        display: 'flex',
+                    }}
+                >
+                    Omega
+                </div>
+            </div>
         </div>
     );
 }

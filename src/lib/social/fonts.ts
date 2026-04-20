@@ -32,6 +32,11 @@ function loadFontFile(pkg: string, basename: string): Buffer {
 // Source Serif 4 — latin + latin-ext subsets, weights 400 and 700
 // ═══════════════════════════════════════════════════════════════════
 
+// Weight 300 — the "Vaka" display weight per brand guide §2, used for
+// hero-level Scripture verses and display headlines.
+const SRCSERIF_300_LATIN     = loadFontFile('source-serif-4', 'source-serif-4-latin-300-normal');
+const SRCSERIF_300_LATIN_EXT = loadFontFile('source-serif-4', 'source-serif-4-latin-ext-300-normal');
+
 const SRCSERIF_400_LATIN     = loadFontFile('source-serif-4', 'source-serif-4-latin-400-normal');
 const SRCSERIF_400_LATIN_EXT = loadFontFile('source-serif-4', 'source-serif-4-latin-ext-400-normal');
 const SRCSERIF_400_GREEK     = loadFontFile('source-serif-4', 'source-serif-4-greek-400-normal');
@@ -64,6 +69,10 @@ const INTER_600_LATIN_EXT = loadFontFile('inter', 'inter-latin-ext-600-normal');
 // ═══════════════════════════════════════════════════════════════════
 
 export const SATORI_FONTS: SatoriOptions['fonts'] = [
+    // Source Serif 4 Light / Vaka (weight 300) — Scripture hero, display
+    { name: 'Source Serif 4', data: SRCSERIF_300_LATIN,     weight: 300, style: 'normal' },
+    { name: 'Source Serif 4', data: SRCSERIF_300_LATIN_EXT, weight: 300, style: 'normal' },
+
     // Source Serif 4 Regular — basic Latin, Icelandic, Greek (for Ω)
     { name: 'Source Serif 4', data: SRCSERIF_400_LATIN,     weight: 400, style: 'normal' },
     { name: 'Source Serif 4', data: SRCSERIF_400_LATIN_EXT, weight: 400, style: 'normal' },

@@ -22,7 +22,7 @@ const FORMAT_LABELS: Record<SocialFormat, { label: string; dims: string; icon: R
 };
 
 const DEFAULT_TEXT = 'Sælir eru fátækir í anda, því þeirra er himnaríki.';
-const DEFAULT_CITATION = 'MATTEUS 5:3';
+const DEFAULT_CITATION = 'MATT. 5:3';
 
 export default function SocialAdminPage() {
     const [text, setText] = useState(DEFAULT_TEXT);
