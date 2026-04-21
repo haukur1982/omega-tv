@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { OmegaMark } from '@/components/brand/OmegaMark';
 
 /* ════════════════════════════════════════════════════════════════
    Omega Navbar — editorial, transparent-over-hero.
@@ -131,17 +132,8 @@ export default function Navbar() {
                             color: 'var(--ljos)',
                         }}
                     >
-                        <span
-                            style={{
-                                fontFamily: 'var(--font-display, var(--font-serif))',
-                                fontSize: '1.65rem',
-                                fontWeight: 300,
-                                lineHeight: 1,
-                                letterSpacing: '-0.01em',
-                                color: 'var(--ljos)',
-                            }}
-                        >
-                            Ω
+                        <span style={{ color: 'var(--ljos)', display: 'inline-flex' }}>
+                            <OmegaMark size={28} title="Omega" />
                         </span>
                         <span
                             className="type-merki"
@@ -284,16 +276,8 @@ export default function Navbar() {
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 style={{ display: 'flex', alignItems: 'baseline', gap: '10px', textDecoration: 'none' }}
                             >
-                                <span
-                                    style={{
-                                        fontFamily: 'var(--font-display, var(--font-serif))',
-                                        fontSize: '1.8rem',
-                                        fontWeight: 300,
-                                        color: 'var(--ljos)',
-                                        lineHeight: 1,
-                                    }}
-                                >
-                                    Ω
+                                <span style={{ color: 'var(--ljos)', display: 'inline-flex' }}>
+                                    <OmegaMark size={32} title="Omega" />
                                 </span>
                                 <span className="type-merki" style={{ color: 'var(--moskva)', letterSpacing: '0.24em', fontSize: '0.72rem' }}>
                                     Omega

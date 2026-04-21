@@ -4,6 +4,7 @@ import { RitningInVikunnar } from '@/lib/social/templates/ritningin-vikunnar';
 import { AMorgunCard } from '@/lib/social/templates/a-morgun';
 import { Ritstjoraroedd } from '@/lib/social/templates/ritstjoraroedd';
 import { Baenakvoldid } from '@/lib/social/templates/baenakvoldid';
+import { resolveTypeface } from '@/lib/social/typeface';
 import type { SocialFormat } from '@/lib/social/types';
 
 /**
@@ -41,6 +42,7 @@ export async function GET(req: NextRequest) {
     const template = sp.get('template') ?? 'ritningin-vikunnar';
     const format = (sp.get('format') ?? 'square') as SocialFormat;
     const scheme = (sp.get('scheme') ?? 'primary') as 'primary' | 'cream';
+    const typeface = resolveTypeface(sp.get('typeface'));
 
     if (!['square', 'story', 'landscape'].includes(format)) {
         return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
@@ -60,6 +62,7 @@ export async function GET(req: NextRequest) {
                         text={text}
                         citation={citation}
                         scheme={scheme}
+                        typeface={typeface}
                         format={format}
                     />,
                     { format },
@@ -79,6 +82,7 @@ export async function GET(req: NextRequest) {
                         invitation={invitation}
                         scriptureRef={scriptureRef}
                         scheme={scheme}
+                        typeface={typeface}
                         format={format}
                     />,
                     { format },
@@ -99,6 +103,7 @@ export async function GET(req: NextRequest) {
                         bibleRef={bibleRef}
                         date={date}
                         scheme={scheme}
+                        typeface={typeface}
                         format={format}
                     />,
                     { format },
@@ -121,6 +126,7 @@ export async function GET(req: NextRequest) {
                         hostName={hostName}
                         description={description}
                         scheme={scheme}
+                        typeface={typeface}
                         format={format}
                     />,
                     { format },

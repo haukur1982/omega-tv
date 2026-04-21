@@ -1,25 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Libre_Baskerville, Source_Serif_4 } from "next/font/google";
+import { Inter, Newsreader, Fraunces } from "next/font/google";
 import "./globals.css";
 
+// UI sans — Inter for labels, kickers, meta, UI elements
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const libre = Libre_Baskerville({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+// Editorial body — Newsreader (Production Type), designed specifically
+// for digital long-form reading. Replaces Libre Baskerville. More
+// distinctive forms; less ubiquitous than Baskerville.
+const newsreader = Newsreader({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   variable: "--font-serif",
   display: "swap",
 });
 
-// Display serif — Vaka / Kveða roles (hero moments, section openers)
-// Variable font covering weights 200–900, optical-size 8–60.
-const sourceSerif = Source_Serif_4({
-  subsets: ["latin"],
-  weight: ["300", "400", "600"],
+// Display serif — Fraunces (Undercase Type) for Vaka/Kveða hero
+// moments. Variable optical sizing means letterforms automatically
+// adapt as size scales (more dramatic at hero, more readable at body).
+// Replaces Source Serif 4. More personality, less ubiquitous.
+const fraunces = Fraunces({
+  subsets: ["latin", "latin-ext"],
+  weight: ["300", "400", "500", "600", "700", "900"],
   style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
@@ -63,7 +70,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="is">
-      <body className={`min-h-screen flex flex-col antialiased selection:bg-[var(--kerti)] selection:text-black ${inter.variable} ${libre.variable} ${sourceSerif.variable} font-sans`}>
+      <body className={`min-h-screen flex flex-col antialiased selection:bg-[var(--kerti)] selection:text-black ${inter.variable} ${newsreader.variable} ${fraunces.variable} font-sans`}>
         <main className="flex-grow">
           {children}
         </main>

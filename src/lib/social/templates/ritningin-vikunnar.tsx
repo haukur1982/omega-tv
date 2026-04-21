@@ -28,6 +28,7 @@
 
 import React from 'react';
 import { ALTINGI, type SocialFormat } from '../types';
+import { type TypefaceFamily, TYPEFACES } from '../typeface';
 
 export interface RitningInput {
     /** Verse text in Icelandic. Keep under ~220 chars for legibility. */
@@ -36,6 +37,8 @@ export interface RitningInput {
     citation: string;
     /** Color scheme. Primary = Kerti on Night. Cream = Night on Vellum. */
     scheme?: 'primary' | 'cream';
+    /** Typeface family. Defaults to classic (Source Serif 4 + Libre Baskerville + Inter). */
+    typeface?: TypefaceFamily;
 }
 
 interface TemplateProps extends RitningInput {
@@ -99,7 +102,7 @@ function sizesFor(format: SocialFormat) {
 // ═══════════════════════════════════════════════════════════════════
 
 export function RitningInVikunnar(props: TemplateProps) {
-    const { text, citation, scheme = 'primary', format } = props;
+    const { text, citation, scheme = 'primary', format, typeface = TYPEFACES.fraunces } = props;
     const s = sizesFor(format);
 
     const bg     = scheme === 'primary' ? ALTINGI.nott   : ALTINGI.skra;
@@ -118,7 +121,7 @@ export function RitningInVikunnar(props: TemplateProps) {
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 padding: `${s.padTop}px ${s.padX}px ${s.padBottom}px`,
-                fontFamily: 'Source Serif 4',
+                fontFamily: typeface.display,
             }}
         >
             {/* Top — kicker */}
@@ -150,7 +153,7 @@ export function RitningInVikunnar(props: TemplateProps) {
             >
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 300,                 // Vaka weight
                         fontSize: s.verseFont,
                         lineHeight: s.verseLineHeight,
@@ -186,7 +189,7 @@ export function RitningInVikunnar(props: TemplateProps) {
                 {/* Citation */}
                 <div
                     style={{
-                        fontFamily: 'Inter',
+                        fontFamily: typeface.ui,
                         fontWeight: 600,
                         fontSize: s.citationFont,
                         letterSpacing: '0.22em',
@@ -205,7 +208,7 @@ export function RitningInVikunnar(props: TemplateProps) {
                     make the Omega brand unmistakable. */}
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 700,
                         fontSize: s.wordmarkFont,
                         color: dim,                    // Muted — signature, not headline

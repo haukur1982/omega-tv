@@ -23,6 +23,7 @@
 
 import React from 'react';
 import { ALTINGI, type SocialFormat } from '../types';
+import { type TypefaceFamily, TYPEFACES } from '../typeface';
 
 export interface RitstjoraroeddInput {
     /** Editor note / voice line — 40-80 words. The hero. */
@@ -35,6 +36,8 @@ export interface RitstjoraroeddInput {
     date?: string;
     /** Color scheme. */
     scheme?: 'primary' | 'cream';
+    /** Typeface family. Defaults to classic. */
+    typeface?: TypefaceFamily;
 }
 
 interface TemplateProps extends RitstjoraroeddInput {
@@ -98,7 +101,7 @@ function sizesFor(format: SocialFormat) {
 }
 
 export function Ritstjoraroedd(props: TemplateProps) {
-    const { editorNote, sermonTitle, bibleRef, date, scheme = 'primary', format } = props;
+    const { editorNote, sermonTitle, bibleRef, date, scheme = 'primary', format, typeface = TYPEFACES.fraunces } = props;
     const s = sizesFor(format);
 
     const bg     = scheme === 'primary' ? ALTINGI.nott   : ALTINGI.skra;
@@ -123,13 +126,13 @@ export function Ritstjoraroedd(props: TemplateProps) {
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 padding: `${s.padTop}px ${s.padX}px ${s.padBottom}px`,
-                fontFamily: 'Source Serif 4',
+                fontFamily: typeface.display,
             }}
         >
             {/* Top — kicker */}
             <div
                 style={{
-                    fontFamily: 'Inter',
+                    fontFamily: typeface.ui,
                     fontWeight: 600,
                     fontSize: s.kickerFont,
                     color: dim,
@@ -154,7 +157,7 @@ export function Ritstjoraroedd(props: TemplateProps) {
             >
                 <div
                     style={{
-                        fontFamily: 'Libre Baskerville',
+                        fontFamily: typeface.body,
                         fontStyle: 'italic',            // The brand guide's "human voice" treatment
                         fontWeight: 400,
                         fontSize: s.quoteFont,
@@ -181,7 +184,7 @@ export function Ritstjoraroedd(props: TemplateProps) {
                 />
                 <div
                     style={{
-                        fontFamily: 'Inter',
+                        fontFamily: typeface.ui,
                         fontWeight: 600,
                         fontSize: s.attrTitleFont,
                         color: fg,
@@ -195,7 +198,7 @@ export function Ritstjoraroedd(props: TemplateProps) {
                 {metaLine && (
                     <div
                         style={{
-                            fontFamily: 'Inter',
+                            fontFamily: typeface.ui,
                             fontWeight: 500,
                             fontSize: s.attrMetaFont,
                             color: dim,
@@ -210,7 +213,7 @@ export function Ritstjoraroedd(props: TemplateProps) {
                 )}
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 700,
                         fontSize: s.wordmarkFont,
                         color: dim,

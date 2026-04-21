@@ -84,13 +84,22 @@ Three scales for every context. Each carries the same meaning at a different reg
 
 Three fonts, assigned to specific roles. Never substitute.
 
+**v2 typography (locked 2026-04-20):** the original Source Serif 4 + Libre Baskerville stack was tasteful but ubiquitous in 2024–2026 premium design — used by half the dark-mode sites you'd compare Omega against. We swapped for **Fraunces + Newsreader + Inter**: less common, more distinctive, still free and well-engineered. The change applies everywhere — website, social templates, lockup SVGs, brand assets. Set typeface query param `?typeface=classic` on the social generator API to render with the old stack for direct comparison.
+
 | Role | Font | Weights | Use |
 |---|---|---|---|
-| **Display / Wordmark** | Source Serif 4 | 300 (Vaka), 700 (Wordmark) | Hero headlines, OMEGA wordmark, the Ω inside the mark. Also used on omega.is display headlines. |
-| **Editorial** | Libre Baskerville | 400, 400 italic, 700 | Article body, pull quotes, editor's voice lines. On-site reading matter. |
+| **Display / Wordmark** | Fraunces (Undercase Type) | 300 (Vaka), 400, 500, 600, 700, 900 + italics | Hero headlines, OMEGA wordmark, the Ω inside the mark. Variable optical sizing — letterforms automatically adapt as size scales. Use weight 300 (Vaka) at hero/Scripture sizes. |
+| **Editorial** | Newsreader (Production Type) | 400, 400 italic, 500, 600, 700 | Article body, pull quotes, editor's voice lines. Designed specifically for digital long-form reading. Use italic 400 for the "human voice" treatment (editor notes, host attribution, Scripture citations). |
 | **UI / Tagline** | Inter | 400, 500, 600 | Tagline caps, UI labels, meta, metadata. Tagline always uses Inter SemiBold at 0.22em tracking in all-caps. |
 
-**Loading:** Google Fonts CSS link includes all three. `Source Serif 4` weights 300, 400, 600, 700, 900. `Libre Baskerville` weights 400, 700. `Inter` weights 400, 500, 600, 700.
+**Loading:** `src/app/layout.tsx` loads all three from Google Fonts via Next.js's `next/font/google`. The variables are exposed as CSS custom properties — `--font-display` (Fraunces), `--font-serif` (Newsreader), `--font-sans` (Inter). For server-side social rendering see `src/lib/social/fonts.ts`.
+
+**Why these specifically:**
+- **Fraunces** has a *hand* — sculpted "S", characterful "f" terminals, the "ð" glyph feels at home rather than added-on. Source Serif 4 is well-mannered but unremarkable; Fraunces feels designed.
+- **Newsreader** was designed for screen reading from the start (Production Type built it for editorial use). It's slightly more distinctive than Libre Baskerville and pairs visually with Fraunces.
+- **Inter** is kept because nothing free beats it for UI labels, and its ubiquity disappears at small caps sizes anyway.
+
+**Italic = human voice** rule still applies — Newsreader italic is now the canonical "editor voice" face. Less calligraphic than Libre Baskerville italic (which we acknowledged was more characterful in isolation), but the typeface family coherence with Fraunces matters more.
 
 **Icelandic diacritics (þ, ð, æ, ö, ý):** test every new render. Source Serif 4 and Libre Baskerville have them. Inter has them. Never use a font that lacks Icelandic glyphs.
 
@@ -502,7 +511,9 @@ Brand voice follows Hawk's personal writing rules documented in `~/Claude Cowork
 
 | Date | Event | Commit |
 |---|---|---|
-| 2026-04-19 | Brand guide written | this commit |
+| 2026-04-20 | Typography v2 — Fraunces + Newsreader replace Source Serif 4 + Libre Baskerville everywhere; OmegaMark React component built; mark wired into Navbar / Footer / AdminLayout | this commit |
+| 2026-04-20 | Four social templates complete (Ritningin / Á morgun / Ritstjórarödd / Bænakvöldið) | `021278d` |
+| 2026-04-19 | Brand guide written | `97ab9c0` |
 | 2026-04-19 | Facebook cover v1 shipped | `d34e8d9` |
 | 2026-04-19 | Mark + lockup system locked (v10 final) | `5e2d1b8` |
 | 2026-04-19 | Design session started — 30+ iterations on the mark | — |

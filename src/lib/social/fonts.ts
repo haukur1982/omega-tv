@@ -56,6 +56,34 @@ const LBASK_700_LATIN         = loadFontFile('libre-baskerville', 'libre-baskerv
 const LBASK_700_LATIN_EXT     = loadFontFile('libre-baskerville', 'libre-baskerville-latin-ext-700-normal');
 
 // ═══════════════════════════════════════════════════════════════════
+// Fraunces — distinctive editorial serif by Undercase Type.
+// Variable optical sizing, more personality than Source Serif 4.
+// Loaded as alternative display face for typographic comparison.
+// ═══════════════════════════════════════════════════════════════════
+
+const FRAUNCES_300_LATIN     = loadFontFile('fraunces', 'fraunces-latin-300-normal');
+const FRAUNCES_300_LATIN_EXT = loadFontFile('fraunces', 'fraunces-latin-ext-300-normal');
+const FRAUNCES_400_LATIN     = loadFontFile('fraunces', 'fraunces-latin-400-normal');
+const FRAUNCES_400_LATIN_EXT = loadFontFile('fraunces', 'fraunces-latin-ext-400-normal');
+const FRAUNCES_400_IT_LATIN     = loadFontFile('fraunces', 'fraunces-latin-400-italic');
+const FRAUNCES_400_IT_LATIN_EXT = loadFontFile('fraunces', 'fraunces-latin-ext-400-italic');
+const FRAUNCES_700_LATIN     = loadFontFile('fraunces', 'fraunces-latin-700-normal');
+const FRAUNCES_700_LATIN_EXT = loadFontFile('fraunces', 'fraunces-latin-ext-700-normal');
+
+// ═══════════════════════════════════════════════════════════════════
+// Newsreader — editorial body face by Production Type.
+// Designed specifically for digital long-form reading.
+// Loaded as alternative editorial body face.
+// ═══════════════════════════════════════════════════════════════════
+
+const NEWSREADER_400_LATIN        = loadFontFile('newsreader', 'newsreader-latin-400-normal');
+const NEWSREADER_400_LATIN_EXT    = loadFontFile('newsreader', 'newsreader-latin-ext-400-normal');
+const NEWSREADER_400_IT_LATIN     = loadFontFile('newsreader', 'newsreader-latin-400-italic');
+const NEWSREADER_400_IT_LATIN_EXT = loadFontFile('newsreader', 'newsreader-latin-ext-400-italic');
+const NEWSREADER_700_LATIN        = loadFontFile('newsreader', 'newsreader-latin-700-normal');
+const NEWSREADER_700_LATIN_EXT    = loadFontFile('newsreader', 'newsreader-latin-ext-700-normal');
+
+// ═══════════════════════════════════════════════════════════════════
 // Inter — 600 semibold
 // ═══════════════════════════════════════════════════════════════════
 
@@ -98,4 +126,22 @@ export const SATORI_FONTS: SatoriOptions['fonts'] = [
     // Inter SemiBold
     { name: 'Inter', data: INTER_600_LATIN,     weight: 600, style: 'normal' },
     { name: 'Inter', data: INTER_600_LATIN_EXT, weight: 600, style: 'normal' },
+
+    // Fraunces — distinctive editorial serif (alternative to Source Serif 4)
+    { name: 'Fraunces', data: FRAUNCES_300_LATIN,        weight: 300, style: 'normal' },
+    { name: 'Fraunces', data: FRAUNCES_300_LATIN_EXT,    weight: 300, style: 'normal' },
+    { name: 'Fraunces', data: FRAUNCES_400_LATIN,        weight: 400, style: 'normal' },
+    { name: 'Fraunces', data: FRAUNCES_400_LATIN_EXT,    weight: 400, style: 'normal' },
+    { name: 'Fraunces', data: FRAUNCES_400_IT_LATIN,     weight: 400, style: 'italic' },
+    { name: 'Fraunces', data: FRAUNCES_400_IT_LATIN_EXT, weight: 400, style: 'italic' },
+    { name: 'Fraunces', data: FRAUNCES_700_LATIN,        weight: 700, style: 'normal' },
+    { name: 'Fraunces', data: FRAUNCES_700_LATIN_EXT,    weight: 700, style: 'normal' },
+
+    // Newsreader — editorial body (alternative to Libre Baskerville)
+    { name: 'Newsreader', data: NEWSREADER_400_LATIN,        weight: 400, style: 'normal' },
+    { name: 'Newsreader', data: NEWSREADER_400_LATIN_EXT,    weight: 400, style: 'normal' },
+    { name: 'Newsreader', data: NEWSREADER_400_IT_LATIN,     weight: 400, style: 'italic' },
+    { name: 'Newsreader', data: NEWSREADER_400_IT_LATIN_EXT, weight: 400, style: 'italic' },
+    { name: 'Newsreader', data: NEWSREADER_700_LATIN,        weight: 700, style: 'normal' },
+    { name: 'Newsreader', data: NEWSREADER_700_LATIN_EXT,    weight: 700, style: 'normal' },
 ];

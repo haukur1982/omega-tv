@@ -22,6 +22,7 @@
 
 import React from 'react';
 import { ALTINGI, type SocialFormat } from '../types';
+import { type TypefaceFamily, TYPEFACES } from '../typeface';
 
 export interface BroadcastInput {
     /**
@@ -42,6 +43,8 @@ export interface BroadcastInput {
     description: string;
     /** Color scheme */
     scheme?: 'primary' | 'cream';
+    /** Typeface family. Defaults to classic. */
+    typeface?: TypefaceFamily;
 }
 
 interface TemplateProps extends BroadcastInput {
@@ -122,7 +125,7 @@ function sizesFor(format: SocialFormat) {
 // ═══════════════════════════════════════════════════════════════════
 
 export function AMorgunCard(props: TemplateProps) {
-    const { prefix, when, programTitle, hostName, description, scheme = 'primary', format } = props;
+    const { prefix, when, programTitle, hostName, description, scheme = 'primary', format, typeface = TYPEFACES.fraunces } = props;
     const s = sizesFor(format);
 
     const bg     = scheme === 'primary' ? ALTINGI.nott   : ALTINGI.skra;
@@ -142,14 +145,14 @@ export function AMorgunCard(props: TemplateProps) {
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 padding: `${s.padTop}px ${s.padX}px ${s.padBottom}px`,
-                fontFamily: 'Source Serif 4',
+                fontFamily: typeface.display,
             }}
         >
             {/* Top cluster: prefix + date */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: s.gapTop - 12 }}>
                 <div
                     style={{
-                        fontFamily: 'Inter',
+                        fontFamily: typeface.ui,
                         fontWeight: 600,
                         fontSize: s.kickerPrefixFont,
                         color: accent,                // Gull for the temporal marker — this is THE hook
@@ -162,7 +165,7 @@ export function AMorgunCard(props: TemplateProps) {
                 </div>
                 <div
                     style={{
-                        fontFamily: 'Inter',
+                        fontFamily: typeface.ui,
                         fontWeight: 500,
                         fontSize: s.kickerDateFont,
                         color: dim,
@@ -189,7 +192,7 @@ export function AMorgunCard(props: TemplateProps) {
             >
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 300,                    // Vaka weight — hero Scripture-level
                         fontSize: s.titleFont,
                         lineHeight: s.titleLineHeight,
@@ -204,7 +207,7 @@ export function AMorgunCard(props: TemplateProps) {
                 {hostName && (
                     <div
                         style={{
-                            fontFamily: 'Libre Baskerville',
+                            fontFamily: typeface.body,
                             fontStyle: 'italic',              // Italic = voice attribution
                             fontWeight: 400,
                             fontSize: s.hostFont,
@@ -229,7 +232,7 @@ export function AMorgunCard(props: TemplateProps) {
                 />
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 400,
                         fontSize: s.descFont,
                         lineHeight: s.descLineHeight,
@@ -243,7 +246,7 @@ export function AMorgunCard(props: TemplateProps) {
                 </div>
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 700,
                         fontSize: s.wordmarkFont,
                         color: dim,

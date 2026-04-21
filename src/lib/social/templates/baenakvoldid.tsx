@@ -24,6 +24,7 @@
 
 import React from 'react';
 import { ALTINGI, type SocialFormat } from '../types';
+import { type TypefaceFamily, TYPEFACES } from '../typeface';
 
 export interface BaenakvoldidInput {
     /** Kicker label — usually "BÆNAKVÖLDIÐ" but could be "BÆNAKVÖLD" etc. */
@@ -36,6 +37,8 @@ export interface BaenakvoldidInput {
     scriptureRef?: string;
     /** Color scheme */
     scheme?: 'primary' | 'cream';
+    /** Typeface family. Defaults to classic. */
+    typeface?: TypefaceFamily;
 }
 
 interface TemplateProps extends BaenakvoldidInput {
@@ -93,7 +96,7 @@ function sizesFor(format: SocialFormat) {
 }
 
 export function Baenakvoldid(props: TemplateProps) {
-    const { eventLabel, eventDate, invitation, scriptureRef, scheme = 'primary', format } = props;
+    const { eventLabel, eventDate, invitation, scriptureRef, scheme = 'primary', format, typeface = TYPEFACES.fraunces } = props;
     const s = sizesFor(format);
 
     const bg     = scheme === 'primary' ? ALTINGI.nott   : ALTINGI.skra;
@@ -113,7 +116,7 @@ export function Baenakvoldid(props: TemplateProps) {
                 justifyContent: 'space-between',
                 alignItems: 'center',                // Center-align the entire composition
                 padding: `${s.padTop}px ${s.padX}px ${s.padBottom}px`,
-                fontFamily: 'Source Serif 4',
+                fontFamily: typeface.display,
                 textAlign: 'center',
             }}
         >
@@ -121,7 +124,7 @@ export function Baenakvoldid(props: TemplateProps) {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: s.gapKickerToMeta }}>
                 <div
                     style={{
-                        fontFamily: 'Inter',
+                        fontFamily: typeface.ui,
                         fontWeight: 600,
                         fontSize: s.kickerFont,
                         color: dim,
@@ -134,7 +137,7 @@ export function Baenakvoldid(props: TemplateProps) {
                 </div>
                 <div
                     style={{
-                        fontFamily: 'Inter',
+                        fontFamily: typeface.ui,
                         fontWeight: 500,
                         fontSize: s.metaFont,
                         color: dim,
@@ -160,7 +163,7 @@ export function Baenakvoldid(props: TemplateProps) {
             >
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 300,                // Vaka weight — quiet, ceremonial
                         fontSize: s.invitationFont,
                         lineHeight: s.invitationLineHeight,
@@ -190,7 +193,7 @@ export function Baenakvoldid(props: TemplateProps) {
                 {scriptureRef && (
                     <div
                         style={{
-                            fontFamily: 'Inter',
+                            fontFamily: typeface.ui,
                             fontWeight: 500,
                             fontSize: s.scriptureFont,
                             color: dim,
@@ -204,7 +207,7 @@ export function Baenakvoldid(props: TemplateProps) {
                 )}
                 <div
                     style={{
-                        fontFamily: 'Source Serif 4',
+                        fontFamily: typeface.display,
                         fontWeight: 700,
                         fontSize: s.wordmarkFont,
                         color: dim,

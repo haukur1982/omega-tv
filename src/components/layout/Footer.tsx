@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { OmegaMark } from '@/components/brand/OmegaMark';
 
 const NAV_COLUMNS = [
   {
@@ -74,14 +75,8 @@ export default function Footer() {
                 marginBottom: '1rem',
               }}
             >
-              <span
-                style={{
-                  color: 'var(--accent)',
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                }}
-              >
-                Ω
+              <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
+                <OmegaMark size={36} title="Omega" />
               </span>
               <span
                 style={{

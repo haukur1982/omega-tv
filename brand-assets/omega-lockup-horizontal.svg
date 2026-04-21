@@ -29,14 +29,14 @@
     <g transform="translate(0, 10)">
       <circle cx="120" cy="120" r="104" stroke="currentColor" stroke-width="22" fill="none"/>
       <text x="120" y="202" fill="currentColor"
-            font-family="'Source Serif 4', 'Libre Baskerville', Georgia, serif"
+            font-family="'Fraunces', 'Newsreader', Georgia, serif"
             font-size="235" font-weight="700" text-anchor="middle">Ω</text>
     </g>
   </g>
 
   <!-- MEGA wordmark — baseline aligned with Ω baseline (y=212 in lockup coords) -->
   <text x="248" y="212" fill="currentColor"
-        font-family="'Source Serif 4', 'Libre Baskerville', Georgia, serif"
+        font-family="'Fraunces', 'Newsreader', Georgia, serif"
         font-size="235" font-weight="700" letter-spacing="-0.005em">MEGA</text>
 
   <!-- Tagline underneath — Inter caps, generous tracking -->

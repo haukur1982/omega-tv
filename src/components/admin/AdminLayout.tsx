@@ -21,6 +21,7 @@ import {
     Tv
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { OmegaMark } from '@/components/brand/OmegaMark';
 import '@/styles/admin.css';
 
 interface AdminLayoutProps {
@@ -85,8 +86,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 {/* Logo */}
                 <div className="h-16 flex items-center px-6 border-b border-[var(--admin-border)]">
                     <Link href="/" className="flex items-center gap-3 group">
-                        <div className="w-9 h-9 rounded-lg bg-[var(--admin-accent)] flex items-center justify-center shadow-lg">
-                            <span className="text-black font-bold text-lg">Ω</span>
+                        <div className="w-9 h-9 flex items-center justify-center text-[var(--admin-accent)]">
+                            <OmegaMark size={36} title="Omega" />
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[var(--admin-text)] font-semibold text-sm">Omega</span>
