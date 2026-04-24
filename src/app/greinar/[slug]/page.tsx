@@ -49,18 +49,55 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 className="article-cover"
                 style={{
                     position: 'relative',
-                    background:
-                        'linear-gradient(180deg, var(--nott) 0%, var(--mold) 100%)',
+                    background: 'var(--nott)',
                     overflow: 'hidden',
                     padding: 'clamp(124px, 11vw, 164px) var(--rail-padding) clamp(56px, 7vw, 88px)',
                     borderBottom: '1px solid var(--border)',
                 }}
             >
+                {/* Full-bleed photograph as the banner background. When
+                    there's no featured_image the fallback gradient on
+                    the section itself (--nott) carries through. */}
+                {article.featured_image && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={article.featured_image}
+                        alt=""
+                        style={{
+                            position: 'absolute',
+                            inset: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            objectPosition: '50% 50%',
+                            filter: 'saturate(0.95) contrast(1.05)',
+                        }}
+                    />
+                )}
+
+                {/* Dark overlay — keeps the masthead readable over the
+                    photograph. Two stacked gradients: a horizontal one
+                    that's darker on the left (behind the text) and
+                    lighter on the right (let the image breathe), plus
+                    a vertical vignette that strengthens the top-to-nav
+                    transition and the bottom-to-vellum fade. */}
+                {article.featured_image && (
+                    <div
+                        aria-hidden
+                        style={{
+                            position: 'absolute',
+                            inset: 0,
+                            background: [
+                                'linear-gradient(to right, rgba(20,18,15,0.82) 0%, rgba(20,18,15,0.62) 45%, rgba(20,18,15,0.42) 100%)',
+                                'linear-gradient(to bottom, rgba(20,18,15,0.45) 0%, rgba(20,18,15,0.15) 35%, rgba(20,18,15,0.35) 100%)',
+                            ].join(', '),
+                        }}
+                    />
+                )}
+
                 <div
                     className="article-cover-shell"
                     style={{
-                        position: 'relative',
-                        zIndex: 2,
                         maxWidth: '80rem',
                         margin: '0 auto',
                     }}
@@ -175,55 +212,6 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                         </div>
                     </div>
 
-                    {article.featured_image && (
-                        <div
-                            className="article-cover-media"
-                            style={{
-                                position: 'relative',
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={article.featured_image}
-                                alt=""
-                                style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover',
-                                    objectPosition: '70% 50%',
-                                    filter: 'saturate(0.95) contrast(1.08)',
-                                }}
-                            />
-                            {/* Fade into the warm-black banner on the LEFT
-                                edge — the image "bleeds" from the right.
-                                Clear on the right, dissolving to brown on
-                                the left. */}
-                            <div
-                                aria-hidden
-                                style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    background:
-                                        'linear-gradient(to right, var(--mold) 0%, rgba(27,24,20,0.88) 10%, rgba(27,24,20,0.35) 35%, transparent 65%)',
-                                }}
-                            />
-                            {/* Subtle top-to-bottom tint so the image sits
-                                tonally with the dark banner above and
-                                border below. */}
-                            <div
-                                aria-hidden
-                                style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    background:
-                                        'linear-gradient(180deg, rgba(20,18,15,0.14) 0%, rgba(20,18,15,0) 35%, rgba(20,18,15,0.18) 100%)',
-                                }}
-                            />
-                        </div>
-                    )}
                 </div>
             </section>
 
