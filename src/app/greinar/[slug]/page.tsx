@@ -3,6 +3,7 @@ import Footer from "@/components/layout/Footer";
 import ArticleContent from "@/components/articles/ArticleContent";
 import ArticleRelated from "@/components/articles/ArticleRelated";
 import { readingMinutes, formatDateIs, type Article } from "@/components/articles/article-helpers";
+import { MOCK_ARTICLES } from "@/components/articles/mock-articles";
 import { getArticleBySlug, getAllArticles } from "@/lib/articles-db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -36,10 +37,20 @@ interface PageProps {
 export default async function ArticleDetailPage({ params }: PageProps) {
     const { slug } = await params;
 
-    const article: Article | null = await getArticleBySlug(slug).catch(() => null);
+    // Look up real article first, fall back to mocks so demo slugs
+    // (aska, thu-tharft-ekki-ad-vinna, etc.) don't 404 before Supabase
+    // has rows. The fallback goes away cleanly the moment Supabase
+    // returns a real article for the slug.
+    const real: Article | null = await getArticleBySlug(slug).catch(() => null);
+    const article: Article | null =
+        real ?? MOCK_ARTICLES.find((a) => a.slug === slug) ?? null;
     if (!article) notFound();
 
-    const allArticles = await getAllArticles().catch(() => [] as Article[]);
+    const realAll = await getAllArticles().catch(() => [] as Article[]);
+    const allArticles: Article[] =
+        realAll && realAll.length > 0
+            ? realAll
+            : [...MOCK_ARTICLES];
     const related = pickRelated(allArticles, article, 3);
 
     const minutes = readingMinutes(article.content);

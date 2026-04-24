@@ -4,6 +4,7 @@ import ArticleFeaturedCard from "@/components/articles/ArticleFeaturedCard";
 import ArticleMidCard from "@/components/articles/ArticleMidCard";
 import ArticleListRow from "@/components/articles/ArticleListRow";
 import type { Article } from "@/components/articles/article-helpers";
+import { MOCK_ARTICLES } from "@/components/articles/mock-articles";
 import { getAllArticles } from "@/lib/articles-db";
 
 /**
@@ -25,77 +26,6 @@ import { getAllArticles } from "@/lib/articles-db";
 
 export const revalidate = 3600;
 
-// Minimal mock fallback so the page never renders empty in dev before
-// Supabase has real rows.
-const MOCK_ARTICLES: Article[] = [
-    {
-        id: 'a00',
-        title: 'Aska — Hvers vegna fortíðin skilgreinir þig ekki',
-        slug: 'aska',
-        excerpt: 'Hvað ef syndir þínar eru ekki bara fyrirgefnar — heldur tortímdar svo fullkomlega að ekkert stendur eftir nema aska?',
-        content: 'Allir burðast með eitthvað.\n\nMinningu sem svíður enn þegar hún skýtur upp kollinum.',
-        featured_image: 'https://images.unsplash.com/photo-1507692049790-de58290a4334?w=1600&auto=format&fit=crop',
-        author_name: 'Hawk Sigurbjörnsson',
-        published_at: '2026-04-05T10:00:00Z',
-        created_at: '2026-04-05T10:00:00Z',
-    },
-    {
-        id: 'a0',
-        title: 'Þú þarft ekki að vinna þér inn það sem er þegar þitt',
-        slug: 'thu-tharft-ekki',
-        excerpt: 'Hvað ef allur sá hugsunarháttur sem segir þér að þú sért ekki að gera nóg — byggist á misskilningi?',
-        content: 'Það er ákveðin byrði sem margir bera með sér — jafnvel fólk sem trúir á Guð.',
-        featured_image: 'https://images.unsplash.com/photo-1476610182048-b716b8515aaa?w=1200&auto=format&fit=crop',
-        author_name: 'Hawk Sigurbjörnsson',
-        published_at: '2026-04-04T08:00:00Z',
-        created_at: '2026-04-04T08:00:00Z',
-    },
-    {
-        id: 'a1',
-        title: 'Tíminn er núna: Framtíð trúar á Íslandi',
-        slug: 'timinn-er-nuna',
-        excerpt: 'Hvernig við getum unnið saman að betra samfélagi og sterkari trú í nútímanum.',
-        content: 'Ísland stendur á krossgötum.',
-        featured_image: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1200&auto=format&fit=crop',
-        author_name: 'Guðrún Helgadóttir',
-        published_at: '2026-04-02T10:00:00Z',
-        created_at: '2026-04-02T10:00:00Z',
-    },
-    {
-        id: 'a2',
-        title: 'Aflgefandi Samfélag',
-        slug: 'aflgefandi-samfelag',
-        excerpt: 'Samfélag sem styrkir og uppbyggir hvert annað.',
-        content: 'Kristið samfélag er ekki bara sunnudagssamkoma — það er lífsstíll.',
-        featured_image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=900&auto=format&fit=crop',
-        author_name: 'Jón Þór Einarsson',
-        published_at: '2026-03-30T10:00:00Z',
-        created_at: '2026-03-30T10:00:00Z',
-    },
-    {
-        id: 'a3',
-        title: 'Að finna náð í hversdeginum',
-        slug: 'nad-i-hversdeginum',
-        excerpt: 'Hugvekja um náð og fyrirgefningu í dag.',
-        content: 'Náðin er ekki bara hugtak — hún er reynsla.',
-        featured_image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=900&auto=format&fit=crop',
-        author_name: 'Sigríður Anna',
-        published_at: '2026-03-28T10:00:00Z',
-        created_at: '2026-03-28T10:00:00Z',
-    },
-    {
-        id: 'a4',
-        title: 'Bænin sem breytir öllu',
-        slug: 'baenin-sem-breytir',
-        excerpt: 'Hvað gerist þegar við leggjum allt í hendur Guðs?',
-        content: 'Bænin er samtal við Guð — og Guð svarar alltaf.',
-        featured_image: 'https://images.unsplash.com/photo-1519834785169-98be25ec3f84?w=900&auto=format&fit=crop',
-        author_name: 'Hawk Sigurbjörnsson',
-        published_at: '2026-03-26T10:00:00Z',
-        created_at: '2026-03-26T10:00:00Z',
-    },
-];
-
 export default async function ArticlesPage() {
     let articles: Article[] = [];
     try {
@@ -108,7 +38,7 @@ export default async function ArticlesPage() {
     } catch (err) {
         console.error('Failed to load articles:', err);
     }
-    if (articles.length === 0) articles = MOCK_ARTICLES;
+    if (articles.length === 0) articles = [...MOCK_ARTICLES];
 
     // Newest first
     articles.sort((a, b) => {
