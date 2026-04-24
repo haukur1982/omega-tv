@@ -11,35 +11,8 @@ import Link from "next/link";
 /**
  * /greinar/[slug] — article detail.
  *
- * Layered composition (top → bottom):
- *
- *   1. Dark overture — the hero photograph occupies a ~68vh band at
- *      the top of the page. Navbar floats over it in its default
- *      transparent-over-hero state. A gradient stack darkens the top
- *      (so the navbar reads) and fades the bottom edge into --skra
- *      vellum cream, so the image dissolves into the page rather
- *      than ending in a hard rectangle.
- *
- *      When an article has no featured_image, the overture degrades
- *      gracefully to a warm-black band with a quiet amber radial
- *      wash — the page still opens with a dark corridor before
- *      stepping into cream.
- *
- *   2. Vellum article frame — kicker · large Fraunces title · italic
- *      deck · gold-foil rule · byline in smallcaps. Wider container
- *      (48rem) so the masthead has room to breathe.
- *
- *   3. Body — .article-reading-frame + .article-prose rules in
- *      globals.css do the drop cap, line-height, blockquote, em
- *      color work. Body column widened to 44rem (~74ch), which is
- *      inside the typographically orthodox range for vellum-on-cream
- *      and reads more like a magazine long-read than a blog post.
- *
- *   4. Byline close — quiet, slightly tighter than before.
- *
- *   5. Related articles on vellum.
- *
- *   6. Dark Footer — horizon flips back.
+ * Dark editorial cover followed by a cream long-read frame.
+ * The image supports the article instead of swallowing the first screen.
  */
 
 export const revalidate = 60;
@@ -72,71 +45,175 @@ export default async function ArticleDetailPage({ params }: PageProps) {
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
             <Navbar />
 
-            {/* 1. DARK OVERTURE — hero image or warm-black amber wash.
-                The navbar floats over this in its transparent state.
-                Bottom edge fades into --skra so the vellum begins
-                without a seam. */}
             <section
-                aria-hidden={article.featured_image ? undefined : true}
+                className="article-cover"
                 style={{
                     position: 'relative',
-                    width: '100%',
-                    height: 'clamp(380px, 58vh, 680px)',
-                    background: 'var(--nott)',
+                    background:
+                        'linear-gradient(180deg, var(--nott) 0%, var(--mold) 100%)',
                     overflow: 'hidden',
+                    padding: 'clamp(128px, 12vw, 176px) var(--rail-padding) clamp(64px, 8vw, 104px)',
+                    borderBottom: '1px solid var(--border)',
                 }}
             >
-                {article.featured_image ? (
-                    <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src={article.featured_image}
-                            alt=""
+                <div
+                    className="article-cover-shell"
+                    style={{
+                        position: 'relative',
+                        zIndex: 2,
+                        maxWidth: '80rem',
+                        margin: '0 auto',
+                    }}
+                >
+                    <div className="article-cover-copy">
+                        <div
                             style={{
-                                position: 'absolute',
-                                inset: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                                filter: 'saturate(0.85) contrast(1.02)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '14px',
+                                flexWrap: 'wrap',
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                letterSpacing: '0.22em',
+                                textTransform: 'uppercase',
+                                color: 'var(--nordurljos)',
+                                marginBottom: '24px',
                             }}
-                        />
-                        {/* Top darkening so the navbar sits cleanly */}
+                        >
+                            <Link
+                                href="/greinar"
+                                style={{ color: 'inherit', textDecoration: 'none' }}
+                            >
+                                Omega Tímaritið
+                            </Link>
+                            {published && (
+                                <>
+                                    <span style={{ color: 'var(--steinn)' }}>·</span>
+                                    <span style={{ color: 'var(--moskva)' }}>{published}</span>
+                                </>
+                            )}
+                        </div>
+
+                        <h1
+                            style={{
+                                margin: 0,
+                                fontFamily: 'var(--font-serif)',
+                                fontSize: 'clamp(40px, 5.4vw, 76px)',
+                                lineHeight: 1.02,
+                                letterSpacing: 0,
+                                fontWeight: 400,
+                                color: 'var(--ljos)',
+                                textWrap: 'balance',
+                                maxWidth: '13ch',
+                            }}
+                        >
+                            {article.title}
+                        </h1>
+
+                        {article.excerpt && (
+                            <p
+                                style={{
+                                    margin: '28px 0 0',
+                                    fontFamily: 'var(--font-serif)',
+                                    fontStyle: 'italic',
+                                    fontSize: 'clamp(20px, 1.8vw, 25px)',
+                                    lineHeight: 1.48,
+                                    color: 'var(--moskva)',
+                                    letterSpacing: 0,
+                                    textWrap: 'pretty',
+                                    maxWidth: '34rem',
+                                }}
+                            >
+                                {article.excerpt}
+                            </p>
+                        )}
+
                         <div
                             aria-hidden
                             style={{
-                                position: 'absolute',
-                                inset: 0,
-                                background:
-                                    'linear-gradient(to bottom, rgba(20,18,15,0.62) 0%, rgba(20,18,15,0.12) 28%, rgba(20,18,15,0.04) 58%, rgba(243,237,224,0.18) 78%, var(--skra) 100%)',
+                                width: '52px',
+                                height: '1px',
+                                background: 'var(--gull)',
+                                margin: '34px 0 20px',
                             }}
                         />
-                        {/* Amber tint in the upper corner — evening-light warmth */}
+
                         <div
-                            aria-hidden
                             style={{
-                                position: 'absolute',
-                                inset: 0,
-                                background:
-                                    'radial-gradient(ellipse at 78% 20%, rgba(233,168,96,0.12) 0%, transparent 55%)',
-                                pointerEvents: 'none',
+                                display: 'flex',
+                                alignItems: 'baseline',
+                                gap: '14px',
+                                flexWrap: 'wrap',
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '11.5px',
+                                color: 'var(--steinn)',
+                                letterSpacing: '0.14em',
+                                textTransform: 'uppercase',
+                                fontWeight: 600,
                             }}
-                        />
-                    </>
-                ) : (
-                    <div
-                        aria-hidden
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            background:
-                                'radial-gradient(ellipse at 50% 30%, rgba(233,168,96,0.14) 0%, transparent 55%), linear-gradient(to bottom, var(--nott) 0%, var(--mold) 60%, var(--skra) 100%)',
-                        }}
-                    />
-                )}
+                        >
+                            {article.author_name && (
+                                <>
+                                    <span
+                                        style={{
+                                            fontFamily: 'var(--font-serif)',
+                                            fontStyle: 'italic',
+                                            fontSize: '15px',
+                                            color: 'var(--ljos)',
+                                            letterSpacing: 0,
+                                            textTransform: 'none',
+                                            fontWeight: 400,
+                                        }}
+                                    >
+                                        {article.author_name}
+                                    </span>
+                                    <span style={{ opacity: 0.5 }}>·</span>
+                                </>
+                            )}
+                            <span>{minutes} mín. lestur</span>
+                        </div>
+                    </div>
+
+                    {article.featured_image && (
+                        <div
+                            className="article-cover-media"
+                            style={{
+                                position: 'relative',
+                                overflow: 'hidden',
+                                background: 'var(--torfa)',
+                                border: '1px solid var(--border)',
+                                boxShadow: 'var(--shadow-lift)',
+                            }}
+                        >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={article.featured_image}
+                                alt=""
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    objectPosition: '50% 58%',
+                                    filter: 'saturate(0.88) contrast(1.04)',
+                                }}
+                            />
+                            <div
+                                aria-hidden
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background:
+                                        'linear-gradient(180deg, rgba(20,18,15,0.08) 0%, rgba(20,18,15,0.22) 100%)',
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
             </section>
 
-            {/* 2–5. VELLUM ARTICLE FRAME */}
             <article
                 className="article-reading-frame"
                 style={{
@@ -144,141 +221,15 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     color: 'var(--skra-djup)',
                     paddingBottom: 0,
                     boxShadow: 'var(--shadow-read)',
-                    // Pull the vellum into the bottom of the photograph so the
-                    // masthead feels connected to the opening image.
-                    marginTop: 'clamp(-92px, -7vw, -64px)',
                 }}
             >
-                {/* Header — centered masthead composition, matches the
-                    full-width image above. Left-aligned body follows
-                    (different modes: masthead announces, body reads). */}
-                <header
-                    style={{
-                        maxWidth: '48rem',
-                        margin: '0 auto',
-                        padding: 'clamp(56px, 6vw, 76px) var(--rail-padding) clamp(34px, 5vw, 46px)',
-                        textAlign: 'center',
-                    }}
-                >
-                    <div
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'baseline',
-                            gap: '14px',
-                            flexWrap: 'wrap',
-                            justifyContent: 'center',
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            letterSpacing: '0.22em',
-                            textTransform: 'uppercase',
-                            color: 'var(--gull)',
-                            marginBottom: '32px',
-                        }}
-                    >
-                        <Link
-                            href="/greinar"
-                            style={{ color: 'inherit', textDecoration: 'none' }}
-                        >
-                            Omega Tímaritið
-                        </Link>
-                        {published && (
-                            <>
-                                <span style={{ color: 'var(--skra-mjuk)', opacity: 0.4 }}>·</span>
-                                <span style={{ color: 'var(--skra-mjuk)' }}>{published}</span>
-                            </>
-                        )}
-                    </div>
-
-                    <h1
-                        style={{
-                            margin: 0,
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: 'clamp(32px, 5vw, 58px)',
-                            lineHeight: 1.08,
-                            letterSpacing: 0,
-                            fontWeight: 400,
-                            color: 'var(--skra-djup)',
-                            textWrap: 'balance',
-                        }}
-                    >
-                        {article.title}
-                    </h1>
-
-                    {article.excerpt && (
-                        <p
-                            style={{
-                                margin: '32px auto 0',
-                                fontFamily: 'var(--font-serif)',
-                                fontStyle: 'italic',
-                                fontSize: 'clamp(19px, 1.9vw, 24px)',
-                                lineHeight: 1.5,
-                                color: 'var(--skra-mjuk)',
-                                letterSpacing: 0,
-                                textWrap: 'pretty',
-                                maxWidth: '38rem',
-                            }}
-                        >
-                            {article.excerpt}
-                        </p>
-                    )}
-
-                    {/* Short gold-foil rule as a visual anchor (not a
-                        full-width divider — this is an ornament, not a
-                        section break). Centered byline underneath. */}
-                    <div
-                        aria-hidden
-                        style={{
-                            width: '56px',
-                            height: '1px',
-                            background: 'var(--gull)',
-                            margin: '40px auto 20px',
-                        }}
-                    />
-                    <div
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'baseline',
-                            gap: '14px',
-                            flexWrap: 'wrap',
-                            justifyContent: 'center',
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '11.5px',
-                            color: 'var(--skra-mjuk)',
-                            letterSpacing: '0.14em',
-                            textTransform: 'uppercase',
-                            fontWeight: 600,
-                        }}
-                    >
-                        {article.author_name && (
-                            <>
-                                <span
-                                    style={{
-                                        fontFamily: 'var(--font-serif)',
-                                        fontStyle: 'italic',
-                                        fontSize: '15px',
-                                        color: 'var(--skra-djup)',
-                                        letterSpacing: 0,
-                                        textTransform: 'none',
-                                        fontWeight: 400,
-                                    }}
-                                >
-                                    {article.author_name}
-                                </span>
-                                <span style={{ opacity: 0.4 }}>·</span>
-                            </>
-                        )}
-                        <span>{minutes} mín. lestur</span>
-                    </div>
-                </header>
-
                 {/* Body — 46rem column at 19px body size gives ~78ch,
                     the magazine long-read sweet spot. */}
                 <div
                     style={{
                         maxWidth: '46rem',
                         margin: '0 auto',
-                        padding: 'clamp(16px, 3vw, 24px) var(--rail-padding) clamp(64px, 10vw, 96px)',
+                        padding: 'clamp(56px, 7vw, 88px) var(--rail-padding) clamp(64px, 10vw, 96px)',
                     }}
                 >
                     <ArticleContent content={article.content} />

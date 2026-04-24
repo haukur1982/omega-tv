@@ -473,6 +473,37 @@ h1, h2, h3, h4, h5, h6 {
 }
 .article-prose a:hover { opacity: 0.8; }
 
+/* Article detail cover */
+.article-cover-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.82fr);
+  gap: clamp(40px, 6vw, 84px);
+  align-items: center;
+}
+
+.article-cover-media {
+  aspect-ratio: 4 / 5;
+  min-height: 420px;
+  max-height: 620px;
+}
+
+@media (max-width: 900px) {
+  .article-cover-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .article-cover-copy {
+    order: 1;
+  }
+
+  .article-cover-media {
+    order: 2;
+    aspect-ratio: 16 / 10;
+    min-height: 0;
+    max-height: none;
+  }
+}
+
 /* ═══ Cream Reading Frame (vellum) ═══ */
 .article-reading-frame {
   background: var(--skra) !important;

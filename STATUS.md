@@ -1,13 +1,29 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-24 (Codex — Greinar article detail visual pass)
-**Last Agent:** Codex — article detail readability/design tuning
-**Branch:** `claude-design-rebrand` (8 commits ahead of main on this branch, **pushed to origin**)
+**Last Updated:** 2026-04-24 (Codex — Greinar article cover redesign correction)
+**Last Agent:** Codex — article detail visual correction
+**Branch:** `claude-design-rebrand` (active redesign branch, pushed to origin)
 **Build Status:** all pages 200, tsc clean, `pnpm build` green across all redesigns.
 
 ---
 
 ## Codex session — 2026-04-24 evening
+
+**Correction after Hawk review:** first pass still looked bad on desktop. The full-bleed ash photo/fade treatment was removed entirely.
+
+What changed in the correction:
+
+- Replaced the giant image-over-vellum hero with a dark editorial article cover.
+- Desktop now uses a two-column opening: article metadata/title/excerpt/author on the left, ash image as supporting media on the right.
+- Narrow/mobile view now opens with the article title first, then the image. No more waiting through a large photo before knowing what page you are on.
+- Cream reading frame starts cleanly after the cover instead of being pulled into a foggy image fade.
+
+Verification:
+
+- `pnpm build` passed after rerun with network access for Google font fetches.
+- Browser QA checked `http://localhost:3005/greinar/aska` in the in-app browser.
+
+Earlier first pass, kept for history:
 
 Hawk flagged `/greinar/aska` as feeling visually off. The issue was mainly proportion and opening typography:
 
