@@ -15,7 +15,8 @@ import { OmegaMark } from '@/components/brand/OmegaMark';
    - Right-hand slot is reserved for state-aware live status:
      off-air = muted "Næsta sending" link; on-air = warm Live Badge.
    - Wordmark only in cream; Ω as typographic mark, not a blue disc.
-   - Active route gets a subtle kerti-amber underline — wayfinding.
+   - Active route underline in nordurljos (wayfinding only — amber is
+     reserved for primary CTAs per the Altingi palette rules).
    ════════════════════════════════════════════════════════════════ */
 
 const SearchIcon = ({ size = 18 }: { size?: number }) => (
@@ -171,8 +172,8 @@ export default function Navbar() {
                                             style={{
                                                 position: 'absolute',
                                                 left: 0, right: 0, bottom: '18px',
-                                                height: '1px',
-                                                background: 'var(--kerti)',
+                                                height: '2px',
+                                                background: 'var(--nordurljos)',
                                             }}
                                         />
                                     )}
@@ -206,7 +207,7 @@ export default function Navbar() {
                                     width: '6px',
                                     height: '6px',
                                     borderRadius: '50%',
-                                    background: 'var(--kerti)',
+                                    background: 'var(--nordurljos)',
                                     display: 'inline-block',
                                 }}
                             />
@@ -322,7 +323,7 @@ export default function Navbar() {
                                                 textDecoration: 'none',
                                                 letterSpacing: '-0.02em',
                                                 lineHeight: 1,
-                                                borderLeft: active ? '2px solid var(--kerti)' : '2px solid transparent',
+                                                borderLeft: active ? '2px solid var(--nordurljos)' : '2px solid transparent',
                                                 paddingLeft: '14px',
                                             }}
                                         >
