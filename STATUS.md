@@ -1,9 +1,53 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-19 (late evening — brand system session)
-**Last Agent:** Claude Code — visual identity redesign + brand guide authoring
-**Branch:** main
-**Build Status:** Dev on :3010, all pages 200, tsc clean. Ten+ commits on origin/main today; last three are the brand identity milestone.
+**Last Updated:** 2026-04-23 (late evening — Claude Design session)
+**Last Agent:** Claude Code — Claude Design prep + Live site audit
+**Branch:** main (also pushed `claude-design-rebrand` for the design tool to work against)
+**Build Status:** Dev on :3010, all pages 200, tsc clean.
+
+## Active session — 2026-04-23 Claude Design handoff
+
+**What was done tonight:**
+
+1. **README rewrite** — replaced Next.js boilerplate with an orientation doc that points AI collaborators at `docs/brand-guide.md`, `src/app/globals.css`, and `src/app/layout.tsx` as the locked system. Committed `063ed14` on main.
+2. **Branch `claude-design-rebrand`** pushed for Claude Design to work against.
+3. **Claude Design project set up** — "Omega Stöðin Design System":
+   - GitHub repo linked
+   - Brand assets uploaded (logo SVGs)
+   - Company blurb + gotchas-list filled in (palette, italics-as-voice, warm-don't-lift, Icelandic diacritics)
+   - Design system published (⚠️ "Default" checkbox may still need ticking — left as TODO)
+   - Font warning: Fraunces/Newsreader/Inter must be uploaded as .ttf files from fonts.google.com (TODO tomorrow)
+4. **PDFs → PNGs** — 9 site screenshots converted from PDF and saved to `/Users/haukur/Downloads/pAGES/images/`
+5. **Site audit received from Claude Design** — genuinely strong work. Summary below.
+
+**Audit headline finding:**
+
+The amber/slate roles are **inverted site-wide**. Amber (`--kerti`) is doing wayfinding (nav active state, "NÆSTA SENDING" indicator, even section headings on Ísrael page). Slate (`--nordurljos`) is doing CTAs (prayer form button, newsletter signup, "NÝJAST" badge, Styrkja hero arch). This is the *root cause* of both the "cornflower blue button" bug and the "amber fatigue" feel. Fix the inversion and five separate bugs collapse together.
+
+**Also flagged:**
+
+- Styrkja hero arch is `#5B8ABF` — a completely off-palette blue, not even `--nordurljos`.
+- One UTF-8-mojibaked prayer record on Bænatorg ("Anna" entry, Heilsa category) — isolated, data-layer issue.
+- Three specific tight-type spots: prayer card body, Greinar card meta row, Home card sub-labels.
+- Live page empty-state = blank canvas (design problem, not a bug).
+- Possible lazy-load misses on Styrkja "Tvær leiðir." and Um okkur (unverified).
+- Italics verified clean — Newsreader italic holding everywhere, italic-as-human-voice rule intact.
+
+**Decision made:** go with option (b) — the Live page redesign will establish the corrected patterns (nav→slate, CTA→amber, section-headings→ljos) that the rest of the site adopts. Not option (a) Live-only fixes.
+
+**Next session pickup:**
+
+1. Tomorrow morning: tick "Default" on the Claude Design system, upload the three Google Fonts (.ttf files) to clear the substitute-font warning.
+2. Paste the approval response (in the conversation log above) into Claude Design to kick off the Live page redesign spec.
+3. Claude Design will propose design direction first; review before any screens are generated.
+4. Hold: Priority 3 (human warmth), Priority 4 (mobile + TV extension), Priority 5 (design system doc).
+
+**Important for future code work:** once Claude Design proposes the corrected patterns, the *code* needs the same inversion fix applied. That's a Claude Code job on `claude-design-rebrand`, not a Claude Design job. Likely affects: Navbar, PrayerWall form, NewsletterSignup, ArticleCard "Lesa grein" link, "NÝJAST" badge component, Styrkja hero section.
+
+---
+
+## Historical context below — keep for reference
+
 
 ## Where things stand right now
 
