@@ -1,220 +1,197 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import Link from "next/link";
-import WeekSchedule from "@/components/live/WeekSchedule";
-import PrayerHall from "@/components/sanctuary/PrayerHall";
-import { getCurrentAndNext, formatClockUtc } from "@/lib/schedule-db";
+import LiveMeta from "@/components/live/LiveMeta";
+import OnAirEditorial from "@/components/live/OnAirEditorial";
+import NaestaSending from "@/components/live/NaestaSending";
+import AMedanPuBidur from "@/components/live/AMedanPuBidur";
+import DagskraTimeline from "@/components/live/DagskraTimeline";
+import { getCurrentAndNext, getScheduleInRange, type ScheduleSlot } from "@/lib/schedule-db";
 
 /**
  * /live — "Beint"
  *
- * Single-column layout (Phase 4 rework):
- *   1. Player — full-width cinematic broadcast
- *   2. Now-playing info bar — live state + program title + CTAs
- *   3. PrayerHall — the SOUL of this page. Prayer wall, bið-með,
- *      submission form. Not a sidebar ornament — the main event.
- *      The player serves the prayer, not the other way around.
- *   4. Weekly schedule with day-switcher
+ * Two first-class states, per the Beint Redesign spec:
+ *   A. On-air — there's a current broadcast. Player + LiveMeta + OnAirEditorial.
+ *   B. Off-air — no broadcast. NaestaSending countdown + AMedanPuBidur row.
  *
- * See plan §4.3 + Hawk's 2026-04-17 feedback (captured in STATUS.md).
+ * Both states end with the chronological DagskraTimeline (next 6 broadcasts).
+ *
+ * PrayerHall is no longer inlined here — "Senda bænaefni" becomes a link
+ * to /baenatorg, which owns the prayer experience end-to-end. Live stays
+ * about the broadcast.
+ *
+ * The state-A player is still Bunny Stream iframe via NEXT_PUBLIC_LIVE_STREAM_EMBED_URL.
+ * A ?state=off-air query (dev-only escape hatch) forces State B so both
+ * states are testable without waiting for a schedule gap.
  */
 
 export const revalidate = 60;
 
 interface LivePageProps {
-    searchParams: Promise<{ day?: string }>;
+    searchParams: Promise<{ state?: string }>;
 }
 
 export default async function LivePage({ searchParams }: LivePageProps) {
-    const { day } = await searchParams;
+    const { state: stateParam } = await searchParams;
     const embedUrl = process.env.NEXT_PUBLIC_LIVE_STREAM_EMBED_URL;
-    const { current, next } = await getCurrentAndNext();
+
+    const now = new Date();
+    const { current, next } = await getCurrentAndNext(now);
+
+    // Dev escape hatch — force off-air to visually QA the State B composition.
+    const forceOffAir = stateParam === 'off-air';
+    const effectiveCurrent: ScheduleSlot | null = forceOffAir ? null : current;
+
+    // Upcoming + recent slots for the timeline + "Síðasta útsending" card.
+    const rangeStart = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+    const rangeEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const allSlots = await getScheduleInRange(rangeStart.toISOString(), rangeEnd.toISOString());
+
+    const upcoming = allSlots.filter((s) => new Date(s.ends_at).getTime() > now.getTime()).slice(0, 6);
+    const previous =
+        [...allSlots].reverse().find((s) => new Date(s.ends_at).getTime() <= now.getTime()) ?? null;
+
+    const isOnAir = effectiveCurrent !== null;
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
             <Navbar />
 
-            {/* ═══ PLAYER — full-width 16:9, cinematic ═══ */}
-            <div style={{ paddingTop: '72px', background: 'var(--nott)' }}>
-                <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-                    <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', background: 'var(--nott)' }}>
-                        {embedUrl ? (
-                            <iframe
-                                src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1`}
-                                title="Omega — bein útsending"
-                                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
-                                allow="autoplay; fullscreen; picture-in-picture"
-                                allowFullScreen
-                            />
-                        ) : (
+            {/* Breadcrumb + page title */}
+            <div
+                style={{
+                    maxWidth: '84rem',
+                    margin: '0 auto',
+                    padding: 'clamp(120px, 12vw, 160px) var(--rail-padding) 32px',
+                }}
+            >
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        marginBottom: '14px',
+                        color: 'var(--steinn)',
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: '11.5px',
+                        fontWeight: 600,
+                        letterSpacing: '0.18em',
+                        textTransform: 'uppercase',
+                    }}
+                >
+                    <span>Omega</span>
+                    <span style={{ opacity: 0.5 }}>·</span>
+                    <span style={{ color: 'var(--ljos)' }}>Beint</span>
+                </div>
+                <h1
+                    className="type-vaka"
+                    style={{ margin: 0, color: 'var(--ljos)', fontSize: 'clamp(2.75rem, 5.5vw, 4.5rem)' }}
+                >
+                    {isOnAir ? 'Í beinni útsendingu.' : 'Næsta sending.'}
+                </h1>
+            </div>
+
+            {/* Main panel slot — player (on-air) OR countdown (off-air) */}
+            <section
+                style={{
+                    maxWidth: '84rem',
+                    margin: '0 auto',
+                    padding: '0 var(--rail-padding)',
+                }}
+            >
+                {isOnAir && effectiveCurrent ? (
+                    <div>
+                        {/* Player */}
+                        <div
+                            style={{
+                                position: 'relative',
+                                width: '100%',
+                                aspectRatio: '16 / 9',
+                                borderRadius: 'var(--radius-md)',
+                                overflow: 'hidden',
+                                background: 'var(--nott)',
+                                border: '1px solid var(--border)',
+                                boxShadow: 'var(--shadow-lift)',
+                            }}
+                        >
+                            {embedUrl ? (
+                                <iframe
+                                    src={`${embedUrl}${embedUrl.includes('?') ? '&' : '?'}autoplay=1`}
+                                    title="Omega — bein útsending"
+                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 0 }}
+                                    allow="autoplay; fullscreen; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            ) : (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: 'var(--steinn)',
+                                        fontFamily: 'var(--font-serif)',
+                                        fontStyle: 'italic',
+                                    }}
+                                >
+                                    Útsendingin verður aðgengileg skömmu áður en hún hefst.
+                                </div>
+                            )}
+
+                            {/* BEINT pill — top-left overlay. Only visual element
+                                layered on the iframe because CSS overlay on a
+                                cross-origin iframe is a thin veneer, not a real
+                                control surface. No viewership counter (would be
+                                fake data at the moment). */}
                             <div
                                 style={{
                                     position: 'absolute',
-                                    inset: 0,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    gap: '12px',
-                                }}
-                            >
-                                <p className="type-merki" style={{ color: 'var(--steinn)', margin: 0, letterSpacing: '0.22em' }}>
-                                    Engin útsending í gangi
-                                </p>
-                                <p
-                                    style={{
-                                        margin: 0,
-                                        color: 'var(--moskva)',
-                                        fontFamily: 'var(--font-serif)',
-                                        fontStyle: 'italic',
-                                        fontSize: '0.98rem',
-                                    }}
-                                >
-                                    {next ? `Næsta sending: ${next.program_title} kl. ${formatClockUtc(next.starts_at)}` : 'Líttu aftur síðar.'}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* ═══ NOW / NEXT info bar ═══ */}
-            <div
-                style={{
-                    maxWidth: '1400px',
-                    margin: '0 auto',
-                    padding: 'clamp(1.5rem, 2.5vw, 2rem) var(--rail-padding)',
-                    borderBottom: '1px solid var(--border)',
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(0, 1fr) auto',
-                    gap: 'clamp(1rem, 2vw, 2rem)',
-                    alignItems: 'center',
-                }}
-            >
-                <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                        {current ? (
-                            <span
-                                className="type-merki"
-                                style={{
+                                    top: '18px',
+                                    left: '18px',
                                     display: 'inline-flex',
                                     alignItems: 'center',
-                                    gap: '8px',
-                                    padding: '4px 10px',
-                                    background: 'rgba(216, 75, 58, 0.14)',
-                                    border: '1px solid rgba(216, 75, 58, 0.4)',
-                                    borderRadius: '2px',
+                                    gap: '9px',
+                                    padding: '7px 12px',
+                                    borderRadius: 'var(--radius-xs)',
+                                    background: 'rgba(20,18,15,0.72)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '1px solid rgba(216,75,58,0.35)',
                                     color: 'var(--blod)',
+                                    fontFamily: 'var(--font-sans)',
+                                    fontSize: '10.5px',
+                                    fontWeight: 700,
                                     letterSpacing: '0.22em',
-                                    fontSize: '0.62rem',
+                                    textTransform: 'uppercase',
+                                    pointerEvents: 'none',
                                 }}
                             >
                                 <span
                                     className="live-dot"
-                                    aria-hidden="true"
-                                    style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--blod)', display: 'inline-block' }}
+                                    aria-hidden
+                                    style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--blod)', display: 'inline-block' }}
                                 />
-                                Í beinni
-                            </span>
-                        ) : (
-                            <span className="type-merki" style={{ color: 'var(--moskva)', letterSpacing: '0.22em' }}>
-                                Dagskrá
-                            </span>
-                        )}
-                        {current && (
-                            <span className="type-meta" style={{ color: 'var(--steinn)' }}>
-                                {formatClockUtc(current.starts_at)} – {formatClockUtc(current.ends_at)}
-                            </span>
-                        )}
+                                Beint
+                            </div>
+                        </div>
+
+                        <LiveMeta current={effectiveCurrent} />
+                        <OnAirEditorial current={effectiveCurrent} />
                     </div>
-                    <h1
-                        style={{
-                            margin: 0,
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: 'clamp(1.6rem, 3vw, 2.1rem)',
-                            fontWeight: 700,
-                            letterSpacing: '-0.02em',
-                            color: 'var(--ljos)',
-                        }}
-                    >
-                        {current?.program_title ?? 'Omega Stöðin'}
-                    </h1>
-                    {current?.description && (
-                        <p
-                            style={{
-                                margin: '6px 0 0',
-                                color: 'var(--moskva)',
-                                fontFamily: 'var(--font-serif)',
-                                fontStyle: 'italic',
-                                fontSize: '0.95rem',
-                                lineHeight: 1.5,
-                                maxWidth: '64ch',
-                            }}
-                        >
-                            {current.description}
-                        </p>
-                    )}
-                </div>
+                ) : (
+                    <NaestaSending next={next} />
+                )}
+            </section>
 
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-                    <a
-                        href="#samfelag"
-                        className="ghost-btn"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 20px',
-                            borderRadius: '2px',
-                            borderWidth: '1px',
-                            borderStyle: 'solid',
-                            color: 'var(--ljos)',
-                            fontSize: '0.8rem',
-                            fontWeight: 500,
-                            letterSpacing: '0.02em',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        Senda bæn ↓
-                    </a>
-                    <Link
-                        href="/give"
-                        className="warm-hover"
-                        style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '12px 20px',
-                            background: 'var(--kerti)',
-                            color: 'var(--nott)',
-                            fontSize: '0.8rem',
-                            fontWeight: 600,
-                            borderRadius: '2px',
-                            border: '1px solid var(--kerti)',
-                            textDecoration: 'none',
-                        }}
-                    >
-                        Styrkja
-                    </Link>
-                </div>
-            </div>
+            {/* Á meðan þú bíður — only in off-air state */}
+            {!isOnAir && <AMedanPuBidur previous={previous} />}
 
-            {/* ═══ PRAYER HALL — the soul of this page ═══ */}
-            <div id="samfelag">
-                <PrayerHall />
-            </div>
-
-            {/* ═══ SCHEDULE ═══ */}
-            <div
-                style={{
-                    maxWidth: '1400px',
-                    margin: '0 auto',
-                    padding: '0 var(--rail-padding)',
-                    borderTop: '1px solid var(--border)',
-                }}
-            >
-                <WeekSchedule selectedDay={day} />
-            </div>
+            {/* Dagskrá timeline — both states */}
+            <DagskraTimeline
+                slots={upcoming}
+                currentId={effectiveCurrent?.id ?? null}
+                nextId={next?.id ?? null}
+            />
 
             <Footer />
         </main>
