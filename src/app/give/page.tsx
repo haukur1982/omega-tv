@@ -45,7 +45,7 @@ export default function GivePage() {
                     style={{ willChange: 'transform' }}
                 />
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, var(--bg-deep) 0%, rgba(12,10,8,0.7) 40%, rgba(12,10,8,0.4) 100%)' }} />
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center bottom, rgba(91,138,191,0.08) 0%, transparent 70%)' }} />
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center bottom, rgba(111,165,216,0.08) 0%, transparent 70%)' }} />
 
                 <div className="relative z-10 max-w-4xl text-center">
                     <motion.p
