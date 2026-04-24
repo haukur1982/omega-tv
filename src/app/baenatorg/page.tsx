@@ -1,100 +1,163 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import PrayerCard from "@/components/prayer/PrayerCard";
-import PrayerForm from "@/components/prayer/PrayerForm";
-import QuickPrayerButtons from "@/components/prayer/QuickPrayerButtons";
+import BaenatorgClient from "@/components/prayer/BaenatorgClient";
 import PrayerCampaignBanner from "@/components/prayer/PrayerCampaignBanner";
 import { getPrayers, getTotalPrayCount, getActiveCampaigns } from "@/lib/prayer-db";
 
+/**
+ * /baenatorg — the prayer square.
+ *
+ * Redesigned per the "altar, not form" direction. The permanent
+ * right-hand form column is gone; writing a prayer is an *action you
+ * invoke* (modal, triggered from the invitation row), not a fixture
+ * of the page. The prayer feed is the page.
+ *
+ * Amber discipline:
+ *   - Appears once on the default page: the invitation row CTA
+ *   - Appears once more inside the modal: the submit button
+ *   - Never on cards ("bið með þér" is a subdued hairline button
+ *     that warms to amber only after pressing)
+ *
+ * Wayfinding (filter tabs, Bænasvar badge) uses --nordurljos slate.
+ *
+ * FeaturedPrayer ("Bæn dagsins" pastor-authored) and ShowPrayerCluster
+ * (prayers linked to a currently-airing show) are deferred — both need
+ * schema extensions (a featured_prayers table and a schedule_slot_id
+ * relation on prayers). See STATUS.md follow-ups.
+ */
+
 export const dynamic = 'force-dynamic';
 
-export default async function PrayerPage() {
+export default async function BaenatorgPage() {
     const [prayers, totalCount, campaigns] = await Promise.all([
         getPrayers(),
         getTotalPrayCount(),
         getActiveCampaigns(),
     ]);
 
-    const activeCampaign = campaigns[0] || null;
+    const activeCampaign = campaigns[0] ?? null;
     const displayCount = totalCount + prayers.length;
 
     return (
-        <main style={{ minHeight: '100vh', backgroundColor: 'var(--bg-deep)' }}>
+        <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
             <Navbar />
 
-            {/* Hero + Quick Prayers */}
-            <div className="relative overflow-hidden">
-                <img
-                    src="https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=2600&auto=format&fit=crop"
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover opacity-20"
-                />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, rgba(12,10,8,0.3) 0%, transparent 50%, var(--bg-deep) 100%)' }} />
-
-                <div className="relative z-10 pt-40 pb-16 text-center px-6">
-                    <p style={{ color: 'var(--accent)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.25em', marginBottom: '2rem' }}>
+            {/* Editorial page header — not a marketing hero.
+                Title + italic sub, with the all-time counter quietly set
+                to the right. No background image — that would compete
+                with the register the page needs. */}
+            <section
+                style={{
+                    maxWidth: '84rem',
+                    margin: '0 auto',
+                    padding: 'clamp(120px, 12vw, 160px) var(--rail-padding) 40px',
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(0,1fr) auto',
+                    gap: '48px',
+                    alignItems: 'end',
+                    borderBottom: '1px solid var(--border)',
+                }}
+            >
+                <div>
+                    <div
+                        style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            letterSpacing: '0.22em',
+                            textTransform: 'uppercase',
+                            color: 'var(--moskva)',
+                            marginBottom: '18px',
+                        }}
+                    >
                         Bænatorg
-                    </p>
-                    <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 8vw, 6rem)', fontWeight: 700, lineHeight: 0.9, letterSpacing: '-0.02em', marginBottom: '2rem' }}>
-                        Samfélag í bæn.
+                    </div>
+                    <h1
+                        style={{
+                            margin: 0,
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: 'clamp(44px, 6vw, 76px)',
+                            lineHeight: 1.02,
+                            letterSpacing: '-0.018em',
+                            fontWeight: 400,
+                            color: 'var(--ljos)',
+                            maxWidth: '760px',
+                        }}
+                    >
+                        Þar sem bænir mætast.
                     </h1>
-                    <p className="text-lg leading-relaxed max-w-xl mx-auto mb-16" style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                        &ldquo;Komið því fram með djörfung að hásæti náðarinnar, til þess
-                        að við öðlumst miskunn og finnum náð.&rdquo;
+                    <p
+                        style={{
+                            margin: '28px 0 0',
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '19px',
+                            lineHeight: 1.55,
+                            color: 'var(--moskva)',
+                            maxWidth: '560px',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        Deildu því sem þungt liggur, berðu aðra fyrir Drottni, og ritaðu bænasvörin þegar þau koma.
                     </p>
-
-                    {/* Prayer counter */}
-                    <div className="flex flex-col items-center gap-2 mb-20">
-                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 6vw, 4rem)', fontWeight: 700 }}>{displayCount.toLocaleString('is-IS')}</span>
-                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 600 }}>
-                            bænir hafa verið beðnar
-                        </span>
-                    </div>
-
-                    {/* Quick prayer section */}
-                    <div className="max-w-4xl mx-auto text-left">
-                        <p style={{ color: 'var(--accent)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1.5rem' }}>
-                            Biðja fyrir þjóðinni
-                        </p>
-                        <QuickPrayerButtons />
-                    </div>
                 </div>
-            </div>
 
-            {/* Campaign banner */}
+                <aside style={{ textAlign: 'right', color: 'var(--moskva)' }}>
+                    <div
+                        style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: 'clamp(44px, 5vw, 64px)',
+                            lineHeight: 1,
+                            fontWeight: 400,
+                            color: 'var(--ljos)',
+                            fontFeatureSettings: '"lnum", "tnum"',
+                            letterSpacing: '-0.02em',
+                        }}
+                    >
+                        {displayCount.toLocaleString('is-IS')}
+                    </div>
+                    <div
+                        style={{
+                            marginTop: '10px',
+                            fontFamily: 'var(--font-serif)',
+                            fontStyle: 'italic',
+                            fontSize: '14px',
+                            color: 'var(--moskva)',
+                            maxWidth: '200px',
+                            marginLeft: 'auto',
+                            lineHeight: 1.4,
+                        }}
+                    >
+                        bænir bornar fram á þessu torgi
+                    </div>
+                </aside>
+            </section>
+
+            {/* Optional active campaign banner — kept from the pre-redesign
+                because it's real data with its own visual language, not a
+                form chrome. Sits above the invitation row when present. */}
             {activeCampaign && (
-                <section className="max-w-6xl mx-auto px-6 py-12">
+                <section
+                    style={{
+                        maxWidth: '84rem',
+                        margin: '0 auto',
+                        padding: '32px var(--rail-padding) 0',
+                    }}
+                >
                     <PrayerCampaignBanner campaign={activeCampaign} />
                 </section>
             )}
 
-            {/* Prayer Feed + Form */}
-            <section className="max-w-6xl mx-auto px-6 py-20">
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-16">
-
-                    {/* Left: Prayer Feed */}
-                    <div>
-                        <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '2.5rem' }}>Bænir samfélagsins</h2>
-
-                        {prayers.length > 0 ? (
-                            <div className="space-y-8">
-                                {prayers.map((prayer, idx) => (
-                                    <PrayerCard key={prayer.id} prayer={prayer} index={idx} />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="py-24 text-center">
-                                <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>Engar bænir ennþá.</p>
-                                <p style={{ color: 'var(--text-secondary)' }}>Vertu fyrst/ur til að senda bænabeiðni.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Right: Submission Form */}
-                    <div>
-                        <PrayerForm />
-                    </div>
-                </div>
+            {/* Invitation row → feed → modal. Single column, full-width.
+                This is the "altar surface" — the form isn't here until
+                invoked. */}
+            <section
+                style={{
+                    maxWidth: '84rem',
+                    margin: '0 auto',
+                    padding: '0 var(--rail-padding) 96px',
+                }}
+            >
+                <BaenatorgClient initialPrayers={prayers} />
             </section>
 
             <Footer />
