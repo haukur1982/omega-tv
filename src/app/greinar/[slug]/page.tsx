@@ -52,7 +52,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     background:
                         'linear-gradient(180deg, var(--nott) 0%, var(--mold) 100%)',
                     overflow: 'hidden',
-                    padding: 'clamp(128px, 12vw, 176px) var(--rail-padding) clamp(64px, 8vw, 104px)',
+                    padding: 'clamp(124px, 11vw, 164px) var(--rail-padding) clamp(56px, 7vw, 88px)',
                     borderBottom: '1px solid var(--border)',
                 }}
             >
@@ -99,13 +99,13 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                             style={{
                                 margin: 0,
                                 fontFamily: 'var(--font-serif)',
-                                fontSize: 'clamp(40px, 5.4vw, 76px)',
-                                lineHeight: 1.02,
+                                fontSize: 'clamp(40px, 5vw, 70px)',
+                                lineHeight: 1.04,
                                 letterSpacing: 0,
                                 fontWeight: 400,
                                 color: 'var(--ljos)',
                                 textWrap: 'balance',
-                                maxWidth: '13ch',
+                                maxWidth: '15ch',
                             }}
                         >
                             {article.title}
@@ -181,9 +181,6 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                             style={{
                                 position: 'relative',
                                 overflow: 'hidden',
-                                background: 'var(--torfa)',
-                                border: '1px solid var(--border)',
-                                boxShadow: 'var(--shadow-lift)',
                             }}
                         >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -196,17 +193,33 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                                     width: '100%',
                                     height: '100%',
                                     objectFit: 'cover',
-                                    objectPosition: '50% 58%',
-                                    filter: 'saturate(0.88) contrast(1.04)',
+                                    objectPosition: '70% 50%',
+                                    filter: 'saturate(0.95) contrast(1.08)',
                                 }}
                             />
+                            {/* Fade into the warm-black banner on the LEFT
+                                edge — the image "bleeds" from the right.
+                                Clear on the right, dissolving to brown on
+                                the left. */}
                             <div
                                 aria-hidden
                                 style={{
                                     position: 'absolute',
                                     inset: 0,
                                     background:
-                                        'linear-gradient(180deg, rgba(20,18,15,0.08) 0%, rgba(20,18,15,0.22) 100%)',
+                                        'linear-gradient(to right, var(--mold) 0%, rgba(27,24,20,0.88) 10%, rgba(27,24,20,0.35) 35%, transparent 65%)',
+                                }}
+                            />
+                            {/* Subtle top-to-bottom tint so the image sits
+                                tonally with the dark banner above and
+                                border below. */}
+                            <div
+                                aria-hidden
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background:
+                                        'linear-gradient(180deg, rgba(20,18,15,0.14) 0%, rgba(20,18,15,0) 35%, rgba(20,18,15,0.18) 100%)',
                                 }}
                             />
                         </div>
