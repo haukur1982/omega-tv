@@ -419,7 +419,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ═══ Article Prose (HTML from CMS) ═══ */
-.article-prose p { margin-bottom: 1.75rem; }
+.article-prose {
+  font-family: var(--font-serif);
+  font-size: clamp(17px, 1.35vw, 19px);
+  line-height: 1.75;
+}
+.article-prose p { margin-bottom: 1.5em; }
 
 .article-prose p.lead {
   font-size: clamp(1.1rem, 1.8vw, 1.25rem);

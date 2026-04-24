@@ -149,27 +149,31 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     marginTop: '-1px',
                 }}
             >
-                {/* Header — wider 48rem so the masthead breathes */}
+                {/* Header — centered masthead composition, matches the
+                    full-width image above. Left-aligned body follows
+                    (different modes: masthead announces, body reads). */}
                 <header
                     style={{
                         maxWidth: '48rem',
                         margin: '0 auto',
                         padding: 'clamp(48px, 7vw, 72px) var(--rail-padding) clamp(36px, 5vw, 48px)',
+                        textAlign: 'center',
                     }}
                 >
                     <div
                         style={{
-                            display: 'flex',
+                            display: 'inline-flex',
                             alignItems: 'baseline',
                             gap: '14px',
                             flexWrap: 'wrap',
+                            justifyContent: 'center',
                             fontFamily: 'var(--font-sans)',
                             fontSize: '11px',
                             fontWeight: 700,
                             letterSpacing: '0.22em',
                             textTransform: 'uppercase',
                             color: 'var(--gull)',
-                            marginBottom: '28px',
+                            marginBottom: '32px',
                         }}
                     >
                         <Link
@@ -204,7 +208,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     {article.excerpt && (
                         <p
                             style={{
-                                margin: '32px 0 0',
+                                margin: '32px auto 0',
                                 fontFamily: 'var(--font-serif)',
                                 fontStyle: 'italic',
                                 fontSize: 'clamp(19px, 1.9vw, 24px)',
@@ -212,23 +216,32 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                                 color: 'var(--skra-mjuk)',
                                 letterSpacing: '-0.005em',
                                 textWrap: 'pretty',
-                                maxWidth: '40rem',
+                                maxWidth: '38rem',
                             }}
                         >
                             {article.excerpt}
                         </p>
                     )}
 
-                    {/* Gold-foil rule + byline row */}
+                    {/* Short gold-foil rule as a visual anchor (not a
+                        full-width divider — this is an ornament, not a
+                        section break). Centered byline underneath. */}
+                    <div
+                        aria-hidden
+                        style={{
+                            width: '56px',
+                            height: '1px',
+                            background: 'var(--gull)',
+                            margin: '40px auto 20px',
+                        }}
+                    />
                     <div
                         style={{
-                            marginTop: '40px',
-                            paddingTop: '20px',
-                            borderTop: '1px solid var(--gull)',
-                            display: 'flex',
-                            alignItems: 'center',
+                            display: 'inline-flex',
+                            alignItems: 'baseline',
                             gap: '14px',
                             flexWrap: 'wrap',
+                            justifyContent: 'center',
                             fontFamily: 'var(--font-sans)',
                             fontSize: '11.5px',
                             color: 'var(--skra-mjuk)',
@@ -259,10 +272,11 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     </div>
                 </header>
 
-                {/* Body — widened to 44rem for a more magazine-feeling column */}
+                {/* Body — 46rem column at 19px body size gives ~78ch,
+                    the magazine long-read sweet spot. */}
                 <div
                     style={{
-                        maxWidth: '44rem',
+                        maxWidth: '46rem',
                         margin: '0 auto',
                         padding: 'clamp(16px, 3vw, 24px) var(--rail-padding) clamp(64px, 10vw, 96px)',
                     }}
@@ -274,7 +288,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 {article.author_name && (
                     <div
                         style={{
-                            maxWidth: '44rem',
+                            maxWidth: '46rem',
                             margin: '0 auto',
                             padding: 'clamp(40px, 6vw, 56px) var(--rail-padding)',
                             borderTop: '1px solid rgba(0,0,0,0.1)',
