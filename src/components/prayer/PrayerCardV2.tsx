@@ -5,28 +5,37 @@ import { IcoHands, IcoShare, IcoHeartCheck } from './PrayerIcons';
 import type { Prayer } from '@/lib/prayer-db';
 
 /**
- * PrayerCardV2 — prayer row for the new single-column feed.
+ * PrayerCardV2 — prayer row for the Bænatorg feed.
  *
- * Per the redesign: body is the star — Newsreader italic, 22px,
- * generous line-height. The meta row is quiet. "Bið með þér" is a
- * subdued hairline button (NOT amber-filled) — amber is reserved for
- * the invitation row above the feed and the submit button inside
- * the modal. Once pressed, the button warms to --kerti border and
- * fill-tint to mark the gesture as made.
+ * Two visual variants:
  *
- * Hover uses a soft --torfa tint that extends beyond the text
- * column via negative margin, so the card "breathes" rather than
- * hugging the text with a boxed border.
+ *   - "dark" (default) — transparent card on the page's warm-black,
+ *     border-bottom separators, halo-hover with --torfa tint
+ *     extending beyond the text column. The original pattern.
+ *
+ *   - "vellum" — each card is a cream rectangle on the warm-black
+ *     page, like handwritten letters on an altar table. Reinforces
+ *     the "letter" part of Omega's brand direction and carries the
+ *     article vellum palette over to intimate reading content.
+ *     Hawk's experiment proposed 2026-04-24.
+ *
+ * Body is the star in both variants — Newsreader italic. The
+ * "Bið með þér" button is subdued (not amber-filled) until pressed;
+ * amber stays reserved for the invitation row above the feed and
+ * the submit button inside the modal.
  */
+
+type Variant = 'dark' | 'vellum';
 
 interface Props {
     prayer: Prayer;
     density?: 'comfortable' | 'compact';
+    variant?: Variant;
     onPray?: (id: string) => void;
     onShare?: (prayer: Prayer) => void;
 }
 
-export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, onShare }: Props) {
+export default function PrayerCardV2({ prayer, density = 'comfortable', variant = 'dark', onPray, onShare }: Props) {
     const [prayed, setPrayed] = useState(false);
     const [count, setCount] = useState(prayer.prayCount);
     const [hovered, setHovered] = useState(false);
@@ -35,6 +44,39 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
     const padY = density === 'compact' ? 24 : 32;
     const bodySize = density === 'compact' ? 20 : 22;
     const HALO_X = 28;
+    const isVellum = variant === 'vellum';
+
+    // Color tokens resolved per variant. Dark = original palette on page bg.
+    // Vellum = cream card with ink-on-cream text.
+    const tokens = isVellum
+        ? {
+            bodyColor: 'var(--skra-djup)',
+            metaColor: 'var(--skra-mjuk)',
+            dotColor: 'rgba(0,0,0,0.3)',
+            btnIdleColor: 'var(--skra-mjuk)',
+            btnIdleBorder: 'rgba(0,0,0,0.18)',
+            btnHoverColor: 'var(--skra-djup)',
+            btnPressedBg: 'rgba(200,138,62,0.14)',       // --gull wash
+            btnPressedBorder: 'var(--gull)',
+            btnPressedColor: 'var(--gull)',
+            answerBadgeBorder: 'rgba(111,165,216,0.45)',
+            answerBadgeColor: 'var(--nordurljos)',
+            shareIconColor: 'var(--skra-mjuk)',
+        }
+        : {
+            bodyColor: 'var(--ljos)',
+            metaColor: 'var(--moskva)',
+            dotColor: 'var(--steinn)',
+            btnIdleColor: 'var(--moskva)',
+            btnIdleBorder: 'var(--border)',
+            btnHoverColor: 'var(--ljos)',
+            btnPressedBg: 'color-mix(in oklab, var(--kerti) 12%, transparent)',
+            btnPressedBorder: 'var(--kerti)',
+            btnPressedColor: 'var(--kerti)',
+            answerBadgeBorder: 'rgba(111,165,216,0.35)',
+            answerBadgeColor: 'var(--nordurljos)',
+            shareIconColor: 'var(--moskva)',
+        };
 
     const handlePray = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -50,7 +92,6 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
             onShare(prayer);
             return;
         }
-        // Fallback: native share API
         if (typeof navigator !== 'undefined' && navigator.share) {
             navigator.share({
                 title: 'Bænaefni — Omega',
@@ -60,25 +101,43 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
         }
     };
 
-    // Icelandic relative time — simple, not a full library
     const when = relativeIs(prayer.timestamp);
+
+    // Visual shell differs between variants.
+    // Dark: full-width row with border-bottom, halo hover extends beyond text.
+    // Vellum: defined cream rectangle, margin-bottom gap, subtle lift on hover.
+    const shellStyle: React.CSSProperties = isVellum
+        ? {
+            position: 'relative',
+            padding: `${padY}px clamp(24px, 3.5vw, 40px)`,
+            marginBottom: '16px',
+            background: 'var(--skra)',
+            border: '1px solid rgba(0,0,0,0.08)',
+            borderRadius: 'var(--radius-sm)',
+            boxShadow: hovered
+                ? '0 12px 36px -20px rgba(10,8,5,0.55)'
+                : '0 4px 14px -10px rgba(10,8,5,0.4)',
+            transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
+            transition: 'box-shadow 280ms ease, transform 280ms ease, border-color 280ms ease',
+        }
+        : {
+            position: 'relative',
+            padding: `${padY}px ${HALO_X}px`,
+            marginLeft: -HALO_X,
+            marginRight: -HALO_X,
+            borderBottom: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            background: hovered
+                ? 'color-mix(in oklab, var(--torfa) 55%, transparent)'
+                : 'transparent',
+            transition: 'background 280ms ease',
+        };
 
     return (
         <article
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            style={{
-                position: 'relative',
-                padding: `${padY}px ${HALO_X}px`,
-                marginLeft: -HALO_X,
-                marginRight: -HALO_X,
-                borderBottom: '1px solid var(--border)',
-                borderRadius: 'var(--radius-sm)',
-                background: hovered
-                    ? 'color-mix(in oklab, var(--torfa) 55%, transparent)'
-                    : 'transparent',
-                transition: 'background 280ms ease',
-            }}
+            style={shellStyle}
         >
             {isAnswer && (
                 <div
@@ -87,8 +146,8 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
                         alignItems: 'center',
                         gap: '8px',
                         padding: '5px 11px',
-                        border: '1px solid rgba(111,165,216,0.35)',
-                        color: 'var(--nordurljos)',
+                        border: `1px solid ${tokens.answerBadgeBorder}`,
+                        color: tokens.answerBadgeColor,
                         borderRadius: '999px',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11px',
@@ -110,7 +169,7 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
                     fontSize: `${bodySize}px`,
                     lineHeight: 1.5,
                     letterSpacing: '-0.003em',
-                    color: 'var(--ljos)',
+                    color: tokens.bodyColor,
                     fontStyle: 'italic',
                     maxWidth: '820px',
                     textWrap: 'pretty',
@@ -136,16 +195,16 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
                         gap: '14px',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '12px',
-                        color: 'var(--moskva)',
+                        color: tokens.metaColor,
                         letterSpacing: '0.04em',
                     }}
                 >
                     <span style={{ fontWeight: 600 }}>{prayer.name || 'Nafnlaust systkin'}</span>
-                    <span style={{ color: 'var(--steinn)' }}>·</span>
+                    <span style={{ color: tokens.dotColor }}>·</span>
                     <span>{when}</span>
                     {prayer.topic && (
                         <>
-                            <span style={{ color: 'var(--steinn)' }}>·</span>
+                            <span style={{ color: tokens.dotColor }}>·</span>
                             <span
                                 style={{
                                     fontStyle: 'italic',
@@ -163,12 +222,11 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
                     <button
                         type="button"
                         onClick={handleShare}
-                        className="ghost-btn"
                         aria-label="Deila"
                         style={{
                             background: 'transparent',
                             border: 0,
-                            color: 'var(--moskva)',
+                            color: tokens.shareIconColor,
                             padding: '8px',
                             cursor: 'pointer',
                             borderRadius: 'var(--radius-xs)',
@@ -184,11 +242,9 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
                         disabled={prayed}
                         style={{
                             padding: '9px 16px',
-                            background: prayed
-                                ? 'color-mix(in oklab, var(--kerti) 12%, transparent)'
-                                : 'transparent',
-                            border: `1px solid ${prayed ? 'var(--kerti)' : 'var(--border)'}`,
-                            color: prayed ? 'var(--kerti)' : 'var(--moskva)',
+                            background: prayed ? tokens.btnPressedBg : 'transparent',
+                            border: `1px solid ${prayed ? tokens.btnPressedBorder : tokens.btnIdleBorder}`,
+                            color: prayed ? tokens.btnPressedColor : tokens.btnIdleColor,
                             fontFamily: 'var(--font-sans)',
                             fontSize: '12px',
                             fontWeight: 600,
@@ -203,14 +259,14 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', onPray, 
                         }}
                         onMouseOver={(e) => {
                             if (!prayed) {
-                                e.currentTarget.style.borderColor = 'var(--kerti)';
-                                e.currentTarget.style.color = 'var(--ljos)';
+                                e.currentTarget.style.borderColor = tokens.btnPressedBorder;
+                                e.currentTarget.style.color = tokens.btnHoverColor;
                             }
                         }}
                         onMouseOut={(e) => {
                             if (!prayed) {
-                                e.currentTarget.style.borderColor = 'var(--border)';
-                                e.currentTarget.style.color = 'var(--moskva)';
+                                e.currentTarget.style.borderColor = tokens.btnIdleBorder;
+                                e.currentTarget.style.color = tokens.btnIdleColor;
                             }
                         }}
                     >

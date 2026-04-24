@@ -55,10 +55,10 @@ export default function BaenatorgClient({ initialPrayers }: Props) {
 
             <PrayerFilterStrip active={filter} onChange={setFilter} counts={counts} />
 
-            <div style={{ maxWidth: '820px', margin: '0 auto' }} id="senda">
+            <div style={{ maxWidth: '860px', margin: '0 auto', paddingTop: '32px' }} id="senda">
                 {filtered.length > 0 ? (
                     filtered.map((p) => (
-                        <PrayerCardV2 key={p.id} prayer={p} onPray={handlePray} />
+                        <PrayerCardV2 key={p.id} prayer={p} variant="vellum" onPray={handlePray} />
                     ))
                 ) : (
                     <div
