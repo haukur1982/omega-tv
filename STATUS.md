@@ -1,11 +1,84 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-23 (late evening — Claude Design session)
-**Last Agent:** Claude Code — Claude Design prep + Live site audit
-**Branch:** main (also pushed `claude-design-rebrand` for the design tool to work against)
-**Build Status:** Dev on :3010, all pages 200, tsc clean.
+**Last Updated:** 2026-04-24 (overnight — Beint + Bænatorg implementation)
+**Last Agent:** Claude Code — Claude Design handoff execution
+**Branch:** `claude-design-rebrand` (5 commits ahead of main on this branch, NOT pushed yet — see "Next session pickup")
+**Build Status:** Dev on :3005, all pages 200, tsc clean, `pnpm build` green.
 
-## Active session — 2026-04-23 Claude Design handoff
+---
+
+## Active session — 2026-04-24 overnight (Beint + Bænatorg implementation)
+
+**Summary:** Claude Design finished its working session and produced an 8.4 MB handoff bundle — the `omega-stodin-design` skill — with 5 page prototypes (Beint, Bænatorg, Heim, Styrkja, Episode) as real React JSX plus the complete design system (colors_and_type.css, fonts, assets, 18 preview cards, website UI kit, 2,195-line chat transcript). Tonight implemented **two full page redesigns** (Beint, Bænatorg) and **site-wide pattern corrections** (Navbar, Ísrael, Styrkja hero wash) from that bundle. 3 prototypes still on the follow-up list (Heim, Styrkja full redesign, Episode).
+
+### What shipped on branch `claude-design-rebrand` tonight
+
+| # | Commit | What |
+|---|---|---|
+| 1 | `063ed14` (main) | README rewrite — AI-collaborator entry point |
+| 2 | `f089ae3` | STATUS.md session log (prior session) |
+| 3 | `67f83b6` | **Navbar fix** — active-state underline + "Næsta sending" indicator swap from `--kerti` amber to `--nordurljos` slate (audit §3 root cause) |
+| 4 | `7165ce0` | **Beint redesign** — two first-class states (on-air / off-air) with proper editorial composition |
+| 5 | `1a30b15` | **Bænatorg redesign** — altar reframe, single-column feed, modal submission, corrected CTA discipline |
+| 6 | `3e00b60` | **Site-wide palette cleanup** — Styrkja off-palette blue + Ísrael amber headings + pure-black backgrounds |
+
+Install of `omega-stodin-design` skill to `~/.claude/skills/omega-stodin-design/` — any future Claude Code session can now reference the design system directly.
+
+### Architecture decisions that future sessions should know
+
+1. **Claude Design JSX prototypes are NOT drop-in React components.** The skill's own README is explicit: *"Don't copy ui_kits/website/\*.jsx into production — those files are cosmetic recreations for design work, not production React."* Each page needs to be re-authored as Next.js Server Components wired to Supabase, using the JSX prototypes as a visual spec. That's what was done for Beint and Bænatorg.
+
+2. **Client vs server split on Bænatorg:** server component fetches approved prayers + counter + campaign; passes prayers down to `<BaenatorgClient>` which owns filter state, modal state, and optimistic `bið-með-þér` updates. Clean boundary.
+
+3. **Beint has a dev escape hatch:** `?state=off-air` forces State B so the off-air composition can be QA'd without waiting for a schedule gap. Remove when real prod data reliably produces both states.
+
+4. **Custom SVG icons, NEVER Lucide.** The brand rule is hard. `src/components/prayer/PrayerIcons.tsx` is the new pattern — hand-authored inline SVG with `strokeWidth=1.6`, `round` caps/joins, `currentColor` fill/stroke. Follow this shape for any new icons added to the system.
+
+5. **Mobile modal = full-height sheet, not centered dialog.** At ≤640px, `PrayerSubmissionModal` becomes a bottom sheet. Apply this pattern to any future modal dialogs — the 60–75 audience on iPads + phones does not tolerate centered 480px dialogs.
+
+### Audit items NOT addressed tonight (deferred on purpose)
+
+- **§5.3 Home card sub-labels** — contrast marginal, needs visual inspection, not a palette bug per se.
+- **§6 UTF-8 mojibake on Bænatorg** — one Anna/Heilsa prayer record. Data-layer fix (Supabase row), not a code fix.
+- **§7d Beint empty state when live stream iframe is null** — currently shows a quiet italic sentence; could be richer. Low priority.
+- **"Minna mig á" backend** — NaestaSending CTA is visual-only. Needs either .ics download (static, cheap) or push/email subscribe (real). See commit `7165ce0` message.
+- **Ritningarstaðir data** — OnAirEditorial accepts an optional `scriptures` prop but no data wiring yet. Needs a scripture_refs join on episodes or schedule_slots.
+- **FeaturedPrayer on Bænatorg** — deferred; needs a `featured_prayers` table.
+- **ShowPrayerCluster on Bænatorg** — deferred; needs a `schedule_slot_id` relation on `prayers`.
+- **SharePanel on Bænatorg** — using `navigator.share()` native API for now. A proper slide-out dialog is a second pass.
+
+### Prototypes from Claude Design NOT yet implemented
+
+1. **Heim (homepage)** — prototype exists at `~/.claude/skills/omega-stodin-design/prototypes/heim/`. 677 lines of components (heim-components.jsx). No detailed chat direction proposal was written (unlike Beint + Bænatorg) so this will need more interpretive work.
+2. **Styrkja (giving page)** — prototype at `~/.claude/skills/omega-stodin-design/prototypes/styrkja/`. 754 lines. No written direction proposal.
+3. **Episode (individual archive page)** — prototype at `~/.claude/skills/omega-stodin-design/prototypes/episode/`. 513 lines. No written direction proposal.
+
+### Critical context on Omega that was clarified this session
+
+Hawk shared this 2026-04-24. Saved to memory files for future sessions (see `~/.claude/projects/-Users-haukur-Projects-omega-tv/memory/`):
+
+- **Hawk is the closest friend to Omega Stöðin's founder/owner** (Eiríkur Sigurbjörnsson). This is vocational stewardship, not a client project.
+- **Actual audience is 60–75 yr old** — NOT mixed-age with grandchildren bridge. Design serves them, don't optimize for hypothetical younger users.
+- **Omega is cable + donations**, not a standalone web product. The web is additive modernization; design work = donor-facing stewardship evidence ("we are serious"), not aesthetic indulgence.
+- **Hawk built a subtitle/translation pipeline** (Azotus + Book System) — 20-min turnaround, Icelandic + Norwegian, feeding VOD + cable playout. Potentially licensable to other small-country Christian broadcasters. **Separate business conversation pending** about monetizing this — he asked for it explicitly.
+
+### Next session pickup
+
+**Priority order:**
+
+1. **Push `claude-design-rebrand` to origin** — it's 5 commits ahead locally. `git push -u origin claude-design-rebrand` to get it visible. (NOT done tonight because Hawk should see the work before it's in remote history; local commits are safe.)
+2. **Hawk QA** — take the branch through a browser pass before merging anything to main. He should see Beint on-air/off-air (use `?state=off-air` for the latter), Bænatorg feed + modal + filter tabs, Ísrael section headings now `--ljos`, Styrkja hero wash.
+3. **Decide on Heim redesign approach** — the Claude Design prototype has no written direction proposal. Options: (a) implement prototype verbatim; (b) re-engage Claude Design for a direction proposal first; (c) write the direction proposal here and implement.
+4. **Styrkja + Episode** — same question as Heim. If one of them has clear visual continuity with what's already shipped, it's cheap to do. If both need fresh design thinking, it's one Claude Design session per page.
+5. **Merge plan** — when Hawk approves, squash-merge `claude-design-rebrand` into main, or rebase + merge the individual commits to preserve granular history.
+
+### Pending non-Omega thread
+
+**Subtitle system monetization conversation.** Hawk explicitly asked to have this as a separate conversation. Positioning a B2B product to small-country Christian broadcasters (Faroes, Greenland, Baltics, other Nordic nets) — pricing, licensing model, outreach strategy ("how to get into the doors"). Different audience from Omega work; different deliverables. Do not bring Omega branding context into that conversation.
+
+---
+
+## Prior session — 2026-04-23 Claude Design handoff
 
 **What was done tonight:**
 
