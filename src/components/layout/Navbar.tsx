@@ -145,7 +145,7 @@ export default function Navbar() {
                     </Link>
 
                     {/* ── Desktop nav ───────────────────────────────────── */}
-                    <div className="hidden md:flex" style={{ alignItems: 'center', gap: 'clamp(1.25rem, 2.4vw, 2rem)' }}>
+                    <div className="hidden md:flex" style={{ alignItems: 'center', gap: 'clamp(1rem, 1.8vw, 1.75rem)' }}>
                         {navLinks.map(link => {
                             const active = isActive(pathname, link.href);
                             return (
@@ -161,6 +161,7 @@ export default function Navbar() {
                                         transition: 'color 300ms ease',
                                         letterSpacing: '0.18em',
                                         fontSize: '0.7rem',
+                                        whiteSpace: 'nowrap',
                                     }}
                                     onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
                                     onMouseOut={(e) => { e.currentTarget.style.color = active ? 'var(--ljos)' : 'var(--moskva)'; }}
@@ -197,6 +198,7 @@ export default function Navbar() {
                                 letterSpacing: '0.18em',
                                 fontSize: '0.7rem',
                                 transition: 'color 300ms ease',
+                                whiteSpace: 'nowrap',
                             }}
                             onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
                             onMouseOut={(e) => { e.currentTarget.style.color = 'var(--moskva)'; }}
