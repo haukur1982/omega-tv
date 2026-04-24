@@ -128,14 +128,22 @@ export default async function OnAirRibbon() {
                     </span>
                 </div>
 
+                {/* Ribbon CTA stays ghost in both states. The pulsing
+                    --blod dot + "NÚ Í BEINNI" kicker already carry the
+                    urgency signal when on-air; doubling that with an
+                    amber button here would be a second amber CTA ~80px
+                    below the hero's "Horfa í beinni" — breaks the
+                    "amber appears once meaningfully" rule. Amber stays
+                    in the hero as the single page-level watch CTA; the
+                    ribbon is status-plus-link, not a primary action. */}
                 <Link
                     href="/live"
-                    className="warm-hover"
+                    className="ghost-btn"
                     style={{
                         padding: '12px 20px',
-                        background: onAir ? 'var(--kerti)' : 'transparent',
-                        border: onAir ? '1px solid var(--kerti)' : '1px solid var(--border)',
-                        color: onAir ? 'var(--nott)' : 'var(--ljos)',
+                        background: 'transparent',
+                        border: '1px solid',
+                        color: 'var(--ljos)',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '12px',
                         fontWeight: 700,
@@ -146,7 +154,7 @@ export default async function OnAirRibbon() {
                         whiteSpace: 'nowrap',
                     }}
                 >
-                    {onAir ? 'Horfa núna' : 'Opna Beint'}
+                    {onAir ? 'Opna Beint' : 'Sjá dagskrá'}
                 </Link>
             </div>
         </section>
