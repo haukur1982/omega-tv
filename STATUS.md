@@ -1,9 +1,30 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-24 (daytime continuation — Heim + Styrkja shipped, Episode deferred)
-**Last Agent:** Claude Code — Claude Design handoff execution, prototypes 3–5
+**Last Updated:** 2026-04-24 (Codex — Greinar article detail visual pass)
+**Last Agent:** Codex — article detail readability/design tuning
 **Branch:** `claude-design-rebrand` (8 commits ahead of main on this branch, **pushed to origin**)
 **Build Status:** all pages 200, tsc clean, `pnpm build` green across all redesigns.
+
+---
+
+## Codex session — 2026-04-24 evening
+
+Hawk flagged `/greinar/aska` as feeling visually off. The issue was mainly proportion and opening typography:
+
+- Article hero was too tall on mobile, which delayed the actual article title/body and made the page feel like an image followed by a separate article.
+- The cream vellum frame now overlaps the photo fade, so the masthead feels attached to the image.
+- The title scale was tightened slightly and negative tracking removed on the article title/excerpt.
+- Removed the decorative drop cap from article bodies. For this article, the first paragraph is a short opening line, so the drop cap split "Allir" awkwardly. First paragraph now reads as a clean lead sentence.
+
+Verification:
+
+- `pnpm build` passed after rerun with network access for Google font fetches.
+- Browser QA checked `http://localhost:3005/greinar/aska` in the in-app browser.
+
+Next:
+
+- Hawk should eyeball this page on desktop too before merging the wider redesign branch.
+- If the article detail direction lands, consider applying the same "clean lead, no drop cap" rule intentionally across all future Omega long-read pages.
 
 ---
 

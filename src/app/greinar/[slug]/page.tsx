@@ -81,7 +81,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                 style={{
                     position: 'relative',
                     width: '100%',
-                    height: 'clamp(520px, 68vh, 760px)',
+                    height: 'clamp(380px, 58vh, 680px)',
                     background: 'var(--nott)',
                     overflow: 'hidden',
                 }}
@@ -108,7 +108,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                                 position: 'absolute',
                                 inset: 0,
                                 background:
-                                    'linear-gradient(to bottom, rgba(20,18,15,0.55) 0%, rgba(20,18,15,0.08) 22%, rgba(20,18,15,0.12) 60%, var(--skra) 100%)',
+                                    'linear-gradient(to bottom, rgba(20,18,15,0.62) 0%, rgba(20,18,15,0.12) 28%, rgba(20,18,15,0.04) 58%, rgba(243,237,224,0.18) 78%, var(--skra) 100%)',
                             }}
                         />
                         {/* Amber tint in the upper corner — evening-light warmth */}
@@ -144,9 +144,9 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     color: 'var(--skra-djup)',
                     paddingBottom: 0,
                     boxShadow: 'var(--shadow-read)',
-                    // Pull the article up so the vellum overlaps the bottom of
-                    // the overture gradient, completing the dissolve.
-                    marginTop: '-1px',
+                    // Pull the vellum into the bottom of the photograph so the
+                    // masthead feels connected to the opening image.
+                    marginTop: 'clamp(-92px, -7vw, -64px)',
                 }}
             >
                 {/* Header — centered masthead composition, matches the
@@ -156,7 +156,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                     style={{
                         maxWidth: '48rem',
                         margin: '0 auto',
-                        padding: 'clamp(48px, 7vw, 72px) var(--rail-padding) clamp(36px, 5vw, 48px)',
+                        padding: 'clamp(56px, 6vw, 76px) var(--rail-padding) clamp(34px, 5vw, 46px)',
                         textAlign: 'center',
                     }}
                 >
@@ -194,9 +194,9 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                         style={{
                             margin: 0,
                             fontFamily: 'var(--font-serif)',
-                            fontSize: 'clamp(36px, 5.2vw, 60px)',
-                            lineHeight: 1.06,
-                            letterSpacing: '-0.018em',
+                            fontSize: 'clamp(32px, 5vw, 58px)',
+                            lineHeight: 1.08,
+                            letterSpacing: 0,
                             fontWeight: 400,
                             color: 'var(--skra-djup)',
                             textWrap: 'balance',
@@ -214,7 +214,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                                 fontSize: 'clamp(19px, 1.9vw, 24px)',
                                 lineHeight: 1.5,
                                 color: 'var(--skra-mjuk)',
-                                letterSpacing: '-0.005em',
+                                letterSpacing: 0,
                                 textWrap: 'pretty',
                                 maxWidth: '38rem',
                             }}
