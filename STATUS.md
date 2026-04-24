@@ -1,9 +1,74 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-24 (overnight — Beint + Bænatorg implementation)
-**Last Agent:** Claude Code — Claude Design handoff execution
-**Branch:** `claude-design-rebrand` (5 commits ahead of main on this branch, NOT pushed yet — see "Next session pickup")
-**Build Status:** Dev on :3005, all pages 200, tsc clean, `pnpm build` green.
+**Last Updated:** 2026-04-24 (daytime continuation — Heim + Styrkja shipped, Episode deferred)
+**Last Agent:** Claude Code — Claude Design handoff execution, prototypes 3–5
+**Branch:** `claude-design-rebrand` (8 commits ahead of main on this branch, **pushed to origin**)
+**Build Status:** all pages 200, tsc clean, `pnpm build` green across all redesigns.
+
+---
+
+## Daytime continuation — 2026-04-24 (after overnight Beint + Bænatorg)
+
+**4 of 5 prototypes implemented.** Episode explicitly deferred with rationale.
+
+### New commits on `claude-design-rebrand` today
+
+| Commit | What |
+|---|---|
+| [`7d6188f`](https://github.com/haukur1982/omega-tv/commit/7d6188f) | **Heim redesign** — 8-section editorial homepage replaces Netflix-rail (HeroV2, OnAirRibbon, PrayerTicker, BaenDagsins, UrDagskranni, PullQuote, StyrkjaBand + preserved Legacy34Years) |
+| [`c49d75f`](https://github.com/haukur1982/omega-tv/commit/c49d75f) | **Styrkja redesign** — unified donation flow (cadence toggle + tier cards + custom amount + form + live allocation sidebar + honest thank-you + other ways + bank transfer preserved) |
+
+### Full 5-prototype status
+
+| Prototype | Status | Commit | Notes |
+|---|---|---|---|
+| **Beint** | Shipped | `7165ce0` | Two first-class states (on-air / off-air) with `?state=off-air` dev escape hatch |
+| **Bænatorg** | Shipped | `1a30b15` | Altar reframe, single-column feed, modal submission |
+| **Heim** | Shipped | `7d6188f` | 8 editorial sections; old Hero/DagskraStrip/PrayerPresence kept in tree for future /dagskra revival |
+| **Styrkja** | Shipped | `c49d75f` | Visual + state complete. Payment backend NOT wired — submit goes to honest thank-you state, bank transfer details preserved |
+| **Episode** | **Deferred** | — | See reasoning below |
+
+### Why Episode was deferred (important)
+
+The Episode prototype is simpler than the current `/sermons/[id]` page. The current page is already "the highest-impact surface on the whole site" (Phase 2 plan) with:
+  - ThreadsSidebar connecting passage → prayer → article → next broadcast
+  - ChapterList (chapter-level navigation within each episode)
+  - Caption switcher
+  - Related episodes rail
+
+Fully adopting the prototype would REGRESS these features to match a simpler design. That's wrong.
+
+The prototype's one genuinely new idea is **"Bænir úr þessum þætti"** — prayers tied specifically to one episode's broadcast (distinct from passage-linked prayers which the current page already has). That needs:
+  - Schema addition: `episode_id` or `schedule_slot_id` column on `prayers` table
+  - Admin flow to approve these episode-linked prayers for display
+  - Data capture during live broadcast so prayers land on the right episode
+
+That's its own follow-up. **Do not** try to lift the prototype's UI without the data layer — it would render empty every time.
+
+Log: the prototype's `EmptyStateInvite` component (candle glow + italic "Þú mátt vera sú, eða sá, fyrsta sem ritar bæn við þennan þátt" + Skrifa bæn button) is genuinely beautiful and should be reused when the data model is ready.
+
+### Follow-ups still live
+
+From the overnight + daytime sessions combined:
+
+1. **featured_prayers table** — enables BaenDagsins (home), FeaturedPrayer (Bænatorg), and a consistent "prayer of the day" across pages.
+2. **episode_prayers or schedule_slot_id on prayers** — enables Bænatorg ShowPrayerCluster + Episode "Bænir úr þessum þætti".
+3. **pull_quote field on articles** — so PullQuote (home) doesn't have to heuristic-extract from excerpt.
+4. **scripture_refs on episodes/schedule_slots** — so OnAirEditorial (Beint) shows real "Ritningarstaðir í dag" instead of silently hiding the column.
+5. **"Minna mig á" backend** — NaestaSending CTA on Beint off-air state. Either .ics download or push/email subscribe.
+6. **Styrkja payment backend** — submit currently flips to honest thank-you. Either server action emailing admin the donor's intent (cheapest), or Valitor/SaltPay/Stripe integration.
+7. **Styrkja off-palette blue fully fixed** — audit §2 addressed via token swap; if Hawk wants a richer visual treatment on the Styrkja hero, it's a separate design pass.
+8. **Dedicated /dagskra page** — would revive the retained DagskraStrip + PrayerPresence + WeekSchedule components in a broadcast-aware full-schedule layout. Not a regression since the tree still has them.
+9. **Mobile sweep** — each page designed desktop-first with responsive fallbacks. A dedicated mobile QA pass across Heim / Beint / Bænatorg / Styrkja would catch anything that broke at small viewports.
+10. **Visual QA by Hawk** — all 4 redesigned pages are on `claude-design-rebrand` but not merged to main. He needs to eyeball them before merge.
+
+### When Hawk merges
+
+- Branch is ready. Suggest squash-merge per redesign page OR a single merge commit (preserve granular history via individual commits in merge message).
+- No destructive ops needed — every replaced component stays in the tree, just unmounted from its page.
+- After merge, the skill bundle `~/.claude/skills/omega-stodin-design/` stays available for future sessions to reference.
+
+---
 
 ---
 
