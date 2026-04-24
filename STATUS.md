@@ -1,9 +1,228 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-19 (late evening — brand system session)
-**Last Agent:** Claude Code — visual identity redesign + brand guide authoring
-**Branch:** main
-**Build Status:** Dev on :3010, all pages 200, tsc clean. Ten+ commits on origin/main today; last three are the brand identity milestone.
+**Last Updated:** 2026-04-24 (Codex — Greinar article cover redesign correction)
+**Last Agent:** Codex — article detail visual correction
+**Branch:** `claude-design-rebrand` (active redesign branch, pushed to origin)
+**Build Status:** all pages 200, tsc clean, `pnpm build` green across all redesigns.
+
+---
+
+## Codex session — 2026-04-24 evening
+
+**Correction after Hawk review:** first pass still looked bad on desktop. The full-bleed ash photo/fade treatment was removed entirely.
+
+What changed in the correction:
+
+- Replaced the giant image-over-vellum hero with a dark editorial article cover.
+- Desktop now uses a two-column opening: article metadata/title/excerpt/author on the left, ash image as supporting media on the right.
+- Narrow/mobile view now opens with the article title first, then the image. No more waiting through a large photo before knowing what page you are on.
+- Cream reading frame starts cleanly after the cover instead of being pulled into a foggy image fade.
+
+Verification:
+
+- `pnpm build` passed after rerun with network access for Google font fetches.
+- Browser QA checked `http://localhost:3005/greinar/aska` in the in-app browser.
+
+Earlier first pass, kept for history:
+
+Hawk flagged `/greinar/aska` as feeling visually off. The issue was mainly proportion and opening typography:
+
+- Article hero was too tall on mobile, which delayed the actual article title/body and made the page feel like an image followed by a separate article.
+- The cream vellum frame now overlaps the photo fade, so the masthead feels attached to the image.
+- The title scale was tightened slightly and negative tracking removed on the article title/excerpt.
+- Removed the decorative drop cap from article bodies. For this article, the first paragraph is a short opening line, so the drop cap split "Allir" awkwardly. First paragraph now reads as a clean lead sentence.
+
+Verification:
+
+- `pnpm build` passed after rerun with network access for Google font fetches.
+- Browser QA checked `http://localhost:3005/greinar/aska` in the in-app browser.
+
+Next:
+
+- Hawk should eyeball this page on desktop too before merging the wider redesign branch.
+- If the article detail direction lands, consider applying the same "clean lead, no drop cap" rule intentionally across all future Omega long-read pages.
+
+---
+
+## Daytime continuation — 2026-04-24 (after overnight Beint + Bænatorg)
+
+**4 of 5 prototypes implemented.** Episode explicitly deferred with rationale.
+
+### New commits on `claude-design-rebrand` today
+
+| Commit | What |
+|---|---|
+| [`7d6188f`](https://github.com/haukur1982/omega-tv/commit/7d6188f) | **Heim redesign** — 8-section editorial homepage replaces Netflix-rail (HeroV2, OnAirRibbon, PrayerTicker, BaenDagsins, UrDagskranni, PullQuote, StyrkjaBand + preserved Legacy34Years) |
+| [`c49d75f`](https://github.com/haukur1982/omega-tv/commit/c49d75f) | **Styrkja redesign** — unified donation flow (cadence toggle + tier cards + custom amount + form + live allocation sidebar + honest thank-you + other ways + bank transfer preserved) |
+
+### Full 5-prototype status
+
+| Prototype | Status | Commit | Notes |
+|---|---|---|---|
+| **Beint** | Shipped | `7165ce0` | Two first-class states (on-air / off-air) with `?state=off-air` dev escape hatch |
+| **Bænatorg** | Shipped | `1a30b15` | Altar reframe, single-column feed, modal submission |
+| **Heim** | Shipped | `7d6188f` | 8 editorial sections; old Hero/DagskraStrip/PrayerPresence kept in tree for future /dagskra revival |
+| **Styrkja** | Shipped | `c49d75f` | Visual + state complete. Payment backend NOT wired — submit goes to honest thank-you state, bank transfer details preserved |
+| **Episode** | **Deferred** | — | See reasoning below |
+
+### Why Episode was deferred (important)
+
+The Episode prototype is simpler than the current `/sermons/[id]` page. The current page is already "the highest-impact surface on the whole site" (Phase 2 plan) with:
+  - ThreadsSidebar connecting passage → prayer → article → next broadcast
+  - ChapterList (chapter-level navigation within each episode)
+  - Caption switcher
+  - Related episodes rail
+
+Fully adopting the prototype would REGRESS these features to match a simpler design. That's wrong.
+
+The prototype's one genuinely new idea is **"Bænir úr þessum þætti"** — prayers tied specifically to one episode's broadcast (distinct from passage-linked prayers which the current page already has). That needs:
+  - Schema addition: `episode_id` or `schedule_slot_id` column on `prayers` table
+  - Admin flow to approve these episode-linked prayers for display
+  - Data capture during live broadcast so prayers land on the right episode
+
+That's its own follow-up. **Do not** try to lift the prototype's UI without the data layer — it would render empty every time.
+
+Log: the prototype's `EmptyStateInvite` component (candle glow + italic "Þú mátt vera sú, eða sá, fyrsta sem ritar bæn við þennan þátt" + Skrifa bæn button) is genuinely beautiful and should be reused when the data model is ready.
+
+### Follow-ups still live
+
+From the overnight + daytime sessions combined:
+
+1. **featured_prayers table** — enables BaenDagsins (home), FeaturedPrayer (Bænatorg), and a consistent "prayer of the day" across pages.
+2. **episode_prayers or schedule_slot_id on prayers** — enables Bænatorg ShowPrayerCluster + Episode "Bænir úr þessum þætti".
+3. **pull_quote field on articles** — so PullQuote (home) doesn't have to heuristic-extract from excerpt.
+4. **scripture_refs on episodes/schedule_slots** — so OnAirEditorial (Beint) shows real "Ritningarstaðir í dag" instead of silently hiding the column.
+5. **"Minna mig á" backend** — NaestaSending CTA on Beint off-air state. Either .ics download or push/email subscribe.
+6. **Styrkja payment backend** — submit currently flips to honest thank-you. Either server action emailing admin the donor's intent (cheapest), or Valitor/SaltPay/Stripe integration.
+7. **Styrkja off-palette blue fully fixed** — audit §2 addressed via token swap; if Hawk wants a richer visual treatment on the Styrkja hero, it's a separate design pass.
+8. **Dedicated /dagskra page** — would revive the retained DagskraStrip + PrayerPresence + WeekSchedule components in a broadcast-aware full-schedule layout. Not a regression since the tree still has them.
+9. **Mobile sweep** — each page designed desktop-first with responsive fallbacks. A dedicated mobile QA pass across Heim / Beint / Bænatorg / Styrkja would catch anything that broke at small viewports.
+10. **Visual QA by Hawk** — all 4 redesigned pages are on `claude-design-rebrand` but not merged to main. He needs to eyeball them before merge.
+
+### When Hawk merges
+
+- Branch is ready. Suggest squash-merge per redesign page OR a single merge commit (preserve granular history via individual commits in merge message).
+- No destructive ops needed — every replaced component stays in the tree, just unmounted from its page.
+- After merge, the skill bundle `~/.claude/skills/omega-stodin-design/` stays available for future sessions to reference.
+
+---
+
+---
+
+## Active session — 2026-04-24 overnight (Beint + Bænatorg implementation)
+
+**Summary:** Claude Design finished its working session and produced an 8.4 MB handoff bundle — the `omega-stodin-design` skill — with 5 page prototypes (Beint, Bænatorg, Heim, Styrkja, Episode) as real React JSX plus the complete design system (colors_and_type.css, fonts, assets, 18 preview cards, website UI kit, 2,195-line chat transcript). Tonight implemented **two full page redesigns** (Beint, Bænatorg) and **site-wide pattern corrections** (Navbar, Ísrael, Styrkja hero wash) from that bundle. 3 prototypes still on the follow-up list (Heim, Styrkja full redesign, Episode).
+
+### What shipped on branch `claude-design-rebrand` tonight
+
+| # | Commit | What |
+|---|---|---|
+| 1 | `063ed14` (main) | README rewrite — AI-collaborator entry point |
+| 2 | `f089ae3` | STATUS.md session log (prior session) |
+| 3 | `67f83b6` | **Navbar fix** — active-state underline + "Næsta sending" indicator swap from `--kerti` amber to `--nordurljos` slate (audit §3 root cause) |
+| 4 | `7165ce0` | **Beint redesign** — two first-class states (on-air / off-air) with proper editorial composition |
+| 5 | `1a30b15` | **Bænatorg redesign** — altar reframe, single-column feed, modal submission, corrected CTA discipline |
+| 6 | `3e00b60` | **Site-wide palette cleanup** — Styrkja off-palette blue + Ísrael amber headings + pure-black backgrounds |
+
+Install of `omega-stodin-design` skill to `~/.claude/skills/omega-stodin-design/` — any future Claude Code session can now reference the design system directly.
+
+### Architecture decisions that future sessions should know
+
+1. **Claude Design JSX prototypes are NOT drop-in React components.** The skill's own README is explicit: *"Don't copy ui_kits/website/\*.jsx into production — those files are cosmetic recreations for design work, not production React."* Each page needs to be re-authored as Next.js Server Components wired to Supabase, using the JSX prototypes as a visual spec. That's what was done for Beint and Bænatorg.
+
+2. **Client vs server split on Bænatorg:** server component fetches approved prayers + counter + campaign; passes prayers down to `<BaenatorgClient>` which owns filter state, modal state, and optimistic `bið-með-þér` updates. Clean boundary.
+
+3. **Beint has a dev escape hatch:** `?state=off-air` forces State B so the off-air composition can be QA'd without waiting for a schedule gap. Remove when real prod data reliably produces both states.
+
+4. **Custom SVG icons, NEVER Lucide.** The brand rule is hard. `src/components/prayer/PrayerIcons.tsx` is the new pattern — hand-authored inline SVG with `strokeWidth=1.6`, `round` caps/joins, `currentColor` fill/stroke. Follow this shape for any new icons added to the system.
+
+5. **Mobile modal = full-height sheet, not centered dialog.** At ≤640px, `PrayerSubmissionModal` becomes a bottom sheet. Apply this pattern to any future modal dialogs — the 60–75 audience on iPads + phones does not tolerate centered 480px dialogs.
+
+### Audit items NOT addressed tonight (deferred on purpose)
+
+- **§5.3 Home card sub-labels** — contrast marginal, needs visual inspection, not a palette bug per se.
+- **§6 UTF-8 mojibake on Bænatorg** — one Anna/Heilsa prayer record. Data-layer fix (Supabase row), not a code fix.
+- **§7d Beint empty state when live stream iframe is null** — currently shows a quiet italic sentence; could be richer. Low priority.
+- **"Minna mig á" backend** — NaestaSending CTA is visual-only. Needs either .ics download (static, cheap) or push/email subscribe (real). See commit `7165ce0` message.
+- **Ritningarstaðir data** — OnAirEditorial accepts an optional `scriptures` prop but no data wiring yet. Needs a scripture_refs join on episodes or schedule_slots.
+- **FeaturedPrayer on Bænatorg** — deferred; needs a `featured_prayers` table.
+- **ShowPrayerCluster on Bænatorg** — deferred; needs a `schedule_slot_id` relation on `prayers`.
+- **SharePanel on Bænatorg** — using `navigator.share()` native API for now. A proper slide-out dialog is a second pass.
+
+### Prototypes from Claude Design NOT yet implemented
+
+1. **Heim (homepage)** — prototype exists at `~/.claude/skills/omega-stodin-design/prototypes/heim/`. 677 lines of components (heim-components.jsx). No detailed chat direction proposal was written (unlike Beint + Bænatorg) so this will need more interpretive work.
+2. **Styrkja (giving page)** — prototype at `~/.claude/skills/omega-stodin-design/prototypes/styrkja/`. 754 lines. No written direction proposal.
+3. **Episode (individual archive page)** — prototype at `~/.claude/skills/omega-stodin-design/prototypes/episode/`. 513 lines. No written direction proposal.
+
+### Critical context on Omega that was clarified this session
+
+Hawk shared this 2026-04-24. Saved to memory files for future sessions (see `~/.claude/projects/-Users-haukur-Projects-omega-tv/memory/`):
+
+- **Hawk is the closest friend to Omega Stöðin's founder/owner** (Eiríkur Sigurbjörnsson). This is vocational stewardship, not a client project.
+- **Actual audience is 60–75 yr old** — NOT mixed-age with grandchildren bridge. Design serves them, don't optimize for hypothetical younger users.
+- **Omega is cable + donations**, not a standalone web product. The web is additive modernization; design work = donor-facing stewardship evidence ("we are serious"), not aesthetic indulgence.
+- **Hawk built a subtitle/translation pipeline** (Azotus + Book System) — 20-min turnaround, Icelandic + Norwegian, feeding VOD + cable playout. Potentially licensable to other small-country Christian broadcasters. **Separate business conversation pending** about monetizing this — he asked for it explicitly.
+
+### Next session pickup
+
+**Priority order:**
+
+1. **Push `claude-design-rebrand` to origin** — it's 5 commits ahead locally. `git push -u origin claude-design-rebrand` to get it visible. (NOT done tonight because Hawk should see the work before it's in remote history; local commits are safe.)
+2. **Hawk QA** — take the branch through a browser pass before merging anything to main. He should see Beint on-air/off-air (use `?state=off-air` for the latter), Bænatorg feed + modal + filter tabs, Ísrael section headings now `--ljos`, Styrkja hero wash.
+3. **Decide on Heim redesign approach** — the Claude Design prototype has no written direction proposal. Options: (a) implement prototype verbatim; (b) re-engage Claude Design for a direction proposal first; (c) write the direction proposal here and implement.
+4. **Styrkja + Episode** — same question as Heim. If one of them has clear visual continuity with what's already shipped, it's cheap to do. If both need fresh design thinking, it's one Claude Design session per page.
+5. **Merge plan** — when Hawk approves, squash-merge `claude-design-rebrand` into main, or rebase + merge the individual commits to preserve granular history.
+
+### Pending non-Omega thread
+
+**Subtitle system monetization conversation.** Hawk explicitly asked to have this as a separate conversation. Positioning a B2B product to small-country Christian broadcasters (Faroes, Greenland, Baltics, other Nordic nets) — pricing, licensing model, outreach strategy ("how to get into the doors"). Different audience from Omega work; different deliverables. Do not bring Omega branding context into that conversation.
+
+---
+
+## Prior session — 2026-04-23 Claude Design handoff
+
+**What was done tonight:**
+
+1. **README rewrite** — replaced Next.js boilerplate with an orientation doc that points AI collaborators at `docs/brand-guide.md`, `src/app/globals.css`, and `src/app/layout.tsx` as the locked system. Committed `063ed14` on main.
+2. **Branch `claude-design-rebrand`** pushed for Claude Design to work against.
+3. **Claude Design project set up** — "Omega Stöðin Design System":
+   - GitHub repo linked
+   - Brand assets uploaded (logo SVGs)
+   - Company blurb + gotchas-list filled in (palette, italics-as-voice, warm-don't-lift, Icelandic diacritics)
+   - Design system published (⚠️ "Default" checkbox may still need ticking — left as TODO)
+   - Font warning: Fraunces/Newsreader/Inter must be uploaded as .ttf files from fonts.google.com (TODO tomorrow)
+4. **PDFs → PNGs** — 9 site screenshots converted from PDF and saved to `/Users/haukur/Downloads/pAGES/images/`
+5. **Site audit received from Claude Design** — genuinely strong work. Summary below.
+
+**Audit headline finding:**
+
+The amber/slate roles are **inverted site-wide**. Amber (`--kerti`) is doing wayfinding (nav active state, "NÆSTA SENDING" indicator, even section headings on Ísrael page). Slate (`--nordurljos`) is doing CTAs (prayer form button, newsletter signup, "NÝJAST" badge, Styrkja hero arch). This is the *root cause* of both the "cornflower blue button" bug and the "amber fatigue" feel. Fix the inversion and five separate bugs collapse together.
+
+**Also flagged:**
+
+- Styrkja hero arch is `#5B8ABF` — a completely off-palette blue, not even `--nordurljos`.
+- One UTF-8-mojibaked prayer record on Bænatorg ("Anna" entry, Heilsa category) — isolated, data-layer issue.
+- Three specific tight-type spots: prayer card body, Greinar card meta row, Home card sub-labels.
+- Live page empty-state = blank canvas (design problem, not a bug).
+- Possible lazy-load misses on Styrkja "Tvær leiðir." and Um okkur (unverified).
+- Italics verified clean — Newsreader italic holding everywhere, italic-as-human-voice rule intact.
+
+**Decision made:** go with option (b) — the Live page redesign will establish the corrected patterns (nav→slate, CTA→amber, section-headings→ljos) that the rest of the site adopts. Not option (a) Live-only fixes.
+
+**Next session pickup:**
+
+1. Tomorrow morning: tick "Default" on the Claude Design system, upload the three Google Fonts (.ttf files) to clear the substitute-font warning.
+2. Paste the approval response (in the conversation log above) into Claude Design to kick off the Live page redesign spec.
+3. Claude Design will propose design direction first; review before any screens are generated.
+4. Hold: Priority 3 (human warmth), Priority 4 (mobile + TV extension), Priority 5 (design system doc).
+
+**Important for future code work:** once Claude Design proposes the corrected patterns, the *code* needs the same inversion fix applied. That's a Claude Code job on `claude-design-rebrand`, not a Claude Design job. Likely affects: Navbar, PrayerWall form, NewsletterSignup, ArticleCard "Lesa grein" link, "NÝJAST" badge component, Styrkja hero section.
+
+---
+
+## Historical context below — keep for reference
+
 
 ## Where things stand right now
 

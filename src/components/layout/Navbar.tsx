@@ -15,7 +15,8 @@ import { OmegaMark } from '@/components/brand/OmegaMark';
    - Right-hand slot is reserved for state-aware live status:
      off-air = muted "Næsta sending" link; on-air = warm Live Badge.
    - Wordmark only in cream; Ω as typographic mark, not a blue disc.
-   - Active route gets a subtle kerti-amber underline — wayfinding.
+   - Active route underline in nordurljos (wayfinding only — amber is
+     reserved for primary CTAs per the Altingi palette rules).
    ════════════════════════════════════════════════════════════════ */
 
 const SearchIcon = ({ size = 18 }: { size?: number }) => (
@@ -144,7 +145,7 @@ export default function Navbar() {
                     </Link>
 
                     {/* ── Desktop nav ───────────────────────────────────── */}
-                    <div className="hidden md:flex" style={{ alignItems: 'center', gap: 'clamp(1.25rem, 2.4vw, 2rem)' }}>
+                    <div className="hidden md:flex" style={{ alignItems: 'center', gap: 'clamp(1rem, 1.8vw, 1.75rem)' }}>
                         {navLinks.map(link => {
                             const active = isActive(pathname, link.href);
                             return (
@@ -160,6 +161,7 @@ export default function Navbar() {
                                         transition: 'color 300ms ease',
                                         letterSpacing: '0.18em',
                                         fontSize: '0.7rem',
+                                        whiteSpace: 'nowrap',
                                     }}
                                     onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
                                     onMouseOut={(e) => { e.currentTarget.style.color = active ? 'var(--ljos)' : 'var(--moskva)'; }}
@@ -171,8 +173,8 @@ export default function Navbar() {
                                             style={{
                                                 position: 'absolute',
                                                 left: 0, right: 0, bottom: '18px',
-                                                height: '1px',
-                                                background: 'var(--kerti)',
+                                                height: '2px',
+                                                background: 'var(--nordurljos)',
                                             }}
                                         />
                                     )}
@@ -196,6 +198,7 @@ export default function Navbar() {
                                 letterSpacing: '0.18em',
                                 fontSize: '0.7rem',
                                 transition: 'color 300ms ease',
+                                whiteSpace: 'nowrap',
                             }}
                             onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
                             onMouseOut={(e) => { e.currentTarget.style.color = 'var(--moskva)'; }}
@@ -206,7 +209,7 @@ export default function Navbar() {
                                     width: '6px',
                                     height: '6px',
                                     borderRadius: '50%',
-                                    background: 'var(--kerti)',
+                                    background: 'var(--nordurljos)',
                                     display: 'inline-block',
                                 }}
                             />
@@ -322,7 +325,7 @@ export default function Navbar() {
                                                 textDecoration: 'none',
                                                 letterSpacing: '-0.02em',
                                                 lineHeight: 1,
-                                                borderLeft: active ? '2px solid var(--kerti)' : '2px solid transparent',
+                                                borderLeft: active ? '2px solid var(--nordurljos)' : '2px solid transparent',
                                                 paddingLeft: '14px',
                                             }}
                                         >

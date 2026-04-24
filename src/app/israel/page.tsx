@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function IsraelPage() {
     return (
-        <div style={{ backgroundColor: '#050505', minHeight: '100vh', color: '#FFF' }}>
+        <div style={{ backgroundColor: 'var(--nott)', minHeight: '100vh', color: 'var(--ljos)' }}>
             <Navbar />
             <IsraelHero />
             <IsraelNav />

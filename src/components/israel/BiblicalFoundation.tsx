@@ -5,18 +5,18 @@ export default function BiblicalFoundation() {
         <section 
             id="skrifin"
             style={{
-                backgroundColor: '#050505',
+                backgroundColor: 'var(--nott)',
                 padding: 'clamp(4rem, 10vw, 8rem) 24px',
-                color: '#E5E5E5',
+                color: 'var(--moskva)',
             }}
         >
             <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <h2 
+                <h2
                     style={{
                         fontFamily: 'var(--font-serif)',
                         fontSize: 'clamp(2rem, 4vw, 3rem)',
                         fontWeight: 700,
-                        color: '#D4AF37',
+                        color: 'var(--ljos)',
                         marginBottom: '40px',
                         textAlign: 'center',
                     }}
@@ -24,21 +24,21 @@ export default function BiblicalFoundation() {
                     Sáttmáli frá Upphafi
                 </h2>
 
-                <div 
+                <div
                     style={{
                         fontFamily: 'var(--font-serif)',
                         fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)',
                         lineHeight: 1.8,
                         fontWeight: 400,
-                        color: '#FFFFFF',
+                        color: 'var(--ljos)',
                         marginBottom: '60px',
-                        borderLeft: '4px solid #D4AF37',
+                        borderLeft: '3px solid var(--gull)',
                         paddingLeft: '32px',
                         fontStyle: 'italic',
                     }}
                 >
-                    „Ég mun gera þig að mikilli þjóð, blessa þig og gjöra nafn þitt mikilfenglegt, og þú skalt vera blessun.“
-                    <span style={{ display: 'block', marginTop: '16px', fontSize: '1rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'normal', fontFamily: 'var(--font-sans)' }}>— 1. Mósebók 12:2</span>
+                    „Ég mun gera þig að mikilli þjóð, blessa þig og gjöra nafn þitt mikilfenglegt, og þú skalt vera blessun."
+                    <span style={{ display: 'block', marginTop: '16px', fontSize: '1rem', color: 'var(--steinn)', fontStyle: 'normal', fontFamily: 'var(--font-sans)' }}>— 1. Mósebók 12:2</span>
                 </div>
 
                 <div 
