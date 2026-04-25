@@ -85,21 +85,22 @@ export default async function BaenatorgPage() {
                     }}
                 />
 
-                {/* Gradient stack — same pattern as /greinar/[slug].
-                    ONLY two hues in play: warm-black (--nott family)
-                    and cream (--skra). Intermediate stops are just
-                    opacity variations of those two colors — no
-                    mid-brown hues that would band as visible
-                    rainbow stripes. Stronger top darkening than the
-                    article variant because the masthead occupies
-                    more banner surface here. */}
+                {/* Top-only darkening for masthead legibility.
+                    Strong at the top where the navbar + kicker + title
+                    sit; fades to transparent by ~55% so the photograph
+                    reads at full saturation in its lower half.
+                    NO bottom-fade-to-cream — the photo ends at a hard
+                    edge and the cream section starts cleanly below it.
+                    Long photo-to-cream gradients let the photograph's
+                    own warm tones bleed through and create banding
+                    that no amount of opacity-stop tweaking fixes. */}
                 <div
                     aria-hidden
                     style={{
                         position: 'absolute',
                         inset: 0,
                         background:
-                            'linear-gradient(180deg, rgba(20,18,15,0.78) 0%, rgba(20,18,15,0.4) 25%, rgba(20,18,15,0.18) 55%, rgba(243,237,224,0.18) 80%, var(--skra) 100%)',
+                            'linear-gradient(180deg, rgba(20,18,15,0.78) 0%, rgba(20,18,15,0.5) 25%, rgba(20,18,15,0.2) 55%, transparent 75%)',
                     }}
                 />
 
@@ -208,17 +209,13 @@ export default async function BaenatorgPage() {
                 </div>
             </section>
 
-            {/* 2. VELLUM PAGE — the lit room. Banner gradient already
-                fades into --skra at its bottom edge, so this section
-                begins seamlessly without a separate transition band. */}
+            {/* 2. VELLUM PAGE — clean horizontal break from the photo
+                above. No gradient transition — magazine convention,
+                photo ends, page begins. */}
             <section
                 style={{
                     background: 'var(--skra)',
                     color: 'var(--skra-djup)',
-                    // Pull up by 1px so the banner's terminal --skra fully
-                    // overlaps this section's --skra — eliminates any
-                    // hairline rendering seam.
-                    marginTop: '-1px',
                 }}
             >
                 <div
