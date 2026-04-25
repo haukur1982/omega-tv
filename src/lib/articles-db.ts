@@ -23,6 +23,25 @@ export async function getAllArticles(): Promise<Article[]> {
 }
 
 /**
+ * Get all published articles in a given category (public-facing).
+ * Articles without a category are excluded — pass null to opt out.
+ */
+export async function getArticlesByCategory(category: string): Promise<Article[]> {
+    const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('category', category)
+        .not('published_at', 'is', null)
+        .order('published_at', { ascending: false });
+
+    if (error) {
+        console.error(`Failed to fetch ${category} articles:`, error);
+        return [];
+    }
+    return data || [];
+}
+
+/**
  * Get a single article by slug (public-facing)
  */
 export async function getArticleBySlug(slug: string): Promise<Article | null> {

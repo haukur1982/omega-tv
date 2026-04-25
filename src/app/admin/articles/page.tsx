@@ -14,6 +14,7 @@ interface Article {
     featured_image: string | null;
     published_at: string | null;
     created_at: string | null;
+    category: string | null;
 }
 
 export default function AdminArticlesPage() {
@@ -31,6 +32,7 @@ export default function AdminArticlesPage() {
         excerpt: '',
         author_name: 'Omega',
         featured_image: '',
+        category: '',
     });
     const [isSaving, setIsSaving] = useState(false);
 
@@ -61,6 +63,7 @@ export default function AdminArticlesPage() {
             excerpt: '',
             author_name: 'Omega',
             featured_image: '',
+            category: '',
         });
         setShowEditor(true);
     };
@@ -75,6 +78,7 @@ export default function AdminArticlesPage() {
             excerpt: article.excerpt || '',
             author_name: article.author_name || 'Omega',
             featured_image: article.featured_image || '',
+            category: article.category || '',
         });
         setShowEditor(true);
     };
@@ -375,6 +379,18 @@ export default function AdminArticlesPage() {
                                         placeholder="https://..."
                                     />
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="admin-label mb-2 block">Flokkur</label>
+                                <select
+                                    className="admin-input"
+                                    value={formData.category}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                                >
+                                    <option value="">Almenn grein (Greinar)</option>
+                                    <option value="israel">Ísrael — sýnist í /israel og /israel/greinar</option>
+                                </select>
                             </div>
 
                             <div className="pt-4 flex gap-3">

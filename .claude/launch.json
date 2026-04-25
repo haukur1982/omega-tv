@@ -5,7 +5,7 @@
       "name": "omega-tv",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["dev"],
-      "port": 3000
+      "port": 3005
     }
   ]
 }

@@ -11,6 +11,61 @@ export type EpisodeInsert = Database['public']['Tables']['episodes']['Insert'];
 
 // ===== PUBLIC QUERIES (only published content) =====
 
+/**
+ * Get published episodes that belong to Israel-themed series.
+ * Matches any series whose title contains "ísrael" or "israel"
+ * (case-insensitive). Used by /israel landing + /israel/heimildarmyndir
+ * to surface CBN Fréttir frá Ísrael, Ísrael í brennidepli, and any
+ * other Israel-tagged content from the existing episodes catalog —
+ * no new schema, just a filter over what's already there.
+ */
+export type IsraelEpisode = {
+    id: string;
+    title: string;
+    description: string | null;
+    duration: number | null;
+    published_at: string | null;
+    thumbnail_custom: string | null;
+    bunny_video_id: string;
+    episode_number: number;
+    series: { id: string; title: string; slug: string } | null;
+};
+
+export async function getIsraelEpisodes(limit = 24): Promise<IsraelEpisode[]> {
+    const { data, error } = await supabase
+        .from('episodes')
+        .select(`
+            id,
+            title,
+            description,
+            duration,
+            published_at,
+            thumbnail_custom,
+            bunny_video_id,
+            episode_number,
+            series:series_id ( id, title, slug )
+        `)
+        .eq('status', 'published')
+        .not('published_at', 'is', null)
+        .order('published_at', { ascending: false })
+        .limit(limit * 4); // overfetch — we filter by series title client-side
+
+    if (error) {
+        console.error('Failed to fetch Israel episodes:', error);
+        return [];
+    }
+
+    const rows = (data ?? []) as unknown as IsraelEpisode[];
+
+    return rows
+        .filter((e) => {
+            const seriesTitle = e.series?.title?.toLowerCase() ?? '';
+            const epTitle = e.title?.toLowerCase() ?? '';
+            return /ísrael|israel/.test(seriesTitle) || /ísrael|israel/.test(epTitle);
+        })
+        .slice(0, limit);
+}
+
 export async function getAllSeries() {
     const { data, error } = await supabase
         .from('series')

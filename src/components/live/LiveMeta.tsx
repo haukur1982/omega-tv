@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatClockUtc, type ScheduleSlot } from "@/lib/schedule-db";
+import SendaBaenButton from "./SendaBaenButton";
 
 /**
  * LiveMeta — below-player panel when State A (on-air).
@@ -71,31 +72,7 @@ export default function LiveMeta({ current }: Props) {
             </div>
 
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                <Link
-                    href="/baenatorg#senda"
-                    className="warm-hover"
-                    style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        padding: '14px 26px',
-                        borderRadius: 'var(--radius-xs)',
-                        background: 'var(--kerti)',
-                        color: 'var(--nott)',
-                        border: '1px solid var(--kerti)',
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: '13.5px',
-                        fontWeight: 700,
-                        letterSpacing: '0.01em',
-                        textDecoration: 'none',
-                    }}
-                >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M22 2L11 13" />
-                        <path d="M22 2l-7 20-4-9-9-4 20-7z" />
-                    </svg>
-                    Senda bænaefni
-                </Link>
+                <SendaBaenButton variant="primary" />
                 <Link
                     href="#"
                     className="ghost-btn"

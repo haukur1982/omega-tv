@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { title, slug, content, excerpt, author_name, featured_image, published_at } = body;
+        const { title, slug, content, excerpt, author_name, featured_image, published_at, category } = body;
 
         if (!title || !slug || !content) {
             return NextResponse.json({ error: 'Titill, slóð og innihald vantar' }, { status: 400 });
@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
             author_name: author_name || 'Omega',
             featured_image: featured_image || null,
             published_at: published_at || new Date().toISOString(),
+            category: category || null,
         });
 
         if (!article) {

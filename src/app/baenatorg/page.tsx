@@ -7,41 +7,23 @@ import { getPrayers, getTotalPrayCount, getActiveCampaigns } from "@/lib/prayer-
 /**
  * /baenatorg — the prayer wall.
  *
- * Composition follows the principle "dark = watching, light = reading":
+ * Composition follows the magazine pattern proven on /greinar/[slug]:
+ * a dark editorial cover hard-cuts into a cream long-read body. The
+ * cover is purely typographic (no photograph) — for a section-index
+ * page there is no single canonical image, and the typography alone
+ * carries the same weight the article-cover does without one.
  *
  *   1. Dark navbar (chrome)
- *   2. Full-bleed contemplative photograph as the banner. A gradient
- *      stack on top darkens the area behind the masthead text, lets
- *      the photograph breathe in the middle, and fades cleanly into
- *      --skra at the bottom edge — same pattern as the article
- *      detail page. The "transition band" is no longer a separate
- *      visible stripe; the image dissolves into the cream below.
- *   3. Vellum page — invitation row, filter strip, prayer feed.
- *      Prayers as flowing stanzas (no card chrome) separated by
- *      thin gold rules.
- *   4. Final transition band on the way OUT (cream → mór → mold)
- *      before the dark footer. No image needed there — pure tonal.
- *   5. Dark footer.
- *
- * The image swap is easy: replace BANNER_IMAGE with a curated Omega
- * photograph (candle on altar, sanctuary interior, hands in prayer,
- * Iceland dawn — anything atmospheric and contemplative).
+ *   2. Dark editorial cover — kicker, title, italic excerpt, gold
+ *      rule, byline-row (count of prayers held here).
+ *   3. Hard cut into cream — `border-bottom: 1px solid var(--border)`,
+ *      no gradient transition.
+ *   4. Cream body — invitation row, filter strip, prayer feed as
+ *      flowing stanzas (no card chrome, gold rule between).
+ *   5. Dark footer lands cleanly on top of the cream body.
  */
 
 export const dynamic = 'force-dynamic';
-
-/**
- * Banner photograph. Reuses the Unsplash image that the previous
- * /baenatorg hero used (and which was already in the curated set
- * approved across the site) — a contemplative atmospheric shot.
- * When a real Omega-shot photograph is available (candle on altar,
- * sanctuary interior, hands clasped, Iceland dawn), swap it here.
- *
- * Rule: only use photo IDs that are ALREADY used on another page of
- * the site. That set has been visually verified. Don't introduce
- * new stock URLs without seeing the image first.
- */
-const BANNER_IMAGE = 'https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?q=80&w=2600&auto=format&fit=crop';
 
 export default async function BaenatorgPage() {
     const [prayers, totalCount, campaigns] = await Promise.all([
@@ -57,161 +39,162 @@ export default async function BaenatorgPage() {
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
             <Navbar />
 
-            {/* 1. FULL-BLEED BANNER — photograph + gradient stack that
-                handles navbar darkening, mid-image breathing room, and
-                the fade to vellum cream at the bottom. */}
+            {/* ─── Dark editorial cover ─────────────────────────────── */}
             <section
+                className="article-cover"
                 style={{
                     position: 'relative',
                     background: 'var(--nott)',
                     overflow: 'hidden',
-                    paddingTop: 'clamp(140px, 14vw, 180px)',
-                    paddingBottom: 'clamp(96px, 12vw, 140px)',
+                    padding: 'clamp(124px, 11vw, 164px) var(--rail-padding) clamp(56px, 7vw, 88px)',
+                    borderBottom: '1px solid var(--border)',
                 }}
             >
-                {/* Photograph */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={BANNER_IMAGE}
-                    alt=""
-                    style={{
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        objectPosition: '50% 45%',
-                        filter: 'saturate(0.85) contrast(1.05)',
-                    }}
-                />
-
-                {/* Top-only darkening for masthead legibility.
-                    Strong at the top where the navbar + kicker + title
-                    sit; fades to transparent by ~55% so the photograph
-                    reads at full saturation in its lower half.
-                    NO bottom-fade-to-cream — the photo ends at a hard
-                    edge and the cream section starts cleanly below it.
-                    Long photo-to-cream gradients let the photograph's
-                    own warm tones bleed through and create banding
-                    that no amount of opacity-stop tweaking fixes. */}
                 <div
-                    aria-hidden
+                    className="article-cover-shell baenatorg-cover-grid"
                     style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background:
-                            'linear-gradient(180deg, rgba(20,18,15,0.78) 0%, rgba(20,18,15,0.5) 25%, rgba(20,18,15,0.2) 55%, transparent 75%)',
-                    }}
-                />
-
-                {/* Subtle amber radial in the upper-right — evening
-                    warmth. Stays in both image and no-image cases. */}
-                <div
-                    aria-hidden
-                    style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background:
-                            'radial-gradient(ellipse at 80% 22%, rgba(233,168,96,0.14) 0%, transparent 55%)',
-                        pointerEvents: 'none',
-                    }}
-                />
-
-                {/* Masthead — sits over the gradient stack */}
-                <div
-                    style={{
-                        position: 'relative',
-                        zIndex: 2,
                         maxWidth: '80rem',
                         margin: '0 auto',
-                        padding: '0 var(--rail-padding)',
                         display: 'grid',
-                        gridTemplateColumns: 'minmax(0,1fr) auto',
-                        gap: '48px',
+                        gridTemplateColumns: 'minmax(0, 48rem) 1fr',
+                        gap: 'clamp(48px, 6vw, 96px)',
                         alignItems: 'end',
                     }}
                 >
-                    <div>
+                    <div className="article-cover-copy">
                         <div
                             style={{
                                 fontFamily: 'var(--font-sans)',
-                                fontSize: '12px',
+                                fontSize: '11px',
                                 fontWeight: 700,
                                 letterSpacing: '0.22em',
                                 textTransform: 'uppercase',
-                                color: 'var(--gull)',
-                                marginBottom: '18px',
+                                color: 'var(--nordurljos)',
+                                marginBottom: '24px',
                             }}
                         >
                             Bænatorg
                         </div>
+
                         <h1
                             style={{
                                 margin: 0,
                                 fontFamily: 'var(--font-serif)',
-                                fontSize: 'clamp(44px, 6vw, 76px)',
-                                lineHeight: 1.02,
-                                letterSpacing: '-0.018em',
+                                fontSize: 'clamp(40px, 5vw, 70px)',
+                                lineHeight: 1.04,
+                                letterSpacing: 0,
                                 fontWeight: 400,
                                 color: 'var(--ljos)',
-                                maxWidth: '760px',
-                                textShadow: '0 2px 30px rgba(10,8,5,0.5)',
+                                textWrap: 'balance',
+                                maxWidth: '15ch',
                             }}
                         >
                             Þar sem bænir mætast.
                         </h1>
+
                         <p
                             style={{
                                 margin: '28px 0 0',
                                 fontFamily: 'var(--font-serif)',
-                                fontSize: '19px',
-                                lineHeight: 1.55,
-                                color: 'var(--moskva)',
-                                maxWidth: '560px',
                                 fontStyle: 'italic',
-                                textShadow: '0 1px 18px rgba(10,8,5,0.6)',
+                                fontSize: 'clamp(20px, 1.8vw, 25px)',
+                                lineHeight: 1.48,
+                                color: 'var(--moskva)',
+                                letterSpacing: 0,
+                                textWrap: 'pretty',
+                                maxWidth: '34rem',
                             }}
                         >
                             Deildu því sem þungt liggur, berðu aðra fyrir Drottni, og ritaðu bænasvörin þegar þau koma.
                         </p>
+
+                        <div
+                            aria-hidden
+                            style={{
+                                width: '52px',
+                                height: '1px',
+                                background: 'var(--gull)',
+                                margin: '34px 0 20px',
+                            }}
+                        />
+
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'baseline',
+                                gap: '14px',
+                                flexWrap: 'wrap',
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '11.5px',
+                                color: 'var(--steinn)',
+                                letterSpacing: '0.14em',
+                                textTransform: 'uppercase',
+                                fontWeight: 600,
+                            }}
+                        >
+                            <span
+                                style={{
+                                    fontFamily: 'var(--font-serif)',
+                                    fontStyle: 'italic',
+                                    fontSize: '17px',
+                                    color: 'var(--ljos)',
+                                    letterSpacing: 0,
+                                    textTransform: 'none',
+                                    fontWeight: 400,
+                                    fontFeatureSettings: '"lnum", "tnum"',
+                                }}
+                            >
+                                {displayCount.toLocaleString('is-IS')} bænir
+                            </span>
+                            <span style={{ opacity: 0.5 }}>·</span>
+                            <span>bornar fram á þessu torgi</span>
+                        </div>
                     </div>
 
-                    <aside style={{ textAlign: 'right', color: 'var(--moskva)' }}>
-                        <div
+                    {/* Right-side epigraph — quiet Scripture voice over
+                        the page. Hidden on small viewports where the
+                        masthead column owns the full width. */}
+                    <aside
+                        className="baenatorg-epigraph"
+                        style={{
+                            textAlign: 'right',
+                            color: 'var(--moskva)',
+                            maxWidth: '26rem',
+                            justifySelf: 'end',
+                        }}
+                    >
+                        <p
                             style={{
-                                fontFamily: 'var(--font-serif)',
-                                fontSize: 'clamp(44px, 5vw, 64px)',
-                                lineHeight: 1,
-                                fontWeight: 400,
-                                color: 'var(--ljos)',
-                                fontFeatureSettings: '"lnum", "tnum"',
-                                letterSpacing: '-0.02em',
-                                textShadow: '0 2px 24px rgba(10,8,5,0.55)',
-                            }}
-                        >
-                            {displayCount.toLocaleString('is-IS')}
-                        </div>
-                        <div
-                            style={{
-                                marginTop: '10px',
+                                margin: 0,
                                 fontFamily: 'var(--font-serif)',
                                 fontStyle: 'italic',
-                                fontSize: '14px',
+                                fontSize: '19px',
+                                lineHeight: 1.5,
                                 color: 'var(--moskva)',
-                                maxWidth: '200px',
-                                marginLeft: 'auto',
-                                lineHeight: 1.4,
+                                letterSpacing: 0,
+                                textWrap: 'pretty',
                             }}
                         >
-                            bænir bornar fram á þessu torgi
+                            Komið til mín, öll þér sem erfiðið og þunga eruð hlaðin, og ég mun veita yður hvíld.
+                        </p>
+                        <div
+                            style={{
+                                marginTop: '14px',
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                letterSpacing: '0.22em',
+                                textTransform: 'uppercase',
+                                color: 'var(--steinn)',
+                            }}
+                        >
+                            Matteusarguðspjall 11:28
                         </div>
                     </aside>
                 </div>
             </section>
 
-            {/* 2. VELLUM PAGE — clean horizontal break from the photo
-                above. No gradient transition — magazine convention,
-                photo ends, page begins. */}
+            {/* ─── Cream body — invitation, filter, feed ────────────── */}
             <section
                 style={{
                     background: 'var(--skra)',
@@ -222,7 +205,7 @@ export default async function BaenatorgPage() {
                     style={{
                         maxWidth: '80rem',
                         margin: '0 auto',
-                        padding: 'clamp(24px, 4vw, 48px) var(--rail-padding) clamp(64px, 9vw, 96px)',
+                        padding: 'clamp(24px, 4vw, 48px) var(--rail-padding) clamp(72px, 10vw, 112px)',
                     }}
                 >
                     {activeCampaign && (
@@ -234,20 +217,6 @@ export default async function BaenatorgPage() {
                     <BaenatorgClient initialPrayers={prayers} register="light" />
                 </div>
             </section>
-
-            {/* 3. EXIT TRANSITION — vellum back to warm-black for the
-                footer. Same single-hue principle as the banner top:
-                only --skra (cream) and --nott (warm-black) in play,
-                opacity stops in between. No intermediate brown hues
-                that would band. */}
-            <div
-                aria-hidden
-                style={{
-                    height: 'clamp(96px, 12vh, 140px)',
-                    background:
-                        'linear-gradient(180deg, var(--skra) 0%, rgba(243,237,224,0.2) 22%, rgba(20,18,15,0.18) 50%, rgba(20,18,15,0.55) 80%, var(--mold) 100%)',
-                }}
-            />
 
             <Footer />
         </main>

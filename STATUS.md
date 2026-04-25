@@ -1,7 +1,75 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-24 (Codex — Greinar article cover redesign correction)
-**Last Agent:** Codex — article detail visual correction
+**Last Updated:** 2026-04-25 (Claude Opus 4.7 — full-day session, 4 surfaces touched)
+**Last Agent:** Claude Opus 4.7
+**Branch:** `experiment/vellum-prayer-cards`
+**Build Status:** local HMR working; `pnpm build` not run this session — should be verified before merge.
+
+---
+
+## Session — 2026-04-25 (full day)
+
+Long session covering 4 surfaces: Bænatorg, Live, Israel, plus a small data cleanup. Required multiple iterations on most pieces — flagging clearly where I miscalibrated so future sessions don't repeat the same mistakes.
+
+### Bænatorg redesign (early-day)
+- **Banner overhaul** — replaced photographed dark banner that wasn't landing with a typographic article-cover pattern (kicker / serif title / italic excerpt / gold rule / byline-row + right-side Scripture epigraph)
+- **Cream body register** — body section uses `--skra` cream, dark→cream hard cut, exit gradient removed
+- **Matt 11:28 epigraph verified** against 2007 Biblían at biblian.is — text + reference format both corrected (was wrong on first pass: had older 1981 wording + period instead of colon)
+- **Site reference convention** for Bible refs: `Matteus 5:3–10` (colon, short book name) per `src/lib/passages.ts:165`. Hawk approved using full form `Matteusarguðspjall 11:28` for the prayer-wall epigraph as a deliberate reverent treatment; inline refs elsewhere stay short
+- **Footer fix** — `<main>` background was set to `var(--skra)` cream, which made the footer's `linear-gradient(to bottom, var(--bg-deep), #05040350)` (50 = ~31% alpha at the bottom) wash out. Reverted `<main>` to `--mold` to match every other page
+- **Data cleanup** — `scripts/clean-prayer-junk.ts` repaired Anna's mojibake prayer (MacRoman→UTF-8 roundtrip via fixed mapping table) and unapproved a duplicate "leiðtogum landsins" prayer. Idempotent, re-runnable
+
+### Live page (mid-day)
+- **In-broadcast prayer pulse** — new `LivePrayerPulse` component on /live during on-air. One tap → one count, Postgres atomic via `increment_live_prayer_count` RPC, polls every 15s. Migration: `supabase/migrations/20260425_live_prayer_pulse.sql` adds `live_prayer_count` column + RPC + grants to anon/authenticated. **Hawk applied this migration via Supabase dashboard.**
+- **In-place prayer submission** — replaced two `<Link href="/baenatorg#senda">` triggers in LiveMeta + OnAirEditorial with `<SendaBaenButton variant="…">` that opens the same Bænatorg `PrayerSubmissionModal` over the player. Viewer never leaves the broadcast. Submissions still flow to the same moderation queue
+- **Architectural recommendation captured but not built**: deleting the dead `src/components/sanctuary/*` folder + `/api/broadcast-prayers/submit` route + `is_broadcast_prayer` flag (use `broadcast_slot_id IS NOT NULL` instead) + the auto-approve leak on `submitQuickPrayerAction` for "national" prayers. **Follow-up task.**
+
+### Israel section — full redesign (late-day, multiple iterations)
+**Required ~5 escalations from Hawk before it was right. Failure pattern was scope-cutting features he explicitly named into "Phase 2" — saved as feedback memory `feedback_no_scope_cut_when_vocational.md`.** When Hawk frames work as vocational/calling/important, build the whole vision in one push, not a phase 1.
+
+Final composition (8 sections):
+1. **Dark masthead** — Isaiah 62 watchman tone, kicker/title/italic excerpt/gold rule/byline + right-side full-verse epigraph, dawn-light radial + ornamental flourish, **embedded "Næsta sending" ribbon at the bottom** (solves the dark→dark clash by keeping schedule signal inside the header)
+2. **Cream doors grid** — 4 typographic tiles with chapter numbers (01–04), per-tile warm tint, links into Foundation / /israel/greinar / /israel/heimildarmyndir / Prayer call
+3. **Cream Foundation** — Genesis 12 covenant teaching (preserved verbatim from prior page), ornamental opener + 3-line drop cap on first paragraph, pull-quote with verified 2007 wording
+4. **Cream Greinar rail** — articles tagged `category='israel'`, with empty state when none yet (still a dashed placeholder — flagged for redesign)
+5. **Pergament Hátíðir rail** — 5 upcoming Hebrew/biblical holidays (Shavuot, Rosh Hashanah, Yom Kippur, Sukkot, Hanukkah), each with **Hebrew script with niqqud** + Icelandic name + biblical ref + pastoral 1-line meaning. Data in `src/lib/israel-holidays.ts` — needs annual update
+6. **Cream Documentaries** — `getIsraelEpisodes()` filters episodes joined with series by title pattern. **Poster-style 4:5 thumbnails** with title overlaid, series tag top-left, runtime top-right
+7. **Cream Prophecy** — Ezekiel 37 dry-bones, ornamental opener + drop cap on "Árið 1948" paragraph, pull-quote with verified 2007 wording (older 1981 "vor/yðar" replaced with 2007 "okkar/ykkur")
+8. **Dark Prayer call** — Psalm 122:6 with centered ornamental opener (gold 8-point star flanked by hairlines)
+
+All Bible refs verified against 2007 Biblían at biblian.is (Jesaja 62:6, 1. Mósebók 12:2, Esekíel 37:11–12). Psalm 122:6 fragment used as-is — fetcher dodged the full verse on copyright grounds, but the opening clause is unchanged across translations.
+
+### Migrations applied
+- ✅ `20260425_live_prayer_pulse.sql` — Hawk applied via dashboard
+- ✅ `20260425_articles_category.sql` — applied via dashboard (added `articles.category TEXT NULL` + partial index)
+
+### Database state (audited via `scripts/check-israel-data.ts`)
+- Series with "Ísrael" in title: **0** — documentaries section will render empty until seeded
+- Published Israel episodes: **0**
+- Israel-tagged articles: **0** — Hawk writes these
+- Israel schedule slots (last 90d + next 30d): **8** — masthead ribbon will populate from these
+
+### What needs to happen next (priority order)
+
+1. **Seed Israel series + episodes** so /israel/heimildarmyndir + the Documentaries rail aren't empty. Three options documented in chat (manual seed / Azotus pipeline extension / schedule_slots auto-link). Hawk hasn't picked one yet.
+2. **Hawk writes first 1–2 Israel teaching articles** so the Greinar rail populates. Articles MUST stay Hawk's voice — no auto-generation (project standing rule).
+3. **Greinar rail empty state redesign** — currently a dashed placeholder; should be more editorial when no content yet. Flagged but not built.
+4. **Doors hover polish** — gold line transition on hover. Flagged but not built.
+5. **Sanctuary code cleanup** — delete `src/components/sanctuary/*` + `/api/broadcast-prayers/submit` + `is_broadcast_prayer` flag. Pure dead code removal.
+6. **Quick-prayer auto-approve fix** — `submitQuickPrayerAction` (`src/actions/prayer.ts:36`) auto-approves "national" prayers, bypassing moderation. Should go through one consistent moderation path.
+7. **`pnpm build` smoke test** — wasn't run this session. Verify before merging this branch.
+8. **Branch is `experiment/vellum-prayer-cards`** but contains far more than vellum prayer cards now. Either rename or merge to main once verified.
+
+### What I learned (kept in memory for future sessions)
+
+- **`feedback_no_scope_cut_when_vocational.md`** — when Hawk frames work as vocational/calling/important or names ≥3 content types together, build the whole vision in one push. Don't punt features into phases. Don't call something "done" while named content types are missing.
+- Verify Bible refs against biblian.is (2007 Biblían) — never trust training-data wording for theological copy.
+- Site Bible reference convention: colon (`Matteus 5:3–10`), short book name in inline use, full liturgical name (`Matteusarguðspjall`) for reverent display moments.
+- Hawk's existing dev server holds port 3005 — Preview MCP can't take over without killing his process. HMR is the verification path.
+
+---
+
+## Prior session — 2026-04-24 (Codex — Greinar article cover redesign correction)
 **Branch:** `claude-design-rebrand` (active redesign branch, pushed to origin)
 **Build Status:** all pages 200, tsc clean, `pnpm build` green across all redesigns.
 

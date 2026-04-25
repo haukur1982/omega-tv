@@ -5,6 +5,7 @@ import OnAirEditorial from "@/components/live/OnAirEditorial";
 import NaestaSending from "@/components/live/NaestaSending";
 import AMedanPuBidur from "@/components/live/AMedanPuBidur";
 import DagskraTimeline from "@/components/live/DagskraTimeline";
+import LivePrayerPulse from "@/components/live/LivePrayerPulse";
 import { getCurrentAndNext, getScheduleInRange, type ScheduleSlot } from "@/lib/schedule-db";
 
 /**
@@ -177,6 +178,7 @@ export default async function LivePage({ searchParams }: LivePageProps) {
 
                         <LiveMeta current={effectiveCurrent} />
                         <OnAirEditorial current={effectiveCurrent} />
+                        <LivePrayerPulse slotId={effectiveCurrent.id} />
                     </div>
                 ) : (
                     <NaestaSending next={next} />

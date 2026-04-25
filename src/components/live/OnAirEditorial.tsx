@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ScheduleSlot } from "@/lib/schedule-db";
+import SendaBaenButton from "./SendaBaenButton";
 
 /**
  * OnAirEditorial — two-column editorial strip below the live meta bar.
@@ -70,59 +70,10 @@ export default function OnAirEditorial({ current, scriptures }: Props) {
                     </p>
                 )}
 
-                {/* Quiet prayer hand-off — ghost card, warm border on hover.
-                    Not an amber fill: the primary amber CTA above this
-                    section already carries the action weight. */}
-                <Link
-                    href="/baenatorg#senda"
-                    className="warm-hover"
-                    style={{
-                        marginTop: '26px',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '12px 18px 12px 16px',
-                        background: 'transparent',
-                        border: '1px solid var(--border)',
-                        borderRadius: 'var(--radius-xs)',
-                        color: 'var(--ljos)',
-                        textDecoration: 'none',
-                    }}
-                >
-                    <span
-                        aria-hidden
-                        style={{
-                            width: '8px',
-                            height: '8px',
-                            borderRadius: '50%',
-                            background: 'var(--kerti)',
-                            boxShadow: '0 0 0 4px var(--kerti-gloed)',
-                        }}
-                    />
-                    <span
-                        style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            letterSpacing: '0.14em',
-                            textTransform: 'uppercase',
-                        }}
-                    >
-                        Senda bænarefni
-                    </span>
-                    <span
-                        style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontStyle: 'italic',
-                            fontSize: '14px',
-                            color: 'var(--moskva)',
-                            borderLeft: '1px solid var(--border)',
-                            paddingLeft: '12px',
-                        }}
-                    >
-                        biðið er fyrir sendingum í beinni
-                    </span>
-                </Link>
+                {/* Quiet prayer hand-off — opens the same submission
+                    modal Bænatorg uses, in place. Viewer never leaves
+                    the broadcast. */}
+                <SendaBaenButton variant="ghost" />
             </div>
 
             {hasScriptures && (

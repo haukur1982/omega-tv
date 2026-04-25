@@ -12,6 +12,7 @@ import type { Article } from "./article-helpers";
  */
 export const MOCK_ARTICLES: readonly Article[] = [
     {
+        category: null,
         id: 'a00',
         title: 'Aska — Hvers vegna fortíðin skilgreinir þig ekki',
         slug: 'aska',
@@ -117,6 +118,7 @@ Stígðu nær. Eldurinn hefur þegar unnið sitt verk. Það er ekkert eftir til
         created_at: '2026-04-05T10:00:00Z',
     },
     {
+        category: null,
         id: 'a0',
         title: 'Þú þarft ekki að vinna þér inn það sem er þegar þitt',
         slug: 'thu-tharft-ekki-ad-vinna',
@@ -228,6 +230,7 @@ Komdu nær. Haltu þér nálægt. Sýndu einlægni. Blóð Jesú hefur aldrei h�
         created_at: '2026-04-05T08:00:00Z',
     },
     {
+        category: null,
         id: 'a1',
         title: 'Tíminn er núna: Framtíð trúar á Íslandi',
         slug: 'timinn-er-nuna',
@@ -249,6 +252,7 @@ Framtíðin byrjar með okkur. Hún byrjar með þér. Hvernig ætlarðu að ver
         created_at: '2026-04-04T10:00:00Z',
     },
     {
+        category: null,
         id: 'a2',
         title: 'Aflgefandi Samfélag',
         slug: 'aflgefandi-samfelag',
@@ -268,6 +272,7 @@ Omega Stöðin vill vera vettvangur fyrir þetta samfélag — ekki aðeins á n
         created_at: '2026-04-03T10:00:00Z',
     },
     {
+        category: null,
         id: 'a3',
         title: 'Að finna náð í hversdeginum',
         slug: 'nad-i-hversdeginum',
@@ -287,6 +292,7 @@ Fyrirgefningin er stærstur birtingarmynd náðarinnar. Þegar við fyrirgefum �
         created_at: '2026-04-02T10:00:00Z',
     },
     {
+        category: null,
         id: 'a4',
         title: 'Bænin sem breytir öllu',
         slug: 'baenin-sem-breytir',
@@ -306,6 +312,7 @@ En mikilvægast af öllu: bænin tengir okkur við Guð sjálfan.`,
         created_at: '2026-04-01T10:00:00Z',
     },
     {
+        category: null,
         id: 'a5',
         title: 'Vonin lifir — jafnvel á erfiðum tímum',
         slug: 'vonin-lifir',
