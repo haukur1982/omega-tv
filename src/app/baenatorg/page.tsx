@@ -85,20 +85,21 @@ export default async function BaenatorgPage() {
                     }}
                 />
 
-                {/* Gradient stack — text legibility + clean fade to vellum.
-                    Stronger upper darkening than the article-detail
-                    treatment because the masthead (kicker + title +
-                    counter) takes up more of the banner surface here
-                    than an article header does. The bottom transitions
-                    through --mor → --pergament → --skra so the photo
-                    dissolves into the cream below without a seam. */}
+                {/* Gradient stack — same pattern as /greinar/[slug].
+                    ONLY two hues in play: warm-black (--nott family)
+                    and cream (--skra). Intermediate stops are just
+                    opacity variations of those two colors — no
+                    mid-brown hues that would band as visible
+                    rainbow stripes. Stronger top darkening than the
+                    article variant because the masthead occupies
+                    more banner surface here. */}
                 <div
                     aria-hidden
                     style={{
                         position: 'absolute',
                         inset: 0,
                         background:
-                            'linear-gradient(180deg, rgba(20,18,15,0.78) 0%, rgba(20,18,15,0.55) 25%, rgba(20,18,15,0.4) 50%, rgba(63,47,35,0.65) 78%, rgba(212,194,162,0.55) 92%, var(--skra) 100%)',
+                            'linear-gradient(180deg, rgba(20,18,15,0.78) 0%, rgba(20,18,15,0.4) 25%, rgba(20,18,15,0.18) 55%, rgba(243,237,224,0.18) 80%, var(--skra) 100%)',
                     }}
                 />
 
@@ -237,21 +238,17 @@ export default async function BaenatorgPage() {
                 </div>
             </section>
 
-            {/* 3. EXIT TRANSITION — vellum back to dark for the footer.
-                No image here, pure tonal walk: skra → pergament → mór → mold. */}
+            {/* 3. EXIT TRANSITION — vellum back to warm-black for the
+                footer. Same single-hue principle as the banner top:
+                only --skra (cream) and --nott (warm-black) in play,
+                opacity stops in between. No intermediate brown hues
+                that would band. */}
             <div
                 aria-hidden
                 style={{
-                    height: 'clamp(80px, 12vh, 140px)',
+                    height: 'clamp(96px, 12vh, 140px)',
                     background:
-                        'linear-gradient(180deg, var(--skra) 0%, var(--pergament) 30%, var(--hafrar) 65%, var(--mor) 100%)',
-                }}
-            />
-            <div
-                aria-hidden
-                style={{
-                    height: '40px',
-                    background: 'linear-gradient(180deg, var(--mor) 0%, var(--mold) 100%)',
+                        'linear-gradient(180deg, var(--skra) 0%, rgba(243,237,224,0.2) 22%, rgba(20,18,15,0.18) 50%, rgba(20,18,15,0.55) 80%, var(--mold) 100%)',
                 }}
             />
 
