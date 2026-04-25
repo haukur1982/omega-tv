@@ -8,17 +8,14 @@ import PrayerFilterStrip, { type PrayerFilter } from './PrayerFilterStrip';
 import PrayerCardV2 from './PrayerCardV2';
 import PrayerSubmissionModal from './PrayerSubmissionModal';
 
-/**
- * Bænatorg client wrapper. Owns filter state, modal state, and
- * optimistic bið-með-þér updates. Receives the approved prayer list
- * from the server component.
- */
+type Register = 'dark' | 'light';
 
 interface Props {
     initialPrayers: Prayer[];
+    register?: Register;
 }
 
-export default function BaenatorgClient({ initialPrayers }: Props) {
+export default function BaenatorgClient({ initialPrayers, register = 'dark' }: Props) {
     const [prayers, setPrayers] = useState<Prayer[]>(initialPrayers);
     const [filter, setFilter] = useState<PrayerFilter>('allar');
     const [modalOpen, setModalOpen] = useState(false);
@@ -40,7 +37,6 @@ export default function BaenatorgClient({ initialPrayers }: Props) {
     }, [prayers, filter]);
 
     const handlePray = (id: string) => {
-        // Optimistic update
         setPrayers((list) =>
             list.map((p) => (p.id === id ? { ...p, prayCount: p.prayCount + 1 } : p)),
         );
@@ -49,16 +45,24 @@ export default function BaenatorgClient({ initialPrayers }: Props) {
         });
     };
 
+    const isLight = register === 'light';
+
     return (
         <>
-            <PrayerInvitationRow onOpen={() => setModalOpen(true)} />
+            <PrayerInvitationRow onOpen={() => setModalOpen(true)} register={register} />
 
-            <PrayerFilterStrip active={filter} onChange={setFilter} counts={counts} />
+            <PrayerFilterStrip active={filter} onChange={setFilter} counts={counts} register={register} />
 
-            <div style={{ maxWidth: '860px', margin: '0 auto', paddingTop: '32px' }} id="senda">
+            <div
+                id="senda"
+                style={{
+                    maxWidth: '44rem',
+                    margin: isLight ? '24px auto 0' : '0 auto',
+                }}
+            >
                 {filtered.length > 0 ? (
                     filtered.map((p) => (
-                        <PrayerCardV2 key={p.id} prayer={p} variant="vellum" onPray={handlePray} />
+                        <PrayerCardV2 key={p.id} prayer={p} register={register} onPray={handlePray} />
                     ))
                 ) : (
                     <div
@@ -68,7 +72,7 @@ export default function BaenatorgClient({ initialPrayers }: Props) {
                             fontFamily: 'var(--font-serif)',
                             fontStyle: 'italic',
                             fontSize: '18px',
-                            color: 'var(--moskva)',
+                            color: isLight ? 'var(--skra-mjuk)' : 'var(--moskva)',
                         }}
                     >
                         {filter === 'svor'

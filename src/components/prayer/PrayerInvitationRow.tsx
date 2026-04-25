@@ -3,19 +3,45 @@
 import { IcoQuote, IcoFeather } from './PrayerIcons';
 
 /**
- * InvitationRow — the "write a prayer" entry point that REPLACES the
- * permanent right-hand form column. Feels like a candle stand, not a
- * form field. Clicking opens the submission modal.
+ * InvitationRow — the "write a prayer" entry point. Two registers:
  *
- * Per the altar metaphor: the form is not a fixture of the page; it's
- * an action you invoke. Amber appears once on the default page: here.
+ *   - "dark"  (default) — warm-black --torfa background, cream copy.
+ *     Use on a dark page.
+ *   - "light"            — pergament-tinted background, ink copy on
+ *     cream. Use on the vellum register so the row reads as part of
+ *     the "letters on a desk" composition rather than a dark island.
+ *
+ * Amber CTA is the same in both registers — gold reads on cream as
+ * surely as it reads on dark, and amber stays the page's single
+ * primary action either way.
  */
+
+type Register = 'dark' | 'light';
 
 interface Props {
     onOpen: () => void;
+    register?: Register;
 }
 
-export default function PrayerInvitationRow({ onOpen }: Props) {
+export default function PrayerInvitationRow({ onOpen, register = 'dark' }: Props) {
+    const isLight = register === 'light';
+
+    const tokens = isLight
+        ? {
+            bg: 'rgba(212,194,162,0.18)',           // pergament wash on cream
+            border: 'rgba(63,47,35,0.14)',          // mór hairline
+            quoteColor: 'var(--gull)',
+            titleColor: 'var(--skra-djup)',
+            descColor: 'var(--skra-mjuk)',
+        }
+        : {
+            bg: 'var(--torfa)',
+            border: 'var(--border)',
+            quoteColor: 'var(--kerti)',
+            titleColor: 'var(--ljos)',
+            descColor: 'var(--moskva)',
+        };
+
     return (
         <div
             className="warm-hover"
@@ -26,8 +52,8 @@ export default function PrayerInvitationRow({ onOpen }: Props) {
             style={{
                 position: 'relative',
                 padding: '34px 38px',
-                background: 'var(--torfa)',
-                border: '1px solid var(--border)',
+                background: tokens.bg,
+                border: `1px solid ${tokens.border}`,
                 borderRadius: 'var(--radius-md)',
                 display: 'grid',
                 gridTemplateColumns: 'auto 1fr auto',
@@ -37,7 +63,7 @@ export default function PrayerInvitationRow({ onOpen }: Props) {
                 cursor: 'pointer',
             }}
         >
-            <div style={{ color: 'var(--kerti)', opacity: 0.7 }}>
+            <div style={{ color: tokens.quoteColor, opacity: isLight ? 0.85 : 0.7 }}>
                 <IcoQuote size={44} />
             </div>
 
@@ -47,7 +73,7 @@ export default function PrayerInvitationRow({ onOpen }: Props) {
                         fontFamily: 'var(--font-serif)',
                         fontSize: '22px',
                         lineHeight: 1.35,
-                        color: 'var(--ljos)',
+                        color: tokens.titleColor,
                         letterSpacing: '-0.005em',
                     }}
                 >
@@ -59,7 +85,7 @@ export default function PrayerInvitationRow({ onOpen }: Props) {
                         fontFamily: 'var(--font-serif)',
                         fontStyle: 'italic',
                         fontSize: '15px',
-                        color: 'var(--moskva)',
+                        color: tokens.descColor,
                         maxWidth: '540px',
                         lineHeight: 1.5,
                     }}

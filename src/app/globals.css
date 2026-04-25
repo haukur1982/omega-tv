@@ -26,6 +26,15 @@
   --kerti-gloed:  rgba(233, 168, 96, 0.14);       /* Candle-glow */
   --gull:         #C88A3E;                        /* Gold-foil — scarce */
 
+  /* ── Bridge tones (the warm middle of the scale) ────────────────
+     Fill the gap between --reykur (dark) and --skra (cream) so
+     transitions between dark and light registers feel like dawn,
+     not like a wall. Used in section gradients and as background
+     for content that sits between the two registers. */
+  --mor:        #3F2F23;  /* Mór — peat, warm coffee */
+  --hafrar:     #8A7156;  /* Hafrar — oats, mid warm tan */
+  --pergament:  #D4C2A2;  /* Pergament — aged paper, almost cream */
+
   /* ── Reading frame (vellum) ─────────────────────────────────── */
   --skra:       #F3EDE0;  /* Vellum */
   --skra-djup:  #1B1814;  /* Vellum-deep (ink) */
