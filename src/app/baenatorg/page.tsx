@@ -30,9 +30,18 @@ import { getPrayers, getTotalPrayCount, getActiveCampaigns } from "@/lib/prayer-
 
 export const dynamic = 'force-dynamic';
 
-// Atmospheric placeholder. Swap with a real Omega-shot photograph
-// (candle / sanctuary / hands in prayer / Iceland dawn) when available.
-const BANNER_IMAGE = 'https://images.unsplash.com/photo-1518619745898-93e765966dcd?w=2400&auto=format&fit=crop';
+/**
+ * Optional banner photograph. Set to a URL string (or local /images/...
+ * path) when a real Omega-shot photograph is available — candle on
+ * altar, sanctuary interior, hands clasped, Iceland dawn, anything
+ * contemplative. While null, the banner is pure tonal: warm-black
+ * gradient + amber radial wash, fading into vellum at the bottom.
+ *
+ * Important: do NOT drop in a random Unsplash URL without seeing the
+ * image first. Stock URLs are not memorable; verify the photograph
+ * matches the prayer-wall register before using it.
+ */
+const BANNER_IMAGE: string | null = null;
 
 export default async function BaenatorgPage() {
     const [prayers, totalCount, campaigns] = await Promise.all([
@@ -60,38 +69,44 @@ export default async function BaenatorgPage() {
                     paddingBottom: 'clamp(96px, 12vw, 140px)',
                 }}
             >
-                {/* Photograph */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                    src={BANNER_IMAGE}
-                    alt=""
-                    style={{
-                        position: 'absolute',
-                        inset: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        objectPosition: '50% 45%',
-                        filter: 'saturate(0.9) contrast(1.05)',
-                    }}
-                />
+                {/* Optional photograph — kept conditional so the no-image
+                    case is a clean tonal banner. */}
+                {BANNER_IMAGE && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={BANNER_IMAGE}
+                        alt=""
+                        style={{
+                            position: 'absolute',
+                            inset: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            objectPosition: '50% 45%',
+                            filter: 'saturate(0.9) contrast(1.05)',
+                        }}
+                    />
+                )}
 
-                {/* Gradient stack:
-                    - Top: warm-black so the navbar reads
-                    - Middle: light, lets the photograph breathe
-                    - Bottom: fades into --skra cream so the vellum
-                      page below begins without a visible seam */}
+                {/* Gradient stack — does the work whether or not there's
+                    a photograph. With image: darkens top for navbar,
+                    lets photo breathe through middle, fades to cream at
+                    bottom. Without image: pure tonal warm-black to cream
+                    walk, with mór coffee-brown midpoint absorbing any
+                    transition seam. */}
                 <div
                     aria-hidden
                     style={{
                         position: 'absolute',
                         inset: 0,
-                        background:
-                            'linear-gradient(180deg, rgba(20,18,15,0.7) 0%, rgba(20,18,15,0.3) 18%, rgba(20,18,15,0.18) 45%, rgba(20,18,15,0.35) 72%, rgba(63,47,35,0.85) 88%, var(--skra) 100%)',
+                        background: BANNER_IMAGE
+                            ? 'linear-gradient(180deg, rgba(20,18,15,0.7) 0%, rgba(20,18,15,0.3) 18%, rgba(20,18,15,0.18) 45%, rgba(20,18,15,0.35) 72%, rgba(63,47,35,0.85) 88%, var(--skra) 100%)'
+                            : 'linear-gradient(180deg, var(--nott) 0%, var(--mold) 35%, var(--mor) 75%, var(--hafrar) 90%, var(--pergament) 96%, var(--skra) 100%)',
                     }}
                 />
 
-                {/* Subtle amber radial in the upper-right — evening warmth */}
+                {/* Subtle amber radial in the upper-right — evening
+                    warmth. Stays in both image and no-image cases. */}
                 <div
                     aria-hidden
                     style={{
