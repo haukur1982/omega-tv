@@ -15,6 +15,20 @@ export default function NewNewsletterPage() {
     const [isSending, setIsSending] = useState(false);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+    const createNewsletter = async (): Promise<{ id: string } | null> => {
+        const res = await fetch('/api/admin/newsletters', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, content }),
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setFeedback({ type: 'error', message: data.error ?? 'Villa við vistun' });
+            return null;
+        }
+        return res.json();
+    };
+
     const handleSave = async () => {
         if (!title || !content) {
             setFeedback({ type: 'error', message: 'Titill og innihald vantar' });
@@ -22,21 +36,11 @@ export default function NewNewsletterPage() {
         }
         setIsSaving(true);
         setFeedback(null);
-
-        try {
-            const res = await fetch('/api/admin/newsletters', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, subject, content, send: false }),
-            });
-
-            if (!res.ok) throw new Error();
+        const created = await createNewsletter();
+        setIsSaving(false);
+        if (created) {
             setFeedback({ type: 'success', message: 'Fréttabréf vistað!' });
             setTimeout(() => router.push('/admin/newsletters'), 1000);
-        } catch {
-            setFeedback({ type: 'error', message: 'Villa við vistun' });
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -45,26 +49,27 @@ export default function NewNewsletterPage() {
             setFeedback({ type: 'error', message: 'Titill og innihald vantar' });
             return;
         }
-        if (!confirm('Ertu viss um að þú viljir senda þetta fréttabréf til allra áskrifenda?')) return;
+        if (!confirm('Vista og senda til allra staðfestra áskrifenda? Þetta er ekki hægt að taka til baka.')) return;
 
         setIsSending(true);
         setFeedback(null);
 
+        // Two-step: create the row, then call the dedicated send endpoint —
+        // verified-only + unsubscribe tokens enforced there.
+        const created = await createNewsletter();
+        if (!created) { setIsSending(false); return; }
+
         try {
-            const res = await fetch('/api/admin/newsletters', {
+            const res = await fetch(`/api/admin/newsletters/${created.id}/send`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, subject, content, send: true }),
             });
-
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-
-            const sentCount = data.sent || 0;
-            setFeedback({ type: 'success', message: `Sent til ${sentCount} áskrifenda!` });
-            setTimeout(() => router.push('/admin/newsletters'), 2000);
-        } catch (err: any) {
-            setFeedback({ type: 'error', message: err.message || 'Villa við sendingu' });
+            if (!res.ok) throw new Error(data.error || 'Villa við sendingu');
+            setFeedback({ type: 'success', message: `Sent: ${data.sent} af ${data.total}. Mistókst: ${data.failed}.` });
+            setTimeout(() => router.push('/admin/newsletters'), 2500);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Villa við sendingu';
+            setFeedback({ type: 'error', message });
         } finally {
             setIsSending(false);
         }

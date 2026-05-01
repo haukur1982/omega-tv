@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { getAllNewsletters, createNewsletter, deleteNewsletter } from '@/lib/newsletter-db';
-import { getSubscribers } from '@/lib/subscriber-db';
-import { sendNewsletter } from '@/lib/email';
 
 export async function GET(request: Request) {
     const auth = await verifyAdminSession(request);
@@ -21,13 +19,16 @@ export async function POST(req: NextRequest) {
     if (auth.error) return auth.error;
 
     try {
-        const { title, subject, content, send } = await req.json();
+        // Note: this endpoint only CREATES the newsletter row. Sending is a
+        // separate step at /api/admin/newsletters/[id]/send so the
+        // verified-only + unsubscribe-token policy is consistently enforced.
+        // The legacy `send` flag was removed when double-opt-in shipped.
+        const { title, content } = await req.json();
 
         if (!title || !content) {
             return NextResponse.json({ error: "Titill og innihald vantar" }, { status: 400 });
         }
 
-        // Save newsletter to database
         const newsletter = await createNewsletter({
             title,
             author: 'Omega',
@@ -36,19 +37,6 @@ export async function POST(req: NextRequest) {
 
         if (!newsletter) {
             return NextResponse.json({ error: "Gat ekki vistað fréttabréf" }, { status: 500 });
-        }
-
-        // If send flag is true, send to all subscribers
-        if (send) {
-            const subscribers = await getSubscribers();
-            const emails = subscribers.map((s: { email: string }) => s.email);
-
-            if (emails.length === 0) {
-                return NextResponse.json({ ...newsletter, sent: 0, message: "Vistað en engir áskrifendur til að senda á" });
-            }
-
-            const result = await sendNewsletter(subject || title, content, emails);
-            return NextResponse.json({ ...newsletter, ...result });
         }
 
         return NextResponse.json(newsletter);
