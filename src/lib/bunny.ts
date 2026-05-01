@@ -82,7 +82,9 @@ export function parseVideoMetadata(video: BunnyVideo) {
     return {
         title,
         show,
-        dateDisplay: dateStr.includes('T') ? new Date(dateStr).toLocaleDateString('is-IS') : dateStr,
+        dateDisplay: !dateStr
+            ? ''
+            : dateStr.includes('T') ? new Date(dateStr).toLocaleDateString('is-IS') : dateStr,
         category,
         thumbnail
     };
@@ -188,6 +190,51 @@ export async function getBunnyVideoDetail(videoId: string): Promise<BunnyVideoDe
         };
     } catch (error) {
         console.error('Bunny video detail fetch failed:', error);
+        return null;
+    }
+}
+
+/**
+ * Lightweight status check for a single Bunny video. Used by the admin
+ * draft editor to render an encoding chip ("Tilbúið í Bunny" / "Verið
+ * að umbreyta…" / "Villa í kóðun"). Bunny's encoding status is a single
+ * integer:
+ *
+ *   0 — Created (no upload yet)
+ *   1 — Uploaded
+ *   2 — Processing
+ *   3 — Transcoding
+ *   4 — Finished (ready to play)
+ *   5 — Error
+ *
+ * No revalidate cache — callers want fresh state.
+ */
+export type BunnyEncodingStatus = 'queued' | 'encoding' | 'ready' | 'error' | 'unknown';
+
+export async function getBunnyVideoStatus(
+    videoId: string,
+): Promise<{ status: BunnyEncodingStatus; raw: number | null; hasThumbnail: boolean } | null> {
+    if (!API_KEY || !LIBRARY_ID) return null;
+    if (!videoId) return null;
+
+    try {
+        const res = await fetch(`${BASE_URL}/${videoId}`, {
+            headers: { AccessKey: API_KEY, Accept: 'application/json' },
+            cache: 'no-store',
+        });
+        if (!res.ok) return null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data: any = await res.json();
+        const raw: number | null = typeof data.status === 'number' ? data.status : null;
+        let status: BunnyEncodingStatus = 'unknown';
+        if (raw === 4) status = 'ready';
+        else if (raw === 5) status = 'error';
+        else if (raw === 0 || raw === 1) status = 'queued';
+        else if (raw === 2 || raw === 3) status = 'encoding';
+        const hasThumbnail = Boolean(data.thumbnailFileName);
+        return { status, raw, hasThumbnail };
+    } catch (error) {
+        console.error('Bunny video status fetch failed:', error);
         return null;
     }
 }

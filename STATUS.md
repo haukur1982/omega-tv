@@ -1,9 +1,139 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-25 (Claude Opus 4.7 — full-day session, 4 surfaces touched)
+**Last Updated:** 2026-04-26 (Claude Opus 4.7 — design-system audit + polish ripple)
 **Last Agent:** Claude Opus 4.7
 **Branch:** `experiment/vellum-prayer-cards`
-**Build Status:** local HMR working; `pnpm build` not run this session — should be verified before merge.
+**Build Status:** `pnpm build` green — 56 pages, no errors.
+
+---
+
+## Session — 2026-04-26 (design system + cohesion polish)
+
+Hawk asked for a "designer's-eye" pass to make the site cohesive. Site has good bones now; this session locked the system and rippled polish across the redesigned pages.
+
+### Shipped
+
+**Design system documented** at [`docs/design-system.md`](docs/design-system.md):
+- Type ladder (Editorial vs Display H1, three H2 tiers, kicker/deck/drop-cap/meta specs)
+- Color hierarchy rules ("amber appears once per page", gull on cream, nordurljos on dark mastheads)
+- Card grammar (4:5 poster, 16:9 rail, 16:10 featured, list row, door tile)
+- Ornament vocabulary (3 patterns: §4.1 section opener, §4.2 centered, §4.3 byline rule)
+- Transition + motion language (hard cuts, hover -3px, scale 1.04, 320ms cubic-bezier)
+- Hub commitments (persistent live signal, cross-media wayfinding, equal citizenship for video/article/course)
+- Drift log with file paths
+
+**Polish ripples applied:**
+- H2 size lock: UrDagskranni 48→40px, NewestRail 38→40px, /greinar Brennidepill 48→44px (Featured H2 tier)
+- /greinar Brennidepill image aspect 4:3 → 16:10 (matches FeaturedSunday)
+- SeriesShelf hover normalized -2→-3px, scale 1.03→1.04 (matches all poster cards)
+- Amber-once rule on /heim — StyrkjaBand button ghosted, FeaturedSunday added `ctaAccent` prop (ghost on /heim, primary on /sermons)
+- Section ornament (gold rule + dot) added to SeriesShelf, Ritstjórarval, Safnið headers
+- PullQuote ornament swapped to §4.2 centered design
+- OnAirRibbon fallback ribbon — live signal never disappears (shows "Sendingar daglega" when no slot data)
+
+**/namskeid full redesign:**
+- Dark masthead → cream body cathedral rhythm
+- New `CoursePosterCard` component (4:5 poster, matches /sermons SeriesCard aesthetic)
+- Old `CourseCard.tsx` (Apple-TV-Netflix-era with Ken Burns + framer-motion) left in tree but unmounted
+
+### What's still on the drift log (next session)
+
+1. ~~`/give`~~ ✅ Full cathedral redesign across all 5 sub-components — dark masthead → pergament Sowing → cream DonationClient (with allocation sidebar) → cream OtherWays → dark ScriptureFooter. Every visual token swept (torfa → skra-warm, ljos → skra-djup, moskva → skra-mjuk, border → cream hairlines). State logic (cadence toggle, tier cards, custom amount, form, payment method, anonymous, submit handler) untouched. Real form-backend integration (Valitor/SaltPay/Stripe) remains a separate task.
+2. ~~`/vitnisburdur`~~ ✅ Full cathedral redesign + TestimonialForm token cleanup
+3. ~~`/about`~~ ✅ Five-section cathedral sandwich (dark hero → cream pull-quote → cream timeline → pergament values → dark gallery)
+4. ~~`/sermons/[id]`~~ ✅ Targeted token sync (h1 weight 700→400, gold byline rule). Stays dark — watching surfaces work in dark per video-platform convention.
+5. ✅ `/namskeid/[slug]` — full individual-course detail redesign with cinematic hero + cream curriculum body + pergament support card. Lesson-state UX preserved (completed/current/locked/free-preview).
+6. Section kicker drift sweep (mostly false-positive from initial grep — most 0.18em / 11.5px usages are spec-compliant meta lines / card tags; only deliberate kickers need 0.22em / 11px). Punching this is a 30-min targeted job, not a full session.
+
+**Cathedral redesign is now complete across the public-facing site.** Every reading and watching surface is in cohesion. Remaining work is content (Hawk-authored articles, real Sunday sermons, course content) and the deferred backend pieces (donation processor, episode → series tagging).
+
+### Build state
+- `pnpm build` green
+- ~50+ uncommitted files since the morning commit (4 sessions of work this calendar week)
+- Branch name `experiment/vellum-prayer-cards` is now misleading — the work is the full cathedral redesign
+
+### Key memory established this session
+[`feedback_verify_visual_changes_in_browser.md`](../.claude/projects/-Users-haukur-Projects-omega-tv/memory/) — after any visual change, navigate Chrome MCP and read computed styles BEFORE describing the result. Don't trust theoretical contrast math.
+
+---
+
+## Earlier session — 2026-04-25 (long evening continuation)
+
+[Previous evening continuation entry follows below]
+
+---
+
+## Evening continuation — 2026-04-25 (after the first commit)
+
+Picked up after the 39-file morning commit. Touched four more surfaces: /sermons full redesign with mock data, /greinar dark→cream port, /israel section refinements, and /heim full redesign as the "punchline."
+
+### Shipped (all uncommitted on `experiment/vellum-prayer-cards` — needs commit)
+
+**/sermons (Þáttasafn) — full redesign**
+- 8-section editorial flow: masthead → Sunday featured → newest rail (Apple-TV-up-next style) → 6 series shelves by category (Útsendingar Omega, Söfnuðir á Íslandi, Frá útlöndum, Heimildarmyndir, Lofgjörð, Barnaefni)
+- New per-series page route at `/sermons/show/[slug]` with full episode catalog
+- Migration on disk: `20260425_series_category.sql` (Hawk applied via dashboard)
+- Mock fallback data at `src/lib/mock-series.ts` so empty categories preview correctly
+- Poster-style 4:5 cards with hover lift + play-button reveal
+- New components: `SermonsMasthead`, `FeaturedSunday`, `NewestRail`, `SeriesShelf`
+
+**/greinar — dark→cream port**
+- Was the only reading-content surface still all-dark. Now matches the cathedral rhythm
+- Dark masthead with magazine-issue stamp ("Hefti 17 · Apríl 2026")
+- Cream Brennidepill (cinematic featured), pergament Ritstjórarval, cream Safnið
+- `ArticleListRow` and `LetterPlaceholder` made register-aware (used by /israel/greinar too)
+
+**Pergament-section bug fix (palette-level)**
+- All section-level pergament backgrounds were using `rgba(212,194,162,0.18)` transparent overlay. On pages with `<main>` bg `--mold` (dark), this rendered as DARK warm-brown, not cream.
+- New solid token `--skra-warm: #EBE2D0` in globals.css. Replaced section-level usages across:
+  /greinar, /israel Hátíðir rail, /sermons SeriesShelf register='pergament'
+- Empty-state cards inside cream sections kept their rgba (intentional subtle hint)
+
+**/israel — refinements (continuation of morning's work)**
+- Added doors grid (4 chapter-numbered tiles) between broadcast band and Foundation
+- Hátíðir rail with Hebrew script + niqqud (Shavuot/Rosh Hashanah/Yom Kippur/Sukkot/Hanukkah)
+- Documentaries surface (`/israel/heimildarmyndir`) with poster-style 4:5 cards
+- Embedded "Næsta sending" ribbon in masthead — solved the dark→dark clash
+- Foundation + Prophecy got drop caps + ornamental openers
+- Prayer call got centered ornamental opener
+- All Bible references verified against 2007 Biblían at biblian.is
+
+**/heim (homepage) — full redesign — "the punchline"**
+- 10-section composition with dark→cream→dark sandwich
+- Order: Hero → OnAirRibbon → PrayerTicker → **FeaturedSunday (NEW)** → UrDagskranni → BaenDagsins → PullQuote → IsraelTeaser → StyrkjaBand → Legacy34Years
+- New: `IsraelTeaser` component (quiet dark band acknowledging /israel section)
+- New: FeaturedSunday on homepage (latest Sunnudagssamkoma as cinematic moment, reuses /sermons component)
+- PrayerTicker, BaenDagsins, UrDagskranni, PullQuote made register-aware
+- UrDagskranni now uses 4:5 poster cards matching /sermons aesthetic
+- BaenDagsins refactored to manuscript-page composition (centered single column, smaller drop cap, ornamental opener tight to kicker)
+- Legacy34Years token cleanup (was using deprecated `--accent`/`--text-primary`)
+- Ornamental openers added to UrDagskranni section header
+
+### Discipline established this session
+
+**Verify visual changes in Chrome MCP before declaring done.** Saved as feedback memory at `~/.claude/projects/.../memory/feedback_verify_visual_changes_in_browser.md`. After every visual/CSS change, navigate Chrome and read computed styles — don't trust theoretical contrast math. Lesson learned the hard way when I told Hawk a fix had landed without verifying, and the fix had landed in his browser but my confident language was based on math, not observation.
+
+### What needs to happen next
+
+1. **Commit this batch** — `experiment/vellum-prayer-cards` branch has 30+ uncommitted files from the evening continuation. Hawk hasn't asked yet.
+2. **Branch rename** — branch name still says "vellum-prayer-cards" but it's the cathedral-redesign branch now
+3. **Real Sunnudagssamkoma series + episodes seeded** — FeaturedSunday on /heim and /sermons currently shows mock; needs `getLatestEpisodeBySeriesSlug('sunnudagssamkoma')` to return real data
+4. **Tag existing series with categories** in the `series.category` column so /sermons shelves populate from real data instead of mock fallback
+5. **Articles content** — Hawk writes Israel articles + tags `category='israel'` to populate `/israel/greinar`
+6. **Sanctuary code cleanup** — `src/components/sanctuary/*` is dead, `is_broadcast_prayer` flag could be replaced by `broadcast_slot_id IS NOT NULL`
+7. **Quick-prayer auto-approve fix** — `submitQuickPrayerAction` bypasses moderation for "national" prayers
+8. **Deploy** — none of today's evening work is live yet
+
+### Migrations applied this session
+- ✅ `20260425_articles_category.sql` — adds `articles.category` column
+- ✅ `20260425_series_category.sql` — adds `series.category` column
+- ✅ `20260425_live_prayer_pulse.sql` — applied earlier in the day
+
+---
+
+## Morning session — 2026-04-25
+
+[unchanged from previous STATUS update — Bænatorg + Live + Israel section overhaul commit ceee838]
 
 ---
 

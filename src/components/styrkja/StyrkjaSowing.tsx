@@ -1,9 +1,10 @@
 /**
- * Sowing — theological frame between hero and the donation card.
+ * Sowing — three theological reflections, pergament register.
  *
- * Not a pitch. A breath before the ask. Three short reflections with
- * small amber leades, each line a hairline amber left border. Reads
- * like an editorial aside, not a marketing section.
+ * A breath between the dark masthead and the cream donation card.
+ * Warm-cream `--skra-warm` ground with quiet gold left-borders on
+ * each reflection — reads as an editorial aside, not a marketing
+ * section.
  */
 
 const LINES = [
@@ -16,15 +17,17 @@ export default function StyrkjaSowing() {
     return (
         <section
             style={{
-                background: 'var(--torfa)',
-                borderBottom: '1px solid var(--border)',
+                background: 'var(--skra-warm)',
+                color: 'var(--skra-djup)',
+                borderTop: '1px solid rgba(63,47,35,0.12)',
+                borderBottom: '1px solid rgba(63,47,35,0.12)',
             }}
         >
             <div
                 style={{
                     maxWidth: '80rem',
                     margin: '0 auto',
-                    padding: 'clamp(48px, 6vw, 64px) var(--rail-padding)',
+                    padding: 'clamp(56px, 7vw, 80px) var(--rail-padding)',
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
                     gap: 'clamp(32px, 4vw, 48px)',
@@ -40,8 +43,8 @@ export default function StyrkjaSowing() {
                                 top: '4px',
                                 width: '1px',
                                 height: 'calc(100% - 8px)',
-                                background: 'var(--kerti)',
-                                opacity: 0.45,
+                                background: 'var(--gull)',
+                                opacity: 0.55,
                             }}
                         />
                         <div
@@ -51,9 +54,8 @@ export default function StyrkjaSowing() {
                                 fontWeight: 700,
                                 letterSpacing: '0.22em',
                                 textTransform: 'uppercase',
-                                color: 'var(--kerti)',
+                                color: 'var(--gull)',
                                 marginBottom: '14px',
-                                opacity: 0.9,
                             }}
                         >
                             {l.lede}
@@ -65,7 +67,7 @@ export default function StyrkjaSowing() {
                                 fontStyle: 'italic',
                                 fontSize: '19px',
                                 lineHeight: 1.5,
-                                color: 'var(--ljos)',
+                                color: 'var(--skra-djup)',
                                 letterSpacing: '-0.003em',
                                 textWrap: 'pretty',
                             }}

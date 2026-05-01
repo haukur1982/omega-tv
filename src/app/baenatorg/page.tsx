@@ -105,7 +105,7 @@ export default async function BaenatorgPage() {
                                 maxWidth: '34rem',
                             }}
                         >
-                            Deildu því sem þungt liggur, berðu aðra fyrir Drottni, og ritaðu bænasvörin þegar þau koma.
+                            Hér leggjum við bænirnar fram saman — það sem hvílir á hjarta, þá sem þurfa fyrirbæn, og þakkirnar þegar svörin koma.
                         </p>
 
                         <div
@@ -127,7 +127,7 @@ export default async function BaenatorgPage() {
                                 fontFamily: 'var(--font-sans)',
                                 fontSize: '11.5px',
                                 color: 'var(--steinn)',
-                                letterSpacing: '0.14em',
+                                letterSpacing: '0.18em',
                                 textTransform: 'uppercase',
                                 fontWeight: 600,
                             }}

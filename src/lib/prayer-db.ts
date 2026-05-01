@@ -218,3 +218,21 @@ export async function incrementCampaignPrayCount(id: string): Promise<number | n
     if (error) return null;
     return newCount;
 }
+
+export async function setCampaignActive(id: string, active: boolean): Promise<boolean> {
+    const { error } = await supabaseAdmin
+        .from('prayer_campaigns')
+        .update({ is_active: active })
+        .eq('id', id);
+    if (error) { console.error('Failed to toggle campaign:', error); return false; }
+    return true;
+}
+
+export async function deleteCampaign(id: string): Promise<boolean> {
+    const { error } = await supabaseAdmin
+        .from('prayer_campaigns')
+        .delete()
+        .eq('id', id);
+    if (error) { console.error('Failed to delete campaign:', error); return false; }
+    return true;
+}

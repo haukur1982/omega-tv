@@ -25,7 +25,7 @@ export default function IsraelHolidaysRail({ holidays }: Props) {
     return (
         <section
             style={{
-                background: 'rgba(212,194,162,0.18)', // pergament tint over cream
+                background: 'var(--skra-warm)',
                 color: 'var(--skra-djup)',
                 borderTop: '1px solid rgba(63,47,35,0.12)',
                 borderBottom: '1px solid rgba(63,47,35,0.12)',

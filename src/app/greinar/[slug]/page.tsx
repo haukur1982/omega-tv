@@ -185,7 +185,7 @@ export default async function ArticleDetailPage({ params }: PageProps) {
                                 fontFamily: 'var(--font-sans)',
                                 fontSize: '11.5px',
                                 color: 'var(--steinn)',
-                                letterSpacing: '0.14em',
+                                letterSpacing: '0.18em',
                                 textTransform: 'uppercase',
                                 fontWeight: 600,
                             }}

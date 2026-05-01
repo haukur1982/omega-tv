@@ -19,7 +19,12 @@ export default async function OnAirRibbon() {
     const { current, next } = await getCurrentAndNext();
     const onAir = !!current;
     const slot = current ?? next;
-    if (!slot) return null;
+
+    // Fallback ribbon — when no slot data exists, the live signal
+    // shouldn't disappear (it's the heartbeat of a TV network homepage).
+    // A quiet brand line + link keeps the live presence visible without
+    // making up specific schedule times.
+    if (!slot) return <FallbackRibbon />;
 
     const startTime = formatClockUtc(slot.starts_at);
     const endTime = formatClockUtc(slot.ends_at);
@@ -147,7 +152,7 @@ export default async function OnAirRibbon() {
                         fontFamily: 'var(--font-sans)',
                         fontSize: '12px',
                         fontWeight: 700,
-                        letterSpacing: '0.14em',
+                        letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         borderRadius: 'var(--radius-xs)',
                         textDecoration: 'none',
@@ -155,6 +160,123 @@ export default async function OnAirRibbon() {
                     }}
                 >
                     {onAir ? 'Opna Beint' : 'Sjá dagskrá'}
+                </Link>
+            </div>
+        </section>
+    );
+}
+
+/**
+ * FallbackRibbon — quiet always-on live signal when the schedule
+ * has no current/next slot data. Doesn't fabricate specific times;
+ * just keeps the brand commitment visible ("we broadcast daily")
+ * with a path through to the schedule.
+ */
+function FallbackRibbon() {
+    return (
+        <section
+            style={{
+                background: 'var(--nott)',
+                borderBottom: '1px solid var(--border)',
+            }}
+        >
+            <div
+                style={{
+                    maxWidth: '80rem',
+                    margin: '0 auto',
+                    padding: '20px var(--rail-padding)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '28px',
+                    flexWrap: 'wrap',
+                }}
+            >
+                <div
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        whiteSpace: 'nowrap',
+                    }}
+                >
+                    <span
+                        aria-hidden
+                        style={{
+                            width: '6px',
+                            height: '6px',
+                            borderRadius: '50%',
+                            background: 'var(--nordurljos)',
+                            display: 'inline-block',
+                        }}
+                    />
+                    <span
+                        style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '11px',
+                            fontWeight: 800,
+                            letterSpacing: '0.22em',
+                            textTransform: 'uppercase',
+                            color: 'var(--moskva)',
+                        }}
+                    >
+                        Á dagskrá
+                    </span>
+                </div>
+
+                <div
+                    style={{
+                        flex: 1,
+                        minWidth: '240px',
+                        borderLeft: '1px solid var(--border)',
+                        paddingLeft: '28px',
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        gap: '16px',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <span
+                        style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '19px',
+                            color: 'var(--ljos)',
+                            letterSpacing: '-0.008em',
+                        }}
+                    >
+                        Sendingar daglega
+                    </span>
+                    <span
+                        style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontStyle: 'italic',
+                            fontSize: '15px',
+                            color: 'var(--moskva)',
+                            letterSpacing: 0,
+                        }}
+                    >
+                        — án auglýsinga, allan sólarhringinn
+                    </span>
+                </div>
+
+                <Link
+                    href="/live"
+                    className="ghost-btn"
+                    style={{
+                        padding: '12px 20px',
+                        background: 'transparent',
+                        border: '1px solid',
+                        color: 'var(--ljos)',
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        letterSpacing: '0.18em',
+                        textTransform: 'uppercase',
+                        borderRadius: 'var(--radius-xs)',
+                        textDecoration: 'none',
+                        whiteSpace: 'nowrap',
+                    }}
+                >
+                    Sjá dagskrá
                 </Link>
             </div>
         </section>

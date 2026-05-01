@@ -26,6 +26,7 @@ export default function NewSeriesPage() {
     const [slug, setSlug] = useState('');
     const [host, setHost] = useState('');
     const [description, setDescription] = useState('');
+    const [category, setCategory] = useState<string>('');
     const [posterFile, setPosterFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -67,14 +68,16 @@ export default function NewSeriesPage() {
                 posterUrl = publicUrl;
             }
 
-            // 2. Create Database Record
+            // 2. Create Database Record. category is what routes the series
+            // to a shelf on /sermons — leave empty to land in "Annað efni".
             await createSeries({
                 title,
                 slug,
                 description,
                 host,
                 poster_vertical: posterUrl,
-                status: 'active'
+                status: 'active',
+                category: category || null,
             });
 
             // 3. Create initial Season (2026 or Season 1)
@@ -174,6 +177,29 @@ export default function NewSeriesPage() {
                                     className="admin-input"
                                     placeholder="Stutt lýsing á þáttunum..."
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">
+                                    Flokkur (Hilla á /sermons)
+                                </label>
+                                <select
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="admin-input"
+                                >
+                                    <option value="">— án flokks (birtist undir „Annað efni“) —</option>
+                                    <option value="omega-produced">Útsendingar Omega</option>
+                                    <option value="iceland-partners">Söfnuðir á Íslandi</option>
+                                    <option value="international">Frá útlöndum</option>
+                                    <option value="documentaries">Heimildarmyndir</option>
+                                    <option value="music">Lofgjörð & tónleikar</option>
+                                    <option value="kids">Barnaefni</option>
+                                    <option value="israel">Ísrael</option>
+                                </select>
+                                <p className="text-xs text-[var(--admin-text-muted)] mt-1">
+                                    Flokkurinn ræður á hvaða hillu þættir í þessari þáttaröð birtast á /sermons. Hægt að breyta síðar.
+                                </p>
                             </div>
                         </div>
                     </div>

@@ -113,7 +113,7 @@ export default function IsraelPrayerCall() {
                         fontFamily: 'var(--font-sans)',
                         fontSize: '13px',
                         fontWeight: 700,
-                        letterSpacing: '0.14em',
+                        letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         textDecoration: 'none',
                     }}

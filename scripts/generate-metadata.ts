@@ -210,9 +210,13 @@ export async function upsertDraftEpisode(
     const sb = createClient(url, key) as any;
 
     // Is there already a row for this bunny video? Upsert by bunny_video_id.
+    // Preservation rule: re-running metadata generation must NEVER wipe
+    // editorial decisions made between runs (series_id, season_id, the
+    // reviewed status, episode_number, custom thumbnail). We only overwrite
+    // the fields the generator actually computed.
     const { data: existing } = await sb
         .from('episodes')
-        .select('id, status')
+        .select('id, status, series_id, season_id, episode_number, thumbnail_custom')
         .eq('bunny_video_id', bunnyVideoId)
         .maybeSingle();
 
@@ -226,22 +230,26 @@ export async function upsertDraftEpisode(
         tags: meta.tags,
         duration: extra.durationSec,
         language_primary: extra.language_primary ?? 'is',
-        status: 'draft',
     };
     // Persist the transcript for downstream generators (articles,
     // devotionals, study guides). Strip VTT timing so we store clean text.
     if (extra.transcript) {
         payload.transcript = stripVttTiming(extra.transcript).trim();
     }
-    // episode_number is NOT NULL — new rows need a default.
-    // Reviewer assigns the real number during editing.
-    if (!existing) payload.episode_number = 1;
 
     if (existing) {
+        // UPDATE path — preserve existing editorial fields. We deliberately
+        // do NOT include status, series_id, season_id, episode_number, or
+        // thumbnail_custom in the payload, so a re-run can't undo a publish
+        // or unlink the episode from its series.
         const { error } = await sb.from('episodes').update(payload).eq('id', existing.id);
         if (error) { console.error('upsert failed:', error); return null; }
         return existing.id as string;
     }
+
+    // INSERT path — first time, set sane defaults. Reviewer adjusts in admin.
+    payload.status = 'draft';
+    payload.episode_number = 1;
 
     const { data: inserted, error } = await sb
         .from('episodes')

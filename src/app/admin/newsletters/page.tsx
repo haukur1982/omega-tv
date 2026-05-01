@@ -1,51 +1,67 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Plus, Mail, Eye, Send, FileText, MoreHorizontal } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { Plus, Mail, Eye, Send, FileText, MoreHorizontal, Loader2 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import Link from 'next/link';
-import { getNewsletters, Newsletter } from '@/lib/newsletter-db';
-
-// Note: In a real app we would use an API route, but for now we reuse the type
-// We need an API route for GET newsletters to be client-side compatible if getNewsletters uses fs
-// Actually, getNewsletters uses Supabase now, so it is async but runs on server. 
-// We should make a client-side API route for this page.
+import { Newsletter } from '@/lib/newsletter-db';
+import { supabase } from '@/lib/supabase';
 
 interface AdminNewsletter extends Newsletter {
-    status: 'draft' | 'published' | 'sent';
+    sent_at?: string | null;
     stats?: {
         opens: number;
         clicks: number;
     };
 }
 
+async function authedFetch(input: string, init: RequestInit = {}) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(init.headers as Record<string, string> | undefined),
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    };
+    return fetch(input, { ...init, headers });
+}
+
 export default function AdminNewslettersPage() {
     const [newsletters, setNewsletters] = useState<AdminNewsletter[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [sendingId, setSendingId] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchNewsletters = async () => {
-            try {
-                const res = await fetch('/api/admin/newsletters');
-                if (res.ok) {
-                    const data = await res.json();
-                    setNewsletters(data.map((n: any) => ({
-                        ...n,
-                        status: 'published', // Default to published for now as DB simplified
-                        stats: { opens: 0, clicks: 0 } // Stats not yet in DB
-                    })));
-                } else {
-                    console.error("Failed to fetch");
-                }
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setIsLoading(false);
+    const fetchNewsletters = useCallback(async () => {
+        try {
+            const res = await authedFetch('/api/admin/newsletters');
+            if (res.ok) {
+                const data = await res.json();
+                setNewsletters(data.map((n: any) => ({
+                    ...n,
+                    stats: { opens: 0, clicks: 0 },
+                })));
             }
-        };
-
-        fetchNewsletters();
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
+
+    useEffect(() => { fetchNewsletters(); }, [fetchNewsletters]);
+
+    const handleSend = useCallback(async (id: string, title: string) => {
+        if (!confirm(`Senda „${title}“ á alla staðfesta áskrifendur? Þetta er ekki hægt að taka til baka.`)) return;
+        setSendingId(id);
+        const res = await authedFetch(`/api/admin/newsletters/${id}/send`, { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            alert(data.error ?? 'Tókst ekki að senda fréttabréf.');
+        } else {
+            alert(`Sent: ${data.sent} af ${data.total}. Mistókst: ${data.failed}.`);
+            fetchNewsletters();
+        }
+        setSendingId(null);
+    }, [fetchNewsletters]);
 
     return (
         <AdminLayout>
@@ -83,12 +99,13 @@ export default function AdminNewslettersPage() {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h3 className="admin-h3 text-lg">{letter.title}</h3>
-                                        <span className={`admin-badge ${letter.status === 'sent' ? 'admin-badge-success' :
-                                            letter.status === 'published' ? 'admin-badge-info' :
-                                                'admin-badge-warning'
-                                            }`}>
-                                            {letter.status === 'sent' ? 'Sent' : letter.status === 'published' ? 'Útgefið' : 'Drög'}
-                                        </span>
+                                        {letter.sent_at ? (
+                                            <span className="admin-badge admin-badge-success">
+                                                Sent {new Date(letter.sent_at).toLocaleDateString('is-IS')}
+                                            </span>
+                                        ) : (
+                                            <span className="admin-badge admin-badge-info">Útgefið á vef</span>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-4 text-[var(--admin-text-muted)] text-sm mb-4">
                                         <span>{letter.author}</span>
@@ -113,6 +130,18 @@ export default function AdminNewslettersPage() {
                                 </div>
 
                                 <div className="flex items-center gap-2">
+                                    {!letter.sent_at && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSend(letter.id, letter.title)}
+                                            disabled={sendingId === letter.id}
+                                            className="admin-btn admin-btn-primary"
+                                            title="Senda á alla staðfesta áskrifendur"
+                                        >
+                                            {sendingId === letter.id ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                                            Senda
+                                        </button>
+                                    )}
                                     <button className="admin-btn admin-btn-secondary opacity-0 group-hover:opacity-100 transition-opacity">
                                         Breyta
                                     </button>

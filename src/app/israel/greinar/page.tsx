@@ -114,7 +114,7 @@ export default async function IsraelGreinarPage() {
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {articles.map((a) => (
                                 <li key={a.id}>
-                                    <ArticleListRow article={a} />
+                                    <ArticleListRow article={a} register="cream" />
                                 </li>
                             ))}
                         </ul>

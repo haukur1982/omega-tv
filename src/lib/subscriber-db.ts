@@ -10,39 +10,56 @@ export interface Subscriber {
 }
 
 /**
- * Add a new subscriber (email signup)
+ * Add a new subscriber (email signup). On success returns the
+ * verification_token — caller passes it to sendVerificationEmail. The
+ * DB default fills the token (gen_random_uuid), we just read it back.
  */
 export async function addSubscriber(
     email: string,
     name?: string,
     segments: string[] = ['newsletter']
-): Promise<{ success: boolean; error?: string }> {
-    // Check if email already exists
-    const { data: existing } = await supabase
+): Promise<{ success: boolean; error?: string; verificationToken?: string }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+
+    // Already a row for this email?
+    const { data: existing } = await sb
         .from('subscribers')
-        .select('id')
+        .select('id, verified_at, verification_token')
         .eq('email', email.toLowerCase())
-        .single();
+        .maybeSingle();
 
     if (existing) {
-        return { success: false, error: 'Þetta netfang er þegar skráð.' };
+        if (existing.verified_at) {
+            return { success: false, error: 'Þetta netfang er þegar staðfest.' };
+        }
+        // Pending — return the existing token so caller can resend the email.
+        return {
+            success: true,
+            verificationToken: existing.verification_token ?? undefined,
+        };
     }
 
-    const { error } = await supabase
+    const { data: inserted, error } = await sb
         .from('subscribers')
         .insert([{
             email: email.toLowerCase(),
             name: name || null,
             segments: segments,
-            is_verified: false
-        }]);
+            is_verified: false,
+        }])
+        .select('verification_token')
+        .single();
 
     if (error) {
         console.error("Failed to add subscriber:", error);
         return { success: false, error: 'Villa kom upp. Reyndu aftur.' };
     }
 
-    return { success: true };
+    return {
+        success: true,
+        verificationToken: inserted?.verification_token ?? undefined,
+    };
 }
 
 /**

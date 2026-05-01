@@ -35,6 +35,12 @@ type Slot = {
     is_featured: boolean;
     episode_id: string | null;
     series_id: string | null;
+}
+
+interface EpisodePickerOption {
+    id: string;
+    label: string;
+    date: string | null;
 };
 
 type ProgramType = 'service' | 'prayer_night' | 'teaching' | 'broadcast' | 'rerun' | 'special' | 'filler';
@@ -481,7 +487,31 @@ function SlotForm({
     const [programType, setProgramType] = useState<ProgramType>((slot?.program_type as ProgramType) ?? 'rerun');
     const [isLive, setIsLive] = useState<boolean>(slot?.is_live_broadcast ?? false);
     const [isFeatured, setIsFeatured] = useState<boolean>(slot?.is_featured ?? false);
+    const [episodeId, setEpisodeId] = useState<string | null>(slot?.episode_id ?? null);
+    const [episodeOptions, setEpisodeOptions] = useState<EpisodePickerOption[]>([]);
     const [saving, setSaving] = useState(false);
+
+    // Pull recent published episodes once when the form mounts so the
+    // optional "Tengt myndband" picker can offer a list without a blank
+    // search step. Caps at 50 so the dropdown stays usable.
+    useEffect(() => {
+        (async () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const sb = supabase as any;
+            const { data } = await sb
+                .from('episodes')
+                .select('id, title, bunny_video_id, published_at, series:series_id ( title )')
+                .eq('status', 'published')
+                .order('published_at', { ascending: false })
+                .limit(50);
+            type Row = { id: string; title: string; bunny_video_id: string | null; published_at: string | null; series: { title: string } | null };
+            setEpisodeOptions(((data ?? []) as Row[]).map((r) => ({
+                id: r.id,
+                label: r.series?.title ? `${r.series.title} — ${r.title}` : r.title,
+                date: r.published_at,
+            })));
+        })();
+    }, []);
 
     const save = useCallback(async () => {
         setSaving(true);
@@ -502,6 +532,7 @@ function SlotForm({
             description: description.trim() || null,
             is_live_broadcast: isLive,
             is_featured: isFeatured,
+            episode_id: episodeId,
         };
 
         const url = mode === 'edit' && slot
@@ -518,7 +549,7 @@ function SlotForm({
         }
         setSaving(false);
         await onSaved();
-    }, [mode, slot, date, startClock, endClock, title, subtitle, programType, host, description, isLive, isFeatured, onSaved, onError]);
+    }, [mode, slot, date, startClock, endClock, title, subtitle, programType, host, description, isLive, isFeatured, episodeId, onSaved, onError]);
 
     return (
         <div
@@ -583,6 +614,26 @@ function SlotForm({
                     <Star size={13} /> Úrvalsþáttur (áhersla)
                 </label>
             </div>
+
+            {/* Row 6: optional VOD episode link.
+                When set, this slot points at the published episode so the
+                live broadcast and the on-demand version are connected.
+                Leave empty for slots that don't have a VOD counterpart yet. */}
+            <FieldCompact label="Tengt myndband (valfrjálst)">
+                <select
+                    value={episodeId ?? ''}
+                    onChange={(e) => setEpisodeId(e.target.value || null)}
+                    style={inputStyle}
+                >
+                    <option value="">— ekkert tengt —</option>
+                    {episodeOptions.map((ep) => (
+                        <option key={ep.id} value={ep.id}>
+                            {ep.label}
+                            {ep.date ? ` (${new Date(ep.date).toLocaleDateString('is-IS')})` : ''}
+                        </option>
+                    ))}
+                </select>
+            </FieldCompact>
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '6px', borderTop: '1px solid var(--admin-border, #333)' }}>

@@ -75,18 +75,24 @@ export default function StyrkjaBand() {
                     </p>
                 </div>
 
+                {/* Ghost button — section gradient already carries the
+                    kerti warmth. Keeping amber on the button would
+                    violate the "amber appears once per page" rule
+                    (Hero already has the amber CTA). The kerti border
+                    + warm-hover keeps the action signal without
+                    duplicating the page's primary amber moment. */}
                 <Link
                     href="/give"
                     className="warm-hover"
                     style={{
                         padding: '20px 32px',
-                        background: 'var(--kerti)',
+                        background: 'transparent',
                         border: '1px solid var(--kerti)',
-                        color: 'var(--nott)',
+                        color: 'var(--ljos)',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '13px',
                         fontWeight: 700,
-                        letterSpacing: '0.14em',
+                        letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         borderRadius: 'var(--radius-xs)',
                         textDecoration: 'none',

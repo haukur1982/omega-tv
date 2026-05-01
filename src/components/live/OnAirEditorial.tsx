@@ -101,7 +101,7 @@ export default function OnAirEditorial({ current, scriptures }: Props) {
                                         fontFamily: 'var(--font-sans)',
                                         fontSize: '12px',
                                         fontWeight: 700,
-                                        letterSpacing: '0.14em',
+                                        letterSpacing: '0.18em',
                                         textTransform: 'uppercase',
                                         color: 'var(--nordurljos)',
                                         minWidth: '10ch',

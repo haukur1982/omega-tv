@@ -6,11 +6,15 @@ import PrayerTicker from "@/components/home/PrayerTicker";
 import BaenDagsins from "@/components/home/BaenDagsins";
 import UrDagskranni from "@/components/home/UrDagskranni";
 import PullQuote from "@/components/home/PullQuote";
+import IsraelTeaser from "@/components/home/IsraelTeaser";
 import StyrkjaBand from "@/components/home/StyrkjaBand";
 import Legacy34Years from "@/components/home/Legacy34Years";
+import FeaturedSunday from "@/components/sermon/FeaturedSunday";
 import { getVideos, parseVideoMetadata } from "@/lib/bunny";
 import { getAllArticles } from "@/lib/articles-db";
 import { getRecentBroadcastPrayers } from "@/lib/sanctuary-db";
+import { getLatestEpisodeBySeriesSlug } from "@/lib/vod-db";
+import { MOCK_SUNDAY_FEATURED } from "@/lib/mock-series";
 
 /**
  * Heim — homepage.
@@ -58,11 +62,16 @@ type LatestArticle = {
 
 export default async function Home() {
     // Parallel data fetch
-    const [latestVideos, latestArticlesRaw, recentPrayers] = await Promise.all([
+    const [latestVideos, latestArticlesRaw, recentPrayers, sundayLatestReal] = await Promise.all([
         getVideos(1, 3).catch(() => []),
         getAllArticles().catch(() => [] as LatestArticle[]),
         getRecentBroadcastPrayers(7).catch(() => []),
+        getLatestEpisodeBySeriesSlug('sunnudagssamkoma').catch(() => null),
     ]);
+
+    // Fall back to mock Sunday featured when no real Sunnudagssamkoma episode
+    // exists yet (day-1 state until series + episodes are seeded).
+    const sundayFeatured = sundayLatestReal ?? MOCK_SUNDAY_FEATURED;
 
     const episodes = latestVideos.length > 0
         ? latestVideos.slice(0, 3).map((v) => {
@@ -97,12 +106,24 @@ export default async function Home() {
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)' }}>
             <Navbar />
+
+            {/* ─── Dark masthead + chrome ──────────────────────────── */}
             <HeroV2 />
             <OnAirRibbon />
-            <PrayerTicker lines={tickerLines} />
-            <BaenDagsins />
-            <UrDagskranni episodes={episodes} />
-            {leadArticle && <PullQuote article={leadArticle} />}
+
+            {/* ─── Cream sanctuary ─────────────────────────────────── */}
+            <PrayerTicker lines={tickerLines} register="cream" />
+            <FeaturedSunday
+                series={sundayFeatured.series}
+                episode={sundayFeatured.episode}
+                ctaAccent="ghost"
+            />
+            <UrDagskranni episodes={episodes} register="cream" />
+            <BaenDagsins register="cream" />
+            {leadArticle && <PullQuote article={leadArticle} register="pergament" />}
+
+            {/* ─── Dark closing anchor ─────────────────────────────── */}
+            <IsraelTeaser />
             <StyrkjaBand />
             <Legacy34Years />
             <Footer />

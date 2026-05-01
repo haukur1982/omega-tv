@@ -86,7 +86,7 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                 </div>
                 <h1
                     className="type-vaka"
-                    style={{ margin: 0, color: 'var(--ljos)', fontSize: 'clamp(2.75rem, 5.5vw, 4.5rem)' }}
+                    style={{ margin: 0, color: 'var(--ljos)' }}
                 >
                     {isOnAir ? 'Í beinni útsendingu.' : 'Næsta sending.'}
                 </h1>

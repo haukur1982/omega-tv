@@ -138,7 +138,7 @@ export default function Navbar() {
                         </span>
                         <span
                             className="type-merki"
-                            style={{ color: 'var(--moskva)', letterSpacing: '0.24em', fontSize: '0.72rem' }}
+                            style={{ color: 'var(--moskva)', letterSpacing: '0.22em', fontSize: '11px' }}
                         >
                             Omega
                         </span>
@@ -282,7 +282,7 @@ export default function Navbar() {
                                 <span style={{ color: 'var(--ljos)', display: 'inline-flex' }}>
                                     <OmegaMark size={32} title="Omega" />
                                 </span>
-                                <span className="type-merki" style={{ color: 'var(--moskva)', letterSpacing: '0.24em', fontSize: '0.72rem' }}>
+                                <span className="type-merki" style={{ color: 'var(--moskva)', letterSpacing: '0.22em', fontSize: '11px' }}>
                                     Omega
                                 </span>
                             </Link>

@@ -190,7 +190,7 @@ function DoorCard({ door }: { door: Door }) {
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11.5px',
                         fontWeight: 700,
-                        letterSpacing: '0.16em',
+                        letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         color: 'var(--skra-djup)',
                     }}

@@ -118,7 +118,7 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
     );
   }
 
-  const meta = video
+  const bunnyMeta = video
     ? parseVideoMetadata(video)
     : {
         title: mock!.title,
@@ -137,6 +137,21 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
     video ? getBunnyVideoDetail(video.guid) : Promise.resolve(null),
   ]);
 
+  // The DB row is the source of truth — it carries the reviewed,
+  // Gemini-or-human title/description, the joined series (which gives us
+  // the show name we want to render), the published_at date, and the
+  // editor-chosen thumbnail. Bunny metadata is the fallback for episodes
+  // that haven't been reviewed yet (just uploaded, no draft row written).
+  const dbDate = episode?.published_at
+    ? new Date(episode.published_at).toLocaleDateString('is-IS', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+  const meta = {
+    ...bunnyMeta,
+    title: episode?.title ?? bunnyMeta.title,
+    show: episode?.series?.title ?? bunnyMeta.show,
+    dateDisplay: dbDate ?? bunnyMeta.dateDisplay,
+    thumbnail: episode?.thumbnail_custom ?? bunnyMeta.thumbnail,
+  };
   const bibleRef = episode?.bible_ref ?? mock?.bibleRef ?? null;
   const editorNote = episode?.editor_note ?? mock?.editorNote ?? null;
   const description = episode?.description ?? mock?.description ?? null;
@@ -298,29 +313,31 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
               {kickerParts.join(' · ')}
             </p>
 
-            {/* Title */}
+            {/* Title — Editorial H1 weight (400), Newsreader, balanced
+                with the player above so it doesn't compete. */}
             <h1
               className="ink-arrive-delay-1"
               style={{
                 fontFamily: 'var(--font-serif)',
-                fontWeight: 700,
+                fontWeight: 400,
                 color: 'var(--ljos)',
                 fontSize: 'clamp(1.9rem, 4vw, 2.9rem)',
                 lineHeight: 1.1,
-                letterSpacing: '-0.028em',
+                letterSpacing: '-0.018em',
                 margin: 0,
                 marginBottom: 'clamp(10px, 1.4vw, 16px)',
+                textWrap: 'balance',
               }}
             >
               {meta.title}
             </h1>
 
-            {/* Speaker / host line — static for now, phase when people table lands */}
+            {/* Speaker / host line */}
             <p
               className="ink-arrive-delay-2"
               style={{
                 margin: 0,
-                marginBottom: 'clamp(26px, 3vw, 34px)',
+                marginBottom: 'clamp(20px, 2.4vw, 28px)',
                 fontFamily: 'var(--font-serif)',
                 fontStyle: 'italic',
                 color: 'var(--moskva)',
@@ -330,6 +347,18 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
             >
               {meta.show}
             </p>
+
+            {/* Gold rule — matches the masthead byline-rule on every other
+                editorial page; gives this page the same cathedral spine. */}
+            <div
+              aria-hidden
+              style={{
+                width: '52px',
+                height: '1px',
+                background: 'var(--gull)',
+                margin: '0 0 clamp(26px, 3vw, 34px)',
+              }}
+            />
 
             {/* Editor's note — shown only when present */}
             {editorNote && (

@@ -92,7 +92,7 @@ export default function SendaBaenButton({ variant }: Props) {
                             fontFamily: 'var(--font-sans)',
                             fontSize: '12px',
                             fontWeight: 700,
-                            letterSpacing: '0.14em',
+                            letterSpacing: '0.18em',
                             textTransform: 'uppercase',
                         }}
                     >

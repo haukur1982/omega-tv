@@ -36,7 +36,13 @@
   --pergament:  #D4C2A2;  /* Pergament — aged paper, almost cream */
 
   /* ── Reading frame (vellum) ─────────────────────────────────── */
-  --skra:       #F3EDE0;  /* Vellum */
+  --skra:       #F3EDE0;  /* Vellum — primary cream body */
+  --skra-warm:  #EBE2D0;  /* Vellum-warm — section tonal variant for breathing
+                             between cream sections. SOLID color so it renders
+                             correctly even when nested in a page whose <main>
+                             background is dark. Don't use rgba pergament tints
+                             at section level — they bleed through to whatever's
+                             behind. */
   --skra-djup:  #1B1814;  /* Vellum-deep (ink) */
   --skra-mjuk:  #4A4339;  /* Vellum-soft (secondary on cream) */
 
@@ -504,6 +510,54 @@ h1, h2, h3, h4, h5, h6 {
   .baenatorg-epigraph {
     display: none !important;
   }
+}
+
+/* ═══ Þáttasafn rail — Apple-TV-up-next-style horizontal scroll ═══ */
+.newest-rail {
+  /* Hide scrollbar but keep scroll behavior */
+  scrollbar-width: none;
+}
+.newest-rail::-webkit-scrollbar {
+  display: none;
+}
+.rail-card-link:hover .rail-card-art,
+.rail-card-link:focus-visible .rail-card-art {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 56px -28px rgba(20, 18, 15, 0.6);
+}
+.rail-card-link:hover .rail-card-img,
+.rail-card-link:focus-visible .rail-card-img {
+  transform: scale(1.04);
+}
+.rail-card-link:hover .rail-card-play,
+.rail-card-link:focus-visible .rail-card-play {
+  opacity: 1;
+}
+
+/* ═══ Series shelf cards — locked at -3px / 1.04 to match all poster cards ═══ */
+.series-card-link:hover .series-card-art,
+.series-card-link:focus-visible .series-card-art {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 56px -28px rgba(20, 18, 15, 0.55);
+}
+.series-card-link:hover .series-card-img,
+.series-card-link:focus-visible .series-card-img {
+  transform: scale(1.04);
+}
+
+/* ═══ Heim "Úr dagskránni" poster cards — same treatment as rail ═══ */
+.ur-dagskra-card-link:hover .ur-dagskra-card-art,
+.ur-dagskra-card-link:focus-visible .ur-dagskra-card-art {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 56px -28px rgba(20, 18, 15, 0.55);
+}
+.ur-dagskra-card-link:hover .ur-dagskra-card-img,
+.ur-dagskra-card-link:focus-visible .ur-dagskra-card-img {
+  transform: scale(1.04);
+}
+.ur-dagskra-card-link:hover .ur-dagskra-card-play,
+.ur-dagskra-card-link:focus-visible .ur-dagskra-card-play {
+  opacity: 1;
 }
 
 /* ═══ Cream Reading Frame (vellum) ═══ */

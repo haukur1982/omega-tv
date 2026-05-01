@@ -19,6 +19,7 @@ import Link from 'next/link';
 
 interface Props {
     lines: string[];
+    register?: 'dark' | 'cream';
 }
 
 const FALLBACK: string[] = [
@@ -31,7 +32,7 @@ const FALLBACK: string[] = [
     'Einhver biður fyrir heilsu móður sinnar.',
 ];
 
-export default function PrayerTicker({ lines }: Props) {
+export default function PrayerTicker({ lines, register = 'dark' }: Props) {
     const items = lines.length > 0 ? lines : FALLBACK;
     const [i, setI] = useState(0);
 
@@ -41,11 +42,28 @@ export default function PrayerTicker({ lines }: Props) {
         return () => clearInterval(id);
     }, [items.length]);
 
+    const isCream = register === 'cream';
+    const tokens = isCream
+        ? {
+            bg: 'var(--skra)',
+            border: 'rgba(63,47,35,0.12)',
+            kickerColor: 'var(--gull)',
+            lineColor: 'var(--skra-djup)',
+            ctaColor: 'var(--skra-djup)',
+        }
+        : {
+            bg: 'var(--torfa)',
+            border: 'var(--border)',
+            kickerColor: 'var(--moskva)',
+            lineColor: 'var(--ljos)',
+            ctaColor: 'var(--nordurljos)',
+        };
+
     return (
         <section
             style={{
-                background: 'var(--torfa)',
-                borderBottom: '1px solid var(--border)',
+                background: tokens.bg,
+                borderBottom: `1px solid ${tokens.border}`,
             }}
         >
             <div
@@ -84,7 +102,7 @@ export default function PrayerTicker({ lines }: Props) {
                             fontWeight: 700,
                             letterSpacing: '0.22em',
                             textTransform: 'uppercase',
-                            color: 'var(--moskva)',
+                            color: tokens.kickerColor,
                         }}
                     >
                         Á Bænatorgi núna
@@ -95,7 +113,7 @@ export default function PrayerTicker({ lines }: Props) {
                         flex: 1,
                         minWidth: 0,
                         overflow: 'hidden',
-                        borderLeft: '1px solid var(--border)',
+                        borderLeft: `1px solid ${tokens.border}`,
                         paddingLeft: '28px',
                     }}
                 >
@@ -106,7 +124,7 @@ export default function PrayerTicker({ lines }: Props) {
                             fontFamily: 'var(--font-serif)',
                             fontStyle: 'italic',
                             fontSize: '17px',
-                            color: 'var(--ljos)',
+                            color: tokens.lineColor,
                             lineHeight: 1.4,
                             letterSpacing: '-0.005em',
                             whiteSpace: 'nowrap',
@@ -120,7 +138,7 @@ export default function PrayerTicker({ lines }: Props) {
                 <Link
                     href="/baenatorg"
                     style={{
-                        color: 'var(--nordurljos)',
+                        color: tokens.ctaColor,
                         textDecoration: 'none',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '12px',

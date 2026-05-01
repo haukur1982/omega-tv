@@ -1,51 +1,68 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { MessageSquare, Check, X, Calendar, User, Mail, RefreshCw } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { getAllTestimonials, approveTestimonial, deleteTestimonial, Testimonial } from '@/lib/testimonials-db';
+import type { Testimonial } from '@/lib/testimonials-db';
+import { supabase } from '@/lib/supabase';
+
+async function authedFetch(input: string, init: RequestInit = {}) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(init.headers as Record<string, string> | undefined),
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    };
+    return fetch(input, { ...init, headers });
+}
 
 export default function AdminTestimonialsPage() {
     const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const data = await getAllTestimonials();
-            setTestimonials(data);
+            const res = await authedFetch('/api/admin/testimonials');
+            if (res.ok) {
+                const data = await res.json();
+                setTestimonials(data as Testimonial[]);
+            }
         } catch (e) {
             console.error(e);
         }
         setIsLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [loadData]);
 
     const handleApprove = async (id: string) => {
-        // Optimistic update
         setTestimonials(prev => prev.map(t =>
             t.id === id ? { ...t, is_approved: true } : t
         ));
-
-        try {
-            await approveTestimonial(id);
-        } catch (e) {
+        const res = await authedFetch('/api/admin/testimonials', {
+            method: 'PATCH',
+            body: JSON.stringify({ id, action: 'approve' }),
+        });
+        if (!res.ok) {
             alert('Villa við að samþykkja.');
-            loadData(); // Revert on error
+            loadData();
         }
     };
 
     const handleDelete = async (id: string) => {
         if (!confirm('Ertu viss um að þú viljir eyða þessum vitnisburði?')) return;
-        try {
-            await deleteTestimonial(id);
-            setTestimonials(prev => prev.filter(t => t.id !== id));
-        } catch (e) {
+        const res = await authedFetch('/api/admin/testimonials', {
+            method: 'DELETE',
+            body: JSON.stringify({ id }),
+        });
+        if (!res.ok) {
             alert('Villa við að eyða.');
+            return;
         }
+        setTestimonials(prev => prev.filter(t => t.id !== id));
     };
 
     return (

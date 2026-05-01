@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { syncScheduleXmlForDate } from '@/lib/schedule-xml-sync';
+import { logEvent } from '@/lib/system-events';
 
 /**
  * GET /api/cron/sync-schedule-xml
@@ -50,12 +51,25 @@ export async function GET(req: NextRequest) {
     const result = await syncScheduleXmlForDate(date);
 
     if (result.ok) {
+        const summary = `Imported ${result.imported} slots for ${result.date} from ${result.filename}.`;
         console.log(
             `[cron sync-xml] ${result.date} — imported ${result.imported} slots from ${result.filename}` +
                 (result.unlabeled.length > 0
                     ? ` · ${result.unlabeled.length} unlabeled: ${result.unlabeled.join(', ')}`
                     : '') +
                 (result.skipped_manual > 0 ? ` · kept ${result.skipped_manual} manual overrides` : ''),
+        );
+        await logEvent(
+            'cron.schedule_xml',
+            result.unlabeled.length > 0 ? 'warn' : 'info',
+            summary,
+            {
+                date: result.date,
+                imported: result.imported,
+                unlabeled: result.unlabeled,
+                skipped_manual: result.skipped_manual,
+            },
+            'vercel-cron',
         );
         return NextResponse.json(result);
     }
@@ -64,6 +78,13 @@ export async function GET(req: NextRequest) {
     // the cron log shows what happened without alerting as a failure.
     if (result.reason === 'not_found') {
         console.log(`[cron sync-xml] ${result.filename} not on FTP yet — will retry tomorrow.`);
+        await logEvent(
+            'cron.schedule_xml',
+            'info',
+            `XML not on FTP yet (${result.filename}). Will retry tomorrow.`,
+            { filename: result.filename },
+            'vercel-cron',
+        );
         return NextResponse.json({
             ok: false,
             filename: result.filename,
@@ -74,6 +95,13 @@ export async function GET(req: NextRequest) {
 
     // True errors propagate as 5xx so Vercel surfaces them in cron logs.
     console.error(`[cron sync-xml] ${result.reason}: ${result.message}`);
+    await logEvent(
+        'cron.schedule_xml',
+        'error',
+        `XML sync failed: ${result.message}`,
+        { reason: result.reason, filename: result.filename, status: result.status },
+        'vercel-cron',
+    );
     return NextResponse.json(
         {
             ok: false,

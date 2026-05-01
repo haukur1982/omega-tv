@@ -158,7 +158,7 @@ export default function LivePrayerPulse({ slotId }: Props) {
                     fontFamily: 'var(--font-sans)',
                     fontSize: '13px',
                     fontWeight: 700,
-                    letterSpacing: '0.14em',
+                    letterSpacing: '0.18em',
                     textTransform: 'uppercase',
                     borderRadius: 'var(--radius-xs)',
                     cursor: tapped ? 'default' : 'pointer',

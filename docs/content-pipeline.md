@@ -70,6 +70,39 @@ Web-based, works from anywhere.
 
 Target review time: 2-3 minutes per draft (30 seconds when metadata was auto-generated and accurate).
 
+## What happens after I publish?
+
+```
+Vista og birta clicked
+  │
+  ├─ PATCH /api/admin/episodes/[id]            (saves all fields)
+  ├─ POST  /api/admin/episodes/[id]/publish    (status=published, published_at=NOW())
+  │
+  └─ next page revalidate (60s) flushes:
+      ├─ /sermons → "Nýlega bætt við" rail picks it up        (status=published)
+      ├─ /sermons → SeriesShelf (matching series.category)    (if category set)
+      ├─ /sermons → "Annað efni" shelf                        (if category=null)
+      ├─ /sermons/<bunny_guid> → episode detail page          (always — uses Bunny GUID)
+      └─ /sermons/show/<series-slug> → series catalog page    (always)
+```
+
+### Route convention
+
+**`/sermons/[id]` accepts a Bunny GUID, NOT a database UUID.** Visiting `/sermons/<draft-uuid>` returns 404 — the route is keyed by the same value stored in `episodes.bunny_video_id`. The admin draft editor renders the canonical link in the header pill and the post-publish banner; copy from there rather than constructing it by hand.
+
+### Why your draft might not appear
+
+Open `/admin/drafts/[id]`. The **"Hvar mun þetta birtast?"** panel checks every public surface and tells you exactly which one fails for this episode and how to fix it. The four rows:
+
+- **Nýlega bætt við (NewestRail)** — ✗ until `status='published'` AND `bunny_video_id` is set. Click *Vista og birta* and it flips ✓.
+- **Hilla (`series.category`)** — ✗ when the series has no category. Pick one in the inline `<select>` (PATCH `/api/admin/series/[id]`). Without a category the episode lands in the "Annað efni" shelf at the bottom of /sermons instead of its proper themed shelf. Publishing isn't gated on this — it's a signal, not a wall.
+- **Sunnudagssamkoma vikunnar** — ✓ only for episodes whose series has `slug='sunnudagssamkoma'` AND this is the latest published. Pinned position on /heim and /sermons.
+- **Bein slóð** — always ✓ once `bunny_video_id` is set. Copyable URL.
+
+### Dark vs cream
+
+The public pages on cream (`/sermons`, `/greinar`, `/baenatorg`) are reading surfaces. The detail page (`/sermons/[id]`) and the donation form (`/give`) stay on dark — same logic Apple TV / YouTube follow. Don't change a draft's `language_primary` to `en` unless the content really is English-primary; it changes which caption track auto-loads on the player.
+
 ## The metadata generator (`scripts/generate-metadata.ts`)
 
 Shared by all three entry points. Two modes:

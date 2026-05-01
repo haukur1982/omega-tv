@@ -26,6 +26,8 @@ export type ThreadEpisode = Episode & {
     transcript_url?: string | null;
     tags?: string[] | null;
     language_primary?: string | null;
+    /** Joined series row when the episode is connected to one. */
+    series?: { id: string; title: string; slug: string; category: string | null } | null;
 };
 
 export type ThreadPrayer = {
@@ -59,7 +61,7 @@ export type ThreadArticle = {
 export async function getEpisodeByBunnyId(bunnyVideoId: string): Promise<ThreadEpisode | null> {
     const { data, error } = await untyped
         .from('episodes')
-        .select('*')
+        .select('*, series:series_id ( id, title, slug, category )')
         .eq('bunny_video_id', bunnyVideoId)
         .maybeSingle();
     if (error || !data) return null;

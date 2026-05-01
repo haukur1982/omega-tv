@@ -23,9 +23,10 @@ interface Article {
 
 interface Props {
     article: Article | null;
+    register?: 'dark' | 'pergament';
 }
 
-export default function PullQuote({ article }: Props) {
+export default function PullQuote({ article, register = 'dark' }: Props) {
     if (!article) return null;
 
     const quote = article.pull_quote ?? firstSentence(article.excerpt ?? article.title);
@@ -34,31 +35,72 @@ export default function PullQuote({ article }: Props) {
     const dateLabel = article.published_at ? formatDateIs(article.published_at) : null;
     const readingLabel = article.reading_minutes ? `${article.reading_minutes} mín. lestur` : null;
 
+    const isPergament = register === 'pergament';
+    const tokens = isPergament
+        ? {
+            bg: 'var(--skra-warm)',
+            borderTop: 'rgba(63,47,35,0.12)',
+            kickerColor: 'var(--gull)',
+            kickerRule: 'var(--gull)',
+            quoteColor: 'var(--skra-djup)',
+            titleColor: 'var(--skra-djup)',
+            metaColor: 'var(--skra-mjuk)',
+            authorColor: 'var(--skra-mjuk)',
+            ctaColor: 'var(--skra-djup)',
+        }
+        : {
+            bg: 'transparent',
+            borderTop: 'var(--border)',
+            kickerColor: 'var(--kerti)',
+            kickerRule: 'var(--kerti)',
+            quoteColor: 'var(--ljos)',
+            titleColor: 'var(--ljos)',
+            metaColor: 'var(--moskva)',
+            authorColor: 'var(--moskva)',
+            ctaColor: 'var(--kerti)',
+        };
+
     return (
         <section
             style={{
+                background: tokens.bg,
                 padding: 'clamp(80px, 12vw, 128px) var(--rail-padding)',
-                borderTop: '1px solid var(--border)',
+                borderTop: `1px solid ${tokens.borderTop}`,
             }}
         >
             <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+                {/* Centered ornament — design system §4.2 */}
+                <div
+                    aria-hidden
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '14px',
+                        marginBottom: '24px',
+                        maxWidth: '20rem',
+                        marginInline: 'auto',
+                    }}
+                >
+                    <span style={{ flex: 1, height: '1px', background: tokens.kickerRule, opacity: 0.4 }} />
+                    <svg width="9" height="9" viewBox="0 0 9 9" aria-hidden>
+                        <circle cx="4.5" cy="4.5" r="2" fill={tokens.kickerRule} opacity="0.7" />
+                    </svg>
+                    <span style={{ flex: 1, height: '1px', background: tokens.kickerRule, opacity: 0.4 }} />
+                </div>
+
                 <div
                     style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '14px',
                         marginBottom: '36px',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11px',
                         fontWeight: 700,
                         letterSpacing: '0.22em',
                         textTransform: 'uppercase',
-                        color: 'var(--kerti)',
+                        color: tokens.kickerColor,
                     }}
                 >
-                    <span style={{ width: '28px', height: '1px', background: 'var(--kerti)', opacity: 0.6 }} />
                     Nýjasta grein
-                    <span style={{ width: '28px', height: '1px', background: 'var(--kerti)', opacity: 0.6 }} />
                 </div>
 
                 <p
@@ -68,7 +110,7 @@ export default function PullQuote({ article }: Props) {
                         fontStyle: 'italic',
                         fontSize: 'clamp(28px, 3.4vw, 44px)',
                         lineHeight: 1.3,
-                        color: 'var(--ljos)',
+                        color: tokens.quoteColor,
                         letterSpacing: '-0.012em',
                         textWrap: 'balance',
                     }}
@@ -81,7 +123,7 @@ export default function PullQuote({ article }: Props) {
                         style={{
                             fontFamily: 'var(--font-serif)',
                             fontSize: '22px',
-                            color: 'var(--ljos)',
+                            color: tokens.titleColor,
                             letterSpacing: '-0.008em',
                             lineHeight: 1.3,
                             textWrap: 'balance',
@@ -101,7 +143,7 @@ export default function PullQuote({ article }: Props) {
                             fontSize: '12px',
                             fontWeight: 600,
                             letterSpacing: '0.08em',
-                            color: 'var(--moskva)',
+                            color: tokens.metaColor,
                             flexWrap: 'wrap',
                             justifyContent: 'center',
                         }}
@@ -111,7 +153,7 @@ export default function PullQuote({ article }: Props) {
                                 fontFamily: 'var(--font-serif)',
                                 fontStyle: 'italic',
                                 fontSize: '14px',
-                                color: 'var(--moskva)',
+                                color: tokens.authorColor,
                                 letterSpacing: 0,
                             }}
                         >
@@ -141,7 +183,7 @@ export default function PullQuote({ article }: Props) {
                             fontWeight: 700,
                             letterSpacing: '0.18em',
                             textTransform: 'uppercase',
-                            color: 'var(--kerti)',
+                            color: tokens.ctaColor,
                         }}
                     >
                         Lesa greinina →

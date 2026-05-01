@@ -113,7 +113,7 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', register
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11px',
                         fontWeight: 700,
-                        letterSpacing: '0.14em',
+                        letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         marginBottom: '18px',
                     }}
@@ -244,7 +244,7 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11px',
                         fontWeight: 700,
-                        letterSpacing: '0.14em',
+                        letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         marginBottom: '18px',
                     }}
@@ -288,7 +288,7 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11.5px',
                         color: 'var(--skra-mjuk)',
-                        letterSpacing: '0.14em',
+                        letterSpacing: '0.18em',
                         textTransform: 'uppercase',
                         fontWeight: 600,
                     }}
@@ -393,6 +393,7 @@ function relativeIs(timestamp: number): string {
     if (days === 1) return 'í gær';
     if (days < 7) return `fyrir ${days} dögum`;
     const weeks = Math.floor(days / 7);
+    if (weeks === 1) return 'fyrir 1 viku';
     if (weeks < 4) return `fyrir ${weeks} vikum`;
     return new Date(timestamp).toLocaleDateString('is-IS', { day: 'numeric', month: 'long' });
 }

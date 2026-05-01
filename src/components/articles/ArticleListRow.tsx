@@ -3,23 +3,48 @@ import { type Article, readingMinutes, formatDateIs } from "./article-helpers";
 import LetterPlaceholder from "./LetterPlaceholder";
 
 /**
- * ArticleListRow — horizontal row for the chronological archive
- * below the editor's picks. Reads like a table of contents: small
- * image square on the left, title + excerpt + meta on the right.
+ * ArticleListRow — horizontal row for the chronological archive.
+ * Reads like a table of contents: small image square on the left,
+ * title + excerpt + meta on the right.
  *
- * Hover: quiet torfa tint extending slightly beyond the row (same
- * halo pattern as PrayerCardV2 on Bænatorg — the "card breathes"
- * rather than getting a hard border).
+ * Two registers:
+ *   - 'dark' (default) — warm-black page, --ljos title, halo torfa hover
+ *   - 'cream' — vellum page, --skra-djup ink title, parchment hover
+ *
+ * The cream register is what makes the row work on the redesigned
+ * /greinar and /israel/greinar reading pages.
  */
 
 interface Props {
     article: Article;
+    register?: 'dark' | 'cream';
 }
 
-export default function ArticleListRow({ article }: Props) {
+export default function ArticleListRow({ article, register = 'dark' }: Props) {
     const minutes = article.content ? readingMinutes(article.content) : null;
     const published = formatDateIs(article.published_at);
     const HALO_X = 20;
+
+    const isDark = register === 'dark';
+    const tokens = isDark
+        ? {
+            titleColor: 'var(--ljos)',
+            excerptColor: 'var(--moskva)',
+            metaColor: 'var(--steinn)',
+            border: 'var(--border)',
+            arrowColor: 'var(--moskva)',
+            imageBg: 'var(--nott)',
+            imageFilter: 'saturate(0.85)',
+        }
+        : {
+            titleColor: 'var(--skra-djup)',
+            excerptColor: 'var(--skra-mjuk)',
+            metaColor: 'var(--skra-mjuk)',
+            border: 'rgba(63,47,35,0.12)',
+            arrowColor: 'var(--skra-mjuk)',
+            imageBg: 'rgba(63,47,35,0.08)',
+            imageFilter: 'saturate(0.95)',
+        };
 
     return (
         <Link
@@ -34,7 +59,7 @@ export default function ArticleListRow({ article }: Props) {
                 padding: `clamp(18px, 2vw, 22px) ${HALO_X}px`,
                 marginLeft: -HALO_X,
                 marginRight: -HALO_X,
-                borderBottom: '1px solid var(--border)',
+                borderBottom: `1px solid ${tokens.border}`,
                 borderRadius: 'var(--radius-sm)',
                 textDecoration: 'none',
                 color: 'inherit',
@@ -48,7 +73,7 @@ export default function ArticleListRow({ article }: Props) {
                     maxWidth: '120px',
                     borderRadius: 'var(--radius-xs)',
                     overflow: 'hidden',
-                    background: 'var(--nott)',
+                    background: tokens.imageBg,
                 }}
             >
                 {article.featured_image ? (
@@ -62,11 +87,11 @@ export default function ArticleListRow({ article }: Props) {
                             width: '100%',
                             height: '100%',
                             objectFit: 'cover',
-                            filter: 'saturate(0.85)',
+                            filter: tokens.imageFilter,
                         }}
                     />
                 ) : (
-                    <LetterPlaceholder title={article.title} size="sm" />
+                    <LetterPlaceholder title={article.title} size="sm" register={register} />
                 )}
             </div>
 
@@ -79,7 +104,7 @@ export default function ArticleListRow({ article }: Props) {
                         lineHeight: 1.25,
                         letterSpacing: '-0.01em',
                         fontWeight: 400,
-                        color: 'var(--ljos)',
+                        color: tokens.titleColor,
                         textWrap: 'balance',
                     }}
                 >
@@ -93,7 +118,7 @@ export default function ArticleListRow({ article }: Props) {
                             fontStyle: 'italic',
                             fontSize: '14.5px',
                             lineHeight: 1.5,
-                            color: 'var(--moskva)',
+                            color: tokens.excerptColor,
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
@@ -112,7 +137,7 @@ export default function ArticleListRow({ article }: Props) {
                         flexWrap: 'wrap',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11px',
-                        color: 'var(--steinn)',
+                        color: tokens.metaColor,
                         letterSpacing: '0.1em',
                         textTransform: 'uppercase',
                     }}
@@ -128,7 +153,7 @@ export default function ArticleListRow({ article }: Props) {
             <div
                 aria-hidden
                 style={{
-                    color: 'var(--moskva)',
+                    color: tokens.arrowColor,
                     fontFamily: 'var(--font-sans)',
                     fontSize: '18px',
                     display: 'none',
