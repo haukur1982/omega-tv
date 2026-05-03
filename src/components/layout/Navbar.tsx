@@ -42,6 +42,7 @@ const CloseIcon = () => (
 const navLinks = [
     { href: '/live', label: 'Beint' },
     { href: '/sermons', label: 'Þáttasafn' },
+    { href: '/frettir', label: 'Fréttir' },
     { href: '/greinar', label: 'Greinar' },
     { href: '/namskeid', label: 'Námskeið' },
     { href: '/baenatorg', label: 'Bænatorg' },

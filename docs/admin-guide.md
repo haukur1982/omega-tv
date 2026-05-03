@@ -17,6 +17,7 @@ the Supabase SQL editor before using the new admin features:
 1. [`20260427_episode_status_check.sql`](../supabase/migrations/20260427_episode_status_check.sql) — locks `episodes.status` to draft/published at the DB level.
 2. [`20260427_newsletter_double_opt_in.sql`](../supabase/migrations/20260427_newsletter_double_opt_in.sql) — adds verification + unsubscribe tokens to `subscribers` and `sent_at` to `newsletters`.
 3. [`20260427_system_events.sql`](../supabase/migrations/20260427_system_events.sql) — observability log used by `/admin/health`.
+4. [`20260503_news_items.sql`](../supabase/migrations/20260503_news_items.sql) — news items table for `/admin/news` and the public `/frettir` feed.
 
 Open the [SQL Editor](https://supabase.com/dashboard/project/dvzwpwlgucsdyrkhrpah/sql/new), paste each file's contents, click **Run**. Each ends with `NOTIFY pgrst, 'reload schema'` which busts the API cache so the new columns are usable immediately.
 
@@ -28,7 +29,7 @@ Everything on the site falls into one of these:
 
 | Shape | Examples | Pattern |
 |---|---|---|
-| **Editorial** (you create → public reads) | Sermons, Articles, Newsletters, Quotes, Featured weeks, Series | Admin creates → DB → public sees on next revalidate |
+| **Editorial** (you create → public reads) | Sermons, Articles, News (Fréttir), Newsletters, Quotes, Featured weeks, Series | Admin creates → DB → public sees on next revalidate |
 | **User-submitted** (public submits → you approve → public reads) | Prayers, Testimonials, Subscribers | Public form → DB (unapproved) → admin approves → public sees |
 | **External feed** (auto-imported → public reads) | Schedule (XML), Bunny videos | Cron / CLI → DB (with manual override) → public |
 | **One-off interaction** | Donations | Public form → callback (no backend yet) |
@@ -174,6 +175,49 @@ Set the category from the admin form when creating/editing. The Israel filter on
 | `/greinar/[slug]` | same + matching slug |
 | `/israel/greinar` | category='israel' AND published_at IS NOT NULL |
 | Featured / Editor's picks | depends on order; first 2 articles in the index become picks |
+
+---
+
+## News / Fréttir
+
+Distinct from articles on purpose. Articles are evergreen teaching that stand the test of time. **News is time-sensitive — what's happening in the global church now**, translated to Icelandic with mandatory source attribution.
+
+### How to add a news item
+
+1. `/admin/news` → **Ný frétt**.
+2. **Heimild first** — paste the source URL and the source name (e.g. "CBN", "Open Doors"). The form refuses to save without both. This is a hard rule, not a soft suggestion.
+3. **Title** in Icelandic. Slug auto-generates.
+4. **Útdráttur** — 2–3 sentence preview shown in the `/frettir` feed cards.
+5. **Innihald** — the 2–3 paragraph Icelandic summary in your voice. Don't translate the full article. Direct readers to the original for the full story.
+6. **Ritstjórnarlína** (optional) — Icelandic context for readers ("Þetta minnir okkur á að biðja fyrir bræðrum okkar í [land]").
+7. **Flokkur** (optional) — persecution / kingdom-growth / missions / israel / general.
+8. **Svæði** (optional) — country/region the news is about.
+9. **Vista drög** or **Vista og birta**.
+
+### The editorial floor (every news entry, no exceptions)
+
+- Source name credited at the top of every entry — admin UI handles this automatically.
+- Direct link back to the original on the publisher's site — same.
+- Translate as a SUMMARY, not the full article. 2–3 paragraphs of the key facts in your voice, plus your editorial framing for Icelandic readers. Then send people to the original.
+- Don't republish photos unless they're licensed openly. Pull from Unsplash or just go text-only.
+
+### Outreach to sources
+
+Before publishing from a new source for the first time, send a one-time outreach email. Drafts for the eight starter sources are in [`docs/news-source-outreach.md`](./news-source-outreach.md). Most will reply with a yes.
+
+### Where news appears
+
+| Surface | Required |
+|---|---|
+| `/frettir` feed | `is_published=true` AND `published_at IS NOT NULL` |
+| `/frettir/[slug]` detail | same |
+| Future: `/frettir/category/[category]` | not built yet — add when content volume justifies |
+
+### Hard nos (always skip)
+
+- **Reuters / AP wire stories** that show up on Christian news sites — those are commercial wire services. Don't republish.
+- **Tweets** — use Twitter as discovery, not citation. Go to the underlying article on the publisher's site.
+- **Paywalled articles** — don't summarize. Direct readers to subscribe to the original.
 
 ---
 
