@@ -1,15 +1,14 @@
 import Link from "next/link";
+import ThumbnailFrame from "@/components/media/ThumbnailFrame";
 
 /**
  * UrDagskranni — "Úr dagskránni" — three recent episode cards.
  *
- * Two registers:
- *   - 'dark' (legacy)  — torfa bg with 16:10 landscape cards
- *   - 'cream' (new)    — vellum bg with poster-style 4:5 cards,
- *                        title overlaid on artwork, hover lift +
- *                        play-button reveal. Matches /sermons VOD
- *                        aesthetic so the homepage's library tease
- *                        feels continuous with the full archive.
+ * Cards use the shared <ThumbnailFrame> (cinematic grading + vignette
+ * + warm glow + typographic fallback). Per the design system, the
+ * title sits BELOW the art as page text (Apple TV+ pattern), not
+ * overlaid on the image. Same treatment in dark and cream registers —
+ * only the text colors below the card change by register.
  */
 
 interface Episode {
@@ -164,6 +163,9 @@ export default function UrDagskranni({ episodes, register = 'dark' }: Props) {
 
 function PosterCard({ episode, register }: { episode: Episode; register: 'dark' | 'cream' }) {
     const isCream = register === 'cream';
+    const kickerColor = isCream ? 'var(--skra-mjuk)' : 'var(--moskva)';
+    const titleColor = isCream ? 'var(--skra-djup)' : 'var(--ljos)';
+    const metaColor = isCream ? 'var(--skra-mjuk)' : 'var(--steinn)';
 
     return (
         <Link
@@ -172,146 +174,40 @@ function PosterCard({ episode, register }: { episode: Episode; register: 'dark' 
             style={{
                 display: 'block',
                 textDecoration: 'none',
-                color: isCream ? 'var(--skra-djup)' : 'var(--ljos)',
+                color: 'inherit',
             }}
         >
             <article style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div
-                    className="ur-dagskra-card-art"
-                    style={{
-                        position: 'relative',
-                        width: '100%',
-                        aspectRatio: '4 / 5',
-                        overflow: 'hidden',
-                        borderRadius: 'var(--radius-sm)',
-                        background: isCream ? 'rgba(63,47,35,0.1)' : 'var(--nott)',
-                        boxShadow: isCream
-                            ? '0 14px 32px -22px rgba(20,18,15,0.4)'
-                            : '0 14px 32px -22px rgba(0,0,0,0.5)',
-                        transition: 'transform 320ms cubic-bezier(0.2,0.7,0.3,1), box-shadow 320ms ease',
-                    }}
-                >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                        className="ur-dagskra-card-img"
-                        src={episode.thumbnail}
-                        alt=""
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            transition: 'transform 600ms cubic-bezier(0.2,0.7,0.3,1)',
-                        }}
-                    />
-                    {/* Bottom gradient for title legibility */}
+                <ThumbnailFrame
+                    src={episode.thumbnail}
+                    series={episode.speaker}
+                    aspect="4/5"
+                />
+                <div>
                     <div
-                        aria-hidden
-                        style={{
-                            position: 'absolute',
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            height: '60%',
-                            background:
-                                'linear-gradient(to bottom, rgba(20,18,15,0) 0%, rgba(20,18,15,0.85) 100%)',
-                        }}
-                    />
-                    {/* Series tag — top left */}
-                    <span
-                        style={{
-                            position: 'absolute',
-                            top: '12px',
-                            left: '12px',
-                            padding: '5px 10px',
-                            background: 'rgba(20,18,15,0.7)',
-                            backdropFilter: 'blur(8px)',
-                            color: 'var(--ljos)',
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '10px',
-                            fontWeight: 700,
-                            letterSpacing: '0.18em',
-                            textTransform: 'uppercase',
-                            borderRadius: '3px',
-                        }}
+                        className="type-merki"
+                        style={{ color: kickerColor, marginBottom: '6px' }}
                     >
                         {episode.speaker}
-                    </span>
-                    {/* Duration tag — top right */}
-                    <span
+                    </div>
+                    <h3
                         style={{
-                            position: 'absolute',
-                            top: '12px',
-                            right: '12px',
-                            padding: '5px 9px',
-                            background: 'rgba(20,18,15,0.7)',
-                            backdropFilter: 'blur(8px)',
-                            color: 'var(--ljos)',
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: '10.5px',
-                            fontWeight: 700,
-                            letterSpacing: '0.04em',
-                            borderRadius: '3px',
+                            margin: 0,
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: 'clamp(17px, 1.4vw, 20px)',
+                            fontWeight: 400,
+                            lineHeight: 1.25,
+                            color: titleColor,
+                            letterSpacing: '-0.005em',
                         }}
+                    >
+                        {episode.title}
+                    </h3>
+                    <div
+                        className="type-meta"
+                        style={{ color: metaColor, marginTop: '4px' }}
                     >
                         {episode.durationMin} mín
-                    </span>
-                    {/* Play button center — reveals on hover */}
-                    <div
-                        className="ur-dagskra-card-play"
-                        aria-hidden
-                        style={{
-                            position: 'absolute',
-                            inset: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            opacity: 0,
-                            transition: 'opacity 280ms ease',
-                        }}
-                    >
-                        <span
-                            style={{
-                                width: '52px',
-                                height: '52px',
-                                borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.92)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxShadow: '0 6px 24px rgba(20,18,15,0.5)',
-                            }}
-                        >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--nott)" aria-hidden style={{ marginLeft: '3px' }}>
-                                <polygon points="6,3 20,12 6,21" />
-                            </svg>
-                        </span>
-                    </div>
-                    {/* Title overlay — bottom */}
-                    <div
-                        style={{
-                            position: 'absolute',
-                            left: '14px',
-                            right: '14px',
-                            bottom: '14px',
-                        }}
-                    >
-                        <h3
-                            style={{
-                                margin: 0,
-                                fontFamily: 'var(--font-serif)',
-                                fontSize: 'clamp(18px, 1.6vw, 22px)',
-                                lineHeight: 1.2,
-                                fontWeight: 400,
-                                color: 'var(--ljos)',
-                                letterSpacing: '-0.005em',
-                                textWrap: 'balance',
-                                textShadow: '0 1px 14px rgba(0,0,0,0.55)',
-                            }}
-                        >
-                            {episode.title}
-                        </h3>
                     </div>
                 </div>
             </article>
