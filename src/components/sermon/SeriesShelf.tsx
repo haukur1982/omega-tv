@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { SeriesWithLatest } from "@/lib/vod-db";
+import ThumbnailFrame from "@/components/media/ThumbnailFrame";
 
 /**
  * SeriesShelf — reusable section for one editorial category on
@@ -164,9 +165,9 @@ export default function SeriesShelf({
 
 function SeriesCard({ series }: { series: SeriesWithLatest }) {
     const ep = series.latest_episode;
-    const thumb = series.poster_horizontal
-        ?? ep?.thumbnail_custom
-        ?? (ep ? `https://vz-dd90f302-e7e.b-cdn.net/${ep.bunny_video_id}/thumbnail.jpg` : null);
+    // Curated poster or episode custom art only — no Bunny auto-frame
+    // (the design system uses the branded typographic fallback instead).
+    const cover = series.poster_horizontal ?? ep?.thumbnail_custom ?? null;
 
     const date = ep?.published_at
         ? new Date(ep.published_at).toLocaleDateString('is-IS', {
@@ -174,6 +175,12 @@ function SeriesCard({ series }: { series: SeriesWithLatest }) {
             month: 'long',
         })
         : null;
+    const count = series.episode_count > 0
+        ? `${series.episode_count} ${series.episode_count === 1 ? 'þáttur' : 'þættir'}`
+        : null;
+    const meta = [count, date ? `Nýjasti þáttur · ${date}` : null]
+        .filter(Boolean)
+        .join('  ·  ');
 
     return (
         <li>
@@ -183,141 +190,53 @@ function SeriesCard({ series }: { series: SeriesWithLatest }) {
                 style={{ display: 'block', color: 'var(--skra-djup)', textDecoration: 'none' }}
             >
                 <article style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    <div
-                        className="series-card-art"
-                        style={{
-                            position: 'relative',
-                            width: '100%',
-                            aspectRatio: '4 / 5',
-                            background: 'rgba(63,47,35,0.1)',
-                            overflow: 'hidden',
-                            borderRadius: 'var(--radius-sm)',
-                            boxShadow: '0 14px 32px -22px rgba(20,18,15,0.4)',
-                            transition: 'transform 320ms cubic-bezier(0.2,0.7,0.3,1), box-shadow 320ms ease',
-                        }}
-                    >
-                        {thumb ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                className="series-card-img"
-                                src={thumb}
-                                alt=""
-                                style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover',
-                                    transition: 'transform 600ms cubic-bezier(0.2,0.7,0.3,1)',
-                                }}
-                            />
-                        ) : (
-                            <div
-                                style={{
-                                    position: 'absolute',
-                                    inset: 0,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontFamily: 'var(--font-serif)',
-                                    fontSize: '32px',
-                                    color: 'rgba(63,47,35,0.3)',
-                                }}
-                            >
-                                Ω
-                            </div>
-                        )}
-                        <div
-                            aria-hidden
-                            style={{
-                                position: 'absolute',
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                height: '55%',
-                                background:
-                                    'linear-gradient(to bottom, rgba(20,18,15,0) 0%, rgba(20,18,15,0.82) 100%)',
-                            }}
-                        />
-                        {series.episode_count > 0 && (
-                            <span
-                                style={{
-                                    position: 'absolute',
-                                    top: '12px',
-                                    right: '12px',
-                                    padding: '5px 9px',
-                                    background: 'rgba(20,18,15,0.7)',
-                                    backdropFilter: 'blur(6px)',
-                                    color: 'var(--ljos)',
-                                    fontFamily: 'var(--font-sans)',
-                                    fontSize: '10.5px',
-                                    fontWeight: 700,
-                                    letterSpacing: '0.04em',
-                                    borderRadius: '3px',
-                                }}
-                            >
-                                {series.episode_count} {series.episode_count === 1 ? 'þáttur' : 'þættir'}
-                            </span>
-                        )}
-                        <div
-                            style={{
-                                position: 'absolute',
-                                left: '16px',
-                                right: '16px',
-                                bottom: '14px',
-                            }}
-                        >
-                            <h3
-                                style={{
-                                    margin: 0,
-                                    fontFamily: 'var(--font-serif)',
-                                    fontSize: 'clamp(18px, 1.6vw, 22px)',
-                                    lineHeight: 1.18,
-                                    fontWeight: 400,
-                                    color: 'var(--ljos)',
-                                    letterSpacing: '-0.005em',
-                                    textWrap: 'balance',
-                                    textShadow: '0 1px 12px rgba(0,0,0,0.5)',
-                                }}
-                            >
-                                {series.title}
-                            </h3>
-                            {date && ep && (
-                                <div
-                                    style={{
-                                        marginTop: '6px',
-                                        fontFamily: 'var(--font-sans)',
-                                        fontSize: '10.5px',
-                                        fontWeight: 600,
-                                        letterSpacing: '0.16em',
-                                        textTransform: 'uppercase',
-                                        color: 'var(--moskva)',
-                                    }}
-                                >
-                                    Nýjasti þáttur · {date}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    {series.description && (
-                        <p
+                    <ThumbnailFrame
+                        src={cover}
+                        series={series.title}
+                        aspect="4/5"
+                    />
+                    <div>
+                        <h3
                             style={{
                                 margin: 0,
                                 fontFamily: 'var(--font-serif)',
-                                fontStyle: 'italic',
-                                fontSize: '14px',
-                                lineHeight: 1.5,
-                                color: 'var(--skra-mjuk)',
-                                textWrap: 'pretty',
-                                display: '-webkit-box',
-                                WebkitLineClamp: 2,
-                                WebkitBoxOrient: 'vertical',
-                                overflow: 'hidden',
+                                fontSize: 'clamp(18px, 1.5vw, 22px)',
+                                lineHeight: 1.2,
+                                fontWeight: 400,
+                                color: 'var(--skra-djup)',
+                                letterSpacing: '-0.005em',
                             }}
                         >
-                            {series.description}
-                        </p>
-                    )}
+                            {series.title}
+                        </h3>
+                        {meta && (
+                            <div
+                                className="type-meta"
+                                style={{ color: 'var(--skra-mjuk)', marginTop: '6px' }}
+                            >
+                                {meta}
+                            </div>
+                        )}
+                        {series.description && (
+                            <p
+                                style={{
+                                    margin: '10px 0 0',
+                                    fontFamily: 'var(--font-serif)',
+                                    fontStyle: 'italic',
+                                    fontSize: '14px',
+                                    lineHeight: 1.5,
+                                    color: 'var(--skra-mjuk)',
+                                    textWrap: 'pretty',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {series.description}
+                            </p>
+                        )}
+                    </div>
                 </article>
             </Link>
         </li>
