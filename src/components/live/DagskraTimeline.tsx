@@ -48,7 +48,7 @@ export default function DagskraTimeline({ slots, currentId, nextId }: Props) {
                     Dagskrá næstu daga.
                 </h2>
                 <Link
-                    href="/dagskra"
+                    href="/live#dagskra"
                     style={{
                         color: 'var(--nordurljos)',
                         textDecoration: 'none',

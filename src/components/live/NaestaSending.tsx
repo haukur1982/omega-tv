@@ -162,7 +162,7 @@ export default function NaestaSending({ next }: Props) {
                         Minna mig á
                     </button>
                     <Link
-                        href="/dagskra"
+                        href="/live#dagskra"
                         style={{
                             alignSelf: 'center',
                             color: 'var(--nordurljos)',

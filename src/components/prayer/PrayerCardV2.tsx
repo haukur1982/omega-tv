@@ -395,5 +395,25 @@ function relativeIs(timestamp: number): string {
     const weeks = Math.floor(days / 7);
     if (weeks === 1) return 'fyrir 1 viku';
     if (weeks < 4) return `fyrir ${weeks} vikum`;
-    return new Date(timestamp).toLocaleDateString('is-IS', { day: 'numeric', month: 'long' });
+    return formatIcelandicDayMonth(timestamp);
+}
+
+const ICELANDIC_MONTHS = [
+    'janúar',
+    'febrúar',
+    'mars',
+    'apríl',
+    'maí',
+    'júní',
+    'júlí',
+    'ágúst',
+    'september',
+    'október',
+    'nóvember',
+    'desember',
+];
+
+function formatIcelandicDayMonth(timestamp: number): string {
+    const date = new Date(timestamp);
+    return `${date.getUTCDate()}. ${ICELANDIC_MONTHS[date.getUTCMonth()]}`;
 }

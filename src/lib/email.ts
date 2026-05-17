@@ -1,7 +1,11 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 'placeholder');
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const resend = new Resend(RESEND_API_KEY ?? 'unconfigured');
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Omega TV <onboarding@resend.dev>';
+
+/** Returned and logged when RESEND_API_KEY is missing — no silent placeholder sends. */
+const EMAIL_NOT_CONFIGURED = 'RESEND_API_KEY is not set — email sending is disabled.';
 
 /**
  * Public site URL — used to build absolute links in emails. In dev we
@@ -130,6 +134,10 @@ const WELCOME_EMAIL = {
  * Send a welcome email to a new subscriber
  */
 export async function sendWelcomeEmail(to: string, name?: string): Promise<{ success: boolean; error?: string }> {
+    if (!RESEND_API_KEY) {
+        console.error(EMAIL_NOT_CONFIGURED);
+        return { success: false, error: EMAIL_NOT_CONFIGURED };
+    }
     try {
         const { error } = await resend.emails.send({
             from: FROM_EMAIL,
@@ -160,6 +168,10 @@ export async function sendVerificationEmail(
     verificationToken: string,
     name?: string,
 ): Promise<{ success: boolean; error?: string }> {
+    if (!RESEND_API_KEY) {
+        console.error(EMAIL_NOT_CONFIGURED);
+        return { success: false, error: EMAIL_NOT_CONFIGURED };
+    }
     const verifyUrl = `${SITE_URL}/api/subscribers/verify?token=${verificationToken}`;
     try {
         const { error } = await resend.emails.send({
@@ -190,6 +202,10 @@ export async function sendNewsletter(
     content: string,
     recipients: { email: string; unsubscribeToken: string }[],
 ): Promise<{ success: boolean; sent: number; failed: number }> {
+    if (!RESEND_API_KEY) {
+        console.error(EMAIL_NOT_CONFIGURED);
+        return { success: false, sent: 0, failed: recipients.length };
+    }
     let sent = 0;
     let failed = 0;
 

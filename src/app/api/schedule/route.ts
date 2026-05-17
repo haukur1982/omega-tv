@@ -15,14 +15,19 @@ export async function GET() {
         return NextResponse.json(scheduleCache);
     }
 
+    const ftpHost = process.env.FTP_SCHEDULE_HOST;
+    const ftpUser = process.env.FTP_SCHEDULE_USER;
+    const ftpPassword = process.env.FTP_SCHEDULE_PASSWORD;
+
+    if (!ftpHost || !ftpUser || !ftpPassword) {
+        console.error('Schedule FTP credentials not configured (FTP_SCHEDULE_HOST/USER/PASSWORD)');
+        return NextResponse.json({ error: 'Schedule service not configured' }, { status: 500 });
+    }
+
     const client = new Client();
     // client.ftp.verbose = true; // Enable for debugging
 
     try {
-        const ftpHost = process.env.FTP_SCHEDULE_HOST || '212.30.195.77';
-        const ftpUser = process.env.FTP_SCHEDULE_USER || 'MBLuser';
-        const ftpPassword = process.env.FTP_SCHEDULE_PASSWORD || 'omegaftp21';
-
         await client.access({
             host: ftpHost,
             user: ftpUser,

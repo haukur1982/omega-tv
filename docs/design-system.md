@@ -6,6 +6,8 @@
 
 The site is a 24/7 Christian TV network and media hub for Iceland. Three primary content types — **video** (live + VOD), **articles**, **courses** (growing). The design system has to make all three feel like full citizens, not video-with-bonus-text.
 
+**Poster/image system:** see [`docs/poster-system.md`](poster-system.md). No new article image, show poster, course poster, episode thumbnail, or documentary banner should ship as a raw stock/Bunny frame. Every image needs the Omega finish: warm charcoal grade, restrained saturation, subtle grain, controlled vignette, and a clear title-safe crop.
+
 ---
 
 ## 1. Typography ladder

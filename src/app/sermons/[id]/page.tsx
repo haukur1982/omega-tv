@@ -73,6 +73,15 @@ const MOCK_SERMONS: Record<string, {
   },
   v2: { title: 'Kraftur bænarinnar', show: 'Bænakvöld', thumbnail: 'https://images.unsplash.com/photo-1507692049790-de58290a4334?w=1600&h=900&fit=crop', durationSec: 25 * 60, dateDisplay: '25. MAR', description: 'Saman könnum við dýpt bænarinnar og hvernig hún breytir öllu.' },
   v3: { title: 'Framtíð Miðlunar', show: 'Sunnudagssamkoma', thumbnail: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1600&h=900&fit=crop', durationSec: 65 * 60, dateDisplay: '22. MAR', description: 'Hlutverk Omega Stöðinnar í nýrri tíð.' },
+  'mock-sunday-latest': {
+    title: 'Trúin sem stendur',
+    show: 'Sunnudagssamkoma',
+    thumbnail: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1600&h=900&fit=crop',
+    durationSec: 65 * 60,
+    dateDisplay: '20. APRÍL',
+    description: 'Þegar allt í kringum okkur skelfur — fjölskylda, samfélag, samtími — þá er trúin það eina sem heldur. Eiríkur prédikar úr Hebreabréfinu 12 um varanlega ríkið sem ekki er hægt að hrista.',
+    bibleRef: 'HEB.12.26-HEB.12.29',
+  },
   v4: { title: 'Náð sem læknar', show: 'Í Snertingu', thumbnail: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1600&h=900&fit=crop', durationSec: 30 * 60, dateDisplay: '20. MAR', description: 'Náðin opnar dyr að framtíðinni sem við höfðum þegar gefist upp á.', bibleRef: 'ROM.8.28' },
   v5: { title: 'Vonin lifir', show: 'Fræðsla', thumbnail: 'https://images.unsplash.com/photo-1476610182048-b716b8515aaa?w=1600&h=900&fit=crop', durationSec: 27 * 60, dateDisplay: '18. MAR', description: 'Vonin er ekki bara ósk — hún er viss vissa um eitthvað betra.', bibleRef: 'PHP.4.6-PHP.4.7' },
   v6: { title: 'Guðs áætlun fyrir þig', show: 'Sunnudagssamkoma', thumbnail: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1600&h=900&fit=crop', durationSec: 55 * 60, dateDisplay: '15. MAR', description: 'Guð hefur áætlun.' },
@@ -506,4 +515,3 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
     </main>
   );
 }
-

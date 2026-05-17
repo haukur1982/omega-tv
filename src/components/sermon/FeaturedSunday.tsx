@@ -68,6 +68,7 @@ export default function FeaturedSunday({ series, episode, ctaAccent = 'primary' 
                     {/* Cover image */}
                     <Link
                         href={`/sermons/${episode.id}`}
+                        className="featured-sunday-media"
                         style={{ display: 'block', textDecoration: 'none' }}
                     >
                         <div
@@ -117,7 +118,7 @@ export default function FeaturedSunday({ series, episode, ctaAccent = 'primary' 
                     </Link>
 
                     {/* Editorial copy */}
-                    <div>
+                    <div className="featured-sunday-copy">
                         <div
                             style={{
                                 fontFamily: 'var(--font-sans)',
@@ -221,6 +222,22 @@ export default function FeaturedSunday({ series, episode, ctaAccent = 'primary' 
                     </div>
                 </div>
             </div>
+            <style>{`
+                @media (max-width: 820px) {
+                    .featured-sunday-grid {
+                        grid-template-columns: minmax(0, 1fr) !important;
+                        gap: 28px !important;
+                    }
+
+                    .featured-sunday-copy {
+                        order: 1;
+                    }
+
+                    .featured-sunday-media {
+                        order: 2;
+                    }
+                }
+            `}</style>
         </section>
     );
 }

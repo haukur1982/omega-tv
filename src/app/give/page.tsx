@@ -24,19 +24,12 @@ import StyrkjaScriptureFooter from "@/components/styrkja/StyrkjaScriptureFooter"
  *                       dead end for people who prefer millifærsla).
  *   5. ScriptureFooter — single italic verse, 2. Kor 9:7.
  *
- * Payment backend note: there is no online payment processor
- * wired in today. The submit button transitions to a visual
- * thank-you state but does NOT charge anything. The honest copy
- * on the thank-you state reads: "Við höfum samband til að ganga
- * frá greiðslunni" (we'll contact you to complete the gift).
- *
- * Two viable next steps:
- *   • email admin team the donor's intent on submit (cheapest)
- *   • integrate Valitor/SaltPay or Stripe (merchant account work)
- *
- * Bank transfer (0113-26-25707 / 630890-1019) stays live on the
- * page today, so people who want to give without waiting for us
- * to call them back can do so directly.
+ * Giving is by bank transfer (millifærsla) only — Omega has no
+ * online card processor by design. The donation card helps the
+ * donor choose an amount and see allocation; the thank-you state
+ * shows the exact transfer details (reikningur 0113-26-25707,
+ * kt. 630890-1019, marked with the donor's name). A processor may
+ * be added later but is not required.
  */
 
 export default function GivePage() {

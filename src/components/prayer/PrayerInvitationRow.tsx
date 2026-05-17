@@ -44,7 +44,7 @@ export default function PrayerInvitationRow({ onOpen, register = 'dark' }: Props
 
     return (
         <div
-            className="warm-hover"
+            className="prayer-invitation-row warm-hover"
             role="button"
             tabIndex={0}
             onClick={onOpen}
@@ -96,7 +96,7 @@ export default function PrayerInvitationRow({ onOpen, register = 'dark' }: Props
 
             <button
                 type="button"
-                className="warm-hover"
+                className="prayer-invitation-button warm-hover"
                 onClick={(e) => { e.stopPropagation(); onOpen(); }}
                 style={{
                     padding: '14px 22px',
@@ -119,6 +119,20 @@ export default function PrayerInvitationRow({ onOpen, register = 'dark' }: Props
                 <IcoFeather size={16} />
                 Skrifa bæn
             </button>
+            <style>{`
+                @media (max-width: 640px) {
+                    .prayer-invitation-row {
+                        grid-template-columns: minmax(0, 1fr) !important;
+                        padding: 26px 24px !important;
+                        gap: 18px !important;
+                    }
+
+                    .prayer-invitation-button {
+                        width: 100%;
+                        justify-content: center;
+                    }
+                }
+            `}</style>
         </div>
     );
 }

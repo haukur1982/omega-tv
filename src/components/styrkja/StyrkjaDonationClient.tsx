@@ -16,13 +16,12 @@ import { useState } from 'react';
  * active states, single amber `--kerti` CTA on submit. Form chrome
  * reads as a magazine subscription page rather than checkout-stack.
  *
- * Payment integration note: the submit button currently transitions
- * to an honest thank-you state but does NOT charge anything. Two
- * viable backends are notional (admin email or merchant processor).
+ * Payment note: giving is by bank transfer only (no online card
+ * processor). Submit leads to a thank-you state that shows the
+ * exact millifærsla details needed to complete the gift.
  */
 
 type Cadence = 'monthly' | 'once';
-type Method = 'kort' | 'aura' | 'milli';
 
 const TIERS: Record<Cadence, Array<{ amount: number; label: string; note?: string }>> = {
     monthly: [
@@ -49,13 +48,16 @@ const CARD_BORDER = 'rgba(63,47,35,0.16)';
 const CARD_ACTIVE_BG = 'rgba(233,168,96,0.10)';
 const HAIRLINE = 'rgba(63,47,35,0.12)';
 
+function formatIsNumber(value: number): string {
+    return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
 export default function StyrkjaDonationClient() {
     const [cadence, setCadence] = useState<Cadence>('monthly');
     const [amount, setAmount] = useState<number>(3500);
     const [customAmount, setCustomAmount] = useState<string>('');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [method, setMethod] = useState<Method>('kort');
     const [anonymous, setAnonymous] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
@@ -85,7 +87,8 @@ export default function StyrkjaDonationClient() {
 
     const handleSubmit = () => {
         if (!ready) return;
-        // TODO: wire to payment backend.
+        // No card processor by design — the thank-you state shows the
+        // millifærsla details the donor uses to complete the gift.
         setSubmitted(true);
     };
 
@@ -113,7 +116,7 @@ export default function StyrkjaDonationClient() {
                 className="styrkja-donation-grid"
             >
                 {/* LEFT — the ask */}
-                <div>
+                <div style={{ minWidth: 0 }}>
                     {/* Section opener — gold rule + dot */}
                     <div
                         aria-hidden
@@ -244,7 +247,7 @@ export default function StyrkjaDonationClient() {
                                             fontFeatureSettings: '"lnum", "tnum"',
                                         }}
                                     >
-                                        {t.amount.toLocaleString('is-IS')}
+                                        {formatIsNumber(t.amount)}
                                         <span
                                             style={{
                                                 fontSize: '15px',
@@ -310,6 +313,7 @@ export default function StyrkjaDonationClient() {
                             placeholder="0"
                             style={{
                                 flex: 1,
+                                minWidth: 0,
                                 background: 'transparent',
                                 border: 0,
                                 outline: 'none',
@@ -346,7 +350,7 @@ export default function StyrkjaDonationClient() {
                             <Field label="Netfang" value={email} onChange={setEmail} placeholder="nafn@domain.is" required />
                         </div>
 
-                        {/* Payment method */}
+                        {/* Payment method — millifærsla only (no online card processor) */}
                         <div style={{ marginTop: '24px' }}>
                             <div
                                 style={{
@@ -359,37 +363,88 @@ export default function StyrkjaDonationClient() {
                                     marginBottom: '10px',
                                 }}
                             >
-                                Greiðslumáti
+                                Greiðslumáti — millifærsla
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                                {([
-                                    { id: 'kort' as Method, label: 'Greiðslukort' },
-                                    { id: 'aura' as Method, label: 'Aur / Kass' },
-                                    { id: 'milli' as Method, label: 'Millifærsla' },
-                                ]).map((m) => {
-                                    const active = method === m.id;
-                                    return (
-                                        <button
-                                            key={m.id}
-                                            type="button"
-                                            onClick={() => setMethod(m.id)}
+                            <div
+                                style={{
+                                    padding: '18px 20px',
+                                    background: CARD_BG,
+                                    border: `1px solid ${CARD_BORDER}`,
+                                    borderRadius: 'var(--radius-xs)',
+                                    display: 'grid',
+                                    gap: '16px',
+                                }}
+                            >
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        fontFamily: 'var(--font-serif)',
+                                        fontStyle: 'italic',
+                                        fontSize: '14px',
+                                        color: 'var(--skra-mjuk)',
+                                        lineHeight: 1.6,
+                                    }}
+                                >
+                                    Gjöfin er millifærð beint á reikning Omega — engin kortagreiðsla á netinu. Merktu millifærsluna nafni þínu.
+                                </p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '28px' }}>
+                                    <div>
+                                        <div
                                             style={{
-                                                padding: '12px 14px',
-                                                background: active ? CARD_ACTIVE_BG : 'transparent',
-                                                border: `1px solid ${active ? 'var(--kerti)' : CARD_BORDER}`,
-                                                color: active ? 'var(--skra-djup)' : 'var(--skra-mjuk)',
                                                 fontFamily: 'var(--font-sans)',
-                                                fontSize: '13px',
+                                                fontSize: '10px',
+                                                letterSpacing: '0.18em',
+                                                textTransform: 'uppercase',
+                                                color: 'var(--skra-mjuk)',
                                                 fontWeight: 600,
-                                                borderRadius: 'var(--radius-xs)',
-                                                cursor: 'pointer',
-                                                transition: 'all 200ms ease',
+                                                marginBottom: '4px',
                                             }}
                                         >
-                                            {m.label}
-                                        </button>
-                                    );
-                                })}
+                                            Reikningsnúmer
+                                        </div>
+                                        <div
+                                            className="select-all"
+                                            style={{
+                                                fontFamily: 'var(--font-sans)',
+                                                fontVariantNumeric: 'tabular-nums',
+                                                fontSize: '18px',
+                                                fontWeight: 600,
+                                                color: 'var(--skra-djup)',
+                                                letterSpacing: '0.02em',
+                                            }}
+                                        >
+                                            0113-26-25707
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div
+                                            style={{
+                                                fontFamily: 'var(--font-sans)',
+                                                fontSize: '10px',
+                                                letterSpacing: '0.18em',
+                                                textTransform: 'uppercase',
+                                                color: 'var(--skra-mjuk)',
+                                                fontWeight: 600,
+                                                marginBottom: '4px',
+                                            }}
+                                        >
+                                            Kennitala
+                                        </div>
+                                        <div
+                                            className="select-all"
+                                            style={{
+                                                fontFamily: 'var(--font-sans)',
+                                                fontVariantNumeric: 'tabular-nums',
+                                                fontSize: '18px',
+                                                fontWeight: 600,
+                                                color: 'var(--skra-djup)',
+                                                letterSpacing: '0.02em',
+                                            }}
+                                        >
+                                            630890-1019
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -462,7 +517,7 @@ export default function StyrkjaDonationClient() {
                                         marginLeft: '4px',
                                     }}
                                 >
-                                    {total.toLocaleString('is-IS')} kr{cadence === 'monthly' ? ' / mán' : ''}
+                                    {formatIsNumber(total)} kr{cadence === 'monthly' ? ' / mán' : ''}
                                 </span>
                             )}
                         </button>
@@ -486,7 +541,7 @@ export default function StyrkjaDonationClient() {
                 {/* RIGHT — allocation */}
                 <Allocation total={total} />
 
-                <style jsx>{`
+                <style>{`
                     @media (max-width: 900px) {
                         .styrkja-donation-grid {
                             grid-template-columns: 1fr !important;
@@ -551,7 +606,7 @@ function Field({
 
 function Allocation({ total }: { total: number }) {
     return (
-        <aside style={{ position: 'sticky', top: '120px' }}>
+        <aside style={{ position: 'sticky', top: '120px', minWidth: 0 }}>
             <div
                 aria-hidden
                 style={{
@@ -614,6 +669,7 @@ function Allocation({ total }: { total: number }) {
                     return (
                         <li
                             key={row.label}
+                            className="allocation-row"
                             style={{
                                 display: 'grid',
                                 gridTemplateColumns: '36px 1fr auto',
@@ -661,6 +717,7 @@ function Allocation({ total }: { total: number }) {
                             </div>
                             {total > 0 && (
                                 <div
+                                    className="allocation-amount"
                                     style={{
                                         fontFamily: 'var(--font-serif)',
                                         fontStyle: 'italic',
@@ -670,7 +727,7 @@ function Allocation({ total }: { total: number }) {
                                         whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    {kr.toLocaleString('is-IS')} kr
+                                    {formatIsNumber(kr)} kr
                                 </div>
                             )}
                         </li>
@@ -694,6 +751,19 @@ function Allocation({ total }: { total: number }) {
             >
                 Omega er sjálfstæð, skráð kristileg stofnun. Ársreikningar eru opnir — þú mátt biðja um þá hvenær sem er.
             </div>
+            <style>{`
+                @media (max-width: 640px) {
+                    .allocation-row {
+                        grid-template-columns: 36px minmax(0, 1fr) !important;
+                        gap: 12px !important;
+                    }
+
+                    .allocation-amount {
+                        grid-column: 2;
+                        white-space: normal !important;
+                    }
+                }
+            `}</style>
         </aside>
     );
 }
@@ -766,8 +836,8 @@ function ThankYou({ cadence, total, onReset }: { cadence: Cadence; total: number
                     }}
                 >
                     {cadence === 'monthly'
-                        ? `${total.toLocaleString('is-IS')} kr á mánuði styður áfram það sem þú elskar í dagskránni.`
-                        : `${total.toLocaleString('is-IS')} kr — sérhver króna fer beint í útsendingu, dagskrá og bænastarf.`}
+                        ? `${formatIsNumber(total)} kr á mánuði styður áfram það sem þú elskar í dagskránni.`
+                        : `${formatIsNumber(total)} kr — sérhver króna fer beint í útsendingu, dagskrá og bænastarf.`}
                 </p>
                 <p
                     style={{
@@ -780,7 +850,9 @@ function ThankYou({ cadence, total, onReset }: { cadence: Cadence; total: number
                         lineHeight: 1.55,
                     }}
                 >
-                    Við höfum samband til að ganga frá greiðslunni.
+                    {cadence === 'monthly'
+                        ? `Síðasta skrefið: stofnaðu mánaðarlega millifærslu — ${formatIsNumber(total)} kr á reikning 0113-26-25707 (kt. 630890-1019), merkta nafni þínu.`
+                        : `Síðasta skrefið: millifærðu ${formatIsNumber(total)} kr á reikning 0113-26-25707 (kt. 630890-1019) og merktu greiðsluna nafni þínu.`}
                 </p>
                 <button
                     type="button"
