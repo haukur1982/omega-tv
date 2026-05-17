@@ -41,9 +41,9 @@ export default function PrayerForm() {
     }
 
     return (
-        <div className="p-8 bg-[var(--bg-surface)] border border-[var(--border)] sticky top-32">
+        <div className="p-8 bg-[var(--torfa)] border border-[var(--border)] sticky top-32">
             <h3 className="text-2xl font-bold mb-2">Senda Bænaefni</h3>
-            <p className="text-[var(--text-secondary)] mb-6 text-sm">
+            <p className="text-[var(--moskva)] mb-6 text-sm">
                 Við stöndum saman í trúnni. Bænir eru öflugar.
             </p>
 
@@ -57,9 +57,9 @@ export default function PrayerForm() {
                     >
                         <CheckCircle2 size={32} className="text-green-500" />
                         <h4 className="text-xl font-bold">Bæn Móttekin</h4>
-                        <p className="text-[var(--text-secondary)] text-sm">Takk. Við munum biðja fyrir þér.</p>
-                        <p className="text-[var(--accent)] font-serif italic text-sm mt-4">"{promise}"</p>
-                        <button onClick={() => setStatus('idle')} className="mt-4 text-xs text-[var(--accent)] font-semibold uppercase tracking-[0.15em] hover:underline">
+                        <p className="text-[var(--moskva)] text-sm">Takk. Við munum biðja fyrir þér.</p>
+                        <p className="text-[var(--kerti)] font-serif italic text-sm mt-4">"{promise}"</p>
+                        <button onClick={() => setStatus('idle')} className="mt-4 text-xs text-[var(--kerti)] font-semibold uppercase tracking-[0.15em] hover:underline">
                             Senda aðra bæn
                         </button>
                     </motion.div>
@@ -72,8 +72,8 @@ export default function PrayerForm() {
                                 onClick={() => { setCategoryType('personal'); setSelectedTopic('Lækning'); }}
                                 className={`py-2 text-xs font-semibold uppercase tracking-[0.1em] transition-colors ${
                                     categoryType === 'personal'
-                                        ? 'bg-[var(--accent)] text-[var(--bg-deep)]'
-                                        : 'bg-[var(--bg-deep)] border border-[var(--border)] text-[var(--text-secondary)]'
+                                        ? 'bg-[var(--kerti)] text-[var(--nott)]'
+                                        : 'bg-[var(--mold)] border border-[var(--border)] text-[var(--moskva)]'
                                 }`}
                             >
                                 Persónulegt
@@ -83,8 +83,8 @@ export default function PrayerForm() {
                                 onClick={() => { setCategoryType('national'); setSelectedTopic('Ísland'); }}
                                 className={`py-2 text-xs font-semibold uppercase tracking-[0.1em] transition-colors ${
                                     categoryType === 'national'
-                                        ? 'bg-[var(--accent)] text-[var(--bg-deep)]'
-                                        : 'bg-[var(--bg-deep)] border border-[var(--border)] text-[var(--text-secondary)]'
+                                        ? 'bg-[var(--kerti)] text-[var(--nott)]'
+                                        : 'bg-[var(--mold)] border border-[var(--border)] text-[var(--moskva)]'
                                 }`}
                             >
                                 Fyrir þjóðina
@@ -92,32 +92,32 @@ export default function PrayerForm() {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-2">Nafn (Valfrjálst)</label>
+                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--steinn)] mb-2">Nafn (Valfrjálst)</label>
                             <input
                                 name="name"
                                 type="text"
                                 placeholder="Þitt nafn..."
-                                className="w-full bg-[var(--bg-deep)] border border-[var(--border)] px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                                className="w-full bg-[var(--mold)] border border-[var(--border)] px-4 py-3 text-[var(--ljos)] focus:outline-none focus:border-[var(--nordurljos)] transition-colors"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-2">Netfang (birtist ekki)</label>
+                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--steinn)] mb-2">Netfang (birtist ekki)</label>
                             <input
                                 name="email"
                                 type="email"
                                 placeholder="netfang@dæmi.is"
-                                className="w-full bg-[var(--bg-deep)] border border-[var(--border)] px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+                                className="w-full bg-[var(--mold)] border border-[var(--border)] px-4 py-3 text-[var(--ljos)] focus:outline-none focus:border-[var(--nordurljos)] transition-colors"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-2">Efni</label>
+                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--steinn)] mb-2">Efni</label>
                             <select
                                 name="topic"
                                 value={selectedTopic}
                                 onChange={(e) => setSelectedTopic(e.target.value)}
-                                className="w-full bg-[var(--bg-deep)] border border-[var(--border)] px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors appearance-none cursor-pointer"
+                                className="w-full bg-[var(--mold)] border border-[var(--border)] px-4 py-3 text-[var(--ljos)] focus:outline-none focus:border-[var(--nordurljos)] transition-colors appearance-none cursor-pointer"
                             >
                                 {topics.map(t => (
                                     <option key={t.value} value={t.value}>{t.label}</option>
@@ -127,35 +127,35 @@ export default function PrayerForm() {
 
                         {/* Scripture prompt tied to selected topic */}
                         {TOPIC_SCRIPTURES[selectedTopic] && (
-                            <div className="py-3 px-4 bg-[var(--accent)]/5 border-l-2 border-[var(--accent)]/30">
-                                <p className="text-sm text-[var(--text-secondary)] italic leading-relaxed">
+                            <div className="py-3 px-4 bg-[var(--kerti-gloed)] border-l-2" style={{ borderLeftColor: 'var(--gull)' }}>
+                                <p className="text-sm text-[var(--moskva)] italic leading-relaxed">
                                     "{TOPIC_SCRIPTURES[selectedTopic].verse}"
                                 </p>
-                                <p className="text-xs text-[var(--text-muted)] mt-1">
+                                <p className="text-xs text-[var(--steinn)] mt-1">
                                     — {TOPIC_SCRIPTURES[selectedTopic].reference}
                                 </p>
                             </div>
                         )}
 
                         <div>
-                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)] mb-2">Bænaefni</label>
+                            <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-[var(--steinn)] mb-2">Bænaefni</label>
                             <textarea
                                 name="content"
                                 rows={4}
                                 required
                                 maxLength={500}
                                 placeholder={categoryType === 'national' ? 'Hvað liggur þér á hjarta fyrir þjóðina?' : 'Hvernig getum við beðið fyrir þér?'}
-                                className="w-full bg-[var(--bg-deep)] border border-[var(--border)] px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none"
+                                className="w-full bg-[var(--mold)] border border-[var(--border)] px-4 py-3 text-[var(--ljos)] focus:outline-none focus:border-[var(--nordurljos)] transition-colors resize-none"
                             />
                         </div>
 
                         <button
                             type="submit"
                             disabled={isPending}
-                            className="w-full py-4 bg-[var(--accent)] text-[var(--bg-deep)] font-bold flex items-center justify-center gap-2 hover:brightness-110 transition-all disabled:opacity-50"
+                            className="w-full py-4 bg-[var(--kerti)] text-[var(--nott)] font-bold flex items-center justify-center gap-2 hover:brightness-110 transition-all disabled:opacity-50"
                         >
                             {isPending ? (
-                                <span className="w-5 h-5 border-2 border-[var(--bg-deep)]/30 border-t-[var(--bg-deep)] rounded-full animate-spin" />
+                                <span className="w-5 h-5 border-2 border-[var(--nott)]/30 border-t-[var(--nott)] rounded-full animate-spin" />
                             ) : (
                                 <>
                                     <Send size={16} />

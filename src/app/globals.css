@@ -601,3 +601,31 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1.25em;
   letter-spacing: 0;
 }
+
+/* ═══ Thumbnail frame ═══ */
+
+.thumb-frame--lift {
+  cursor: pointer;
+}
+
+.thumb-frame--lift:hover,
+.thumb-frame--lift:focus-within {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 56px -28px rgba(20,18,15,0.6);
+}
+.thumb-frame--lift:hover .thumb-img,
+.thumb-frame--lift:focus-within .thumb-img {
+  transform: scale(1.04);
+}
+.thumb-frame--lift:hover .thumb-play,
+.thumb-frame--lift:focus-within .thumb-play {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thumb-frame--lift,
+  .thumb-frame--lift:hover .thumb-img {
+    transition: none;
+    transform: none;
+  }
+}
