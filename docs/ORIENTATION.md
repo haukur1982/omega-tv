@@ -81,11 +81,16 @@ They cluster into four jobs:
 - **Operations:** `schedule`, `programs`, `health`, `settings`,
   `testimonials`, `dashboard`.
 
-**Strategy recommendation:** group the admin nav by these four jobs and
-make the **Content pipeline** group the primary one (drafts is the inbox
-for Azotus). Don't redesign all 18 — just group them and make the
-content-flow path obvious: *Azotus → draft → review (set series + cover) →
-publish.* That single flow ties VOD-feeding + thumbnails + admin together.
+**Strategy — DONE at the nav/IA level (2026-05-17).** The admin sidebar
+(`src/components/admin/AdminLayout.tsx`) is now grouped into the four jobs,
+**Efni & dagskrá (content pipeline) first** — it's the daily path where
+Azotus lands (Innhólf → Þáttaraðir → publish). Four sections that had no
+nav entry at all (Bænaátak, Fréttir, Tilvitnanir, Kerfisheilsa) are now
+reachable instead of URL-only. Nav-only change — no admin screens
+redesigned. On `vellum`, not yet on prod.
+
+What's still open here: the per-screen workflows themselves (esp. the
+draft→review→publish flow and the series-cover field) — separate passes.
 
 ---
 
@@ -98,8 +103,9 @@ publish.* That single flow ties VOD-feeding + thumbnails + admin together.
 3. **Pick the thumbnail path** — curated series covers (needs the small
    admin field + photo curation) vs. living on the typographic fallback
    for now.
-4. **Admin grouping** — a small, low-risk pass to group the 18 sections by
-   the four jobs, content-pipeline first.
+4. ~~**Admin grouping**~~ — DONE (nav grouped by the four jobs, on
+   `vellum`). Visual needs your admin login to eyeball; deploy is your
+   call. Next admin work = the draft→review→publish workflow itself.
 
 Remaining design-doc items (not blocking, your pace): `FeaturedSunday`,
 the big blue-`--accent` sweep (large, regression-risky — branch-first).

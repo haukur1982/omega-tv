@@ -18,7 +18,11 @@ import {
     Inbox,
     Star,
     CalendarDays,
-    Tv
+    Tv,
+    Megaphone,
+    Newspaper,
+    Quote,
+    Activity,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OmegaMark } from '@/components/brand/OmegaMark';
@@ -28,20 +32,63 @@ interface AdminLayoutProps {
     children: React.ReactNode;
 }
 
-const navItems = [
-    { href: '/admin/dashboard', label: 'Yfirlit', icon: LayoutDashboard },
-    { href: '/admin/drafts', label: 'Innhólf', icon: Inbox },
-    { href: '/admin/featured', label: 'Vikuforsíða', icon: Star },
-    { href: '/admin/schedule', label: 'Dagskrá', icon: CalendarDays },
-    { href: '/admin/programs', label: 'Sýningar', icon: Tv },
-    { href: '/admin/series', label: 'Þáttaraðir', icon: Film },
-    { href: '/admin/videos', label: 'Myndbönd', icon: Film },
-    { href: '/admin/articles', label: 'Greinar', icon: FileText },
-    { href: '/admin/prayers', label: 'Bænir', icon: Heart },
-    { href: '/admin/testimonials', label: 'Vitnisburðir', icon: MessageSquare },
-    { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
-    { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
-    { href: '/admin/social', label: 'Samfélagsmiðlar', icon: Share2 },
+/**
+ * Admin nav grouped by the four jobs (see docs/ORIENTATION.md):
+ *   1. Efni & dagskrá   — the content pipeline (where Azotus lands:
+ *                          Innhólf → Þáttaraðir → publish). The spine.
+ *   2. Samskipti        — communication with viewers/supporters.
+ *   3. Ritstjórn        — editorial / site curation.
+ *   4. Rekstur          — operations & system.
+ * Content pipeline is first on purpose: it's the daily path. Sections
+ * that previously had no nav entry (Bænaátak, Fréttir, Tilvitnanir,
+ * Kerfisheilsa) are now reachable instead of URL-only.
+ */
+const navGroups: {
+    title: string | null;
+    items: { href: string; label: string; icon: React.ElementType }[];
+}[] = [
+    {
+        title: null,
+        items: [
+            { href: '/admin/dashboard', label: 'Yfirlit', icon: LayoutDashboard },
+        ],
+    },
+    {
+        title: 'Efni & dagskrá',
+        items: [
+            { href: '/admin/drafts', label: 'Innhólf', icon: Inbox },
+            { href: '/admin/series', label: 'Þáttaraðir', icon: Film },
+            { href: '/admin/videos', label: 'Myndbönd', icon: Tv },
+            { href: '/admin/programs', label: 'Sýningar', icon: Film },
+            { href: '/admin/schedule', label: 'Dagskrá', icon: CalendarDays },
+            { href: '/admin/featured', label: 'Vikuforsíða', icon: Star },
+        ],
+    },
+    {
+        title: 'Samskipti',
+        items: [
+            { href: '/admin/prayers', label: 'Bænir', icon: Heart },
+            { href: '/admin/campaigns', label: 'Bænaátak', icon: Megaphone },
+            { href: '/admin/testimonials', label: 'Vitnisburðir', icon: MessageSquare },
+            { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
+            { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
+        ],
+    },
+    {
+        title: 'Ritstjórn',
+        items: [
+            { href: '/admin/articles', label: 'Greinar', icon: FileText },
+            { href: '/admin/news', label: 'Fréttir', icon: Newspaper },
+            { href: '/admin/quotes', label: 'Tilvitnanir', icon: Quote },
+            { href: '/admin/social', label: 'Samfélagsmiðlar', icon: Share2 },
+        ],
+    },
+    {
+        title: 'Rekstur',
+        items: [
+            { href: '/admin/health', label: 'Kerfisheilsa', icon: Activity },
+        ],
+    },
 ];
 
 
@@ -79,6 +126,30 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         return null;
     }
 
+    const renderItem = (item: { href: string; label: string; icon: React.ElementType }) => {
+        const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+        return (
+            <Link
+                key={item.href}
+                href={item.href}
+                className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+                    transition-all duration-150 group relative
+                    ${isActive
+                        ? 'bg-[var(--admin-accent-subtle)] text-[var(--admin-accent)]'
+                        : 'text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-hover)]'
+                    }
+                `}
+            >
+                <item.icon size={18} className={isActive ? 'text-[var(--admin-accent)]' : ''} />
+                <span>{item.label}</span>
+                {isActive && (
+                    <ChevronRight size={14} className="ml-auto opacity-60" />
+                )}
+            </Link>
+        );
+    };
+
     return (
         <div className="min-h-screen bg-[var(--admin-bg)] flex">
             {/* Sidebar */}
@@ -96,31 +167,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     </Link>
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                    {navItems.map((item) => {
-                        const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`
-                                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-                                    transition-all duration-150 group relative
-                                    ${isActive
-                                        ? 'bg-[var(--admin-accent-subtle)] text-[var(--admin-accent)]'
-                                        : 'text-[var(--admin-text-secondary)] hover:text-[var(--admin-text)] hover:bg-[var(--admin-surface-hover)]'
-                                    }
-                                `}
-                            >
-                                <item.icon size={18} className={isActive ? 'text-[var(--admin-accent)]' : ''} />
-                                <span>{item.label}</span>
-                                {isActive && (
-                                    <ChevronRight size={14} className="ml-auto opacity-60" />
-                                )}
-                            </Link>
-                        );
-                    })}
+                {/* Navigation — grouped by job (docs/ORIENTATION.md) */}
+                <nav className="flex-1 px-3 py-4 overflow-y-auto">
+                    {navGroups.map((group, gi) => (
+                        <div key={group.title ?? `g${gi}`} className={gi === 0 ? 'space-y-1' : 'mt-5 space-y-1'}>
+                            {group.title && (
+                                <div className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--admin-text-muted)]">
+                                    {group.title}
+                                </div>
+                            )}
+                            {group.items.map(renderItem)}
+                        </div>
+                    ))}
                 </nav>
 
                 {/* Footer */}
