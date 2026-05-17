@@ -64,12 +64,7 @@ export default function PullQuote({ article, register = 'dark' }: Props) {
         <section
             style={{
                 background: tokens.bg,
-                paddingTop: 'clamp(80px, 12vw, 128px)',
-                paddingInline: 'var(--rail-padding)',
-                // On the cream register the closing dawn band provides the
-                // bottom transition, so drop the section's bottom padding —
-                // otherwise a pergament strip sits between band and --mold.
-                paddingBottom: isPergament ? 0 : 'clamp(80px, 12vw, 128px)',
+                padding: 'clamp(80px, 12vw, 128px) var(--rail-padding)',
                 borderTop: `1px solid ${tokens.borderTop}`,
             }}
         >
@@ -195,15 +190,6 @@ export default function PullQuote({ article, register = 'dark' }: Props) {
                     </div>
                 </Link>
             </div>
-            {isPergament && (
-                <div
-                    aria-hidden
-                    style={{
-                        height: 'clamp(64px, 8vw, 96px)',
-                        background: 'linear-gradient(to bottom, var(--pergament) 0%, var(--mor) 55%, var(--mold) 100%)',
-                    }}
-                />
-            )}
         </section>
     );
 }
