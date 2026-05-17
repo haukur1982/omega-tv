@@ -66,6 +66,15 @@ export default function PrayerTicker({ lines, register = 'dark' }: Props) {
                 borderBottom: `1px solid ${tokens.border}`,
             }}
         >
+            {isCream && (
+                <div
+                    aria-hidden
+                    style={{
+                        height: 'clamp(64px, 8vw, 96px)',
+                        background: 'linear-gradient(to bottom, var(--mor) 0%, var(--pergament) 60%, var(--skra) 100%)',
+                    }}
+                />
+            )}
             <div
                 style={{
                     maxWidth: '80rem',

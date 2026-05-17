@@ -56,7 +56,7 @@ export default function HeroV2() {
                         position: 'absolute',
                         inset: 0,
                         background:
-                            'linear-gradient(to bottom, rgba(20,18,15,0.55) 0%, rgba(20,18,15,0.35) 35%, rgba(20,18,15,0.78) 82%, var(--mold) 100%)',
+                            'linear-gradient(to bottom, rgba(20,18,15,0.55) 0%, rgba(20,18,15,0.35) 35%, rgba(20,18,15,0.78) 82%, var(--mold) 92%, var(--mor) 100%)',
                     }}
                 />
                 {/* Kerti-tinted warmth in the upper-right — the one warm
