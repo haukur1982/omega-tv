@@ -1,6 +1,6 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-18 (Codex — VOD Factory deployed)
+**Last Updated:** 2026-05-18 (Codex — temp Vercel rollout decision)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
@@ -18,17 +18,19 @@ Codex pushed and deployed the VOD Factory M1 work after Hawk approved Vercel CLI
 - Deployed production through Vercel CLI.
 - Production URL returned by Vercel: `https://omega-9fwkws5cf-haukur1982-1838s-projects.vercel.app`
 - Active Vercel alias: `https://omega-tv-lovat.vercel.app`
+- Rollout decision from Hawk: keep using the temporary Vercel URL until the VOD library has several reviewed videos and the site is ready to go live on the real domain.
 
 ### Intake smoke test
 
 - `POST https://omega-tv-lovat.vercel.app/api/azotus/vod-intake` without signature returns `401`, which confirms the endpoint is live and protected.
-- `POST https://omega.is/api/azotus/vod-intake` currently returns `404`.
-- Until `omega.is` is pointed at this deployment correctly, Azotus should use:
+- `POST https://omega.is/api/azotus/vod-intake` currently returns `404`, but this is not blocking the current rollout because Hawk does not want the real domain live yet.
+- Until Hawk explicitly decides to switch the public domain over, Azotus should use:
   - `OMEGA_VOD_INTAKE_URL=https://omega-tv-lovat.vercel.app/api/azotus/vod-intake`
 
 ### Next
 
-- Fix the public `omega.is` domain routing before changing Azotus back to the branded URL.
+- Keep the VOD factory on the temporary Vercel URL while building up the first reviewed videos.
+- Fix/switch the public `omega.is` domain only when Hawk says the site is ready to be live.
 - Review the existing i2620 draft in `/admin/drafts`.
 - Run the next manual VOD publish with a new completed track after review.
 
