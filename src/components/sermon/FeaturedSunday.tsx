@@ -1,8 +1,11 @@
 import Link from "next/link";
 import type { Database } from "@/types/supabase";
 
-type Episode = Database['public']['Tables']['episodes']['Row'];
 type Series = Database['public']['Tables']['series']['Row'];
+type FeaturedEpisode = Pick<
+    Database['public']['Tables']['episodes']['Row'],
+    'id' | 'title' | 'description' | 'duration' | 'published_at' | 'thumbnail_custom' | 'bunny_video_id'
+>;
 
 /**
  * FeaturedSunday — single large editorial card pinning the latest
@@ -18,7 +21,7 @@ type Series = Database['public']['Tables']['series']['Row'];
 
 interface Props {
     series: Pick<Series, 'title' | 'slug' | 'host' | 'description'>;
-    episode: Episode;
+    episode: FeaturedEpisode;
     /**
      * 'primary' — amber Horfa button (default; correct on /sermons where this
      *             is the page's single amber CTA).

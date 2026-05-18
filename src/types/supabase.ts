@@ -192,49 +192,97 @@ export type Database = {
       }
       episodes: {
         Row: {
+          assigned_to: string | null
+          azotus_job_id: string | null
+          azotus_track_id: string | null
+          bible_ref: string | null
           bunny_video_id: string
+          captions_available: string[] | null
+          chapters: { t: number; title: string }[] | null
           created_at: string | null
           description: string | null
           duration: number | null
+          editor_note: string | null
           episode_number: number
           id: string
+          language_primary: string | null
+          metadata_confidence: number | null
+          poster_candidates: unknown[] | null
           published_at: string | null
+          review_notes: string | null
+          review_status: string
           season_id: string | null
           series_id: string | null
           source: string | null
+          source_language: string | null
           status: string
+          tags: string[] | null
           thumbnail_custom: string | null
           title: string
+          transcript: string | null
+          transcript_url: string | null
         }
         Insert: {
+          assigned_to?: string | null
+          azotus_job_id?: string | null
+          azotus_track_id?: string | null
+          bible_ref?: string | null
           bunny_video_id: string
+          captions_available?: string[] | null
+          chapters?: { t: number; title: string }[] | null
           created_at?: string | null
           description?: string | null
           duration?: number | null
+          editor_note?: string | null
           episode_number?: number
           id?: string
+          language_primary?: string | null
+          metadata_confidence?: number | null
+          poster_candidates?: unknown[] | null
           published_at?: string | null
+          review_notes?: string | null
+          review_status?: string
           season_id?: string | null
           series_id?: string | null
           source?: string | null
+          source_language?: string | null
           status?: string
+          tags?: string[] | null
           thumbnail_custom?: string | null
           title: string
+          transcript?: string | null
+          transcript_url?: string | null
         }
         Update: {
+          assigned_to?: string | null
+          azotus_job_id?: string | null
+          azotus_track_id?: string | null
+          bible_ref?: string | null
           bunny_video_id?: string
+          captions_available?: string[] | null
+          chapters?: { t: number; title: string }[] | null
           created_at?: string | null
           description?: string | null
           duration?: number | null
+          editor_note?: string | null
           episode_number?: number
           id?: string
+          language_primary?: string | null
+          metadata_confidence?: number | null
+          poster_candidates?: unknown[] | null
           published_at?: string | null
+          review_notes?: string | null
+          review_status?: string
           season_id?: string | null
           series_id?: string | null
           source?: string | null
+          source_language?: string | null
           status?: string
+          tags?: string[] | null
           thumbnail_custom?: string | null
           title?: string
+          transcript?: string | null
+          transcript_url?: string | null
         }
         Relationships: [
           {

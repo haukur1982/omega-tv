@@ -239,6 +239,35 @@ export async function getBunnyVideoStatus(
     }
 }
 
+export async function updateBunnyChapters(
+    videoId: string,
+    chapters: { t: number; title: string }[] | null | undefined,
+): Promise<boolean> {
+    if (!API_KEY || !LIBRARY_ID || !videoId) return false;
+    const payload = {
+        chapters: (chapters ?? []).map((chapter, index) => ({
+            title: chapter.title,
+            start: Math.max(0, Math.floor(chapter.t)),
+            end: chapters?.[index + 1]?.t ? Math.max(0, Math.floor(chapters[index + 1].t)) : undefined,
+        })),
+    };
+    try {
+        const res = await fetch(`${BASE_URL}/${videoId}`, {
+            method: 'POST',
+            headers: {
+                AccessKey: API_KEY,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+        return res.ok;
+    } catch (error) {
+        console.error('Bunny chapter update failed:', error);
+        return false;
+    }
+}
+
 /**
  * Build an embed URL for the Bunny iframe player, with optional caption
  * preferences and chapter support. Supports `t` param for seek.

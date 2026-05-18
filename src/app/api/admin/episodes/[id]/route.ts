@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
+import { updateBunnyChapters } from '@/lib/bunny';
+import { logEvent } from '@/lib/system-events';
 
 /**
  * PATCH /api/admin/episodes/[id]
@@ -44,6 +46,14 @@ export async function PATCH(
         'transcript_url',
         'captions_available',
         'language_primary',
+        'review_status',
+        'assigned_to',
+        'review_notes',
+        'metadata_confidence',
+        'poster_candidates',
+        'azotus_track_id',
+        'azotus_job_id',
+        'source_language',
     ]);
 
     const patch: Record<string, unknown> = {};
@@ -66,6 +76,20 @@ export async function PATCH(
     if (error) {
         console.error('Episode update failed:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if ('chapters' in patch && data?.bunny_video_id) {
+        const ok = await updateBunnyChapters(
+            data.bunny_video_id,
+            Array.isArray(data.chapters) ? data.chapters : [],
+        );
+        await logEvent(
+            ok ? 'bunny.chapters_updated' : 'bunny.chapters_update_failed',
+            ok ? 'info' : 'warn',
+            ok ? 'Updated Bunny chapters from Omega draft review.' : 'Could not update Bunny chapters from Omega draft review.',
+            { episode_id: id, bunny_video_id: data.bunny_video_id },
+            auth.user.email ?? auth.user.id ?? 'admin',
+        );
     }
 
     return NextResponse.json({ ok: true, episode: data });

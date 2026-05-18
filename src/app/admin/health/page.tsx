@@ -33,6 +33,7 @@ function severityColor(s: string) {
 
 export default function AdminHealthPage() {
     const [events, setEvents] = useState<SystemEvent[]>([]);
+    const [vod, setVod] = useState<VodHealth | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'warn' | 'error'>('all');
 
@@ -41,7 +42,13 @@ export default function AdminHealthPage() {
         const res = await authedFetch('/api/admin/health?limit=200');
         if (res.ok) {
             const data = await res.json();
-            setEvents(data as SystemEvent[]);
+            if (Array.isArray(data)) {
+                setEvents(data as SystemEvent[]);
+                setVod(null);
+            } else {
+                setEvents((data.events ?? []) as SystemEvent[]);
+                setVod(data.vod ?? null);
+            }
         }
         setIsLoading(false);
     }, []);
@@ -77,6 +84,15 @@ export default function AdminHealthPage() {
                     {isLoading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
                 </button>
             </div>
+
+            {vod && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
+                    <VodHealthCard label="VOD intake" value={vod.total} hint={vod.latest_at ? `Síðast ${new Date(vod.latest_at).toLocaleString('is-IS')}` : 'Engin handoff enn'} />
+                    <VodHealthCard label="Tilbúin drög" value={vod.draft_ready} hint="Azotus → Omega tókst" tone="ok" />
+                    <VodHealthCard label="Í vinnslu" value={vod.received + vod.metadata_pending + vod.poster_pending} hint="Bíður metadata/poster" />
+                    <VodHealthCard label="Vandamál" value={vod.failed + vod.needs_attention} hint={vod.last_error ?? 'Engin virk villa'} tone={vod.failed + vod.needs_attention > 0 ? 'warn' : 'ok'} />
+                </div>
+            )}
 
             {/* Summary chips */}
             <div className="flex gap-3 mb-6 flex-wrap">
@@ -177,5 +193,42 @@ export default function AdminHealthPage() {
                 </ul>
             )}
         </AdminLayout>
+    );
+}
+
+type VodHealth = {
+    total: number;
+    received: number;
+    metadata_pending: number;
+    poster_pending: number;
+    draft_ready: number;
+    needs_attention: number;
+    failed: number;
+    last_error: string | null;
+    latest_at: string | null;
+};
+
+function VodHealthCard({
+    label,
+    value,
+    hint,
+    tone,
+}: {
+    label: string;
+    value: number;
+    hint: string;
+    tone?: 'ok' | 'warn';
+}) {
+    const color = tone === 'warn'
+        ? '#E9A860'
+        : tone === 'ok'
+            ? '#3fbc7c'
+            : 'var(--admin-text, #eee)';
+    return (
+        <div className="admin-card">
+            <p className="admin-caption mb-2">{label}</p>
+            <div style={{ fontSize: '1.7rem', fontWeight: 750, color }}>{value}</div>
+            <p className="admin-caption mt-2 line-clamp-2">{hint}</p>
+        </div>
     );
 }

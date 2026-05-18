@@ -1,9 +1,89 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-26 (Claude Opus 4.7 — design-system audit + polish ripple)
-**Last Agent:** Claude Opus 4.7
+**Last Updated:** 2026-05-18 (Codex — VOD Factory M1 implemented)
+**Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
-**Build Status:** `pnpm build` green — 56 pages, no errors.
+**Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+
+---
+
+## Session — 2026-05-18 (VOD Factory M1 implemented)
+
+Hawk asked to implement the 90-day VOD Factory plan. This session shipped the first production spine: Azotus now hands finished videos to Omega over HTTP, Omega receives them through a signed intake API, creates draft episodes, and the admin/public VOD surfaces know about review state and discovery.
+
+### Shipped in Omega
+
+- Added migration `20260518000000_vod_factory_intake.sql` and applied it to Supabase.
+- Added `vod_intake_jobs` plus episode fields: `azotus_track_id`, `azotus_job_id`, `source_language`, `review_status`, `assigned_to`, `review_notes`, `metadata_confidence`, `poster_candidates`, `search_vector`.
+- Added `POST /api/azotus/vod-intake`:
+  - HMAC auth via `AZOTUS_WEBHOOK_SECRET`
+  - idempotent by Azotus track + Bunny GUID
+  - stores intake job
+  - generates metadata from transcript
+  - creates/updates Omega draft episode
+- Added `POST /api/bunny/stream-webhook` for Bunny Stream event logging/status updates.
+- Added `POST /api/admin/episodes/[id]/regenerate` so the draft editor can regenerate metadata from stored transcript.
+- Draft inbox now shows queue stats, review status, assignment, Azotus origin, metadata confidence, poster count, and review notes.
+- Draft edit page now has review status, assigned-to, internal notes, Azotus/source metadata, transcript preview, and enabled "Fylla út sjálfvirkt".
+- Episode publish now revalidates VOD public pages/tags.
+- `/sermons` now has first-pass VOD discovery search/filter UI backed by Postgres full-text search.
+- Chapter saves push approved chapters back to Bunny best-effort.
+
+### Shipped in Azotus
+
+- Worker agent updated `workers/vod_publisher.py` to POST signed intake payloads to `OMEGA_VOD_INTAKE_URL` instead of shelling into the Omega repo.
+- `workers/bunny_upload.py` supports per-call Bunny library/API-key overrides.
+- Added `tests/test_vod_publisher.py`; Azotus VOD publisher tests pass.
+
+### Verification
+
+- `pnpm exec tsc --noEmit` ✅
+- `pnpm build` ✅ after rerun with network access for Google fonts
+- `supabase db push` for isolated VOD migration ✅
+- `supabase migration list` confirms `20260518000000` applied ✅
+- Browser QA: `http://localhost:3010/sermons?q=trú&language=is` rendered search/results UI ✅
+- Azotus: `python3 -m py_compile workers/vod_publisher.py workers/bunny_upload.py tests/test_vod_publisher.py` ✅
+- Azotus: `.venv/bin/pytest tests/test_vod_publisher.py` → 2 passed ✅
+
+### Important operational notes
+
+- Set matching secrets before the next live handoff:
+  - Omega/Vercel: `AZOTUS_WEBHOOK_SECRET`
+  - Azotus station: `OMEGA_VOD_INTAKE_URL=https://omega.is/api/azotus/vod-intake` (or preview URL) and the same `AZOTUS_WEBHOOK_SECRET`
+- The normal `supabase db push` is still blocked by old duplicate local migration versions (`20260417`, etc.). This session applied only the new VOD migration from an isolated temp workdir to avoid touching old history.
+- Poster candidate extraction is not built yet. The schema/admin path is ready; Azotus still sends an empty list.
+- Auto-triggering from Azotus `COMPLETED` is still intentionally off. Run one more manual track first.
+
+---
+
+## Session — 2026-05-18 (Azotus → Omega VOD bridge proved)
+
+Hawk handed off the stalled VOD bridge test from Claude. Codex used the committed Azotus branch `omega-vod-handoff` in a separate worktree so the dirty Azotus `main` checkout was left untouched.
+
+### Shipped operationally
+
+- Ran the VOD publisher against the real i2620 Azotus track:
+  - Track ID: `9cfd8236-d1f6-4c36-a9bd-6f717252af17`
+  - Job ID: `i2620_intluk_h264-1080p25-aac-20260516T122859784056Z`
+  - Video: `4_DELIVERY/VIDEO/i2620_intluk_h264-1080p25-aac-20260516T122859784056Z_SUBBED.mp4` (2.1 GB)
+- Uploaded the finished video to Omega's VOD Bunny library `628621`.
+- Bunny GUID: `2b386fa3-3862-486f-8074-65e91c8cc7f3`
+- Omega draft episode created:
+  - Episode ID: `43580ebe-85aa-442c-b196-a0e94e436515`
+  - Status: `draft`
+  - Language: `is`
+  - Series: `null` for human assignment in `/admin/drafts`
+- Azotus track moved from `COMPLETED` to `DELIVERED` with `vod_published=true`.
+
+### Notes
+
+- Claude's handoff said the command was `python -m workers.vod_publisher i2620`, but the DB lookup requires the real track UUID. Bare `i2620` did not resolve.
+- The generated Omega draft title is still filename-like. The metadata bridge works, but the editorial quality of title/description/poster/chapter generation needs the next pass.
+- No code was changed in Omega TV during this session.
+
+### Recommended next pass
+
+Build the real draft-review workflow around this proven bridge: better `/admin/drafts` screen, regenerate metadata, poster candidates, series assignment, publish/schedule. After one or two more manual successes, add the Azotus auto-trigger on eligible `COMPLETED` tracks.
 
 ---
 
