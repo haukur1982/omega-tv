@@ -1,9 +1,36 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-18 (Codex — VOD Factory M1 implemented)
+**Last Updated:** 2026-05-18 (Codex — VOD Factory deployed)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+
+---
+
+## Session — 2026-05-18 (VOD Factory deployed)
+
+Codex pushed and deployed the VOD Factory M1 work after Hawk approved Vercel CLI login.
+
+### Deployment
+
+- Pushed Omega branch `experiment/vellum-prayer-cards` to GitHub at `c0ee403`.
+- Added `AZOTUS_WEBHOOK_SECRET` to Vercel Production.
+- Deployed production through Vercel CLI.
+- Production URL returned by Vercel: `https://omega-9fwkws5cf-haukur1982-1838s-projects.vercel.app`
+- Active Vercel alias: `https://omega-tv-lovat.vercel.app`
+
+### Intake smoke test
+
+- `POST https://omega-tv-lovat.vercel.app/api/azotus/vod-intake` without signature returns `401`, which confirms the endpoint is live and protected.
+- `POST https://omega.is/api/azotus/vod-intake` currently returns `404`.
+- Until `omega.is` is pointed at this deployment correctly, Azotus should use:
+  - `OMEGA_VOD_INTAKE_URL=https://omega-tv-lovat.vercel.app/api/azotus/vod-intake`
+
+### Next
+
+- Fix the public `omega.is` domain routing before changing Azotus back to the branded URL.
+- Review the existing i2620 draft in `/admin/drafts`.
+- Run the next manual VOD publish with a new completed track after review.
 
 ---
 
@@ -47,9 +74,7 @@ Hawk asked to implement the 90-day VOD Factory plan. This session shipped the fi
 
 ### Important operational notes
 
-- Set matching secrets before the next live handoff:
-  - Omega/Vercel: `AZOTUS_WEBHOOK_SECRET`
-  - Azotus station: `OMEGA_VOD_INTAKE_URL=https://omega.is/api/azotus/vod-intake` (or preview URL) and the same `AZOTUS_WEBHOOK_SECRET`
+- Matching secrets were set locally and in Vercel Production. Azotus currently points to `https://omega-tv-lovat.vercel.app/api/azotus/vod-intake` because `omega.is` returns `404` for the new endpoint.
 - The normal `supabase db push` is still blocked by old duplicate local migration versions (`20260417`, etc.). This session applied only the new VOD migration from an isolated temp workdir to avoid touching old history.
 - Poster candidate extraction is not built yet. The schema/admin path is ready; Azotus still sends an empty list.
 - Auto-triggering from Azotus `COMPLETED` is still intentionally off. Run one more manual track first.
