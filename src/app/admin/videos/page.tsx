@@ -64,8 +64,6 @@ export default function VideosPage() {
     const [episodeNumber, setEpisodeNumber] = useState(1);
     const [isSaving, setIsSaving] = useState(false);
 
-    const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID;
-
     const loadData = async () => {
         setIsLoading(true);
         try {
@@ -396,7 +394,7 @@ export default function VideosPage() {
                                 {/* Thumbnail */}
                                 <div className="w-48 flex-shrink-0 bg-black relative">
                                     <img
-                                        src={draft.thumbnail_custom || `https://iframe.mediadelivery.net/thumbnail/${LIBRARY_ID}/${draft.bunny_video_id}/thumbnail.jpg`}
+                                        src={draft.thumbnail_custom || `/api/bunny/thumbnail/${draft.bunny_video_id}`}
                                         alt={draft.title}
                                         className="w-full h-full object-cover"
                                     />
@@ -461,7 +459,7 @@ export default function VideosPage() {
                                 <div key={video.guid} className="admin-card p-0 overflow-hidden flex flex-col group hover:border-[var(--admin-border-hover)] transition-colors">
                                     <div className="aspect-video bg-black relative">
                                         <img
-                                            src={`https://iframe.mediadelivery.net/thumbnail/${LIBRARY_ID}/${video.guid}/thumbnail.jpg`}
+                                            src={`/api/bunny/thumbnail/${video.guid}`}
                                             alt={video.title}
                                             className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                         />
@@ -530,7 +528,7 @@ export default function VideosPage() {
                                 <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">Smámynd</label>
                                 <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
                                     <img
-                                        src={generatedThumbUrl || `https://iframe.mediadelivery.net/thumbnail/${LIBRARY_ID}/${reviewingDraft.bunny_video_id}/thumbnail.jpg`}
+                                        src={generatedThumbUrl || `/api/bunny/thumbnail/${reviewingDraft.bunny_video_id}`}
                                         alt="Thumbnail"
                                         className="w-full h-full object-cover"
                                     />

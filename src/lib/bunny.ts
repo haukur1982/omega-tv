@@ -1,3 +1,5 @@
+import { getBunnyThumbnailProxyUrl } from './bunny-thumbnail';
+
 const API_KEY = process.env.BUNNY_API_KEY;
 const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID;
 const LIVE_STREAM_ID = process.env.NEXT_PUBLIC_BUNNY_LIVE_STREAM_ID;
@@ -18,11 +20,7 @@ export interface BunnyVideo {
 }
 
 export function getThumbnailUrl(videoId: string) {
-    // Standard Bunny Stream thumbnail path
-    // Format: https://{libraryId}.b-cdn.net/{videoId}/thumbnail.jpg
-    // Note: This often requires a custom hostname set in Bunny. 
-    // Fallback if no custom domain: https://iframe.mediadelivery.net/thumbnail/{library_id}/{video_id}/thumbnail.jpg
-    return `https://iframe.mediadelivery.net/thumbnail/${LIBRARY_ID}/${videoId}/thumbnail.jpg`;
+    return getBunnyThumbnailProxyUrl(videoId) ?? '';
 }
 
 // ---------------------------------------------------------------------------

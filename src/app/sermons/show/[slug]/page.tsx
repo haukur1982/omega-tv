@@ -307,7 +307,7 @@ function EpisodeCard({ ep, seriesTitle, clickable = true }: { ep: EpisodeRow; se
     const dur = ep.duration ? formatDuration(ep.duration) : null;
     const thumb = ep.thumbnail_custom
         ?? (ep.bunny_video_id !== 'mock'
-            ? `https://vz-dd90f302-e7e.b-cdn.net/${ep.bunny_video_id}/thumbnail.jpg`
+            ? `/api/bunny/thumbnail/${ep.bunny_video_id}`
             : undefined);
 
     // /sermons/[id] route accepts a Bunny GUID — see route.ts and the

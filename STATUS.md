@@ -1,9 +1,34 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-18 (Codex — temp Vercel rollout decision)
+**Last Updated:** 2026-05-18 (Codex — VOD thumbnail/metadata fixes pending deploy)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+
+---
+
+## Session — 2026-05-18 (VOD thumbnail/metadata fixes pending deploy)
+
+Hawk reported that the admin draft thumbnail was broken and the i2620 description was just raw subtitle lines.
+
+### Fixed in code
+
+- Added `/api/bunny/thumbnail/[videoId]`, a Bunny thumbnail proxy that fetches the CDN image with the Bunny player referer. Direct CDN requests return `403` and the old `iframe.mediadelivery.net/thumbnail/...` path returns `404` for i2620.
+- Switched admin/public VOD thumbnail fallbacks to use `/api/bunny/thumbnail/{bunnyGuid}` instead of direct Bunny URLs.
+- Updated Apple TV thumbnail generation to use the same Bunny thumbnail fetch path.
+- Improved `scripts/generate-metadata.ts` mock fallback so missing Gemini never produces raw SRT cue text as the description.
+
+### Verification
+
+- `pnpm exec tsc --noEmit` passed.
+- `pnpm build` was blocked locally by sandboxed Google Fonts network access. No TypeScript errors.
+- Live Supabase row repair and redeploy were blocked by Codex app privileged network usage limit. Next step is deploy after limit resets, then regenerate i2620 metadata.
+
+### Next
+
+- Add/confirm `GEMINI_API_KEY` in Vercel Production.
+- Deploy this branch to the temp Vercel URL.
+- Regenerate metadata for i2620 from the draft editor or direct admin route.
 
 ---
 

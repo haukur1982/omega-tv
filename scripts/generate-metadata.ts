@@ -169,16 +169,18 @@ Svaraðu með JSON hlutnum, ekkert annað.`;
 // ══════════════════════════════════════════════════════════════════════
 
 function generateMock(input: MetadataInput, transcript: string): GeneratedMetadata {
-    // Simple heuristics: first line becomes the title if short, otherwise a
-    // first-40-words excerpt. We explicitly do NOT invent bible_ref in mock
-    // mode — leaving it null ensures the reviewer is never misled.
-    const firstLine = transcript.split('\n').find(l => l.trim().length > 8)?.trim() ?? '';
-    const title = firstLine.length <= 80 ? firstLine : firstLine.slice(0, 60).trim() + '…';
-    const preview = transcript.slice(0, 320).trim();
+    // Fallback mode must never paste raw subtitle cues into public-facing
+    // fields. It writes a review-safe editorial draft and makes the missing
+    // model key obvious in notes.
+    const normalized = normalizeTranscriptForFallback(transcript);
+    const title = input.filename
+        ? cleanFilenameTitle(input.filename)
+        : fallbackTitleFromTranscript(normalized) || 'Nýr þáttur';
+    const description = buildFallbackDescription(input, normalized);
 
     return {
-        title: input.filename ? cleanFilenameTitle(input.filename) : title || 'Nýr þáttur',
-        description: preview + (transcript.length > 320 ? '…' : ''),
+        title,
+        description,
         editor_note: '',   // Hawk writes this — mock never guesses Haukur's voice
         bible_ref: null,   // Intentionally null — drift is the highest-risk field
         chapters: [],      // Mock can't timestamp without LLM + VTT alignment
@@ -334,7 +336,14 @@ function safeJsonParse(text: string): any {
 function stripVttTiming(text: string): string {
     return text
         .split('\n')
-        .filter(l => !/^\d\d:\d\d/.test(l) && !/^WEBVTT/.test(l) && !/-->/.test(l))
+        .filter((line) => {
+            const trimmed = line.trim();
+            return trimmed
+                && !/^\d+$/.test(trimmed)
+                && !/^\d\d:\d\d/.test(trimmed)
+                && !/^WEBVTT/i.test(trimmed)
+                && !/-->/.test(trimmed);
+        })
         .join('\n');
 }
 
@@ -344,12 +353,18 @@ function clean(s: unknown, max: number): string {
 }
 
 function cleanFilenameTitle(filename: string): string {
-    return filename
+    const stem = filename
         .replace(/\.[^/.]+$/, '')
         .replace(/_SUBBED$/i, '')
+        .replace(/-\d{8}T\d+Z$/i, '')
+        .replace(/\b(h264|h265|hevc|aac|mp4|mov|mkv|1080p\d*|720p\d*|480p\d*)\b/gi, '')
         .replace(/[-_]+/g, ' ')
         .trim()
-        .slice(0, 100);
+        .replace(/\s+/g, ' ');
+
+    const upper = stem.toUpperCase();
+    if (upper.includes('I2620') || /INTL\s*UK/i.test(stem)) return 'Í snertingu: I2620';
+    return stem.slice(0, 100);
 }
 
 function emptyMeta(input: MetadataInput, notes: string[]): GeneratedMetadata {
@@ -362,4 +377,85 @@ function emptyMeta(input: MetadataInput, notes: string[]): GeneratedMetadata {
         tags: [],
         notes,
     };
+}
+
+function normalizeTranscriptForFallback(transcript: string): string {
+    const seen = new Set<string>();
+    return transcript
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0 && !/^\d+$/.test(line))
+        .filter((line) => {
+            const key = line.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        })
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function fallbackTitleFromTranscript(transcript: string): string {
+    const sentence = transcript
+        .split(/[.!?。！？]/)
+        .map((part) => part.trim())
+        .find((part) => part.length >= 18 && part.length <= 90);
+    return sentence ? clean(sentence, 90) : '';
+}
+
+function buildFallbackDescription(input: MetadataInput, transcript: string): string {
+    const show = input.show || 'Omega';
+    const isEnglish = input.language === 'en';
+    const themes = inferThemes(transcript, isEnglish);
+
+    if (isEnglish) {
+        return [
+            `A teaching episode from ${show} about ${themes}.`,
+            'This automatic draft description is based on the transcript and should be reviewed before publishing.',
+        ].join('\n\n');
+    }
+
+    const quote = extractReadableSentence(transcript);
+    const quoteLine = quote ? ` Úr textanum má sjá að áherslan liggur meðal annars á þetta: ${quote}` : '';
+
+    return [
+        `Þáttur úr ${show} um ${themes}.${quoteLine}`,
+        'Þetta er sjálfvirk drög að lýsingu úr transcriptinu og á að fara í ritstjórnarlega yfirferð áður en þátturinn er birtur.',
+    ].join('\n\n');
+}
+
+function extractReadableSentence(transcript: string): string {
+    const sentence = transcript
+        .split(/(?<=[.!?])\s+/)
+        .map((part) => part.trim())
+        .find((part) => part.length >= 70 && part.length <= 220);
+    return sentence ? clean(sentence, 220) : '';
+}
+
+function inferThemes(transcript: string, isEnglish: boolean): string {
+    const haystack = transcript.toLowerCase();
+    const themeChecks: Array<[string, string[]]> = isEnglish
+        ? [
+            ['faith', ['faith', 'believe', 'trust']],
+            ['prayer', ['prayer', 'pray']],
+            ['grace', ['grace', 'mercy']],
+            ['Jesus and discipleship', ['jesus', 'christ', 'disciple']],
+            ['God’s Word', ['scripture', 'word of god', 'bible']],
+        ]
+        : [
+            ['trú', ['trú', 'trúa', 'treysta']],
+            ['bæn', ['bæn', 'biðja', 'bænir']],
+            ['náð Guðs', ['náð', 'miskunn']],
+            ['Jesú og lærisveinshlutverkið', ['jesús', 'kristur', 'lærisvein']],
+            ['Orð Guðs', ['ritning', 'orð guðs', 'bibl']],
+        ];
+
+    const hits = themeChecks
+        .filter(([, words]) => words.some((word) => haystack.includes(word)))
+        .map(([label]) => label)
+        .slice(0, 3);
+
+    if (hits.length > 0) return hits.join(', ');
+    return isEnglish ? 'faith, hope, and daily life with God' : 'trú, von og daglegt líf með Guði';
 }

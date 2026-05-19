@@ -191,7 +191,7 @@ function EpisodeCard({ ep }: { ep: IsraelEpisode }) {
         : '';
     const dur = ep.duration ? formatDuration(ep.duration) : null;
     const thumb = ep.thumbnail_custom
-        ?? `https://vz-dd90f302-e7e.b-cdn.net/${ep.bunny_video_id}/thumbnail.jpg`;
+        ?? `/api/bunny/thumbnail/${ep.bunny_video_id}`;
 
     return (
         <li>

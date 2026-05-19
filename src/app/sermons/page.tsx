@@ -284,7 +284,7 @@ function VodDiscoverySearch({
                                             <div style={{ aspectRatio: '16 / 9', overflow: 'hidden', borderRadius: '6px', background: 'rgba(28,28,30,0.12)' }}>
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img
-                                                    src={episode.thumbnail_custom ?? `https://iframe.mediadelivery.net/thumbnail/${process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID}/${episode.bunny_video_id}/thumbnail.jpg`}
+                                                    src={episode.thumbnail_custom ?? `/api/bunny/thumbnail/${episode.bunny_video_id}`}
                                                     alt=""
                                                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                                                 />

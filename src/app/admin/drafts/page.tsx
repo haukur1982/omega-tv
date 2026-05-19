@@ -176,7 +176,7 @@ function DraftRow({ draft, onPublish, isPublishing }: { draft: DraftEpisode; onP
                 {draft.thumbnail_custom || draft.bunny_video_id ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                        src={draft.thumbnail_custom ?? `https://iframe.mediadelivery.net/thumbnail/${process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID}/${draft.bunny_video_id}/thumbnail.jpg`}
+                        src={draft.thumbnail_custom ?? `/api/bunny/thumbnail/${draft.bunny_video_id}`}
                         alt={draft.title}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />

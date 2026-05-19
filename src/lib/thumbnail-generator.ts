@@ -1,6 +1,5 @@
 import sharp from 'sharp';
-
-const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID;
+import { fetchBunnyThumbnailBuffer } from './bunny-thumbnail';
 
 /**
  * Apple TV-inspired cinematic thumbnail generator.
@@ -30,15 +29,7 @@ const DIMENSIONS = {
 // ─── Fetch raw frame from Bunny ───
 
 async function fetchBunnyThumbnail(videoId: string): Promise<Buffer> {
-    const url = `https://iframe.mediadelivery.net/thumbnail/${LIBRARY_ID}/${videoId}/thumbnail.jpg`;
-
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error(`Failed to fetch Bunny thumbnail: ${res.status}`);
-    }
-
-    const arrayBuffer = await res.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    return (await fetchBunnyThumbnailBuffer(videoId)).buffer;
 }
 
 // ─── Create vignette overlay (darkened edges) ───

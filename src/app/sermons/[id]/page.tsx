@@ -216,7 +216,7 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
         dateDisplay: e.published_at
           ? new Date(e.published_at).toLocaleDateString('is-IS', { day: 'numeric', month: 'short' })
           : null,
-        thumbnail: e.thumbnail_custom || `https://iframe.mediadelivery.net/thumbnail/${process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID}/${e.bunny_video_id}/thumbnail.jpg`,
+        thumbnail: e.thumbnail_custom || `/api/bunny/thumbnail/${e.bunny_video_id}`,
         editorNote: e.editor_note,
         captions: e.captions_available,
       }));
