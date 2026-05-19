@@ -1,9 +1,36 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-19 (Codex — VOD thumbnail/metadata fixes deployed)
+**Last Updated:** 2026-05-19 (Codex — clean VOD thumbnail deployed)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+
+---
+
+## Session — 2026-05-19 (Clean i2620 thumbnail)
+
+Hawk reported that the generated i2620 thumbnail was ugly: it used a raw Bunny frame with burned Icelandic subtitles and part of the scripture slide.
+
+### Fixed
+
+- Updated Apple TV thumbnail generation to crop finished VOD frames away from the lower subtitle band and bias toward the live video side instead of the slide/text side.
+- Fixed the Sharp processing bug where `gamma(0.95)` was invalid; it now uses a valid correction value.
+- Added cache-busted thumbnail filenames so regenerated thumbnails do not keep showing stale images.
+- Generated a clean local preview at `/private/tmp/i2620-clean-thumb-v2.png`.
+- Uploaded the clean thumbnail to Supabase Storage and updated i2620 draft `43580ebe-85aa-442c-b196-a0e94e436515`:
+  - `https://dvzwpwlgucsdyrkhrpah.supabase.co/storage/v1/object/public/thumbnails/43580ebe-85aa-442c-b196-a0e94e436515_landscape_1779193909098.png`
+
+### Verification
+
+- `pnpm exec tsc --noEmit` passed.
+- Pushed commit `50df406` to `experiment/vellum-prayer-cards`.
+- Deployed to temp Vercel: `https://omega-tv-lovat.vercel.app`.
+- Verified the new Supabase thumbnail URL returns `200 image/png`.
+
+### Next
+
+- Refresh the i2620 draft modal in `/admin/drafts` and visually confirm the thumbnail is acceptable.
+- If a future frame still catches a lower-third or slide, the next step is multi-frame candidate selection rather than relying on one Bunny default frame.
 
 ---
 
