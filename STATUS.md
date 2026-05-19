@@ -31,6 +31,7 @@ Hawk reported that the generated i2620 thumbnail was ugly: it used a raw Bunny f
 
 - Refresh the i2620 draft modal in `/admin/drafts` and visually confirm the thumbnail is acceptable.
 - If a future frame still catches a lower-third or slide, the next step is multi-frame candidate selection rather than relying on one Bunny default frame.
+- Coordination handoff for Claude was created at `/Users/haukur/Projects/.dispatch/queue/DISPATCH-001-omega-vod-thumbnail-handoff.md`.
 
 ---
 
