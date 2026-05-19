@@ -18,6 +18,13 @@ interface ThumbnailOptions {
     seriesName?: string;
     episodeTitle?: string;
     format?: 'landscape' | 'portrait';
+    /**
+     * Finished Azotus VOD files often have burned subtitles in the bottom
+     * band, and imported teaching programs can use right-side scripture
+     * slides. This crop favors the live teaching frame and removes the
+     * subtitle band before any Apple TV treatment is applied.
+     */
+    cleanVodCrop?: boolean;
 }
 
 // Target dimensions
@@ -152,17 +159,31 @@ export async function generateThumbnail(options: ThumbnailOptions): Promise<Buff
 
     // 1. Fetch raw frame
     const rawFrame = await fetchBunnyThumbnail(options.bunnyVideoId);
+    const source = sharp(rawFrame);
+    const sourceMeta = await source.metadata();
+    const sourceWidth = sourceMeta.width ?? width;
+    const sourceHeight = sourceMeta.height ?? height;
+    const sourceCrop = options.cleanVodCrop !== false
+        ? getCleanVodCrop(sourceWidth, sourceHeight, format)
+        : null;
 
     // 2. Resize and color grade
-    let pipeline = sharp(rawFrame)
+    let pipeline = source
+        .rotate()
+        .extract(sourceCrop ?? {
+            left: 0,
+            top: 0,
+            width: sourceWidth,
+            height: sourceHeight,
+        })
         .resize(width, height, { fit: 'cover', position: 'centre' })
         // Color grading: boost saturation, slight contrast, warmth
         .modulate({
             saturation: 1.2,        // +20% saturation
             brightness: 1.05,       // slight brightness boost
         })
-        .linear(1.1, -(128 * 0.1)) // Contrast boost ~10%
-        .gamma(0.95);               // Slight warmth
+        .linear(1.1, -(128 * 0.1))
+        .gamma(1.05);
 
     // 3. Composite overlays
     const composites: sharp.OverlayOptions[] = [
@@ -188,6 +209,27 @@ export async function generateThumbnail(options: ThumbnailOptions): Promise<Buff
         .toBuffer();
 
     return result;
+}
+
+function getCleanVodCrop(
+    sourceWidth: number,
+    sourceHeight: number,
+    format: 'landscape' | 'portrait',
+): sharp.Region {
+    const targetRatio = DIMENSIONS[format].width / DIMENSIONS[format].height;
+    const safeHeight = Math.max(1, Math.floor(sourceHeight * 0.72));
+    const biasedWidth = format === 'landscape'
+        ? Math.floor(sourceWidth * 0.52)
+        : Math.floor(sourceWidth * 0.42);
+    const cropWidth = Math.max(1, Math.min(sourceWidth, biasedWidth, Math.floor(safeHeight * targetRatio)));
+    const cropHeight = Math.max(1, Math.min(safeHeight, Math.floor(cropWidth / targetRatio)));
+
+    return {
+        left: 0,
+        top: Math.max(0, Math.floor(sourceHeight * 0.02)),
+        width: cropWidth,
+        height: cropHeight,
+    };
 }
 
 /**
