@@ -1,9 +1,19 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-19 (Codex — poster system queued)
-**Last Agent:** Codex
+**Last Updated:** 2026-05-19 (Claude Code — DISPATCH-002 Azotus-side; no Omega code changes)
+**Last Agent:** Claude Code
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+
+---
+
+## Session — 2026-05-19 (DISPATCH-002 — Azotus-side, no Omega changes)
+
+Claude Code built DISPATCH-002's two-station VOD delivery guardrails — **entirely Azotus-side**, branch `codex/vod-intake-http`. **No Omega code changed**: `/api/azotus/vod-intake` already satisfies the handoff ("only change Omega if missing"). Codex's intake, idempotency, draft gate, Bunny thumbnail proxy and clean crop are preserved/untouched.
+
+Azotus commits `56c5533 54d2b92 3b60bbe fd6dedd 3fc3eef`: canonical track-UUID as `azotus_track_id` (never a filename/alias like i2620); `OMEGA_VOD_DELIVER_ROLE` one-deliverer gate (Mac mini=production, Mac Studio=dev); durable per-station delivery log; `sync_pipeline_to_macmini.sh` now ships the VOD code to the Mac mini (secrets stay on-box); guard unit tests. Full detail in Azotus `STATUS.md` + the `DISPATCH-002` Response (left in `queue/` as `partial` — pytest + live run are operator/venv steps, flagged from the start).
+
+**For Codex:** Omega intake enqueues `enqueue_vod_metadata_job` AND processes metadata inline in the same request — confirm the queued job isn't double-consumed. Optional (needs Hawk's ok, schema): unique index on `episodes(bunny_video_id)` to make dedup race-proof.
 
 ---
 
