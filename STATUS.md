@@ -1,13 +1,13 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-18 (Codex — VOD thumbnail/metadata fixes pending deploy)
+**Last Updated:** 2026-05-19 (Codex — VOD thumbnail/metadata fixes deployed)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
 
 ---
 
-## Session — 2026-05-18 (VOD thumbnail/metadata fixes pending deploy)
+## Session — 2026-05-19 (VOD thumbnail/metadata fixes deployed)
 
 Hawk reported that the admin draft thumbnail was broken and the i2620 description was just raw subtitle lines.
 
@@ -21,14 +21,20 @@ Hawk reported that the admin draft thumbnail was broken and the i2620 descriptio
 ### Verification
 
 - `pnpm exec tsc --noEmit` passed.
-- `pnpm build` was blocked locally by sandboxed Google Fonts network access. No TypeScript errors.
-- Live Supabase row repair and redeploy were blocked by Codex app privileged network usage limit. Next step is deploy after limit resets, then regenerate i2620 metadata.
+- Pushed commit `16d89ee` to `experiment/vellum-prayer-cards`.
+- Added/confirmed `GEMINI_API_KEY` in Vercel Production from local `.env.local`.
+- Deployed to temp Vercel: `https://omega-tv-lovat.vercel.app`.
+- Verified `https://omega-tv-lovat.vercel.app/api/bunny/thumbnail/2b386fa3-3862-486f-8074-65e91c8cc7f3` returns `200 image/jpeg`.
+- Repaired existing i2620 draft `43580ebe-85aa-442c-b196-a0e94e436515` with Gemini-generated metadata:
+  - Title: `Bænin: Lykill að andlegu lífi`
+  - Description length: 840 characters
+  - Tags: `bæn-og-trú`, `andlegt-líf`, `guðsrækt`, `kristið-líf`
 
 ### Next
 
-- Add/confirm `GEMINI_API_KEY` in Vercel Production.
-- Deploy this branch to the temp Vercel URL.
-- Regenerate metadata for i2620 from the draft editor or direct admin route.
+- Open i2620 in `/admin/drafts` and visually review the generated title/description/tags.
+- Generate/select the Apple TV thumbnail now that the Bunny thumbnail proxy works.
+- Run the next completed Azotus track through the VOD intake.
 
 ---
 
