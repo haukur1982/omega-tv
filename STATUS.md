@@ -1,9 +1,40 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-19 (Claude Code — DISPATCH-002 Azotus-side; no Omega code changes)
+**Last Updated:** 2026-05-19 (Claude Code — DISPATCH-003 Poster Machine V1)
 **Last Agent:** Claude Code
 **Branch:** `experiment/vellum-prayer-cards`
-**Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+**Build Status:** `pnpm exec tsc --noEmit` green on 2026-05-19 after DISPATCH-003. `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+
+---
+
+## Session — 2026-05-19 (DISPATCH-003 — Poster Machine V1)
+
+Built the Poster Machine: one selected source frame → branded variants → each public surface gets the right aspect. No schema change — the whole model lives in the existing `episodes.poster_candidates` JSONB column (the dispatch explicitly preferred this over a migration).
+
+### What was built (Omega side, branch `experiment/vellum-prayer-cards`)
+
+- **`src/lib/poster.ts`** (new) — the poster model: `PosterModel` type, `normalizePosterModel()` (accepts the legacy bare array, the full object, or null — old rows and the clean single-frame fallback never break), and `resolvePoster(ep, aspect)` with the full fallback chain (branded variant → other variant → `thumbnail_custom` → Bunny proxy → null).
+- **`src/lib/thumbnail-generator.ts`** — extended backward-compatibly: optional `sourceImage` Buffer (use a reviewer-chosen frame instead of the auto Bunny frame), new `portrait_4x5` (1080×1350) format, `getCleanVodCrop` generalized by target ratio (Codex's subtitle-band clean crop preserved), new `generatePosterVariants()` that fetches the source once and grades 16:9 + 4:5. The existing `bunnyVideoId`/`landscape` path (i2620, `api/admin/videos/thumbnail`) is untouched.
+- **`src/app/api/admin/posters/route.ts`** (new, admin-auth) — `GET ?episodeId` returns the normalized model; `POST` `select` | `generate` | `manual`. `generate` fetches the chosen frame, brands both variants, uploads to the existing Supabase `thumbnails` bucket, writes the model, and **mirrors the 16:9 into `thumbnail_custom`** so every existing public surface upgrades with zero other changes.
+- **`src/app/api/azotus/vod-intake/route.ts`** — new `ingestPosterCandidates()`: Azotus sends candidate frames inline as base64; intake moves each into Supabase Storage and stores only compact descriptors + URLs (base64 never touches the DB). Re-delivery never clobbers reviewer poster work (poster_candidates dropped from the update path, same pattern as `thumbnail_custom`). Degradable: no candidates → empty model, single-frame fallback still works.
+- **`src/components/admin/PosterStudio.tsx`** (new) + mounted in `src/app/admin/drafts/[id]/page.tsx` — candidate grid (pick a frame), Generate button, 16:9 + 4:5 previews, manual URL override. Self-contained so the big draft page only needed a one-line mount.
+
+### Decisions made (flagged for the architect)
+
+- **Candidate transport = base64 inline over the existing signed intake.** No new GCS bucket/ACL or second credential — reuses the one signed Azotus→Omega pipe and the existing Supabase `thumbnails` bucket. ~10×~40 KB JPEGs ≈ ~0.5 MB POST, one-shot per delivery. Forward-compatible: `ingestPosterCandidates` also accepts a pre-hosted `url` if Azotus later moves to GCS-hosted frames.
+- **Public consumption for V1 = the `thumbnail_custom` mirror** (universal, zero-risk — upgrades sermons list, show page, all `ThumbnailFrame` consumers automatically). Aspect-correct portrait wiring (`resolvePoster` into the `4/5` shelves) needs the search-projection / show-page query to also select `poster_candidates` — clean follow-up, intentionally not done in V1 ("keep the first version practical").
+
+### Verification (honest)
+
+- `pnpm exec tsc --noEmit` → exit 0, zero errors (Omega).
+- Azotus `python3 -m py_compile workers/vod_publisher.py tests/test_vod_publisher.py` clean.
+- NOT run here (sandbox): live image generation (Sharp), a real Azotus→Omega delivery, the `.venv` pytest suite. Operator steps below.
+
+### Next / operator
+
+- Run one live track from the Mac mini and confirm candidates appear in `/admin/drafts/[id]` → pick → Generate → 16:9 + 4:5 render and the card updates.
+- `.venv/bin/python -m pytest tests/test_vod_publisher.py -q` (Azotus) — existing tests should stay green (the <60s guard keeps `test_build_omega_intake_payload` hermetic).
+- Follow-up (not a blocker): wire `resolvePoster` into the `4/5` portrait shelves once their queries select `poster_candidates`.
 
 ---
 

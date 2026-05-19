@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { generateMetadata, type GeneratedMetadata } from '../../../../../scripts/generate-metadata';
+import { normalizePosterModel, type PosterModel } from '@/lib/poster';
 
 type IntakePayload = {
     azotus_track_id?: string;
@@ -243,6 +244,95 @@ async function buildMetadata(payload: IntakePayload, transcript: string, bunnyVi
     };
 }
 
+/**
+ * Poster Machine V1 (DISPATCH-003 §1–2).
+ *
+ * Azotus extracts candidate frames locally (it owns the finished video)
+ * and sends them inline as small base64 JPEGs. Here we move each one into
+ * Supabase Storage and return a normalized poster model holding only
+ * compact descriptors + public URLs — base64 never touches the DB, so the
+ * JSONB column stays small.
+ *
+ * Fully degradable: no candidates (extraction not ready / failed) → empty
+ * model, and the existing single clean Bunny frame still works downstream.
+ */
+async function ingestPosterCandidates(
+    rawCandidates: unknown,
+    baseName: string,
+): Promise<PosterModel> {
+    if (!Array.isArray(rawCandidates) || rawCandidates.length === 0) {
+        return normalizePosterModel(null);
+    }
+
+    const sb = supabaseAdmin as any;
+    const hydrated: Array<Record<string, unknown>> = [];
+
+    for (let i = 0; i < rawCandidates.length && i < 16; i++) {
+        const c = rawCandidates[i];
+        if (!c || typeof c !== 'object') continue;
+        const cand = c as Record<string, unknown>;
+
+        const id = typeof cand.id === 'string' && cand.id.trim()
+            ? cand.id.trim()
+            : `frame-${i + 1}`;
+        const meta = {
+            id,
+            time_sec: cand.time_sec ?? cand.t ?? null,
+            score: cand.score ?? null,
+            notes: Array.isArray(cand.notes) ? cand.notes : [],
+        };
+
+        // Already-hosted URL (forward-compatible if Azotus later moves to
+        // GCS/Bunny-hosted candidate frames) — keep as-is.
+        const existingUrl = typeof cand.url === 'string' && cand.url.trim()
+            ? cand.url.trim()
+            : null;
+        if (existingUrl) {
+            hydrated.push({ ...meta, url: existingUrl });
+            continue;
+        }
+
+        const b64 = typeof cand.image_b64 === 'string' ? cand.image_b64 : null;
+        if (!b64) continue;
+        let buffer: Buffer;
+        try {
+            buffer = Buffer.from(b64, 'base64');
+        } catch {
+            continue;
+        }
+        if (buffer.length === 0) continue;
+
+        const mime = typeof cand.mime === 'string' && cand.mime.startsWith('image/')
+            ? cand.mime
+            : 'image/jpeg';
+        const ext = mime === 'image/png' ? 'png' : 'jpg';
+        const filename = `${baseName}_cand_${id}.${ext}`;
+
+        const { error: upErr } = await sb.storage
+            .from('thumbnails')
+            .upload(filename, buffer, {
+                contentType: mime,
+                cacheControl: '3600',
+                upsert: true,
+            });
+        if (upErr) {
+            await logVodEvent('vod_intake.poster_warn', 'warn', 'Poster candidate upload failed.', {
+                base_name: baseName,
+                candidate_id: id,
+                error: upErr.message ?? String(upErr),
+            });
+            continue;
+        }
+        const { data: urlData } = sb.storage.from('thumbnails').getPublicUrl(filename);
+        hydrated.push({ ...meta, url: urlData.publicUrl });
+    }
+
+    // normalizePosterModel turns the array into the canonical model shape
+    // (source_candidates only; selected_source null; no variants yet —
+    // the reviewer picks + Omega brands later in the admin cockpit).
+    return normalizePosterModel(hydrated);
+}
+
 async function upsertDraftEpisodeFromIntake(
     payload: IntakePayload,
     metadata: GeneratedMetadata,
@@ -253,6 +343,7 @@ async function upsertDraftEpisodeFromIntake(
     const bunnyVideoId = payload.bunny_video_id!.trim();
 
     const existing = await findExistingEpisode(azotusTrackId, bunnyVideoId);
+    const posterModel = await ingestPosterCandidates(payload.poster_candidates, bunnyVideoId);
     const commonPayload: Record<string, unknown> = {
         azotus_track_id: azotusTrackId,
         azotus_job_id: payload.azotus_job_id ?? null,
@@ -269,7 +360,7 @@ async function upsertDraftEpisodeFromIntake(
         transcript,
         source: 'azotus',
         metadata_confidence: estimateMetadataConfidence(transcript, metadata),
-        poster_candidates: Array.isArray(payload.poster_candidates) ? payload.poster_candidates : [],
+        poster_candidates: posterModel,
     };
 
     if (existing) {
@@ -279,6 +370,11 @@ async function upsertDraftEpisodeFromIntake(
         delete updatePayload.season_id;
         delete updatePayload.episode_number;
         delete updatePayload.thumbnail_custom;
+        // Never clobber poster work on re-delivery: once a reviewer has
+        // picked a frame / generated branded variants, a repeat intake
+        // must not reset it back to raw candidates. Posters only land on
+        // first creation; the admin cockpit owns them afterwards.
+        delete updatePayload.poster_candidates;
         if (existing.status !== 'published' && !existing.review_status) {
             updatePayload.review_status = 'new';
         }

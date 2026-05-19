@@ -7,6 +7,7 @@ import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import OsisPicker from '@/components/admin/OsisPicker';
 import ChaptersEditor from '@/components/admin/ChaptersEditor';
+import PosterStudio from '@/components/admin/PosterStudio';
 import { supabase } from '@/lib/supabase';
 import { Loader2, CheckCircle2, ArrowLeft, Save, Sparkles, ExternalLink, AlertCircle, RefreshCw, ClipboardList } from 'lucide-react';
 
@@ -627,6 +628,17 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                             </div>
                         )}
                     </FieldGroup>
+
+                    {/* ── 5b. Poster Machine ───────────────────────────
+                         Reviewer picks an Azotus source frame, Omega
+                         brands 16:9 + 4:5. Mirrors landscape into
+                         thumbnail_custom so every public surface upgrades
+                         with no other changes. */}
+                    <PosterStudio
+                        episodeId={episode.id}
+                        seriesTitle={series?.title}
+                        episodeTitle={episode.title}
+                    />
 
                     {/* ── 6. Hvar mun þetta birtast? ──────────────────
                          The mental model panel. Every row tells Hawk
