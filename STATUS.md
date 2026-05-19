@@ -1,6 +1,6 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-19 (Codex — clean VOD thumbnail deployed)
+**Last Updated:** 2026-05-19 (Codex — Azotus/Omega handoff queued)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
@@ -32,6 +32,29 @@ Hawk reported that the generated i2620 thumbnail was ugly: it used a raw Bunny f
 - Refresh the i2620 draft modal in `/admin/drafts` and visually confirm the thumbnail is acceptable.
 - If a future frame still catches a lower-third or slide, the next step is multi-frame candidate selection rather than relying on one Bunny default frame.
 - Coordination handoff for Claude was created at `/Users/haukur/Projects/.dispatch/queue/DISPATCH-001-omega-vod-thumbnail-handoff.md`.
+
+---
+
+## Session — 2026-05-19 (Azotus/Omega delivery package queued)
+
+Hawk clarified the Azotus mental model: Azotus receives original ministry videos, transcribes, translates, creates subtitles, burns subtitles when needed, and exports a processed delivery video. Omega should not replace Azotus; Omega should receive Azotus's completed delivery package as a reviewed VOD draft.
+
+### Coordination
+
+- Created Claude build dispatch: `/Users/haukur/Projects/.dispatch/queue/DISPATCH-002-azotus-omega-delivery-package.md`.
+- The requested build is the dependable Azotus completed-track handoff:
+  - final delivery video
+  - transcript/subtitles
+  - language/source metadata
+  - Bunny upload/idempotency
+  - signed Omega intake
+  - one gated Omega draft
+
+### Guardrails
+
+- Keep using `https://omega-tv-lovat.vercel.app` until Hawk says the real domain is ready.
+- Preserve the Bunny thumbnail proxy and clean subtitle-avoiding thumbnail crop.
+- No VOD auto-publish.
 
 ---
 
