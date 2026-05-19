@@ -1,6 +1,6 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-19 (Codex — two-station VOD guardrails added)
+**Last Updated:** 2026-05-19 (Codex — poster system queued)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
@@ -77,6 +77,29 @@ Claude flagged the corrected production model: the Mac mini in Iceland is the pr
 - Confirmed `workers/vod_publisher.py` sends `"azotus_track_id": track_id`.
 - Confirmed `/tracks/{track_id}/publish-vod` passes the route `track_id` through to `workers.vod_publisher.publish_to_vod(track_id, None)`.
 - Confirmed Azotus track IDs are UUID-based. `omega_db._generate_id()` uses UUID4; the FastAPI create-track route uses deterministic UUID5 from `program_id|language|subtitle`.
+
+---
+
+## Session — 2026-05-19 (Poster system queued)
+
+Hawk clarified that Omega's front page and VOD surfaces use different aspect ratios and graphic treatments, so the current single generated thumbnail is only V1 fallback behavior.
+
+### Coordination
+
+- Created Claude build dispatch: `/Users/haukur/Projects/.dispatch/queue/DISPATCH-003-omega-poster-system.md`.
+- Poster Machine V1 target:
+  - Azotus extracts 8-12 frame candidates from the finished delivery video.
+  - Reject obvious bad frames: black, blurry, too dark, subtitle/lower-third heavy, mostly slide/text when live frames exist.
+  - Omega reviewer picks the source frame.
+  - Omega generates branded variants for current UI needs, especially `16:9` and `4:5`.
+  - Public VOD/front-page components use the correct variant instead of stretching one image everywhere.
+
+### Guardrails
+
+- Preserve the current clean thumbnail fallback.
+- Do not block VOD delivery on perfect poster automation.
+- Keep manual override available.
+- No auto-publish.
 
 ---
 
