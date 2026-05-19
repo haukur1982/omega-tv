@@ -1,6 +1,6 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-19 (Codex — Azotus/Omega handoff queued)
+**Last Updated:** 2026-05-19 (Codex — two-station VOD guardrails added)
 **Last Agent:** Codex
 **Branch:** `experiment/vellum-prayer-cards`
 **Build Status:** `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
@@ -55,6 +55,28 @@ Hawk clarified the Azotus mental model: Azotus receives original ministry videos
 - Keep using `https://omega-tv-lovat.vercel.app` until Hawk says the real domain is ready.
 - Preserve the Bunny thumbnail proxy and clean subtitle-avoiding thumbnail crop.
 - No VOD auto-publish.
+
+---
+
+## Session — 2026-05-19 (Two-station VOD guardrails)
+
+Claude flagged the corrected production model: the Mac mini in Iceland is the primary studio station, not a translation-only satellite. Hawk's Mac Studio is dev/secondary.
+
+### Updated Dispatch
+
+- Amended `/Users/haukur/Projects/.dispatch/queue/DISPATCH-002-azotus-omega-delivery-package.md` with:
+  - Mac mini = primary production VOD deliverer.
+  - Mac Studio = dev/secondary, not normal production deliverer.
+  - Mac mini sync/deploy must include VOD delivery code.
+  - Secrets stay excluded from sync; provision the Mac mini `.env` directly on-box.
+  - Only one station should deliver a given production program to Omega/Bunny.
+  - Production trigger must pass the real Azotus track UUID as `azotus_track_id`, not a filename/test alias like `i2620`.
+
+### Local Check
+
+- Confirmed `workers/vod_publisher.py` sends `"azotus_track_id": track_id`.
+- Confirmed `/tracks/{track_id}/publish-vod` passes the route `track_id` through to `workers.vod_publisher.publish_to_vod(track_id, None)`.
+- Confirmed Azotus track IDs are UUID-based. `omega_db._generate_id()` uses UUID4; the FastAPI create-track route uses deterministic UUID5 from `program_id|language|subtitle`.
 
 ---
 
