@@ -370,7 +370,7 @@ async function upsertDraftEpisodeFromIntake(
         bible_ref: metadata.bible_ref,
         chapters: metadata.chapters.length > 0 ? metadata.chapters : null,
         tags: metadata.tags,
-        duration: payload.duration_sec ?? null,
+        duration: payload.duration_sec != null ? Math.round(payload.duration_sec) : null,
         language_primary: payload.language ?? 'is',
         source_language: payload.source_language ?? null,
         transcript,
