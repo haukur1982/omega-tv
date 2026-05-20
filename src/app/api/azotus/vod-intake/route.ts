@@ -111,13 +111,29 @@ export async function POST(req: NextRequest) {
             status: 'draft_ready',
         });
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown intake failure.';
+        // Robust extraction — Supabase JS client surfaces errors as plain
+        // {message, code, details, hint} objects (NOT Error instances),
+        // so `error instanceof Error` was always false and we lost the
+        // real cause as "Unknown intake failure.". Capture every shape.
+        const err = (error && typeof error === 'object') ? error as Record<string, unknown> : null;
+        const rawMessage =
+            (err && typeof err.message === 'string' && err.message) ||
+            (typeof error === 'string' && error) ||
+            '';
+        const message = rawMessage || 'Unknown intake failure.';
+        const diagnostic = {
+            code: err && typeof err.code === 'string' ? err.code : null,
+            details: err && typeof err.details === 'string' ? err.details : null,
+            hint: err && typeof err.hint === 'string' ? err.hint : null,
+            stack: error instanceof Error ? error.stack : null,
+        };
         await markIntakeFailed(azotusTrackId, bunnyVideoId, payload, message);
         await logVodEvent('vod_intake.failed', 'error', message, {
             azotus_track_id: azotusTrackId,
             bunny_video_id: bunnyVideoId,
+            diagnostic,
         });
-        return NextResponse.json({ error: message }, { status: 500 });
+        return NextResponse.json({ error: message, diagnostic }, { status: 500 });
     }
 }
 
