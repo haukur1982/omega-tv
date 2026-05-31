@@ -9,6 +9,7 @@ import OsisPicker from '@/components/admin/OsisPicker';
 import ChaptersEditor from '@/components/admin/ChaptersEditor';
 import PosterStudio from '@/components/admin/PosterStudio';
 import { supabase } from '@/lib/supabase';
+import { authedFetch } from '@/lib/admin-fetch';
 import { Loader2, CheckCircle2, ArrowLeft, Save, Sparkles, ExternalLink, AlertCircle, RefreshCw, ClipboardList } from 'lucide-react';
 
 /**
@@ -101,18 +102,15 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
 
     useEffect(() => {
         (async () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const sb = supabase as any;
-            const { data, error: e } = await sb
-                .from('episodes')
-                .select('id, title, description, episode_number, bunny_video_id, thumbnail_custom, series_id, season_id, status, published_at, bible_ref, editor_note, chapters, tags, captions_available, transcript_url, transcript, language_primary, source_language, review_status, assigned_to, review_notes, metadata_confidence, poster_candidates, azotus_track_id, azotus_job_id')
-                .eq('id', id)
-                .single();
-            if (!e && data) {
+            // The episode (drafts + transcript) loads via the admin service-role
+            // route — never over the public anon key. The `series` table is
+            // public-readable, so the picker list can stay on the browser client.
+            const res = await authedFetch(`/api/admin/episodes/${id}`);
+            if (res.ok) {
+                const { episode: data } = await res.json();
                 setEpisode(data as Episode);
-                // Fetch all series in parallel with the linked-series fetch — the
-                // editor needs the full list for the picker so episodes can be
-                // connected/reassigned without leaving the page.
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const sb = supabase as any;
                 const allSeriesPromise = sb
                     .from('series')
                     .select('id, title, slug, category')
@@ -124,7 +122,8 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                 if (allRes.data) setAllSeries(allRes.data as SeriesInfo[]);
                 if (linkedRes.data) setSeries(linkedRes.data as SeriesInfo);
             } else {
-                setError(e?.message ?? 'Fann ekki þátt.');
+                const err = await res.json().catch(() => ({}));
+                setError(err.error ?? 'Fann ekki þátt.');
             }
             setLoading(false);
         })();

@@ -76,10 +76,12 @@ export default function VisionPage() {
             </div>
 
             {/* Focus Areas */}
-            <section className="py-24 border-t border-[var(--border)]">
+            {/* Cream "dawn" band — breaks the all-dark page so the register
+                shift reads like dawn, not a wall (north star: warm + LIGHT). */}
+            <section className="py-24" style={{ background: 'var(--skra)', color: 'var(--skra-djup)' }}>
                 <div className="max-w-4xl mx-auto px-6">
-                    <p className="text-[var(--accent)] text-xs font-semibold uppercase tracking-[0.2em] mb-4">Áherslur</p>
-                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }} className="font-bold mb-16 tracking-tight">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--gull)' }}>Áherslur</p>
+                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', color: 'var(--skra-djup)' }} className="font-bold mb-16 tracking-tight">
                         Þrjár stoðir framtíðarinnar.
                     </h2>
 
@@ -93,12 +95,12 @@ export default function VisionPage() {
                                 transition={{ delay: idx * 0.1 }}
                                 className="grid grid-cols-[40px_1fr] gap-6 items-start"
                             >
-                                <span className="text-[var(--accent)] text-sm font-bold pt-1">
+                                <span className="text-sm font-bold pt-1" style={{ color: 'var(--gull)' }}>
                                     {String(idx + 1).padStart(2, '0')}
                                 </span>
-                                <div className="border-t border-[var(--border)] pt-6">
-                                    <h3 className="text-2xl font-bold mb-3">{proj.title}</h3>
-                                    <p className="text-[var(--text-secondary)] leading-relaxed">{proj.desc}</p>
+                                <div className="pt-6" style={{ borderTop: '1px solid rgba(27,24,20,0.12)' }}>
+                                    <h3 className="text-2xl font-bold mb-3" style={{ color: 'var(--skra-djup)' }}>{proj.title}</h3>
+                                    <p className="leading-relaxed" style={{ color: 'var(--skra-mjuk)' }}>{proj.desc}</p>
                                 </div>
                             </motion.div>
                         ))}

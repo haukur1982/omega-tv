@@ -92,24 +92,24 @@ export default async function NewsletterPage() {
             <section style={{ maxWidth: '48rem', margin: '0 auto', padding: '0 1.5rem clamp(3rem, 6vw, 5rem)' }}>
                 {latest ? (
                     <article style={{
-                        background: '#fcfbf9',
-                        color: '#1a1a1a',
+                        background: 'var(--skra)',
+                        color: 'var(--skra-djup)',
                         padding: 'clamp(2rem, 4vw, 4rem)',
                         borderRadius: '14px',
                         overflow: 'hidden',
                     }}>
-                        <header style={{ textAlign: 'center', borderBottom: '1px solid #e5e5e5', paddingBottom: '2rem', marginBottom: '2.5rem' }}>
+                        <header style={{ textAlign: 'center', borderBottom: '1px solid rgba(27,24,20,0.12)', paddingBottom: '2rem', marginBottom: '2.5rem' }}>
                             <h2 style={{
                                 fontFamily: 'var(--font-serif)',
                                 fontSize: 'clamp(1.5rem, 4vw, 2.25rem)',
                                 fontWeight: 700,
-                                color: '#1a1a1a',
+                                color: 'var(--skra-djup)',
                                 lineHeight: 1.2,
                                 marginBottom: '1rem',
                             }}>
                                 {latest.title}
                             </h2>
-                            <time style={{ color: '#888', fontWeight: 500, letterSpacing: '0.1em', fontSize: '0.8rem', textTransform: 'uppercase' }}>
+                            <time style={{ color: 'var(--skra-mjuk)', fontWeight: 500, letterSpacing: '0.1em', fontSize: '0.8rem', textTransform: 'uppercase' }}>
                                 {new Date(latest.date).toLocaleDateString('is-IS', { year: 'numeric', month: 'long', day: 'numeric' })}
                             </time>
                         </header>
@@ -120,9 +120,9 @@ export default async function NewsletterPage() {
                             ))}
                         </div>
 
-                        <footer style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e5e5' }}>
-                            <p style={{ fontWeight: 700, fontSize: '1rem', color: '#1a1a1a' }}>{latest.author}</p>
-                            <p style={{ fontSize: '0.75rem', color: '#888', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>Omega Stöðin</p>
+                        <footer style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(27,24,20,0.12)' }}>
+                            <p style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--skra-djup)' }}>{latest.author}</p>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--skra-mjuk)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>Omega Stöðin</p>
                         </footer>
                     </article>
                 ) : (

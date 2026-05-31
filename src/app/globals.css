@@ -68,12 +68,25 @@
   --rail-padding: clamp(24px, 4vw, 60px);
   --section-gap:  clamp(2.5rem, 5vw, 4rem);
 
+  /* ── Corner radius ──────────────────────────────────────────────
+     Referenced ~87× across the app (buttons, cards, inputs, panels)
+     but never defined — so every one of those corners was rendering
+     SQUARE. A soft, dignified scale: warm without being bubbly. */
+  --radius-xs: 8px;    /* chips, pills, small controls */
+  --radius-sm: 12px;   /* buttons, inputs */
+  --radius-md: 18px;   /* cards, panels */
+  --radius-lg: 28px;   /* hero surfaces, large frames */
+
   /* ── Legacy aliases — keep components rendering during migration ── */
   --bg-deep:        var(--mold);
   --bg-surface:     var(--torfa);
   --bg-elevated:    var(--reykur);
-  --accent:         var(--nordurljos);
-  --accent-dim:     var(--nordurljos-mist);
+  /* General accent = WARM (candle). The north star is warm-not-cold, and
+     the cold Northern-Light blue is for wayfinding ONLY — genuine
+     navigation affordances use var(--nordurljos) directly. Re-pointing this
+     alias warms ~93 emotional/CTA/kicker uses across the site at once. */
+  --accent:         var(--kerti);
+  --accent-dim:     var(--kerti-gloed);
   --text-primary:   var(--ljos);
   --text-secondary: var(--moskva);
   --text-muted:     var(--steinn);
@@ -164,11 +177,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 .type-merki {
   font-family: var(--font-sans);
-  font-size: 0.6875rem;
+  font-size: 0.8125rem;       /* 13px — was 11px; the active audience is 60–75 */
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;     /* eased from 0.18em so caps read, not just decorate */
   text-transform: uppercase;
-  line-height: 1;
+  line-height: 1.1;
 }
 .type-meta {
   font-family: var(--font-sans);

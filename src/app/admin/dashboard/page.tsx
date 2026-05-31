@@ -7,6 +7,7 @@ import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import StatCard from '@/components/admin/StatCard';
 import ActivityFeed from '@/components/admin/ActivityFeed';
+import { authedFetch } from '@/lib/admin-fetch';
 
 interface Stats {
     prayers: { total: number; pending: number };
@@ -32,11 +33,11 @@ export default function AdminDashboardPage() {
         setIsLoading(true);
         try {
             // Fetch prayers
-            const prayerRes = await fetch('/api/admin/prayers');
+            const prayerRes = await authedFetch('/api/admin/prayers');
             const prayers = prayerRes.ok ? await prayerRes.json() : [];
 
             // Fetch subscribers
-            const subRes = await fetch('/api/admin/subscribers');
+            const subRes = await authedFetch('/api/admin/subscribers');
             const subscribers = subRes.ok ? await subRes.json() : [];
 
             // Calculate stats

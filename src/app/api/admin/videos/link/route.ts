@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     if (auth.error) return auth.error;
 
     try {
-        const { bunnyGuid, seriesName, episodeTitle, episodeNumber, description } = await request.json();
+        const { bunnyGuid, seriesName, episodeTitle, episodeNumber, description, episodeId } = await request.json();
 
         if (!bunnyGuid || !seriesName || !episodeTitle) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -73,25 +73,65 @@ export async function POST(request: Request) {
             seasonId = newSeason.id;
         }
 
-        // 3. Create episode
-        const { data: episode, error: epErr } = await supabaseAdmin
-            .from('episodes')
-            .insert({
-                series_id: seriesId,
-                season_id: seasonId,
-                bunny_video_id: bunnyGuid,
-                title: episodeTitle,
-                episode_number: episodeNumber || 1,
-                description: description || '',
-                status: 'published',
-                source: 'admin',
-            })
-            .select()
-            .single();
+        // 3. Publish the episode.
+        //
+        // Two paths, one endpoint:
+        //  • episodeId given → PUBLISH AN EXISTING DRAFT IN PLACE. This is the
+        //    Azotus path: the draft already carries transcript, chapters,
+        //    bible_ref, tags, poster candidates and a generated thumbnail. We
+        //    only assign it to a series/season and flip it live — an UPDATE, so
+        //    none of that enrichment is lost, and there's no second row to
+        //    collide with the unique bunny_video_id index.
+        //  • no episodeId → fresh manual upload / connect: INSERT a new row.
+        //
+        // Both set published_at — public queries filter on `published_at IS NOT
+        // NULL`, so an episode published without it would be live but invisible.
+        const publishedAt = new Date().toISOString();
+        let episode: { id: string } | null = null;
 
-        if (epErr || !episode) {
-            console.error('Episode create error:', epErr);
-            return NextResponse.json({ error: 'Failed to create episode' }, { status: 500 });
+        if (episodeId) {
+            const { data, error: upErr } = await supabaseAdmin
+                .from('episodes')
+                .update({
+                    series_id: seriesId,
+                    season_id: seasonId,
+                    title: episodeTitle,
+                    episode_number: episodeNumber || 1,
+                    description: description ?? undefined,
+                    status: 'published',
+                    review_status: 'published',
+                    published_at: publishedAt,
+                })
+                .eq('id', episodeId)
+                .select('id')
+                .single();
+            if (upErr || !data) {
+                console.error('Episode publish-in-place error:', upErr);
+                return NextResponse.json({ error: 'Failed to publish draft' }, { status: 500 });
+            }
+            episode = data;
+        } else {
+            const { data, error: epErr } = await supabaseAdmin
+                .from('episodes')
+                .insert({
+                    series_id: seriesId,
+                    season_id: seasonId,
+                    bunny_video_id: bunnyGuid,
+                    title: episodeTitle,
+                    episode_number: episodeNumber || 1,
+                    description: description || '',
+                    status: 'published',
+                    review_status: 'published',
+                    published_at: publishedAt,
+                    source: 'admin',
+                })
+                .select('id')
+                .single();
+            if (epErr || !data) {
+                console.error('Episode create error:', epErr);
+                return NextResponse.json({ error: 'Failed to create episode' }, { status: 500 });
+            }
+            episode = data;
         }
 
         return NextResponse.json({

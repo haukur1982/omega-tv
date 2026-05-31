@@ -25,7 +25,7 @@ Icelandic Christian TV streaming platform. Public website + admin portal for man
 - Supabase project ref: `dvzwpwlgucsdyrkhrpah`
 - Bunny Stream Library ID: `628621`
 - Bunny CDN hostname: `vz-dd90f302-e7e.b-cdn.net`
-- Vercel project: TODO
+- Vercel project: `prj_FpxS6A41sMiukyY8FHH5ZlPsCcYa` (team `team_FwdMyHJVjb7wq7wesliBryvV`, slug `haukur1982-1838s-projects`, name `omega-tv`)
 
 ### Env vars needed (all in .env.local)
 ```

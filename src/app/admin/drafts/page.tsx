@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { supabase } from '@/lib/supabase';
+import { authedFetch } from '@/lib/admin-fetch';
 import { Loader2, FileText, CheckCircle2, Tag, BookOpen, Plus, UserRound, AlertCircle } from 'lucide-react';
 import { displayPassageIs } from '@/lib/passages';
 
@@ -49,14 +49,12 @@ export default function DraftsPage() {
 
     const load = async () => {
         setLoading(true);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sb = supabase as any;
-        const { data, error } = await sb
-            .from('episodes')
-            .select('id, title, description, bunny_video_id, thumbnail_custom, episode_number, status, created_at, bible_ref, editor_note, chapters, tags, captions_available, series_id, review_status, assigned_to, review_notes, azotus_track_id, metadata_confidence, poster_candidates')
-            .eq('status', 'draft')
-            .order('created_at', { ascending: false });
-        if (!error && data) setDrafts(data as DraftEpisode[]);
+        // Service-role server route — never reads drafts over the public anon key.
+        const res = await authedFetch('/api/admin/drafts');
+        if (res.ok) {
+            const { items } = await res.json();
+            setDrafts((items ?? []) as DraftEpisode[]);
+        }
         setLoading(false);
     };
 
@@ -66,13 +64,9 @@ export default function DraftsPage() {
 
     const publish = async (id: string) => {
         setPublishing(id);
-        const { data: { session } } = await supabase.auth.getSession();
-        const res = await fetch(`/api/admin/episodes/${id}/publish`, {
+        const res = await authedFetch(`/api/admin/episodes/${id}/publish`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-            },
+            headers: { 'Content-Type': 'application/json' },
         });
         if (res.ok) {
             setDrafts(prev => prev.filter(d => d.id !== id));

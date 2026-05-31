@@ -21,24 +21,38 @@ Last reconciled against real git/repo state: 2026-05-17.
 
 ## 1. Feeding the VOD (Azotus → Omega) — the real status
 
-**How it's designed to work (M1, code-wired):**
+**How it works (M1 + M2 + M3 shipped):**
 Azotus finishes translating a video → uploads the subtitled MP4 to Omega's
-**VOD Bunny library (628621)** → calls Omega's metadata generator → a
-**DRAFT episode** appears in `/admin/drafts` with AI title/description/
-chapters for your 2–3 min review → you assign a series and hit Publish.
-Nothing goes public automatically.
+**VOD Bunny library (628621)** → POSTs an HMAC-signed payload to
+`/api/azotus/vod-intake` → a **DRAFT episode** appears in `/admin/drafts`
+with Gemini title/description/chapters + 8–12 poster candidate frames →
+PosterStudio in `/admin/drafts/[id]` brands 16:9 + 4:5 from your pick →
+you review and hit **Vista og birta**. Nothing goes public automatically.
 
-**Actual state — be honest about this:**
-- The code is written but **UNCOMMITTED** in `~/Projects/Azotus`
-  (`workers/vod_publisher.py`, `workers/bunny_upload.py`). **Risk: it can
-  be lost.** First action should be: commit it on its own branch.
-- It has **never been run on a real finished job.** Unproven.
-- **No auto-trigger** (M3). Today it's a manual command:
-  `cd ~/Projects/Azotus && python -m workers.vod_publisher <track_id>`.
+**Actual state — current truth (2026-05-20):**
+- **Committed and deployed.** `workers/vod_publisher.py` is on Azotus
+  branch `codex/vod-intake-http`; Omega intake + PosterStudio are on
+  `experiment/vellum-prayer-cards`, deployed to `omega-tv-lovat.vercel.app`.
+- **Proved end-to-end on one real track:** i2620 (Charles Stanley),
+  2026-05-18. Bunny GUID `2b386fa3-3862-486f-8074-65e91c8cc7f3`,
+  Omega draft `43580ebe-85aa-442c-b196-a0e94e436515`.
+- **One delivery failed** on 2026-05-19 18:12 with the generic catch
+  message "Unknown intake failure." Commit `e0a2d87` now captures the
+  real error in the catch — but Azotus hasn't retried, so we don't yet
+  know what broke. Next action: re-fire that one track from the Mac mini
+  (`5346e83b-9296-4a3d-87d8-6e65b68ef39c`) and read the real error.
+- **Two-station guardrails live:** Mac mini = production deliverer
+  (`OMEGA_VOD_DELIVER_ROLE=production`), Mac Studio = dev. Mac Studio
+  refuses to deliver unless `OMEGA_VOD_ALLOW_DEV_DELIVERY=1`.
+- **Backlog deliverer ready:** `scripts/deliver_vod_backlog.py` on the
+  mini will run every COMPLETED Icelandic track through once the one
+  stuck delivery is unstuck.
+- **No auto-trigger yet (M3 deferred).** Today: manual command per track.
 
-**The path:** (1) commit M1 → (2) prove it on ONE real track → (3) then,
-only if it works, add the auto-trigger on Azotus `FINALIZED`. Don't
-auto-fire into the live VOD before one manual run proves it.
+**The path forward:** (1) unstick the 2026-05-19 18:12 failure
+(re-fire from the mini, read the now-captured error) → (2) run the
+backlog deliverer once that's confirmed clean → (3) only then add the
+auto-trigger on Azotus `FINALIZED`.
 
 ---
 
@@ -96,16 +110,17 @@ draft→review→publish flow and the series-cover field) — separate passes.
 
 ## Immediate decisions (your call — nothing is mid-flight)
 
-1. **Save the Azotus M1 work** — commit it (own branch, not main) so it
-   can't be lost. Recommended: do this first, it's fragile.
-2. **Prove the VOD feed** — run the one-track manual command when you have
-   a finished job to test with.
-3. **Pick the thumbnail path** — curated series covers (needs the small
+1. ~~**Save the Azotus M1 work**~~ — DONE. Committed on
+   `codex/vod-intake-http`, two-station guardrails in place.
+2. ~~**Prove the VOD feed**~~ — DONE. i2620 went end-to-end 2026-05-18.
+3. **Unstick the 2026-05-19 failure** — re-fire from the mini, read the
+   now-captured real error from commit `e0a2d87`. ~30 minutes.
+4. **Run the backlog** — `scripts/deliver_vod_backlog.py --deliver` on
+   the mini to push the existing Icelandic backlog through. Each lands
+   as a draft for 2–3 min review.
+5. **Pick the thumbnail path** — curated series covers (needs the small
    admin field + photo curation) vs. living on the typographic fallback
    for now.
-4. ~~**Admin grouping**~~ — DONE (nav grouped by the four jobs, on
-   `vellum`). Visual needs your admin login to eyeball; deploy is your
-   call. Next admin work = the draft→review→publish workflow itself.
 
 Remaining design-doc items (not blocking, your pace): `FeaturedSunday`,
 the big blue-`--accent` sweep (large, regression-risky — branch-first).

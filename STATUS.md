@@ -1,9 +1,87 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-19 (Claude Code — DISPATCH-003 Poster Machine V1)
-**Last Agent:** Claude Code
+**Last Updated:** 2026-05-30 (Claude Opus — Platform foundation rebuild)
+**Last Agent:** Claude Opus 4.8 (Claude Code)
 **Branch:** `experiment/vellum-prayer-cards`
-**Build Status:** `pnpm exec tsc --noEmit` green on 2026-05-19 after DISPATCH-003. `pnpm build` green on 2026-05-18. Existing warning: `news_items` missing from Supabase schema cache during static generation.
+**Build Status:** `npx tsc --noEmit` green on 2026-05-30. Dev server (`pnpm dev`, :3010) boots clean; all changed admin routes compile and 401 correctly under the new auth gate. `pnpm build` last green 2026-05-18.
+
+---
+
+## Session — 2026-05-30 (Claude Opus — Foundation: auth + launch blockers)
+
+Commissioned to build the platform to a state-of-the-art bar (UI/UX exceptional, Azotus→publish flow effortless). Started with a multi-agent audit (41 confirmed bugs, 1 refuted; design scored per public page), then rebuilt the foundation because a beautiful UI on a broken auth layer is worthless. **Nothing committed yet** — all in the working tree, awaiting Hawk's go to snapshot on a branch.
+
+### Fixed (verified: tsc clean + routes compile/401)
+
+- **Auth, architectural fix.** New `src/lib/admin-fetch.ts` — one `authedFetch()` helper that attaches the Supabase bearer token to every admin API call (this project uses `@supabase/supabase-js`: token in localStorage, NO cookie, so a plain `fetch` 401s). Converted the 6 broken pages: videos, prayers, articles, dashboard, subscribers, newsletters/new. (12 other admin pages already attach the token by hand — migrate them to the helper in a cleanup pass.)
+- **Authorization gap closed.** `src/lib/admin-auth.ts` now requires the user's email to be on an allowlist (`ADMIN_EMAILS` env, comma-sep; defaults to `haukur1982@gmail.com` so the gate is closed even if the env var is never set). Before: ANY logged-in Supabase user could moderate prayers / email the list / delete content.
+- **Newsletter signup.** `src/lib/subscriber-db.ts` `addSubscriber` moved off the RLS-blocked anon client onto `supabaseAdmin` (it runs in a server action) — the verification token now reads back and the email actually sends.
+- **Draft publish, in place.** `src/app/api/admin/videos/link/route.ts` now UPDATES an existing draft when `episodeId` is passed (Azotus path) instead of insert-then-delete — kills the `bunny_video_id` unique-index collision AND preserves all enrichment (transcript/chapters/poster/thumbnail). Both paths now set `published_at` (public queries filter `published_at IS NOT NULL`, so episodes published without it were live-but-invisible). Videos page `handlePublishDraft` rewired to one call (no delete); `handleSaveConnection` (connect-existing) routed through the server route instead of RLS-blocked client writes.
+- **Schedule slots preserved.** `schedule-slots` POST and `[id]` PATCH now set `is_manual_override = true` — admin-created/edited slots survive the daily XML sync instead of being purged as stale playout rows.
+- **No fake programming on a live channel.** `src/lib/schedule-db.ts` `getScheduleInRange` no longer serves the mock week on a DB error or empty result in production (was masking outages with fabricated shows + feeding non-UUID slot IDs to the prayer-pulse RPC). Mock is now dev-only; prod returns empty → honest off-air.
+
+### Design-system lift (started, verified in-browser)
+
+- **`globals.css` :root** — defined `--radius-xs/sm/md/lg` (8/12/18/28px). ~87 references were undefined → every button/card/input was rendering SQUARE. Now rounded site-wide (confirmed: `--radius-sm`=12px, `--radius-md`=18px computed).
+- **Warm accent** — re-pointed `--accent` from `--nordurljos` (cold blue) to `--kerti` (candle) and `--accent-dim` to `--kerti-gloed`. ~93 emotional/CTA/kicker uses went warm at once; genuine wayfinding (44 direct `--nordurljos` uses) stays cold. Verified: `--accent`=`#e9a860`; home hero CTA + framtid "Gerast Bakhjarl" donate CTA are now warm (were blue).
+- **`.type-merki`** bumped 11px→13px, tracking 0.18em→0.14em. NOTE: most kickers override font-size inline (nav, logo, page eyebrows compute ~11.2px), so this only helps un-overridden uses. Real 60–75 legibility = per-component Phase 3 work.
+
+### Pipeline unification (done, verified: tsc clean + routes 200)
+
+- **One inbox, no duplicate.** `/admin/videos` is now the Bunny library + upload + connect ONLY — the broken "Drög" tab + insert-then-delete review modal are gone. A pointer card sends Azotus drafts to the Innhólf (`/admin/drafts`), which is the single review-and-publish room (nav already treats it as the spine).
+- **Secure draft reads.** New `GET /api/admin/drafts` (list) and `GET /api/admin/episodes/[id]` (single) — both authed + service-role. Converted the inbox (`/admin/drafts`) and the cockpit (`/admin/drafts/[id]`) to read drafts/transcript through these instead of the public anon key. This is the prerequisite that makes the RLS tightening safe (admin lists won't go dark). `series` reads stay on the anon client (public, not sensitive).
+
+### Page polish — Phase 3 (started, verified in-browser)
+
+- **frettabref (was 2/5):** EmailSignupForm — green/red Tailwind states → palette (candle-glow success), faint `placeholder-white/30` → `/55`, neon-glow + `scale-105` button → warm solid (`--accent` fill, `--nott` ink, `--gull` hover, soft shadow). Page's "latest newsletter" card → tokenized the raw hex (#fcfbf9→`--skra`, #1a1a1a→`--skra-djup`, #e5e5e5→warm divider, #888→`--skra-mjuk`). Verified: warm button w/ dark ink, no neon, legible placeholder, tsc clean.
+- **framtid (was 2/5):** cold-blue donate CTA + eyebrow/number markers already corrected by the `--accent`→`--kerti` re-alias (verified). REMAINING: heaviness — still a single dark register; add a cream (`--skra`) section so dark→cream reads as dawn not a wall.
+
+### Thumbnails — subtitle-safe (started)
+
+- **Burned-in-subtitle problem:** finished VOD masters have subtitles burned into the bottom band; `resolvePoster` falls back to a raw Bunny frame-grab when no poster exists → captions show on the card. `ThumbnailFrame` now detects the Bunny-proxy fallback (`/api/bunny/thumbnail/`) and renders the img at `height:128%` top-anchored so the bottom ~22% (the caption strip) is clipped (clean posters/`thumbnail_custom` untouched). Verified against a real frame (fb436cc9…): 128% fully clears a 2-line band; hover transform composes fine.
+- **Proper fix (next):** generate branded posters (Poster Machine `getCleanVodCrop` + Azotus clean candidate frames) for all episodes so cards use designed key art, not frame-grabs. CSS crop is the stopgap until backfilled.
+
+### Home rail — real metadata + Apple TV text (done, verified)
+
+- **Root cause of "Omega TV / 22":** the home "Nýjustu þættir" rail was calling `getVideos()` — RAW Bunny library files, whose names parse to show="Omega TV" + title="22". It bypassed the curated `episodes` catalog entirely.
+- **Fix:** rail now reads `getNewestEpisodes(3)` from the episodes table (real titles, series, duration) and `resolvePoster(e,'portrait_4x5')` for clean key art. `UrDagskranni` card now follows Apple TV+ exactly: **title leads**, then ONE quiet secondary line "series · duration" (was: kicker above + bare title). Removed ~25 junk duplicate `_unused*` imports from page.tsx.
+- Verified in DOM: cards read "Trúin sem sigrar / Í Snertingu · 28 mín" etc. (currently mock fallback — 0 published episodes exist; all 8 are drafts. Once a draft is published the rail shows it automatically). tsc clean, no console errors.
+- **ThumbnailFrame caption-crop** (128% top-anchor on raw Bunny frames) still applies as the safety net when an episode has no branded poster.
+
+### Poster Machine — backfill route built + proven (2026-05-31)
+
+- **No `canvas` needed** (earlier worry was wrong): the Poster Machine runs on `sharp` + `satori` + `@resvg/resvg-js`, all installed and loading. Nothing in src imports `canvas`.
+- **New `POST /api/admin/posters/backfill`** (admin-gated, idempotent): generates branded 16:9 + 4:5 key art for every episode missing a variant. Source priority: selected candidate → first candidate → Bunny auto-frame. `getCleanVodCrop` (72% height) strips the burned-in subtitle band. Mirrors 16:9 into `thumbnail_custom` so every consumer upgrades. Skips episodes with no source; supports `{dryRun, limit}`. tsc clean.
+- **Proven end-to-end:** ran `generatePosterVariants` against a real subtitled Bunny frame (TimesSquareChurch) via a throwaway tsx script — produced valid branded PNGs (487KB landscape / 392KB portrait), clean crop + grade + vignette + title overlay. Script removed after.
+- **Catalog reality:** 8 episodes, ALL drafts, 0 published; only 2 have a Bunny video (rest are demo drafts w/ no source). So backfill yields ~2 posters now and they're not publicly visible until published. Real payoff is forward-looking: run it (logged in: `POST /api/admin/posters/backfill`) after content is published, and ensure Azotus sends candidate frames so new episodes auto-get posters.
+- framtid cream "dawn" Áherslur band added (verified: --skra bg / --skra-djup ink).
+
+### Known-remaining (next sessions)
+
+- **RLS draft leak — CLOSED + verified (2026-05-30, migration `tighten_episodes_public_read_to_published`, Hawk approved).** Dropped the two `USING(true)` public-read policies on `episodes`; replaced with `Public reads published episodes USING (status='published')`. Verified empirically: as the `anon` role, draft visibility = 0 (8 drafts exist); public pages (/, /sermons, /live) still 200. Service-role policy intact → admin inbox still reads all drafts. `series`/`seasons` left public-readable (not sensitive).
+- **Still open (minor hardening):** `supabaseAdmin` silent anon fallback warn (`src/lib/supabase.ts:19`); confirm `SUPABASE_SERVICE_ROLE_KEY` set on Vercel; optional gate on `/api/admin/social/generate` (low risk).
+- **`/api/admin/social/generate`** has no auth — deliberately deferred: read-only PNG render, no DB access, embedded as `<img src>` (a Bearer gate would break the embed). Low risk (compute only).
+- **Two competing draft surfaces** = the real "confusion": `/admin/videos` Drög tab vs `/admin/drafts`. Plan: make `/admin/drafts` THE Azotus inbox (it's richer/correct) and reduce `/admin/videos` to Bunny library + upload only.
+- **`supabaseAdmin` silent anon fallback** when `SUPABASE_SERVICE_ROLE_KEY` missing (`src/lib/supabase.ts:19`) — add a loud warn. Key IS set locally; confirm it's set on Vercel.
+
+### Phase plan (task list)
+
+1. ✅ (mostly) Foundation — auth + launch blockers. 2. Design system lift (tokens: define `--radius-*`, raise small-text floor off `--steinn`, reclaim `--nordurljos` for wayfinding, dawn transitions). 3. Azotus→publish pipeline experience (centerpiece — unify the inbox, visual state clarity). 4. Page-by-page design polish (worst-first: framtid 2/5, frettabref 2/5).
+
+---
+
+## Session — 2026-05-20 (Antigravity — Integration Quality Audit)
+
+Audited the quality of the Azotus-to-Omega VOD intake and poster integration pipeline.
+
+### Findings & Insights
+
+- **Code Quality**: Integration is production-grade. Security (HMAC + timestamp validation), DB hygiene (base64 moved to Storage), trigger-based search indexing (`search_vector`), and editorial edit preservation are solid.
+- **Queue Overlap Warning**: Webhook POST enqueues to a PGMQ queue (`vod_metadata_jobs`) but still processes everything (Gemini metadata + poster generation) inline. If the queue is never consumed, messages will pile up. Blockers on inline processing (e.g. slow LLM calls) could trigger request timeouts in serverless contexts.
+
+### Next Steps
+
+- Monitor PGMQ table size or hook up a background worker to consume `vod_metadata_jobs` off the HTTP thread.
 
 ---
 

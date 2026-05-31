@@ -49,6 +49,11 @@ export async function PATCH(
         }
     }
 
+    // A human edit wins over automated playout. Mark the slot as a manual
+    // override so the next daily XML sync preserves the correction instead of
+    // overwriting it.
+    patch.is_manual_override = true;
+
     const { data, error } = await sb
         .from('schedule_slots')
         .update(patch)

@@ -5,6 +5,36 @@ import { updateBunnyChapters } from '@/lib/bunny';
 import { logEvent } from '@/lib/system-events';
 
 /**
+ * GET /api/admin/episodes/[id]
+ *
+ * Service-role read of a single episode (all fields, drafts + transcript
+ * included). Admin-gated, so the cockpit at /admin/drafts/[id] can load an
+ * unpublished draft WITHOUT exposing it to the public anon key. This is the
+ * secure replacement for the cockpit's old client-side anon read.
+ */
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
+) {
+    const auth = await verifyAdminSession(req);
+    if (auth.error) return auth.error;
+
+    const { id } = await params;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const untyped = supabaseAdmin as any;
+    const { data, error } = await untyped
+        .from('episodes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !data) {
+        return NextResponse.json({ error: error?.message ?? 'Fann ekki þátt.' }, { status: 404 });
+    }
+    return NextResponse.json({ episode: data });
+}
+
+/**
  * PATCH /api/admin/episodes/[id]
  *
  * Updates any editable field on an episode. Used by the /admin/drafts

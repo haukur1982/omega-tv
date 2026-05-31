@@ -1,13 +1,26 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import {
     Search, Film, Calendar, Eye, Link as LinkIcon, AlertCircle,
-    CheckCircle, X, Upload, Loader2, Plus, FileVideo, Sparkles,
-    ArrowRight, RefreshCw, Trash2, Clock
+    CheckCircle, X, Upload, Loader2, Plus, Inbox, ArrowRight
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { getLinkedBunnyIds, getAllSeries, Series, createEpisode, createSeason, getDraftEpisodes, Episode } from '@/lib/vod-db';
+import { getLinkedBunnyIds, getAllSeries, Series } from '@/lib/vod-db';
+import { authedFetch } from '@/lib/admin-fetch';
+
+/**
+ * /admin/videos — the Bunny library.
+ *
+ * Browse every video on the Bunny CDN, see which are already linked to a
+ * series, connect the unlinked ones, and upload new files directly.
+ *
+ * This page is NOT the draft-review surface. Azotus deliveries and uploads
+ * that need review live in the Innhólf (/admin/drafts) — the single
+ * publishing room. Keeping the two separate is deliberate: one place to
+ * review-and-publish, one place to manage the raw Bunny library.
+ */
 
 interface BunnyVideo {
     guid: string;
@@ -24,12 +37,10 @@ export default function VideosPage() {
     const [videos, setVideos] = useState<BunnyVideo[]>([]);
     const [linkedIds, setLinkedIds] = useState<Set<string>>(new Set());
     const [seriesList, setSeriesList] = useState<Series[]>([]);
-    const [drafts, setDrafts] = useState<Episode[]>([]);
 
     // UI State
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState<'drafts' | 'library'>('drafts');
 
     // Upload State
     const [showUpload, setShowUpload] = useState(false);
@@ -46,17 +57,6 @@ export default function VideosPage() {
     const [uploadDescription, setUploadDescription] = useState('');
     const [newSeriesMode, setNewSeriesMode] = useState(false);
 
-    // Draft Review State
-    const [reviewingDraft, setReviewingDraft] = useState<Episode | null>(null);
-    const [draftSeriesName, setDraftSeriesName] = useState('');
-    const [draftTitle, setDraftTitle] = useState('');
-    const [draftEpisodeNumber, setDraftEpisodeNumber] = useState(1);
-    const [draftDescription, setDraftDescription] = useState('');
-    const [draftNewSeries, setDraftNewSeries] = useState(false);
-    const [isPublishing, setIsPublishing] = useState(false);
-    const [isGeneratingThumb, setIsGeneratingThumb] = useState(false);
-    const [generatedThumbUrl, setGeneratedThumbUrl] = useState<string | null>(null);
-
     // Existing connect state
     const [connectingVideo, setConnectingVideo] = useState<BunnyVideo | null>(null);
     const [selectedSeriesId, setSelectedSeriesId] = useState('');
@@ -67,20 +67,15 @@ export default function VideosPage() {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            const [videosRes, linkedRes, seriesRes, draftsRes] = await Promise.all([
-                fetch('/api/admin/videos').then(r => r.json()),
+            const [videosRes, linkedRes, seriesRes] = await Promise.all([
+                authedFetch('/api/admin/videos').then(r => r.json()),
                 getLinkedBunnyIds(),
                 getAllSeries(),
-                getDraftEpisodes(),
             ]);
 
             if (Array.isArray(videosRes)) setVideos(videosRes);
             if (linkedRes) setLinkedIds(new Set(linkedRes));
             if (seriesRes) setSeriesList(seriesRes);
-            if (draftsRes) setDrafts(draftsRes);
-
-            // Auto-switch to drafts tab if there are drafts
-            if (draftsRes && draftsRes.length > 0) setActiveTab('drafts');
         } catch (e) {
             console.error(e);
         }
@@ -115,7 +110,7 @@ export default function VideosPage() {
 
         try {
             setUploadStep('preparing');
-            const initRes = await fetch('/api/admin/videos/upload', {
+            const initRes = await authedFetch('/api/admin/videos/upload', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title: uploadEpisodeTitle }),
@@ -140,7 +135,7 @@ export default function VideosPage() {
             });
 
             setUploadStep('linking');
-            const linkRes = await fetch('/api/admin/videos/link', {
+            const linkRes = await authedFetch('/api/admin/videos/link', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -159,9 +154,9 @@ export default function VideosPage() {
                 resetUploadForm();
                 loadData();
             }, 2000);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Upload error:', err);
-            setUploadError(err.message || 'Óþekkt villa');
+            setUploadError(err instanceof Error ? err.message : 'Óþekkt villa');
             setUploadStep('error');
         }
     };
@@ -178,92 +173,6 @@ export default function VideosPage() {
         setNewSeriesMode(false);
     };
 
-    // ═══ DRAFT REVIEW & PUBLISH ═══
-
-    const openDraftReview = (draft: Episode) => {
-        setReviewingDraft(draft);
-        setDraftTitle(draft.title || '');
-        setDraftEpisodeNumber(draft.episode_number || 1);
-        setDraftDescription(draft.description || '');
-        setDraftSeriesName('');
-        setDraftNewSeries(false);
-        setGeneratedThumbUrl(draft.thumbnail_custom || null);
-    };
-
-    const handleGenerateThumbnail = async () => {
-        if (!reviewingDraft) return;
-        setIsGeneratingThumb(true);
-        try {
-            const res = await fetch('/api/admin/videos/thumbnail', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bunnyVideoId: reviewingDraft.bunny_video_id,
-                    seriesName: draftSeriesName || undefined,
-                    episodeTitle: draftTitle || undefined,
-                    episodeId: reviewingDraft.id,
-                }),
-            });
-            if (res.ok) {
-                const { url } = await res.json();
-                setGeneratedThumbUrl(url);
-            }
-        } catch (e) {
-            console.error('Thumbnail generation failed:', e);
-        }
-        setIsGeneratingThumb(false);
-    };
-
-    const handlePublishDraft = async () => {
-        if (!reviewingDraft || !draftSeriesName || !draftTitle) return;
-        setIsPublishing(true);
-
-        try {
-            // Step 1: Link to series
-            const linkRes = await fetch('/api/admin/videos/link', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bunnyGuid: reviewingDraft.bunny_video_id,
-                    seriesName: draftSeriesName,
-                    episodeTitle: draftTitle,
-                    episodeNumber: draftEpisodeNumber,
-                    description: draftDescription,
-                }),
-            });
-
-            if (!linkRes.ok) throw new Error('Villa við að tengja');
-
-            // Step 2: Delete the draft (the link route created a new published episode)
-            const deleteRes = await fetch(`/api/admin/videos/link`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ episodeId: reviewingDraft.id }),
-            });
-
-            setReviewingDraft(null);
-            loadData();
-        } catch (err) {
-            console.error('Publish error:', err);
-            alert('Villa við birtingu');
-        }
-        setIsPublishing(false);
-    };
-
-    const handleDeleteDraft = async (draft: Episode) => {
-        if (!confirm(`Eyða drögum: "${draft.title}"?`)) return;
-        try {
-            await fetch('/api/admin/videos/link', {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ episodeId: draft.id }),
-            });
-            loadData();
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
     // ═══ CONNECT FLOW (existing videos) ═══
 
     const handleConnectClick = (video: BunnyVideo) => {
@@ -278,29 +187,31 @@ export default function VideosPage() {
         setIsSaving(true);
         try {
             const series = seriesList.find(s => s.id === selectedSeriesId);
-            if (!series) return;
-            let seasonId = '';
-            // @ts-ignore
-            if (series.seasons && series.seasons.length > 0) {
-                // @ts-ignore
-                seasonId = series.seasons[0].id;
-            } else {
-                const newSeason = await createSeason(series.id, 1, 'Sería 1');
-                if (!newSeason) { alert('Gat ekki búið til sería.'); setIsSaving(false); return; }
-                seasonId = newSeason.id;
-            }
-            await createEpisode({
-                series_id: series.id, season_id: seasonId,
-                bunny_video_id: connectingVideo.guid, title: episodeTitle,
-                episode_number: episodeNumber, description: '',
+            if (!series) { setIsSaving(false); return; }
+            // Route through the server link route (service-role). Client-side
+            // writes are blocked by RLS; the route finds-or-creates the series +
+            // season by name and inserts the published episode.
+            const res = await authedFetch('/api/admin/videos/link', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bunnyGuid: connectingVideo.guid,
+                    seriesName: series.title,
+                    episodeTitle,
+                    episodeNumber,
+                }),
             });
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Villa við að tengja myndband.');
+            }
             const newSet = new Set(linkedIds);
             newSet.add(connectingVideo.guid);
             setLinkedIds(newSet);
             setConnectingVideo(null);
         } catch (error) {
             console.error(error);
-            alert('Villa við að tengja myndband.');
+            alert(error instanceof Error ? error.message : 'Villa við að tengja myndband.');
         }
         setIsSaving(false);
     };
@@ -318,10 +229,10 @@ export default function VideosPage() {
     return (
         <AdminLayout>
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="admin-h1">Myndbönd</h1>
-                    <p className="admin-body mt-1">Stjórnaðu myndböndum og drögum</p>
+                    <h1 className="admin-h1">Bunny safn</h1>
+                    <p className="admin-body mt-1">Myndbönd á Bunny CDN — tengdu ótengd myndbönd við þáttaröð eða hladdu upp nýju.</p>
                 </div>
                 <button
                     onClick={() => { setShowUpload(true); resetUploadForm(); }}
@@ -332,115 +243,26 @@ export default function VideosPage() {
                 </button>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-1 mb-6 bg-[var(--admin-bg)] rounded-xl p-1">
-                <button
-                    onClick={() => setActiveTab('drafts')}
-                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
-                        activeTab === 'drafts'
-                            ? 'bg-[var(--admin-surface)] text-[var(--admin-text)] shadow-sm'
-                            : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text-secondary)]'
-                    }`}
-                >
-                    <FileVideo size={16} />
-                    Drög
-                    {drafts.length > 0 && (
-                        <span className="bg-[var(--admin-accent)] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                            {drafts.length}
-                        </span>
-                    )}
-                </button>
-                <button
-                    onClick={() => setActiveTab('library')}
-                    className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
-                        activeTab === 'library'
-                            ? 'bg-[var(--admin-surface)] text-[var(--admin-text)] shadow-sm'
-                            : 'text-[var(--admin-text-muted)] hover:text-[var(--admin-text-secondary)]'
-                    }`}
-                >
-                    <Film size={16} />
-                    Bunny Safn
-                </button>
-            </div>
+            {/* Pointer to the publishing room — keeps the two surfaces unambiguous */}
+            <Link
+                href="/admin/drafts"
+                className="flex items-center gap-3 mb-6 p-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] hover:border-[var(--admin-border-hover)] transition-colors group"
+            >
+                <div className="w-10 h-10 rounded-lg bg-[var(--admin-accent-subtle)] flex items-center justify-center flex-shrink-0">
+                    <Inbox size={20} className="text-[var(--admin-accent)]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[var(--admin-text)]">Drög frá Azotus bíða í Innhólfinu</p>
+                    <p className="text-xs text-[var(--admin-text-muted)]">Nýjar upptökur eru yfirfarnar og birtar þar — ekki hér.</p>
+                </div>
+                <ArrowRight size={18} className="text-[var(--admin-text-muted)] group-hover:text-[var(--admin-accent)] transition-colors flex-shrink-0" />
+            </Link>
 
             {isLoading ? (
                 <div className="flex justify-center p-12">
                     <Loader2 className="w-8 h-8 text-[var(--admin-accent)] animate-spin" />
                 </div>
-            ) : activeTab === 'drafts' ? (
-                /* ═══ DRAFTS TAB ═══ */
-                drafts.length === 0 ? (
-                    <div className="text-center py-16">
-                        <FileVideo size={48} className="mx-auto mb-4 text-[var(--admin-text-muted)] opacity-50" />
-                        <h3 className="text-lg font-medium text-[var(--admin-text-secondary)] mb-2">Engin drög</h3>
-                        <p className="text-sm text-[var(--admin-text-muted)] mb-6">
-                            Drög birtast hér þegar myndband er hlaðið upp úr möppu á Íslandi
-                        </p>
-                        <button
-                            onClick={() => { setShowUpload(true); resetUploadForm(); }}
-                            className="admin-btn admin-btn-primary"
-                        >
-                            <Upload size={16} />
-                            Hlaða upp myndbandi
-                        </button>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        {drafts.map((draft) => (
-                            <div
-                                key={draft.id}
-                                className="admin-card p-0 overflow-hidden flex items-stretch hover:border-[var(--admin-border-hover)] transition-colors"
-                            >
-                                {/* Thumbnail */}
-                                <div className="w-48 flex-shrink-0 bg-black relative">
-                                    <img
-                                        src={draft.thumbnail_custom || `/api/bunny/thumbnail/${draft.bunny_video_id}`}
-                                        alt={draft.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute top-2 left-2 bg-amber-500/90 text-black px-2 py-0.5 rounded text-xs font-bold">
-                                        DRÖG
-                                    </div>
-                                </div>
-
-                                {/* Info */}
-                                <div className="flex-1 p-4 flex flex-col justify-center">
-                                    <h3 className="font-medium text-[var(--admin-text)] mb-1">{draft.title}</h3>
-                                    <div className="flex items-center gap-3 text-xs text-[var(--admin-text-muted)]">
-                                        <span className="flex items-center gap-1">
-                                            <Clock size={12} />
-                                            {draft.created_at ? new Date(draft.created_at).toLocaleDateString('is-IS') : '—'}
-                                        </span>
-                                        {draft.source === 'folder' && (
-                                            <span className="bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded text-xs">
-                                                Úr möppu
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex items-center gap-2 px-4">
-                                    <button
-                                        onClick={() => openDraftReview(draft)}
-                                        className="admin-btn admin-btn-primary"
-                                    >
-                                        <Sparkles size={16} />
-                                        Skoða og birta
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteDraft(draft)}
-                                        className="p-2 text-[var(--admin-text-muted)] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )
             ) : (
-                /* ═══ LIBRARY TAB ═══ */
                 <>
                     <div className="mb-6 relative">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--admin-text-muted)]" size={20} />
@@ -499,108 +321,16 @@ export default function VideosPage() {
                             );
                         })}
                     </div>
+                    {filteredVideos.length === 0 && (
+                        <div className="text-center py-16">
+                            <Film size={48} className="mx-auto mb-4 text-[var(--admin-text-muted)] opacity-50" />
+                            <h3 className="text-lg font-medium text-[var(--admin-text-secondary)] mb-2">Engin myndbönd</h3>
+                            <p className="text-sm text-[var(--admin-text-muted)]">
+                                {searchTerm ? 'Engin myndbönd passa við leitina.' : 'Bunny safnið er tómt — hladdu upp myndbandi til að byrja.'}
+                            </p>
+                        </div>
+                    )}
                 </>
-            )}
-
-            {/* ═══ DRAFT REVIEW MODAL ═══ */}
-            {reviewingDraft && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                    <div className="bg-[var(--admin-surface)] border border-[var(--admin-border)] w-full max-w-2xl rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-200 overflow-hidden max-h-[90vh] overflow-y-auto">
-                        {/* Header */}
-                        <div className="flex justify-between items-center p-6 border-b border-[var(--admin-border)]">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                                    <Sparkles size={20} className="text-amber-400" />
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-[var(--admin-text)]">Skoða drög</h2>
-                                    <p className="text-xs text-[var(--admin-text-muted)]">Settu upp upplýsingar og birtu</p>
-                                </div>
-                            </div>
-                            <button onClick={() => setReviewingDraft(null)} className="p-2 hover:bg-[var(--admin-surface-hover)] rounded-full transition-colors">
-                                <X size={20} className="text-[var(--admin-text-muted)]" />
-                            </button>
-                        </div>
-
-                        <div className="p-6 space-y-5">
-                            {/* Thumbnail Preview */}
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">Smámynd</label>
-                                <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-                                    <img
-                                        src={generatedThumbUrl || `/api/bunny/thumbnail/${reviewingDraft.bunny_video_id}`}
-                                        alt="Thumbnail"
-                                        className="w-full h-full object-cover"
-                                    />
-                                    {generatedThumbUrl && (
-                                        <div className="absolute top-2 left-2 bg-green-500/90 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-                                            <Sparkles size={10} /> Búið til
-                                        </div>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={handleGenerateThumbnail}
-                                    disabled={isGeneratingThumb}
-                                    className="mt-2 admin-btn admin-btn-secondary w-full justify-center"
-                                >
-                                    {isGeneratingThumb ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-                                    {isGeneratingThumb ? 'Bý til smámynd...' : (generatedThumbUrl ? 'Endurgera smámynd' : 'Búa til Apple TV smámynd')}
-                                </button>
-                            </div>
-
-                            {/* Series */}
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">Þáttaröð</label>
-                                {!draftNewSeries ? (
-                                    <div className="flex gap-2">
-                                        <select className="admin-input flex-1" value={draftSeriesName} onChange={(e) => setDraftSeriesName(e.target.value)}>
-                                            <option value="">-- Veldu þáttaröð --</option>
-                                            {seriesList.map(s => <option key={s.id} value={s.title}>{s.title}</option>)}
-                                        </select>
-                                        <button onClick={() => setDraftNewSeries(true)} className="admin-btn admin-btn-secondary flex-shrink-0">
-                                            <Plus size={16} /> Ný
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div className="flex gap-2">
-                                        <input type="text" className="admin-input flex-1" placeholder="Nafn nýrrar þáttaraðar" value={draftSeriesName} onChange={(e) => setDraftSeriesName(e.target.value)} autoFocus />
-                                        <button onClick={() => { setDraftNewSeries(false); setDraftSeriesName(''); }} className="admin-btn admin-btn-secondary flex-shrink-0">Hætta við</button>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Title + Number */}
-                            <div className="grid grid-cols-4 gap-4">
-                                <div className="col-span-3">
-                                    <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">Titill þáttar</label>
-                                    <input type="text" className="admin-input" value={draftTitle} onChange={(e) => setDraftTitle(e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">Nr.</label>
-                                    <input type="number" className="admin-input" value={draftEpisodeNumber} onChange={(e) => setDraftEpisodeNumber(parseInt(e.target.value) || 1)} />
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            <div>
-                                <label className="block text-sm font-medium text-[var(--admin-text-secondary)] mb-2">Lýsing</label>
-                                <textarea className="admin-input min-h-[80px]" value={draftDescription} onChange={(e) => setDraftDescription(e.target.value)} placeholder="Stutt lýsing á þætti..." rows={3} />
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="p-6 pt-0">
-                            <button
-                                onClick={handlePublishDraft}
-                                disabled={!draftSeriesName || !draftTitle || isPublishing}
-                                className="w-full admin-btn admin-btn-primary justify-center py-3 text-base"
-                            >
-                                {isPublishing ? <Loader2 size={18} className="animate-spin" /> : <ArrowRight size={18} />}
-                                {isPublishing ? 'Birti...' : 'Birta á Omega TV'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
             )}
 
             {/* ═══ UPLOAD MODAL ═══ */}

@@ -44,12 +44,27 @@ export async function getScheduleInRange(startIso: string, endIso: string): Prom
         .gte('starts_at', startIso)
         .lt('starts_at', endIso)
         .order('starts_at', { ascending: true });
-    if (!error && data && data.length > 0) return data as ScheduleSlot[];
 
-    // Dev fallback — mirror the migration seed so the UI is usable before
-    // `schedule_slots` is populated. Filtered to the requested range and
-    // re-anchored on the current week so it always feels fresh in dev.
-    return getMockScheduleInRange(startIso, endIso);
+    if (error) {
+        // A DB error must NEVER put fabricated programming on a live channel.
+        // Log it and, in production, return empty so the UI shows an honest
+        // off-air state ("dagskrá kemur senn") rather than fake shows. The mock
+        // week is a dev convenience only.
+        console.error('[schedule] getScheduleInRange query failed:', error);
+        return isProd() ? [] : getMockScheduleInRange(startIso, endIso);
+    }
+
+    if (data && data.length > 0) return data as ScheduleSlot[];
+
+    // Empty result: in production an empty schedule is the truth (off-air /
+    // not yet published). The re-anchored mock week is a dev-only seed so the
+    // UI is usable before `schedule_slots` is populated — its synthetic
+    // non-UUID slot IDs must never reach the live prayer-pulse RPC in prod.
+    return isProd() ? [] : getMockScheduleInRange(startIso, endIso);
+}
+
+function isProd(): boolean {
+    return process.env.NODE_ENV === 'production';
 }
 
 /** Slots for a single day (local Iceland day — Iceland uses UTC year-round). */
