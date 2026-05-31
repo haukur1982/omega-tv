@@ -126,7 +126,7 @@ function SectionHeader({ showAllLink = false }: { showAllLink?: boolean }) {
                         fontWeight: 700,
                         letterSpacing: '0.22em',
                         textTransform: 'uppercase',
-                        color: 'var(--gull)',
+                        color: 'var(--mor)',
                         marginBottom: '14px',
                     }}
                 >
