@@ -250,6 +250,7 @@ export type NewestEpisode = {
     published_at: string | null;
     thumbnail_custom: string | null;
     duration: number | null;
+    poster_candidates: unknown;
     series_title: string;
     series_slug: string;
 };
@@ -281,6 +282,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
             published_at,
             thumbnail_custom,
             duration,
+            poster_candidates,
             series:series_id ( title, slug )
         `)
         .eq('status', 'published')
@@ -301,6 +303,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
         published_at: string | null;
         thumbnail_custom: string | null;
         duration: number | null;
+        poster_candidates: unknown;
         series: { title: string; slug: string } | null;
     };
 
@@ -313,6 +316,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
             published_at: r.published_at,
             thumbnail_custom: r.thumbnail_custom,
             duration: r.duration,
+            poster_candidates: r.poster_candidates,
             series_title: r.series?.title ?? 'Omega',
             series_slug: r.series?.slug ?? '',
         };
