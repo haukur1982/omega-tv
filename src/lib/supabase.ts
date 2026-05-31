@@ -15,9 +15,23 @@ function makeClient(serviceRole: boolean): SupabaseClient<Database> {
             'NEXT_PUBLIC_SUPABASE_ANON_KEY.',
         );
     }
-    const key = serviceRole
-        ? process.env.SUPABASE_SERVICE_ROLE_KEY || anon
-        : anon;
+    let key = anon;
+    if (serviceRole) {
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (serviceKey) {
+            key = serviceKey;
+        } else {
+            // Fall back to anon so the build/runtime doesn't hard-crash, but make
+            // it LOUD: with the anon key, supabaseAdmin is silently subject to RLS,
+            // so admin writes (intake, publish, moderation) fail in confusing ways.
+            // This must never be missing in production.
+            console.error(
+                '[supabase] SUPABASE_SERVICE_ROLE_KEY is missing — supabaseAdmin is ' +
+                'falling back to the anon key and will be blocked by RLS. Set this env ' +
+                'var (locally in .env.local, and on Vercel) for admin operations to work.',
+            );
+        }
+    }
     return createClient<Database>(url, key);
 }
 

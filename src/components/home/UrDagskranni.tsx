@@ -164,7 +164,7 @@ export default function UrDagskranni({ episodes, register = 'dark' }: Props) {
 function PosterCard({ episode, register }: { episode: Episode; register: 'dark' | 'cream' }) {
     const isCream = register === 'cream';
     const titleColor = isCream ? 'var(--skra-djup)' : 'var(--ljos)';
-    const metaColor = isCream ? 'var(--skra-mjuk)' : 'var(--steinn)';
+    const metaColor = isCream ? 'var(--skra-mjuk)' : 'var(--moskva)';
 
     return (
         <Link
