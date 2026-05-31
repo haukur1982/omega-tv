@@ -338,7 +338,7 @@ export default function StyrkjaDonationClient() {
                                 fontWeight: 700,
                                 letterSpacing: '0.22em',
                                 textTransform: 'uppercase',
-                                color: 'var(--gull)',
+                                color: 'var(--mor)',
                                 marginBottom: '20px',
                             }}
                         >
@@ -629,7 +629,7 @@ function Allocation({ total }: { total: number }) {
                     fontWeight: 700,
                     letterSpacing: '0.22em',
                     textTransform: 'uppercase',
-                    color: 'var(--gull)',
+                    color: 'var(--mor)',
                     marginBottom: '20px',
                 }}
             >
