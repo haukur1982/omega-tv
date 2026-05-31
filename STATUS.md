@@ -56,6 +56,22 @@ Commissioned to build the platform to a state-of-the-art bar (UI/UX exceptional,
 - **Catalog reality:** 8 episodes, ALL drafts, 0 published; only 2 have a Bunny video (rest are demo drafts w/ no source). So backfill yields ~2 posters now and they're not publicly visible until published. Real payoff is forward-looking: run it (logged in: `POST /api/admin/posters/backfill`) after content is published, and ensure Azotus sends candidate frames so new episodes auto-get posters.
 - framtid cream "dawn" Áherslur band added (verified: --skra bg / --skra-djup ink).
 
+### Legibility pass — gull-on-cream (COMPLETE site-wide, browser-verified)
+
+Method: `--gull` kickers are fine on dark (--nott, gold) but ~2.5:1 and illegible on cream.
+Swapped to `--mor` (#3F2F23, ~9:1) ONLY where section bg is cream (--skra/--skra-warm),
+TEXT colors only — decorative gull rules/dots/fills kept. Verified per page in-browser
+(computed color + nearest non-transparent bg) = 0 gull-on-cream.
+
+Pages done (commits de72df1, 774b9e0, 9369c58, 4c8263f, 2bfbcc1, 0b8a6d6, 7b20b24):
+give, israel, about, greinar, vitnisburdur, frettir, namskeid. Intentionally kept gull on
+cream: 22px Hebrew calligraphy (Icelandic name in dark ink sits directly below) + 76px
+decorative drop-cap. Dark mastheads/kickers keep gull everywhere.
+
+Separate audit item, NOT started: low-contrast body/meta on `--steinn` (#7A7268, ~3:1 dark)
+→ `--moskva` (#B9B2A6, ~4.5:1). Verify each before swapping. Also: admin inbox/cockpit
+visual elevation (Hawk verifies on login — admin gates to sign-in).
+
 ### Known-remaining (next sessions)
 
 - **RLS draft leak — CLOSED + verified (2026-05-30, migration `tighten_episodes_public_read_to_published`, Hawk approved).** Dropped the two `USING(true)` public-read policies on `episodes`; replaced with `Public reads published episodes USING (status='published')`. Verified empirically: as the `anon` role, draft visibility = 0 (8 drafts exist); public pages (/, /sermons, /live) still 200. Service-role policy intact → admin inbox still reads all drafts. `series`/`seasons` left public-readable (not sensitive).
