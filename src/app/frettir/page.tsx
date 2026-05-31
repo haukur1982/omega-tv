@@ -166,7 +166,7 @@ function NewsCard({ item }: { item: NewsItem }) {
                             fontWeight: 700,
                             letterSpacing: '0.18em',
                             textTransform: 'uppercase',
-                            color: 'var(--gull)',
+                            color: 'var(--mor)',
                         }}
                     >
                         {item.region && <span>{item.region}</span>}
