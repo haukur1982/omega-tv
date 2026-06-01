@@ -72,6 +72,21 @@ Separate audit item, NOT started: low-contrast body/meta on `--steinn` (#7A7268,
 → `--moskva` (#B9B2A6, ~4.5:1). Verify each before swapping. Also: admin inbox/cockpit
 visual elevation (Hawk verifies on login — admin gates to sign-in).
 
+### Self-review of the branch (code-review skill, 2026-05-31) — 2 real fixes, rest refuted
+
+Ran adversarial review of the whole branch diff (auth, RLS, pipeline, data). Findings:
+- **REAL (fixed):** `getNewestEpisodes` didn't select `poster_candidates`, so the home rail
+  couldn't use branded 4:5 posters even after backfill — silently fell back to stretched
+  16:9 / raw frame. Fixed (738deee): field flows through type+select+Row+map.
+- **REAL (fixed):** poster backfill could exceed the serverless function timeout on a large
+  catalog (sequential, 2 renders/episode). Made batch-safe (ced13ba): `scan` vs `batch`
+  split, `maxDuration=300`, returns `{more, remaining}` to loop; idempotent so safe to repeat.
+- **REFUTED:** `getPublicUrl` `{data:urlData}` destructure — matches the proven live pattern
+  (vod-intake:342); supabase-js v2 returns `{data:{publicUrl}}`. `revalidateTag('vod','max')`
+  — Next 16.1 signature IS `(tag, profile)`, 2 args valid. `bunnyVideoId!` assertion — guarded
+  by the `!sourceUrl && !bunny_video_id` skip above it. supabase lazy-fallback "no throw" — by
+  design (loud console.error added; hard-throw would break the build with no env).
+
 ### Known-remaining (next sessions)
 
 - **RLS draft leak — CLOSED + verified (2026-05-30, migration `tighten_episodes_public_read_to_published`, Hawk approved).** Dropped the two `USING(true)` public-read policies on `episodes`; replaced with `Public reads published episodes USING (status='published')`. Verified empirically: as the `anon` role, draft visibility = 0 (8 drafts exist); public pages (/, /sermons, /live) still 200. Service-role policy intact → admin inbox still reads all drafts. `series`/`seasons` left public-readable (not sensitive).
