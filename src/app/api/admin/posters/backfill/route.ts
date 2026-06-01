@@ -19,9 +19,23 @@ import { normalizePosterModel, POSTER_BRAND_VERSION, type PosterModel } from '@/
  * Episodes with none of these (no bunny video, no candidates) are skipped — there
  * is nothing to brand. getCleanVodCrop strips the burned-in subtitle band.
  *
- * Body (optional): { limit?: number, dryRun?: boolean, includePublishedOnly?: boolean }
- * Admin-gated. Idempotent: episodes that already have a branded variant are skipped.
+ * Body (optional):
+ *   - scan?: number   how many recent episodes to CONSIDER (default 1000, max 5000)
+ *   - batch?: number  max episodes to actually GENERATE this call (default 12, max 50)
+ *   - dryRun?: boolean
+ *
+ * Admin-gated. Idempotent: episodes that already have a branded variant are
+ * skipped, so it's safe to call repeatedly. Each call generates at most `batch`
+ * posters (image generation is the expensive part — 2 renders/episode) and
+ * returns `more: true` while unbranded episodes remain, so a caller can loop
+ * until `more: false` without any single invocation risking the function
+ * timeout on a large catalog.
  */
+
+// Poster generation (sharp + satori, 2 renders/episode) is heavy. Give the
+// route the full Fluid Compute budget; the `batch` cap keeps a single call far
+// under it, but a generous ceiling avoids a hard cut mid-episode.
+export const maxDuration = 300;
 
 type Row = {
     id: string;
@@ -35,13 +49,14 @@ export async function POST(request: Request) {
     const auth = await verifyAdminSession(request);
     if (auth.error) return auth.error;
 
-    let body: { limit?: number; dryRun?: boolean } = {};
+    let body: { scan?: number; batch?: number; dryRun?: boolean } = {};
     try {
         body = await request.json();
     } catch {
         /* body optional */
     }
-    const limit = Math.min(Math.max(1, body.limit ?? 100), 500);
+    const scan = Math.min(Math.max(1, body.scan ?? 1000), 5000);
+    const batch = Math.min(Math.max(1, body.batch ?? 12), 50);
     const dryRun = body.dryRun === true;
 
     const sb = supabaseAdmin as any;
@@ -49,7 +64,7 @@ export async function POST(request: Request) {
         .from('episodes')
         .select('id, title, bunny_video_id, poster_candidates, series_id')
         .order('created_at', { ascending: false })
-        .limit(limit);
+        .limit(scan);
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -60,9 +75,11 @@ export async function POST(request: Request) {
     const result = {
         scanned: rows.length,
         generated: [] as string[],
-        skipped_already_branded: [] as string[],
-        skipped_no_source: [] as string[],
+        skipped_already_branded: 0,
+        skipped_no_source: 0,
         failed: [] as { id: string; error: string }[],
+        remaining: 0,
+        more: false,
     };
 
     for (const ep of rows) {
@@ -70,7 +87,7 @@ export async function POST(request: Request) {
 
         // Already has a branded variant → nothing to do (idempotent).
         if (model.variants.landscape_16x9 || model.variants.portrait_4x5) {
-            result.skipped_already_branded.push(ep.id);
+            result.skipped_already_branded++;
             continue;
         }
 
@@ -80,12 +97,22 @@ export async function POST(request: Request) {
             model.source_candidates[0]?.url ??
             null;
         if (!sourceUrl && !ep.bunny_video_id) {
-            result.skipped_no_source.push(ep.id);
+            result.skipped_no_source++;
             continue;
         }
 
         if (dryRun) {
+            // In dry-run, count everything that WOULD be generated (no batch cap)
+            // so the caller sees the true backlog size.
             result.generated.push(ep.id);
+            continue;
+        }
+
+        // Batch cap: this episode needs work, but we've already generated our
+        // quota for this call. Count it as remaining and signal more work.
+        if (result.generated.length >= batch) {
+            result.remaining++;
+            result.more = true;
             continue;
         }
 
