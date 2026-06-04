@@ -25,7 +25,7 @@ Vercel is separate and MUST be checked.
 
 - ⬜ `NEXT_PUBLIC_SUPABASE_URL`
 - ⬜ `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- ⬜ `SUPABASE_SERVICE_ROLE_KEY` ← **critical**: without it, admin writes (intake, publish, moderation) silently fail under RLS. (Code now logs a loud error if missing.)
+- ✅ `SUPABASE_SERVICE_ROLE_KEY` ← **critical**: confirmed set in Vercel prod (2026-06-01). Without it, admin writes (intake, publish, moderation) silently fail under RLS. (Code also logs a loud error if missing.)
 - ⬜ `BUNNY_API_KEY`, `NEXT_PUBLIC_BUNNY_LIBRARY_ID`, `NEXT_PUBLIC_BUNNY_CDN_HOSTNAME`, `NEXT_PUBLIC_BUNNY_LIVE_STREAM_ID`
 - ⬜ `NEXT_PUBLIC_LIVE_STREAM_EMBED_URL` ← the actual live player. Verify it points at the real Omega live feed, not a placeholder.
 - ⬜ `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (newsletter + verification emails)
@@ -63,9 +63,25 @@ This is the "next on the agenda" Hawk named. Two real runs, end to end.
 > Test rows cleaned up afterward. **Conclusion: the Omega side is solid; the real
 > Mac-mini run only needs to exercise the Azotus side (subtitle/burn/deliver).**
 
+> **REAL END-TO-END PROVEN 2026-06-04:** 3 real English programs (Hour of Power,
+> Times Square Church, CBN) ran the FULL pipeline on the Mac mini — translated to
+> Icelandic, subtitles burned, "Send to VOD" toggled → omega-vod-deliverer daemon →
+> Bunny upload + encode → POST to Omega → 3 drafts in /admin/drafts with transcripts.
+> THE PIPELINE WORKS.
+>
+> **Metadata root cause found + fixed:** drafts arrived with empty description/chapters/
+> scripture. Cause was NOT a missing key — Google retired `gemini-2.0-flash` (404), so
+> generateMetadata silently fell back to mock. Fixed to `gemini-2.5-flash` (commit afa6511).
+> Proven on real transcripts: proper IS titles, scripture (ROM.8.31-39 etc.), 6-7 timestamped
+> chapters, 3-paragraph descriptions, editor notes — even caught a 1 Tim 2:6-vs-2:8 misquote.
+> The 3 existing drafts were backfilled in place; they're now review-ready.
+> **ACTION: set GEMINI_METADATA_MODEL (or rely on new default) + ensure GEMINI_API_KEY in
+> Vercel prod, then deploy commit afa6511 so future deliveries auto-generate metadata.**
+
 ### 2A. English program (translated) — Type 1
-- ✅ Omega receiving end verified via simulated signed delivery (see box above).
-- ⬜ Pick one real English source (Hour of Power / In Touch).
+- ✅ Omega receiving end verified via simulated signed delivery.
+- ✅ REAL pipeline proven 2026-06-04 (3 programs delivered, metadata fixed + backfilled).
+- ⬜ Deploy the gemini-2.5-flash fix to prod so it's automatic going forward.
 - ⬜ Run it through Azotus on the Mac mini → it subtitles to Icelandic, burns in, delivers to `/api/azotus/vod-intake`.
 - ⬜ Confirm a draft lands in `/admin/drafts` (Innhólf) with: title, description, transcript, chapters, poster candidates.
 - ⬜ In the cockpit: pick a poster frame → Generate → confirm clean branded 16:9 + 4:5 (no burned subtitles in the poster).
@@ -133,6 +149,6 @@ Walk these on the real production URL:
 2. ⬜ Schedule shows real programming (not the dev mock).
 3. ⬜ Giving page shows correct, real bank details.
 4. ⬜ Prayer submit → moderate → publish works in production.
-5. ⬜ `SUPABASE_SERVICE_ROLE_KEY` set in prod (or the whole admin silently breaks).
+5. ✅ `SUPABASE_SERVICE_ROLE_KEY` set in prod (confirmed 2026-06-01) — or the whole admin silently breaks.
 
 Everything else can be fixed while live.
