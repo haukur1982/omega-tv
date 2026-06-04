@@ -87,7 +87,11 @@ export async function generateMetadata(input: MetadataInput): Promise<GeneratedM
 
 async function generateWithGemini(input: MetadataInput, transcript: string): Promise<GeneratedMetadata> {
     const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY!;
-    const model = process.env.GEMINI_METADATA_MODEL ?? 'gemini-2.0-flash';
+    // gemini-2.0-flash was retired by Google (404 "no longer available"), which
+    // silently broke metadata generation → every draft fell back to mock (empty
+    // chapters/scripture/editor-note). Use a current stable model. Override via
+    // GEMINI_METADATA_MODEL env if Google rotates again.
+    const model = process.env.GEMINI_METADATA_MODEL ?? 'gemini-2.5-flash';
 
     const systemInstructions = `Þú ert ritstjórnarassistent fyrir Omega Stöðina — íslenska kristilega sjónvarpsstöð.
 Omega er rótgróin í biblíulegri kenningu og ritstjórnin er rótfest í bæn.
