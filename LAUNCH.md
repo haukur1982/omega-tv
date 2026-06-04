@@ -51,7 +51,20 @@ Vercel is separate and MUST be checked.
 
 This is the "next on the agenda" Hawk named. Two real runs, end to end.
 
+> **Omega receiving-end PRE-VERIFIED (2026-06-01, simulated signed delivery):**
+> A byte-accurate signed Azotus payload (HMAC-SHA256 over `{ts}.{body}`) for a
+> Hour-of-Power EN→IS program was POSTed to `/api/azotus/vod-intake` locally.
+> Result, all confirmed in DB:
+> - intake returned `{ok:true, status:'draft_ready'}` with real episode_id
+> - draft landed: source=azotus, source_language=en→language_primary=is, transcript stored, 4 chapters parsed
+> - **duration float 1648.7 → stored 1649** (the old `22P02` crash class — proven fixed live)
+> - publish-in-place: status→published + published_at set, **transcript + chapters preserved** (no metadata loss)
+> - anon role sees the published row (public surfacing works; RLS still hides drafts)
+> Test rows cleaned up afterward. **Conclusion: the Omega side is solid; the real
+> Mac-mini run only needs to exercise the Azotus side (subtitle/burn/deliver).**
+
 ### 2A. English program (translated) — Type 1
+- ✅ Omega receiving end verified via simulated signed delivery (see box above).
 - ⬜ Pick one real English source (Hour of Power / In Touch).
 - ⬜ Run it through Azotus on the Mac mini → it subtitles to Icelandic, burns in, delivers to `/api/azotus/vod-intake`.
 - ⬜ Confirm a draft lands in `/admin/drafts` (Innhólf) with: title, description, transcript, chapters, poster candidates.
