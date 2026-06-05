@@ -98,21 +98,22 @@ async function generateWithGemini(input: MetadataInput, transcript: string): Pro
 Omega er rótgróin í biblíulegri kenningu og ritstjórnin er rótfest í bæn.
 Verkefni þitt er að búa til bjargir fyrir nýja þætti til yfirferðar.
 
-Svaraðu ALLTAF sem gilt JSON, nákvæmlega þessa lögun:
-{
-  "title": "Stuttur titill á ${input.language === 'en' ? 'English' : 'íslensku'}, 3-9 orð",
-  "description": "2-3 efnisgreinar á ${input.language === 'en' ? 'English' : 'íslensku'}, kraftmikil og einlæg, ekki markaðslegt",
-  "editor_note": "Ein málsgrein í fyrstu persónu, 40-70 orð, ítölsk, innilegt — eins og Haukur sé að tala beint við áhorfandann",
-  "bible_ref": "OSIS kanónískur tilvísunarstrengur eða null ef óviss. Dæmi: MAT.5.3-MAT.5.10, JHN.3.16, PSA.23",
-  "chapters": [{"t": 0, "title": "Inngangur"}, ...],  // 4-8 kaflar, t í sekúndum
-  "tags": ["heilog-andi", "bæn", "samfelag"],  // 2-5 merki, lágstafir, bandstrikir
-  "notes": ["Valfrjálsir textar til ritstjóra — efasemdir, viðvaranir"]
-}
+Svaraðu ALLTAF með GILDU JSON og EKKERT annað. Engar \`\`\`-merkingar, engar
+athugasemdir (// eða /* */), engin "..." — aðeins hreint, gilt JSON-hlutur.
 
-Reglur:
+Lyklar og reglur fyrir hvert gildi:
+- "title": strengur. Stuttur titill á ${input.language === 'en' ? 'English' : 'íslensku'}, 3-9 orð.
+- "description": strengur. 2-3 efnisgreinar á ${input.language === 'en' ? 'English' : 'íslensku'}, kraftmikil og einlæg, ekki markaðslegt.
+- "editor_note": strengur. Ein málsgrein í fyrstu persónu, 40-70 orð, innilegt — eins og Haukur tali beint við áhorfandann.
+- "bible_ref": strengur eða null. OSIS-snið. Dæmi: "MAT.5.3-MAT.5.10", "JHN.3.16", "PSA.23". null ef óviss.
+- "chapters": fylki af hlutum, hver með "t" (heiltala, sekúndur) og "title" (strengur). 4-8 kaflar.
+- "tags": fylki af strengjum, 2-5 stk, lágstafir, bandstrik milli orða, þematísk.
+- "notes": fylki af strengjum (má vera tómt).
+
+Innihaldsreglur:
 - Engir markaðs­frasar. Engin uppskrúfuð orð. Raunveruleg mannleg rödd.
-- bible_ref: ef transcript nefnir ritningu beint, notaðu hana. Annars álykta þú varlega. Ef óviss → null.
-- tags: lágstafir, bandstrik milli orða, íslenska, þematísk (ekki merkingarlaus "vídeó", "þáttur").`;
+- bible_ref: ef transcript nefnir ritningu beint, notaðu hana. Annars álykta varlega. Ef óviss → null.
+- tags: íslenska, ekki merkingarlaus ("vídeó", "þáttur").`;
 
     const userPrompt = `Þáttur frá ${input.show ? `þáttaröðinni "${input.show}"` : 'Omega Stöðinni'}${input.speaker ? `, talarinn er ${input.speaker}` : ''}.
 ${input.filename ? `Upphaflegt skráarheiti: ${input.filename}\n` : ''}
@@ -133,6 +134,11 @@ Svaraðu með JSON hlutnum, ekkert annað.`;
             generationConfig: {
                 temperature: 0.6,
                 responseMimeType: 'application/json',
+                // gemini-3.5-flash is a "thinking" model — it spends output
+                // tokens reasoning before emitting JSON. Without a generous
+                // ceiling, long sermons truncate the JSON mid-object →
+                // unparseable → mock fallback (empty chapters). Give it room.
+                maxOutputTokens: 8192,
             },
         }),
     });
@@ -141,7 +147,13 @@ Svaraðu með JSON hlutnum, ekkert annað.`;
         throw new Error(`Gemini ${res.status}: ${await res.text()}`);
     }
     const data = await res.json();
+    const finishReason = data?.candidates?.[0]?.finishReason;
     const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    if (finishReason && finishReason !== 'STOP') {
+        // MAX_TOKENS / SAFETY / etc. → the JSON is likely truncated. Throw so the
+        // caller's try/catch logs it loudly instead of silently using mock.
+        throw new Error(`Gemini did not finish cleanly (finishReason=${finishReason}); output likely truncated`);
+    }
     const parsed = safeJsonParse(text);
 
     // Validate + canonicalize
@@ -318,6 +330,14 @@ function safeJsonParse(text: string): any {
     try {
         return JSON.parse(text);
     } catch {
+        // Recovery for common LLM JSON defects (3.5 sometimes emits these even
+        // when told not to): code fences, // and /* */ comments, trailing
+        // commas. Strip those first, then escape raw control chars below.
+        text = text
+            .replace(/```(?:json)?/gi, '')
+            .replace(/^\s*\/\/.*$/gm, '')
+            .replace(/\/\*[\s\S]*?\*\//g, '')
+            .replace(/,(\s*[}\]])/g, '$1');
         // Sanitize: escape any raw control chars (likely inside string values)
         const sanitized = text.replace(/[\u0000-\u001F]/g, (c) => {
             if (c === '\n') return '\\n';
