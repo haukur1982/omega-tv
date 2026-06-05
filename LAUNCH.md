@@ -38,8 +38,14 @@ Vercel is separate and MUST be checked.
 > Quick check (after `vercel link`): `vercel env ls production`
 
 ### 1B. Merge the PR
-- ⬜ Review + merge PR #1 (`experiment/vellum-prayer-cards` → `main`). 15 commits, build green, self-reviewed.
-- ⬜ Confirm Vercel auto-deploys `main` to production.
+- ✅ MERGED 2026-06-04 (merge commit f35c83c). Root cause of "metadata still empty in prod
+  even though I set the key": the gemini-3.5 fix + all session work lived only on the
+  feature branch — `main` (what Vercel deploys) never had it until this merge. Vercel
+  auto-deployed; confirmed live (session-added routes /api/admin/drafts + /regenerate
+  return 401 on prod, not 404). gemini-3.5 metadata now active for new deliveries.
+- Note: existing drafts created BEFORE the deploy stay empty until regenerated (deploy
+  isn't retroactive). Vonarljós backfilled by hand (title "Lifandi von og brautryðjandastarf
+  Omega", HEB.11, 8 chapters). Other pre-deploy drafts: hit Regenerate in /admin or re-run backfill.
 
 ### 1C. Domain
 - ⬜ Decide launch domain: keep `omega-tv-lovat.vercel.app` for soft launch, or connect `omega.is` now.
