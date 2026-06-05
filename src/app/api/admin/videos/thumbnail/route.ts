@@ -24,14 +24,16 @@ export async function POST(request: Request) {
             seriesName: seriesName || undefined,
             episodeTitle: episodeTitle || undefined,
             format: 'landscape',
+            cleanVodCrop: true,
         });
 
         // Upload to Supabase Storage
-        const filename = `${episodeId || bunnyVideoId}_landscape.png`;
+        const filename = `${episodeId || bunnyVideoId}_landscape_${Date.now()}.png`;
         const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
             .from('thumbnails')
             .upload(filename, thumbnailBuffer, {
                 contentType: 'image/png',
+                cacheControl: '3600',
                 upsert: true,
             });
 

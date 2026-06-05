@@ -7,8 +7,10 @@ import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import OsisPicker from '@/components/admin/OsisPicker';
 import ChaptersEditor from '@/components/admin/ChaptersEditor';
+import PosterStudio from '@/components/admin/PosterStudio';
 import { supabase } from '@/lib/supabase';
-import { Loader2, CheckCircle2, ArrowLeft, Save, Sparkles, ExternalLink, AlertCircle, RefreshCw } from 'lucide-react';
+import { authedFetch } from '@/lib/admin-fetch';
+import { Loader2, CheckCircle2, ArrowLeft, Save, Sparkles, ExternalLink, AlertCircle, RefreshCw, ClipboardList } from 'lucide-react';
 
 /**
  * /admin/drafts/[id] — the 2-minute review form.
@@ -40,7 +42,16 @@ type Episode = {
     tags: string[] | null;
     captions_available: string[] | null;
     transcript_url: string | null;
+    transcript: string | null;
     language_primary: string | null;
+    source_language: string | null;
+    review_status: string | null;
+    assigned_to: string | null;
+    review_notes: string | null;
+    metadata_confidence: number | null;
+    poster_candidates: unknown[] | null;
+    azotus_track_id: string | null;
+    azotus_job_id: string | null;
 };
 
 type SeriesInfo = {
@@ -86,22 +97,20 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
     const [error, setError] = useState<string | null>(null);
     const [bunnyStatus, setBunnyStatus] = useState<'queued' | 'encoding' | 'ready' | 'error' | 'unknown' | 'loading' | null>(null);
     const [generatingThumb, setGeneratingThumb] = useState(false);
+    const [generatingMeta, setGeneratingMeta] = useState(false);
     const [thumbError, setThumbError] = useState<string | null>(null);
 
     useEffect(() => {
         (async () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const sb = supabase as any;
-            const { data, error: e } = await sb
-                .from('episodes')
-                .select('id, title, description, episode_number, bunny_video_id, thumbnail_custom, series_id, season_id, status, published_at, bible_ref, editor_note, chapters, tags, captions_available, transcript_url, language_primary')
-                .eq('id', id)
-                .single();
-            if (!e && data) {
+            // The episode (drafts + transcript) loads via the admin service-role
+            // route — never over the public anon key. The `series` table is
+            // public-readable, so the picker list can stay on the browser client.
+            const res = await authedFetch(`/api/admin/episodes/${id}`);
+            if (res.ok) {
+                const { episode: data } = await res.json();
                 setEpisode(data as Episode);
-                // Fetch all series in parallel with the linked-series fetch — the
-                // editor needs the full list for the picker so episodes can be
-                // connected/reassigned without leaving the page.
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const sb = supabase as any;
                 const allSeriesPromise = sb
                     .from('series')
                     .select('id, title, slug, category')
@@ -113,7 +122,8 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                 if (allRes.data) setAllSeries(allRes.data as SeriesInfo[]);
                 if (linkedRes.data) setSeries(linkedRes.data as SeriesInfo);
             } else {
-                setError(e?.message ?? 'Fann ekki þátt.');
+                const err = await res.json().catch(() => ({}));
+                setError(err.error ?? 'Fann ekki þátt.');
             }
             setLoading(false);
         })();
@@ -202,6 +212,35 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
         setGeneratingThumb(false);
     }, [episode, series]);
 
+    const regenerateMetadata = useCallback(async () => {
+        if (!episode) return;
+        setGeneratingMeta(true);
+        setError(null);
+        const { data: { session } } = await supabase.auth.getSession();
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        };
+        const res = await fetch(`/api/admin/episodes/${episode.id}/regenerate`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ field: 'all' }),
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({ error: 'Villa' }));
+            setError(data.error ?? 'Sjálfvirk útfylling tókst ekki.');
+            setStatus('error');
+            setGeneratingMeta(false);
+            return;
+        }
+        const data = await res.json();
+        if (data.episode) {
+            setEpisode(data.episode as Episode);
+            setStatus('saved-draft');
+        }
+        setGeneratingMeta(false);
+    }, [episode]);
+
     const save = useCallback(async (publish?: boolean): Promise<boolean> => {
         if (!episode) return false;
         setSaving(true);
@@ -225,6 +264,12 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
             captions_available: episode.captions_available,
             transcript_url: episode.transcript_url,
             language_primary: episode.language_primary,
+            source_language: episode.source_language,
+            review_status: episode.review_status,
+            assigned_to: episode.assigned_to,
+            review_notes: episode.review_notes,
+            metadata_confidence: episode.metadata_confidence,
+            poster_candidates: episode.poster_candidates,
         };
         const patchRes = await fetch(`/api/admin/episodes/${id}`, {
             method: 'PATCH',
@@ -353,6 +398,60 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                 </header>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+                    {/* ── 0. Yfirferð ─────────────────────────────── */}
+                    <FieldGroup label="Yfirferð">
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '14px' }}>
+                            <Field label="Staða yfirferðar">
+                                <select
+                                    value={episode.review_status ?? 'new'}
+                                    onChange={(e) => patch({ review_status: e.target.value })}
+                                    style={inputStyle}
+                                >
+                                    <option value="new">Nýtt</option>
+                                    <option value="assigned">Úthlutað</option>
+                                    <option value="in_review">Í yfirferð</option>
+                                    <option value="needs_changes">Þarf lagfæringu</option>
+                                    <option value="ready">Tilbúið til birtingar</option>
+                                    <option value="published">Birt</option>
+                                </select>
+                            </Field>
+                            <Field label="Ábyrgð">
+                                <input
+                                    type="text"
+                                    value={episode.assigned_to ?? ''}
+                                    onChange={(e) => patch({ assigned_to: e.target.value || null })}
+                                    placeholder="Haukur, ritstjórn, Ísland…"
+                                    style={inputStyle}
+                                />
+                            </Field>
+                        </div>
+                        <Field label="Athugasemdir yfirferðar" hint="Innri glósur fyrir liðið. Birtist ekki á vefnum.">
+                            <textarea
+                                value={episode.review_notes ?? ''}
+                                onChange={(e) => patch({ review_notes: e.target.value || null })}
+                                rows={3}
+                                style={{ ...inputStyle, resize: 'vertical' }}
+                            />
+                        </Field>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', color: 'var(--admin-text-muted, #888)', fontSize: '0.8rem' }}>
+                            {episode.azotus_track_id && (
+                                <span style={miniInfoPill}><ClipboardList size={12} /> Azotus {episode.azotus_track_id.slice(0, 8)}</span>
+                            )}
+                            {episode.source_language && (
+                                <span style={miniInfoPill}>Uppruni: {episode.source_language.toUpperCase()}</span>
+                            )}
+                            {episode.language_primary && (
+                                <span style={miniInfoPill}>Birting: {episode.language_primary.toUpperCase()}</span>
+                            )}
+                            {typeof episode.metadata_confidence === 'number' && (
+                                <span style={miniInfoPill}>AI traust: {Math.round(episode.metadata_confidence * 100)}%</span>
+                            )}
+                            {Array.isArray(episode.poster_candidates) && episode.poster_candidates.length > 0 && (
+                                <span style={miniInfoPill}>{episode.poster_candidates.length} poster candidates</span>
+                            )}
+                        </div>
+                    </FieldGroup>
+
                     {/* ── 1. Titill + lýsing ───────────────────────── */}
                     <FieldGroup label="Titill + lýsing">
                         <Field label="Titill">
@@ -450,6 +549,15 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                                 <option value="en">English</option>
                             </select>
                         </Field>
+                        <Field label="Upprunatungumál">
+                            <input
+                                type="text"
+                                value={episode.source_language ?? ''}
+                                onChange={(e) => patch({ source_language: e.target.value || null })}
+                                placeholder="en, is…"
+                                style={{ ...inputStyle, maxWidth: '160px' }}
+                            />
+                        </Field>
                     </FieldGroup>
 
                     {/* ── 5. Efnistákn ──────────────────────────────── */}
@@ -520,6 +628,17 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                         )}
                     </FieldGroup>
 
+                    {/* ── 5b. Poster Machine ───────────────────────────
+                         Reviewer picks an Azotus source frame, Omega
+                         brands 16:9 + 4:5. Mirrors landscape into
+                         thumbnail_custom so every public surface upgrades
+                         with no other changes. */}
+                    <PosterStudio
+                        episodeId={episode.id}
+                        seriesTitle={series?.title}
+                        episodeTitle={episode.title}
+                    />
+
                     {/* ── 6. Hvar mun þetta birtast? ──────────────────
                          The mental model panel. Every row tells Hawk
                          exactly which public surface this episode shows
@@ -531,6 +650,31 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                         onSeriesUpdate={(s) => setSeries(s)}
                         onSeriesChange={updateSeries}
                     />
+
+                    {episode.transcript && (
+                        <FieldGroup label="Transcript">
+                            <details>
+                                <summary style={{ cursor: 'pointer', color: 'var(--admin-accent, #E9A860)', fontSize: '0.84rem', fontWeight: 700 }}>
+                                    Sýna transcript fyrir leit og yfirferð
+                                </summary>
+                                <pre style={{
+                                    margin: '12px 0 0',
+                                    maxHeight: '280px',
+                                    overflow: 'auto',
+                                    whiteSpace: 'pre-wrap',
+                                    padding: '14px',
+                                    borderRadius: '6px',
+                                    border: '1px solid var(--admin-border, #333)',
+                                    background: 'var(--admin-bg, #14120F)',
+                                    color: 'var(--admin-text-secondary, #aaa)',
+                                    fontSize: '0.78rem',
+                                    lineHeight: 1.5,
+                                }}>
+                                    {episode.transcript}
+                                </pre>
+                            </details>
+                        </FieldGroup>
+                    )}
                 </div>
 
                 {/* ── Post-action banner ────────────────────────────────
@@ -585,11 +729,13 @@ export default function DraftEditPage({ params }: { params: Promise<{ id: string
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button
                             type="button"
-                            disabled
-                            title="Sjálfvirk útfylling með Azotus kemur bráðum"
-                            style={{ ...btnGhost, opacity: 0.45, cursor: 'not-allowed' }}
+                            onClick={regenerateMetadata}
+                            disabled={generatingMeta || !episode.transcript}
+                            title={episode.transcript ? 'Endurgera titil, lýsingu, kafla og merki úr transcript.' : 'Transcript vantar fyrir sjálfvirka útfyllingu.'}
+                            style={{ ...btnGhost, opacity: episode.transcript && !generatingMeta ? 1 : 0.45, cursor: episode.transcript && !generatingMeta ? 'pointer' : 'not-allowed' }}
                         >
-                            <Sparkles size={14} /> Fylla út sjálfvirkt
+                            {generatingMeta ? <Loader2 size={14} className="admin-spinner" /> : <Sparkles size={14} />}
+                            Fylla út sjálfvirkt
                         </button>
                         <button
                             type="button"
@@ -966,6 +1112,17 @@ const inputStyle: React.CSSProperties = {
     fontSize: '0.92rem',
     fontFamily: 'inherit',
     outline: 'none',
+};
+
+const miniInfoPill: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 10px',
+    borderRadius: '999px',
+    border: '1px solid var(--admin-border, #333)',
+    background: 'var(--admin-bg, #14120F)',
+    color: 'var(--admin-text-secondary, #aaa)',
 };
 
 const btnGhost: React.CSSProperties = {

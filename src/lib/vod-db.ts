@@ -250,8 +250,26 @@ export type NewestEpisode = {
     published_at: string | null;
     thumbnail_custom: string | null;
     duration: number | null;
+    poster_candidates: unknown;
     series_title: string;
     series_slug: string;
+};
+
+export type VodSearchEpisode = {
+    id: string;
+    bunny_video_id: string;
+    title: string;
+    description: string | null;
+    published_at: string | null;
+    thumbnail_custom: string | null;
+    duration: number | null;
+    language_primary: string | null;
+    source_language: string | null;
+    bible_ref: string | null;
+    tags: string[] | null;
+    series_title: string;
+    series_slug: string;
+    series_category: string | null;
 };
 
 export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
@@ -264,6 +282,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
             published_at,
             thumbnail_custom,
             duration,
+            poster_candidates,
             series:series_id ( title, slug )
         `)
         .eq('status', 'published')
@@ -284,6 +303,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
         published_at: string | null;
         thumbnail_custom: string | null;
         duration: number | null;
+        poster_candidates: unknown;
         series: { title: string; slug: string } | null;
     };
 
@@ -296,10 +316,94 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
             published_at: r.published_at,
             thumbnail_custom: r.thumbnail_custom,
             duration: r.duration,
+            poster_candidates: r.poster_candidates,
             series_title: r.series?.title ?? 'Omega',
             series_slug: r.series?.slug ?? '',
         };
     });
+}
+
+export async function searchVodEpisodes({
+    q,
+    language,
+    category,
+    limit = 24,
+}: {
+    q?: string;
+    language?: string;
+    category?: string;
+    limit?: number;
+}): Promise<VodSearchEpisode[]> {
+    let query = supabase
+        .from('episodes')
+        .select(`
+            id,
+            bunny_video_id,
+            title,
+            description,
+            published_at,
+            thumbnail_custom,
+            duration,
+            language_primary,
+            source_language,
+            bible_ref,
+            tags,
+            series:series_id ( title, slug, category )
+        `)
+        .eq('status', 'published')
+        .not('published_at', 'is', null)
+        .not('bunny_video_id', 'is', null)
+        .order('published_at', { ascending: false })
+        .limit(limit * 2);
+
+    if (q?.trim()) {
+        query = query.textSearch('search_vector', q.trim(), {
+            type: 'websearch',
+            config: 'simple',
+        });
+    }
+    if (language?.trim()) query = query.eq('language_primary', language.trim());
+
+    const { data, error } = await query;
+    if (error) {
+        console.error('Failed to search VOD episodes:', error);
+        return [];
+    }
+
+    type Row = {
+        id: string;
+        bunny_video_id: string;
+        title: string;
+        description: string | null;
+        published_at: string | null;
+        thumbnail_custom: string | null;
+        duration: number | null;
+        language_primary: string | null;
+        source_language: string | null;
+        bible_ref: string | null;
+        tags: string[] | null;
+        series: { title: string; slug: string; category: string | null } | null;
+    };
+
+    return ((data ?? []) as unknown as Row[])
+        .filter((row) => !category?.trim() || row.series?.category === category.trim())
+        .slice(0, limit)
+        .map((row) => ({
+            id: row.id,
+            bunny_video_id: row.bunny_video_id,
+            title: row.title,
+            description: row.description,
+            published_at: row.published_at,
+            thumbnail_custom: row.thumbnail_custom,
+            duration: row.duration,
+            language_primary: row.language_primary,
+            source_language: row.source_language,
+            bible_ref: row.bible_ref,
+            tags: row.tags,
+            series_title: row.series?.title ?? 'Omega',
+            series_slug: row.series?.slug ?? '',
+            series_category: row.series?.category ?? null,
+        }));
 }
 
 /**
@@ -434,6 +538,7 @@ export async function publishEpisode(id: string) {
         .from('episodes')
         .update({
             status: 'published',
+            review_status: 'published',
             published_at: new Date().toISOString(),
         })
         .eq('id', id)
@@ -450,7 +555,7 @@ export async function publishEpisode(id: string) {
 export async function unpublishEpisode(id: string) {
     const { data, error } = await supabaseAdmin
         .from('episodes')
-        .update({ status: 'draft' })
+        .update({ status: 'draft', review_status: 'needs_changes' })
         .eq('id', id)
         .select()
         .single();

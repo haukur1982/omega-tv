@@ -10,10 +10,10 @@ import IsraelTeaser from "@/components/home/IsraelTeaser";
 import StyrkjaBand from "@/components/home/StyrkjaBand";
 import Legacy34Years from "@/components/home/Legacy34Years";
 import FeaturedSunday from "@/components/sermon/FeaturedSunday";
-import { getVideos, parseVideoMetadata } from "@/lib/bunny";
 import { getAllArticles } from "@/lib/articles-db";
 import { getRecentBroadcastPrayers } from "@/lib/sanctuary-db";
-import { getLatestEpisodeBySeriesSlug } from "@/lib/vod-db";
+import { getLatestEpisodeBySeriesSlug, getNewestEpisodes } from "@/lib/vod-db";
+import { resolvePoster } from "@/lib/poster";
 import { MOCK_SUNDAY_FEATURED } from "@/lib/mock-series";
 
 /**
@@ -62,8 +62,8 @@ type LatestArticle = {
 
 export default async function Home() {
     // Parallel data fetch
-    const [latestVideos, latestArticlesRaw, recentPrayers, sundayLatestReal] = await Promise.all([
-        getVideos(1, 3).catch(() => []),
+    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayLatestReal] = await Promise.all([
+        getNewestEpisodes(3).catch(() => []),
         getAllArticles().catch(() => [] as LatestArticle[]),
         getRecentBroadcastPrayers(7).catch(() => []),
         getLatestEpisodeBySeriesSlug('sunnudagssamkoma').catch(() => null),
@@ -73,17 +73,18 @@ export default async function Home() {
     // exists yet (day-1 state until series + episodes are seeded).
     const sundayFeatured = sundayLatestReal ?? MOCK_SUNDAY_FEATURED;
 
-    const episodes = latestVideos.length > 0
-        ? latestVideos.slice(0, 3).map((v) => {
-            const meta = parseVideoMetadata(v);
-            return {
-                id: v.guid,
-                title: meta.title,
-                speaker: meta.show,
-                durationMin: Math.floor(v.length / 60).toString(),
-                thumbnail: meta.thumbnail,
-            };
-        })
+    // Pull from the curated episode catalog (real titles, series, scripture,
+    // descriptions — the Azotus-generated metadata), NOT the raw Bunny library
+    // whose "titles" are just filenames like "Omega TV 22". resolvePoster gives
+    // clean key art (branded variant → thumbnail_custom → caption-cropped frame).
+    const episodes = latestEpisodes.length > 0
+        ? latestEpisodes.slice(0, 3).map((e) => ({
+            id: e.bunny_video_id,
+            title: e.title,
+            speaker: e.series_title,
+            durationMin: e.duration ? Math.floor(e.duration / 60).toString() : '',
+            thumbnail: resolvePoster(e, 'portrait_4x5') ?? `/api/bunny/thumbnail/${e.bunny_video_id}`,
+        }))
         : MOCK_VIDEOS.map((v) => ({
             id: v.id,
             title: v.title,

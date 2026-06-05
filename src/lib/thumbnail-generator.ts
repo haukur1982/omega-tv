@@ -1,6 +1,5 @@
 import sharp from 'sharp';
-
-const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID;
+import { fetchBunnyThumbnailBuffer } from './bunny-thumbnail';
 
 /**
  * Apple TV-inspired cinematic thumbnail generator.
@@ -14,31 +13,40 @@ const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID;
  * 6. SVG text overlay: series + episode title
  */
 
+type ThumbnailFormat = 'landscape' | 'portrait' | 'portrait_4x5';
+
 interface ThumbnailOptions {
-    bunnyVideoId: string;
+    /** Required unless `sourceImage` is supplied. */
+    bunnyVideoId?: string;
+    /**
+     * A pre-selected source frame (Poster Machine: the reviewer-chosen
+     * candidate). When given, the Bunny fetch is skipped entirely and
+     * this buffer is graded instead — same clean-crop + brand treatment.
+     */
+    sourceImage?: Buffer;
     seriesName?: string;
     episodeTitle?: string;
-    format?: 'landscape' | 'portrait';
+    format?: ThumbnailFormat;
+    /**
+     * Finished Azotus VOD files often have burned subtitles in the bottom
+     * band, and imported teaching programs can use right-side scripture
+     * slides. This crop favors the live teaching frame and removes the
+     * subtitle band before any Apple TV treatment is applied.
+     */
+    cleanVodCrop?: boolean;
 }
 
 // Target dimensions
-const DIMENSIONS = {
-    landscape: { width: 1280, height: 720 },   // 16:9
-    portrait: { width: 720, height: 1080 },     // 2:3
+const DIMENSIONS: Record<ThumbnailFormat, { width: number; height: number }> = {
+    landscape: { width: 1280, height: 720 },     // 16:9 — watch pages, wide cards
+    portrait: { width: 720, height: 1080 },       // 2:3 — legacy series art
+    portrait_4x5: { width: 1080, height: 1350 },  // 4:5 — VOD/program cards
 };
 
 // ─── Fetch raw frame from Bunny ───
 
 async function fetchBunnyThumbnail(videoId: string): Promise<Buffer> {
-    const url = `https://iframe.mediadelivery.net/thumbnail/${LIBRARY_ID}/${videoId}/thumbnail.jpg`;
-
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error(`Failed to fetch Bunny thumbnail: ${res.status}`);
-    }
-
-    const arrayBuffer = await res.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    return (await fetchBunnyThumbnailBuffer(videoId)).buffer;
 }
 
 // ─── Create vignette overlay (darkened edges) ───
@@ -159,19 +167,41 @@ export async function generateThumbnail(options: ThumbnailOptions): Promise<Buff
     const format = options.format || 'landscape';
     const { width, height } = DIMENSIONS[format];
 
-    // 1. Fetch raw frame
-    const rawFrame = await fetchBunnyThumbnail(options.bunnyVideoId);
+    // 1. Get the raw frame — either the reviewer-chosen poster source, or
+    //    (legacy / one-frame fallback) the auto Bunny frame.
+    let rawFrame: Buffer;
+    if (options.sourceImage) {
+        rawFrame = options.sourceImage;
+    } else if (options.bunnyVideoId) {
+        rawFrame = await fetchBunnyThumbnail(options.bunnyVideoId);
+    } else {
+        throw new Error('generateThumbnail requires bunnyVideoId or sourceImage.');
+    }
+    const source = sharp(rawFrame);
+    const sourceMeta = await source.metadata();
+    const sourceWidth = sourceMeta.width ?? width;
+    const sourceHeight = sourceMeta.height ?? height;
+    const sourceCrop = options.cleanVodCrop !== false
+        ? getCleanVodCrop(sourceWidth, sourceHeight, format)
+        : null;
 
     // 2. Resize and color grade
-    let pipeline = sharp(rawFrame)
+    let pipeline = source
+        .rotate()
+        .extract(sourceCrop ?? {
+            left: 0,
+            top: 0,
+            width: sourceWidth,
+            height: sourceHeight,
+        })
         .resize(width, height, { fit: 'cover', position: 'centre' })
         // Color grading: boost saturation, slight contrast, warmth
         .modulate({
             saturation: 1.2,        // +20% saturation
             brightness: 1.05,       // slight brightness boost
         })
-        .linear(1.1, -(128 * 0.1)) // Contrast boost ~10%
-        .gamma(0.95);               // Slight warmth
+        .linear(1.1, -(128 * 0.1))
+        .gamma(1.05);
 
     // 3. Composite overlays
     const composites: sharp.OverlayOptions[] = [
@@ -199,6 +229,29 @@ export async function generateThumbnail(options: ThumbnailOptions): Promise<Buff
     return result;
 }
 
+function getCleanVodCrop(
+    sourceWidth: number,
+    sourceHeight: number,
+    format: ThumbnailFormat,
+): sharp.Region {
+    const targetRatio = DIMENSIONS[format].width / DIMENSIONS[format].height;
+    const safeHeight = Math.max(1, Math.floor(sourceHeight * 0.72));
+    // Wide targets (≥1:1) can keep a wider slice of the live frame;
+    // tall targets (4:5, 2:3) need a tighter, more central crop.
+    const biasedWidth = targetRatio >= 1
+        ? Math.floor(sourceWidth * 0.52)
+        : Math.floor(sourceWidth * 0.42);
+    const cropWidth = Math.max(1, Math.min(sourceWidth, biasedWidth, Math.floor(safeHeight * targetRatio)));
+    const cropHeight = Math.max(1, Math.min(safeHeight, Math.floor(cropWidth / targetRatio)));
+
+    return {
+        left: 0,
+        top: Math.max(0, Math.floor(sourceHeight * 0.02)),
+        width: cropWidth,
+        height: cropHeight,
+    };
+}
+
 /**
  * Generate both landscape and portrait thumbnails.
  */
@@ -212,4 +265,37 @@ export async function generateThumbnailSet(options: Omit<ThumbnailOptions, 'form
     ]);
 
     return { landscape, portrait };
+}
+
+/**
+ * Poster Machine V1 — branded variants from one selected source frame.
+ *
+ * Fetches the source ONCE (so a Bunny-backed source isn't pulled twice)
+ * and grades it into the two V1 aspects the public UI needs:
+ *   - landscape_16x9 → watch pages, wide cards, mirrored to thumbnail_custom
+ *   - portrait_4x5    → VOD/program cards
+ *
+ * `square_1x1` / `wide_21x9` are intentionally NOT generated in V1 — the
+ * dispatch says only build the variants the current UI needs.
+ */
+export async function generatePosterVariants(
+    options: Omit<ThumbnailOptions, 'format'>,
+): Promise<{ landscape_16x9: Buffer; portrait_4x5: Buffer }> {
+    // Resolve the source buffer a single time.
+    let sourceImage: Buffer;
+    if (options.sourceImage) {
+        sourceImage = options.sourceImage;
+    } else if (options.bunnyVideoId) {
+        sourceImage = await fetchBunnyThumbnail(options.bunnyVideoId);
+    } else {
+        throw new Error('generatePosterVariants requires bunnyVideoId or sourceImage.');
+    }
+
+    const base: ThumbnailOptions = { ...options, sourceImage };
+    const [landscape_16x9, portrait_4x5] = await Promise.all([
+        generateThumbnail({ ...base, format: 'landscape' }),
+        generateThumbnail({ ...base, format: 'portrait_4x5' }),
+    ]);
+
+    return { landscape_16x9, portrait_4x5 };
 }

@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from './supabase';
+import { supabaseAdmin } from './supabase';
 
 export interface Subscriber {
     id: string;
@@ -19,8 +19,12 @@ export async function addSubscriber(
     name?: string,
     segments: string[] = ['newsletter']
 ): Promise<{ success: boolean; error?: string; verificationToken?: string }> {
+    // Service-role client: runs server-side (called from the subscribe server
+    // action). The anon client is blocked by RLS from reading the inserted row
+    // back, so the verification_token came back null and NO verification email
+    // was ever sent. supabaseAdmin bypasses RLS and reads the token reliably.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    const sb = supabaseAdmin as any;
 
     // Already a row for this email?
     const { data: existing } = await sb

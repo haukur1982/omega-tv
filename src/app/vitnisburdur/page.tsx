@@ -147,7 +147,7 @@ export default async function TestimonialPage() {
                                 fontWeight: 700,
                                 letterSpacing: '0.22em',
                                 textTransform: 'uppercase',
-                                color: 'var(--gull)',
+                                color: 'var(--mor)',
                                 marginBottom: '14px',
                             }}
                         >
@@ -206,7 +206,7 @@ export default async function TestimonialPage() {
                                         fontWeight: 700,
                                         letterSpacing: '0.22em',
                                         textTransform: 'uppercase',
-                                        color: 'var(--gull)',
+                                        color: 'var(--mor)',
                                         marginBottom: '14px',
                                     }}
                                 >

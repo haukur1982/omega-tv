@@ -1,3 +1,5 @@
+import { getBunnyThumbnailProxyUrl } from './bunny-thumbnail';
+
 const API_KEY = process.env.BUNNY_API_KEY;
 const LIBRARY_ID = process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID;
 const LIVE_STREAM_ID = process.env.NEXT_PUBLIC_BUNNY_LIVE_STREAM_ID;
@@ -18,11 +20,7 @@ export interface BunnyVideo {
 }
 
 export function getThumbnailUrl(videoId: string) {
-    // Standard Bunny Stream thumbnail path
-    // Format: https://{libraryId}.b-cdn.net/{videoId}/thumbnail.jpg
-    // Note: This often requires a custom hostname set in Bunny. 
-    // Fallback if no custom domain: https://iframe.mediadelivery.net/thumbnail/{library_id}/{video_id}/thumbnail.jpg
-    return `https://iframe.mediadelivery.net/thumbnail/${LIBRARY_ID}/${videoId}/thumbnail.jpg`;
+    return getBunnyThumbnailProxyUrl(videoId) ?? '';
 }
 
 // ---------------------------------------------------------------------------
@@ -236,6 +234,35 @@ export async function getBunnyVideoStatus(
     } catch (error) {
         console.error('Bunny video status fetch failed:', error);
         return null;
+    }
+}
+
+export async function updateBunnyChapters(
+    videoId: string,
+    chapters: { t: number; title: string }[] | null | undefined,
+): Promise<boolean> {
+    if (!API_KEY || !LIBRARY_ID || !videoId) return false;
+    const payload = {
+        chapters: (chapters ?? []).map((chapter, index) => ({
+            title: chapter.title,
+            start: Math.max(0, Math.floor(chapter.t)),
+            end: chapters?.[index + 1]?.t ? Math.max(0, Math.floor(chapters[index + 1].t)) : undefined,
+        })),
+    };
+    try {
+        const res = await fetch(`${BASE_URL}/${videoId}`, {
+            method: 'POST',
+            headers: {
+                AccessKey: API_KEY,
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+        return res.ok;
+    } catch (error) {
+        console.error('Bunny chapter update failed:', error);
+        return false;
     }
 }
 

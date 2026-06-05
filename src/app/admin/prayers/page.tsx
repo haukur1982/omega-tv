@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, X, Clock, Heart, Mail, RefreshCw, Search, Filter } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { authedFetch } from '@/lib/admin-fetch';
 
 interface Prayer {
     id: string;
@@ -28,7 +29,7 @@ export default function AdminPrayersPage() {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/admin/prayers');
+            const res = await authedFetch('/api/admin/prayers');
             if (res.ok) {
                 const data = await res.json();
                 setPrayers(data);
@@ -44,7 +45,7 @@ export default function AdminPrayersPage() {
     }, []);
 
     const handleApprove = async (id: string) => {
-        const res = await fetch('/api/admin/prayers', {
+        const res = await authedFetch('/api/admin/prayers', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, action: 'approve' })
@@ -55,7 +56,7 @@ export default function AdminPrayersPage() {
     };
 
     const handleDelete = async (id: string) => {
-        const res = await fetch('/api/admin/prayers', {
+        const res = await authedFetch('/api/admin/prayers', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })

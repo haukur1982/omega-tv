@@ -1,9 +1,393 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-04-26 (Claude Opus 4.7 — design-system audit + polish ripple)
-**Last Agent:** Claude Opus 4.7
+**Last Updated:** 2026-05-30 (Claude Opus — Platform foundation rebuild)
+**Last Agent:** Claude Opus 4.8 (Claude Code)
 **Branch:** `experiment/vellum-prayer-cards`
-**Build Status:** `pnpm build` green — 56 pages, no errors.
+**Build Status:** `npx tsc --noEmit` green on 2026-05-30. Dev server (`pnpm dev`, :3010) boots clean; all changed admin routes compile and 401 correctly under the new auth gate. `pnpm build` last green 2026-05-18.
+
+---
+
+## Session — 2026-05-30 (Claude Opus — Foundation: auth + launch blockers)
+
+Commissioned to build the platform to a state-of-the-art bar (UI/UX exceptional, Azotus→publish flow effortless). Started with a multi-agent audit (41 confirmed bugs, 1 refuted; design scored per public page), then rebuilt the foundation because a beautiful UI on a broken auth layer is worthless. **Nothing committed yet** — all in the working tree, awaiting Hawk's go to snapshot on a branch.
+
+### Fixed (verified: tsc clean + routes compile/401)
+
+- **Auth, architectural fix.** New `src/lib/admin-fetch.ts` — one `authedFetch()` helper that attaches the Supabase bearer token to every admin API call (this project uses `@supabase/supabase-js`: token in localStorage, NO cookie, so a plain `fetch` 401s). Converted the 6 broken pages: videos, prayers, articles, dashboard, subscribers, newsletters/new. (12 other admin pages already attach the token by hand — migrate them to the helper in a cleanup pass.)
+- **Authorization gap closed.** `src/lib/admin-auth.ts` now requires the user's email to be on an allowlist (`ADMIN_EMAILS` env, comma-sep; defaults to `haukur1982@gmail.com` so the gate is closed even if the env var is never set). Before: ANY logged-in Supabase user could moderate prayers / email the list / delete content.
+- **Newsletter signup.** `src/lib/subscriber-db.ts` `addSubscriber` moved off the RLS-blocked anon client onto `supabaseAdmin` (it runs in a server action) — the verification token now reads back and the email actually sends.
+- **Draft publish, in place.** `src/app/api/admin/videos/link/route.ts` now UPDATES an existing draft when `episodeId` is passed (Azotus path) instead of insert-then-delete — kills the `bunny_video_id` unique-index collision AND preserves all enrichment (transcript/chapters/poster/thumbnail). Both paths now set `published_at` (public queries filter `published_at IS NOT NULL`, so episodes published without it were live-but-invisible). Videos page `handlePublishDraft` rewired to one call (no delete); `handleSaveConnection` (connect-existing) routed through the server route instead of RLS-blocked client writes.
+- **Schedule slots preserved.** `schedule-slots` POST and `[id]` PATCH now set `is_manual_override = true` — admin-created/edited slots survive the daily XML sync instead of being purged as stale playout rows.
+- **No fake programming on a live channel.** `src/lib/schedule-db.ts` `getScheduleInRange` no longer serves the mock week on a DB error or empty result in production (was masking outages with fabricated shows + feeding non-UUID slot IDs to the prayer-pulse RPC). Mock is now dev-only; prod returns empty → honest off-air.
+
+### Design-system lift (started, verified in-browser)
+
+- **`globals.css` :root** — defined `--radius-xs/sm/md/lg` (8/12/18/28px). ~87 references were undefined → every button/card/input was rendering SQUARE. Now rounded site-wide (confirmed: `--radius-sm`=12px, `--radius-md`=18px computed).
+- **Warm accent** — re-pointed `--accent` from `--nordurljos` (cold blue) to `--kerti` (candle) and `--accent-dim` to `--kerti-gloed`. ~93 emotional/CTA/kicker uses went warm at once; genuine wayfinding (44 direct `--nordurljos` uses) stays cold. Verified: `--accent`=`#e9a860`; home hero CTA + framtid "Gerast Bakhjarl" donate CTA are now warm (were blue).
+- **`.type-merki`** bumped 11px→13px, tracking 0.18em→0.14em. NOTE: most kickers override font-size inline (nav, logo, page eyebrows compute ~11.2px), so this only helps un-overridden uses. Real 60–75 legibility = per-component Phase 3 work.
+
+### Pipeline unification (done, verified: tsc clean + routes 200)
+
+- **One inbox, no duplicate.** `/admin/videos` is now the Bunny library + upload + connect ONLY — the broken "Drög" tab + insert-then-delete review modal are gone. A pointer card sends Azotus drafts to the Innhólf (`/admin/drafts`), which is the single review-and-publish room (nav already treats it as the spine).
+- **Secure draft reads.** New `GET /api/admin/drafts` (list) and `GET /api/admin/episodes/[id]` (single) — both authed + service-role. Converted the inbox (`/admin/drafts`) and the cockpit (`/admin/drafts/[id]`) to read drafts/transcript through these instead of the public anon key. This is the prerequisite that makes the RLS tightening safe (admin lists won't go dark). `series` reads stay on the anon client (public, not sensitive).
+
+### Page polish — Phase 3 (started, verified in-browser)
+
+- **frettabref (was 2/5):** EmailSignupForm — green/red Tailwind states → palette (candle-glow success), faint `placeholder-white/30` → `/55`, neon-glow + `scale-105` button → warm solid (`--accent` fill, `--nott` ink, `--gull` hover, soft shadow). Page's "latest newsletter" card → tokenized the raw hex (#fcfbf9→`--skra`, #1a1a1a→`--skra-djup`, #e5e5e5→warm divider, #888→`--skra-mjuk`). Verified: warm button w/ dark ink, no neon, legible placeholder, tsc clean.
+- **framtid (was 2/5):** cold-blue donate CTA + eyebrow/number markers already corrected by the `--accent`→`--kerti` re-alias (verified). REMAINING: heaviness — still a single dark register; add a cream (`--skra`) section so dark→cream reads as dawn not a wall.
+
+### Thumbnails — subtitle-safe (started)
+
+- **Burned-in-subtitle problem:** finished VOD masters have subtitles burned into the bottom band; `resolvePoster` falls back to a raw Bunny frame-grab when no poster exists → captions show on the card. `ThumbnailFrame` now detects the Bunny-proxy fallback (`/api/bunny/thumbnail/`) and renders the img at `height:128%` top-anchored so the bottom ~22% (the caption strip) is clipped (clean posters/`thumbnail_custom` untouched). Verified against a real frame (fb436cc9…): 128% fully clears a 2-line band; hover transform composes fine.
+- **Proper fix (next):** generate branded posters (Poster Machine `getCleanVodCrop` + Azotus clean candidate frames) for all episodes so cards use designed key art, not frame-grabs. CSS crop is the stopgap until backfilled.
+
+### Home rail — real metadata + Apple TV text (done, verified)
+
+- **Root cause of "Omega TV / 22":** the home "Nýjustu þættir" rail was calling `getVideos()` — RAW Bunny library files, whose names parse to show="Omega TV" + title="22". It bypassed the curated `episodes` catalog entirely.
+- **Fix:** rail now reads `getNewestEpisodes(3)` from the episodes table (real titles, series, duration) and `resolvePoster(e,'portrait_4x5')` for clean key art. `UrDagskranni` card now follows Apple TV+ exactly: **title leads**, then ONE quiet secondary line "series · duration" (was: kicker above + bare title). Removed ~25 junk duplicate `_unused*` imports from page.tsx.
+- Verified in DOM: cards read "Trúin sem sigrar / Í Snertingu · 28 mín" etc. (currently mock fallback — 0 published episodes exist; all 8 are drafts. Once a draft is published the rail shows it automatically). tsc clean, no console errors.
+- **ThumbnailFrame caption-crop** (128% top-anchor on raw Bunny frames) still applies as the safety net when an episode has no branded poster.
+
+### Poster Machine — backfill route built + proven (2026-05-31)
+
+- **No `canvas` needed** (earlier worry was wrong): the Poster Machine runs on `sharp` + `satori` + `@resvg/resvg-js`, all installed and loading. Nothing in src imports `canvas`.
+- **New `POST /api/admin/posters/backfill`** (admin-gated, idempotent): generates branded 16:9 + 4:5 key art for every episode missing a variant. Source priority: selected candidate → first candidate → Bunny auto-frame. `getCleanVodCrop` (72% height) strips the burned-in subtitle band. Mirrors 16:9 into `thumbnail_custom` so every consumer upgrades. Skips episodes with no source; supports `{dryRun, limit}`. tsc clean.
+- **Proven end-to-end:** ran `generatePosterVariants` against a real subtitled Bunny frame (TimesSquareChurch) via a throwaway tsx script — produced valid branded PNGs (487KB landscape / 392KB portrait), clean crop + grade + vignette + title overlay. Script removed after.
+- **Catalog reality:** 8 episodes, ALL drafts, 0 published; only 2 have a Bunny video (rest are demo drafts w/ no source). So backfill yields ~2 posters now and they're not publicly visible until published. Real payoff is forward-looking: run it (logged in: `POST /api/admin/posters/backfill`) after content is published, and ensure Azotus sends candidate frames so new episodes auto-get posters.
+- framtid cream "dawn" Áherslur band added (verified: --skra bg / --skra-djup ink).
+
+### Legibility pass — gull-on-cream (COMPLETE site-wide, browser-verified)
+
+Method: `--gull` kickers are fine on dark (--nott, gold) but ~2.5:1 and illegible on cream.
+Swapped to `--mor` (#3F2F23, ~9:1) ONLY where section bg is cream (--skra/--skra-warm),
+TEXT colors only — decorative gull rules/dots/fills kept. Verified per page in-browser
+(computed color + nearest non-transparent bg) = 0 gull-on-cream.
+
+Pages done (commits de72df1, 774b9e0, 9369c58, 4c8263f, 2bfbcc1, 0b8a6d6, 7b20b24):
+give, israel, about, greinar, vitnisburdur, frettir, namskeid. Intentionally kept gull on
+cream: 22px Hebrew calligraphy (Icelandic name in dark ink sits directly below) + 76px
+decorative drop-cap. Dark mastheads/kickers keep gull everywhere.
+
+Separate audit item, NOT started: low-contrast body/meta on `--steinn` (#7A7268, ~3:1 dark)
+→ `--moskva` (#B9B2A6, ~4.5:1). Verify each before swapping. Also: admin inbox/cockpit
+visual elevation (Hawk verifies on login — admin gates to sign-in).
+
+### Self-review of the branch (code-review skill, 2026-05-31) — 2 real fixes, rest refuted
+
+Ran adversarial review of the whole branch diff (auth, RLS, pipeline, data). Findings:
+- **REAL (fixed):** `getNewestEpisodes` didn't select `poster_candidates`, so the home rail
+  couldn't use branded 4:5 posters even after backfill — silently fell back to stretched
+  16:9 / raw frame. Fixed (738deee): field flows through type+select+Row+map.
+- **REAL (fixed):** poster backfill could exceed the serverless function timeout on a large
+  catalog (sequential, 2 renders/episode). Made batch-safe (ced13ba): `scan` vs `batch`
+  split, `maxDuration=300`, returns `{more, remaining}` to loop; idempotent so safe to repeat.
+- **REFUTED:** `getPublicUrl` `{data:urlData}` destructure — matches the proven live pattern
+  (vod-intake:342); supabase-js v2 returns `{data:{publicUrl}}`. `revalidateTag('vod','max')`
+  — Next 16.1 signature IS `(tag, profile)`, 2 args valid. `bunnyVideoId!` assertion — guarded
+  by the `!sourceUrl && !bunny_video_id` skip above it. supabase lazy-fallback "no throw" — by
+  design (loud console.error added; hard-throw would break the build with no env).
+
+### Known-remaining (next sessions)
+
+- **RLS draft leak — CLOSED + verified (2026-05-30, migration `tighten_episodes_public_read_to_published`, Hawk approved).** Dropped the two `USING(true)` public-read policies on `episodes`; replaced with `Public reads published episodes USING (status='published')`. Verified empirically: as the `anon` role, draft visibility = 0 (8 drafts exist); public pages (/, /sermons, /live) still 200. Service-role policy intact → admin inbox still reads all drafts. `series`/`seasons` left public-readable (not sensitive).
+- **Still open (minor hardening):** `supabaseAdmin` silent anon fallback warn (`src/lib/supabase.ts:19`); confirm `SUPABASE_SERVICE_ROLE_KEY` set on Vercel; optional gate on `/api/admin/social/generate` (low risk).
+- **`/api/admin/social/generate`** has no auth — deliberately deferred: read-only PNG render, no DB access, embedded as `<img src>` (a Bearer gate would break the embed). Low risk (compute only).
+- **Two competing draft surfaces** = the real "confusion": `/admin/videos` Drög tab vs `/admin/drafts`. Plan: make `/admin/drafts` THE Azotus inbox (it's richer/correct) and reduce `/admin/videos` to Bunny library + upload only.
+- **`supabaseAdmin` silent anon fallback** when `SUPABASE_SERVICE_ROLE_KEY` missing (`src/lib/supabase.ts:19`) — add a loud warn. Key IS set locally; confirm it's set on Vercel.
+
+### Phase plan (task list)
+
+1. ✅ (mostly) Foundation — auth + launch blockers. 2. Design system lift (tokens: define `--radius-*`, raise small-text floor off `--steinn`, reclaim `--nordurljos` for wayfinding, dawn transitions). 3. Azotus→publish pipeline experience (centerpiece — unify the inbox, visual state clarity). 4. Page-by-page design polish (worst-first: framtid 2/5, frettabref 2/5).
+
+---
+
+## Session — 2026-05-20 (Antigravity — Integration Quality Audit)
+
+Audited the quality of the Azotus-to-Omega VOD intake and poster integration pipeline.
+
+### Findings & Insights
+
+- **Code Quality**: Integration is production-grade. Security (HMAC + timestamp validation), DB hygiene (base64 moved to Storage), trigger-based search indexing (`search_vector`), and editorial edit preservation are solid.
+- **Queue Overlap Warning**: Webhook POST enqueues to a PGMQ queue (`vod_metadata_jobs`) but still processes everything (Gemini metadata + poster generation) inline. If the queue is never consumed, messages will pile up. Blockers on inline processing (e.g. slow LLM calls) could trigger request timeouts in serverless contexts.
+
+### Next Steps
+
+- Monitor PGMQ table size or hook up a background worker to consume `vod_metadata_jobs` off the HTTP thread.
+
+---
+
+## Session — 2026-05-19 (DISPATCH-003 — Poster Machine V1)
+
+Built the Poster Machine: one selected source frame → branded variants → each public surface gets the right aspect. No schema change — the whole model lives in the existing `episodes.poster_candidates` JSONB column (the dispatch explicitly preferred this over a migration).
+
+### What was built (Omega side, branch `experiment/vellum-prayer-cards`)
+
+- **`src/lib/poster.ts`** (new) — the poster model: `PosterModel` type, `normalizePosterModel()` (accepts the legacy bare array, the full object, or null — old rows and the clean single-frame fallback never break), and `resolvePoster(ep, aspect)` with the full fallback chain (branded variant → other variant → `thumbnail_custom` → Bunny proxy → null).
+- **`src/lib/thumbnail-generator.ts`** — extended backward-compatibly: optional `sourceImage` Buffer (use a reviewer-chosen frame instead of the auto Bunny frame), new `portrait_4x5` (1080×1350) format, `getCleanVodCrop` generalized by target ratio (Codex's subtitle-band clean crop preserved), new `generatePosterVariants()` that fetches the source once and grades 16:9 + 4:5. The existing `bunnyVideoId`/`landscape` path (i2620, `api/admin/videos/thumbnail`) is untouched.
+- **`src/app/api/admin/posters/route.ts`** (new, admin-auth) — `GET ?episodeId` returns the normalized model; `POST` `select` | `generate` | `manual`. `generate` fetches the chosen frame, brands both variants, uploads to the existing Supabase `thumbnails` bucket, writes the model, and **mirrors the 16:9 into `thumbnail_custom`** so every existing public surface upgrades with zero other changes.
+- **`src/app/api/azotus/vod-intake/route.ts`** — new `ingestPosterCandidates()`: Azotus sends candidate frames inline as base64; intake moves each into Supabase Storage and stores only compact descriptors + URLs (base64 never touches the DB). Re-delivery never clobbers reviewer poster work (poster_candidates dropped from the update path, same pattern as `thumbnail_custom`). Degradable: no candidates → empty model, single-frame fallback still works.
+- **`src/components/admin/PosterStudio.tsx`** (new) + mounted in `src/app/admin/drafts/[id]/page.tsx` — candidate grid (pick a frame), Generate button, 16:9 + 4:5 previews, manual URL override. Self-contained so the big draft page only needed a one-line mount.
+
+### Decisions made (flagged for the architect)
+
+- **Candidate transport = base64 inline over the existing signed intake.** No new GCS bucket/ACL or second credential — reuses the one signed Azotus→Omega pipe and the existing Supabase `thumbnails` bucket. ~10×~40 KB JPEGs ≈ ~0.5 MB POST, one-shot per delivery. Forward-compatible: `ingestPosterCandidates` also accepts a pre-hosted `url` if Azotus later moves to GCS-hosted frames.
+- **Public consumption for V1 = the `thumbnail_custom` mirror** (universal, zero-risk — upgrades sermons list, show page, all `ThumbnailFrame` consumers automatically). Aspect-correct portrait wiring (`resolvePoster` into the `4/5` shelves) needs the search-projection / show-page query to also select `poster_candidates` — clean follow-up, intentionally not done in V1 ("keep the first version practical").
+
+### Verification (honest)
+
+- `pnpm exec tsc --noEmit` → exit 0, zero errors (Omega).
+- Azotus `python3 -m py_compile workers/vod_publisher.py tests/test_vod_publisher.py` clean.
+- NOT run here (sandbox): live image generation (Sharp), a real Azotus→Omega delivery, the `.venv` pytest suite. Operator steps below.
+
+### Next / operator
+
+- Run one live track from the Mac mini and confirm candidates appear in `/admin/drafts/[id]` → pick → Generate → 16:9 + 4:5 render and the card updates.
+- `.venv/bin/python -m pytest tests/test_vod_publisher.py -q` (Azotus) — existing tests should stay green (the <60s guard keeps `test_build_omega_intake_payload` hermetic).
+- Follow-up (not a blocker): wire `resolvePoster` into the `4/5` portrait shelves once their queries select `poster_candidates`.
+
+---
+
+## Session — 2026-05-19 (DISPATCH-002 — Azotus-side, no Omega changes)
+
+Claude Code built DISPATCH-002's two-station VOD delivery guardrails — **entirely Azotus-side**, branch `codex/vod-intake-http`. **No Omega code changed**: `/api/azotus/vod-intake` already satisfies the handoff ("only change Omega if missing"). Codex's intake, idempotency, draft gate, Bunny thumbnail proxy and clean crop are preserved/untouched.
+
+Azotus commits `56c5533 54d2b92 3b60bbe fd6dedd 3fc3eef`: canonical track-UUID as `azotus_track_id` (never a filename/alias like i2620); `OMEGA_VOD_DELIVER_ROLE` one-deliverer gate (Mac mini=production, Mac Studio=dev); durable per-station delivery log; `sync_pipeline_to_macmini.sh` now ships the VOD code to the Mac mini (secrets stay on-box); guard unit tests. Full detail in Azotus `STATUS.md` + the `DISPATCH-002` Response (left in `queue/` as `partial` — pytest + live run are operator/venv steps, flagged from the start).
+
+**For Codex:** Omega intake enqueues `enqueue_vod_metadata_job` AND processes metadata inline in the same request — confirm the queued job isn't double-consumed. Optional (needs Hawk's ok, schema): unique index on `episodes(bunny_video_id)` to make dedup race-proof.
+
+---
+
+## Session — 2026-05-19 (Clean i2620 thumbnail)
+
+Hawk reported that the generated i2620 thumbnail was ugly: it used a raw Bunny frame with burned Icelandic subtitles and part of the scripture slide.
+
+### Fixed
+
+- Updated Apple TV thumbnail generation to crop finished VOD frames away from the lower subtitle band and bias toward the live video side instead of the slide/text side.
+- Fixed the Sharp processing bug where `gamma(0.95)` was invalid; it now uses a valid correction value.
+- Added cache-busted thumbnail filenames so regenerated thumbnails do not keep showing stale images.
+- Generated a clean local preview at `/private/tmp/i2620-clean-thumb-v2.png`.
+- Uploaded the clean thumbnail to Supabase Storage and updated i2620 draft `43580ebe-85aa-442c-b196-a0e94e436515`:
+  - `https://dvzwpwlgucsdyrkhrpah.supabase.co/storage/v1/object/public/thumbnails/43580ebe-85aa-442c-b196-a0e94e436515_landscape_1779193909098.png`
+
+### Verification
+
+- `pnpm exec tsc --noEmit` passed.
+- Pushed commit `50df406` to `experiment/vellum-prayer-cards`.
+- Deployed to temp Vercel: `https://omega-tv-lovat.vercel.app`.
+- Verified the new Supabase thumbnail URL returns `200 image/png`.
+
+### Next
+
+- Refresh the i2620 draft modal in `/admin/drafts` and visually confirm the thumbnail is acceptable.
+- If a future frame still catches a lower-third or slide, the next step is multi-frame candidate selection rather than relying on one Bunny default frame.
+- Coordination handoff for Claude was created at `/Users/haukur/Projects/.dispatch/queue/DISPATCH-001-omega-vod-thumbnail-handoff.md`.
+
+---
+
+## Session — 2026-05-19 (Azotus/Omega delivery package queued)
+
+Hawk clarified the Azotus mental model: Azotus receives original ministry videos, transcribes, translates, creates subtitles, burns subtitles when needed, and exports a processed delivery video. Omega should not replace Azotus; Omega should receive Azotus's completed delivery package as a reviewed VOD draft.
+
+### Coordination
+
+- Created Claude build dispatch: `/Users/haukur/Projects/.dispatch/queue/DISPATCH-002-azotus-omega-delivery-package.md`.
+- The requested build is the dependable Azotus completed-track handoff:
+  - final delivery video
+  - transcript/subtitles
+  - language/source metadata
+  - Bunny upload/idempotency
+  - signed Omega intake
+  - one gated Omega draft
+
+### Guardrails
+
+- Keep using `https://omega-tv-lovat.vercel.app` until Hawk says the real domain is ready.
+- Preserve the Bunny thumbnail proxy and clean subtitle-avoiding thumbnail crop.
+- No VOD auto-publish.
+
+---
+
+## Session — 2026-05-19 (Two-station VOD guardrails)
+
+Claude flagged the corrected production model: the Mac mini in Iceland is the primary studio station, not a translation-only satellite. Hawk's Mac Studio is dev/secondary.
+
+### Updated Dispatch
+
+- Amended `/Users/haukur/Projects/.dispatch/queue/DISPATCH-002-azotus-omega-delivery-package.md` with:
+  - Mac mini = primary production VOD deliverer.
+  - Mac Studio = dev/secondary, not normal production deliverer.
+  - Mac mini sync/deploy must include VOD delivery code.
+  - Secrets stay excluded from sync; provision the Mac mini `.env` directly on-box.
+  - Only one station should deliver a given production program to Omega/Bunny.
+  - Production trigger must pass the real Azotus track UUID as `azotus_track_id`, not a filename/test alias like `i2620`.
+
+### Local Check
+
+- Confirmed `workers/vod_publisher.py` sends `"azotus_track_id": track_id`.
+- Confirmed `/tracks/{track_id}/publish-vod` passes the route `track_id` through to `workers.vod_publisher.publish_to_vod(track_id, None)`.
+- Confirmed Azotus track IDs are UUID-based. `omega_db._generate_id()` uses UUID4; the FastAPI create-track route uses deterministic UUID5 from `program_id|language|subtitle`.
+
+---
+
+## Session — 2026-05-19 (Poster system queued)
+
+Hawk clarified that Omega's front page and VOD surfaces use different aspect ratios and graphic treatments, so the current single generated thumbnail is only V1 fallback behavior.
+
+### Coordination
+
+- Created Claude build dispatch: `/Users/haukur/Projects/.dispatch/queue/DISPATCH-003-omega-poster-system.md`.
+- Poster Machine V1 target:
+  - Azotus extracts 8-12 frame candidates from the finished delivery video.
+  - Reject obvious bad frames: black, blurry, too dark, subtitle/lower-third heavy, mostly slide/text when live frames exist.
+  - Omega reviewer picks the source frame.
+  - Omega generates branded variants for current UI needs, especially `16:9` and `4:5`.
+  - Public VOD/front-page components use the correct variant instead of stretching one image everywhere.
+
+### Guardrails
+
+- Preserve the current clean thumbnail fallback.
+- Do not block VOD delivery on perfect poster automation.
+- Keep manual override available.
+- No auto-publish.
+
+---
+
+## Session — 2026-05-19 (VOD thumbnail/metadata fixes deployed)
+
+Hawk reported that the admin draft thumbnail was broken and the i2620 description was just raw subtitle lines.
+
+### Fixed in code
+
+- Added `/api/bunny/thumbnail/[videoId]`, a Bunny thumbnail proxy that fetches the CDN image with the Bunny player referer. Direct CDN requests return `403` and the old `iframe.mediadelivery.net/thumbnail/...` path returns `404` for i2620.
+- Switched admin/public VOD thumbnail fallbacks to use `/api/bunny/thumbnail/{bunnyGuid}` instead of direct Bunny URLs.
+- Updated Apple TV thumbnail generation to use the same Bunny thumbnail fetch path.
+- Improved `scripts/generate-metadata.ts` mock fallback so missing Gemini never produces raw SRT cue text as the description.
+
+### Verification
+
+- `pnpm exec tsc --noEmit` passed.
+- Pushed commit `16d89ee` to `experiment/vellum-prayer-cards`.
+- Added/confirmed `GEMINI_API_KEY` in Vercel Production from local `.env.local`.
+- Deployed to temp Vercel: `https://omega-tv-lovat.vercel.app`.
+- Verified `https://omega-tv-lovat.vercel.app/api/bunny/thumbnail/2b386fa3-3862-486f-8074-65e91c8cc7f3` returns `200 image/jpeg`.
+- Repaired existing i2620 draft `43580ebe-85aa-442c-b196-a0e94e436515` with Gemini-generated metadata:
+  - Title: `Bænin: Lykill að andlegu lífi`
+  - Description length: 840 characters
+  - Tags: `bæn-og-trú`, `andlegt-líf`, `guðsrækt`, `kristið-líf`
+
+### Next
+
+- Open i2620 in `/admin/drafts` and visually review the generated title/description/tags.
+- Generate/select the Apple TV thumbnail now that the Bunny thumbnail proxy works.
+- Run the next completed Azotus track through the VOD intake.
+
+---
+
+## Session — 2026-05-18 (VOD Factory deployed)
+
+Codex pushed and deployed the VOD Factory M1 work after Hawk approved Vercel CLI login.
+
+### Deployment
+
+- Pushed Omega branch `experiment/vellum-prayer-cards` to GitHub at `c0ee403`.
+- Added `AZOTUS_WEBHOOK_SECRET` to Vercel Production.
+- Deployed production through Vercel CLI.
+- Production URL returned by Vercel: `https://omega-9fwkws5cf-haukur1982-1838s-projects.vercel.app`
+- Active Vercel alias: `https://omega-tv-lovat.vercel.app`
+- Rollout decision from Hawk: keep using the temporary Vercel URL until the VOD library has several reviewed videos and the site is ready to go live on the real domain.
+
+### Intake smoke test
+
+- `POST https://omega-tv-lovat.vercel.app/api/azotus/vod-intake` without signature returns `401`, which confirms the endpoint is live and protected.
+- `POST https://omega.is/api/azotus/vod-intake` currently returns `404`, but this is not blocking the current rollout because Hawk does not want the real domain live yet.
+- Until Hawk explicitly decides to switch the public domain over, Azotus should use:
+  - `OMEGA_VOD_INTAKE_URL=https://omega-tv-lovat.vercel.app/api/azotus/vod-intake`
+
+### Next
+
+- Keep the VOD factory on the temporary Vercel URL while building up the first reviewed videos.
+- Fix/switch the public `omega.is` domain only when Hawk says the site is ready to be live.
+- Review the existing i2620 draft in `/admin/drafts`.
+- Run the next manual VOD publish with a new completed track after review.
+
+---
+
+## Session — 2026-05-18 (VOD Factory M1 implemented)
+
+Hawk asked to implement the 90-day VOD Factory plan. This session shipped the first production spine: Azotus now hands finished videos to Omega over HTTP, Omega receives them through a signed intake API, creates draft episodes, and the admin/public VOD surfaces know about review state and discovery.
+
+### Shipped in Omega
+
+- Added migration `20260518000000_vod_factory_intake.sql` and applied it to Supabase.
+- Added `vod_intake_jobs` plus episode fields: `azotus_track_id`, `azotus_job_id`, `source_language`, `review_status`, `assigned_to`, `review_notes`, `metadata_confidence`, `poster_candidates`, `search_vector`.
+- Added `POST /api/azotus/vod-intake`:
+  - HMAC auth via `AZOTUS_WEBHOOK_SECRET`
+  - idempotent by Azotus track + Bunny GUID
+  - stores intake job
+  - generates metadata from transcript
+  - creates/updates Omega draft episode
+- Added `POST /api/bunny/stream-webhook` for Bunny Stream event logging/status updates.
+- Added `POST /api/admin/episodes/[id]/regenerate` so the draft editor can regenerate metadata from stored transcript.
+- Draft inbox now shows queue stats, review status, assignment, Azotus origin, metadata confidence, poster count, and review notes.
+- Draft edit page now has review status, assigned-to, internal notes, Azotus/source metadata, transcript preview, and enabled "Fylla út sjálfvirkt".
+- Episode publish now revalidates VOD public pages/tags.
+- `/sermons` now has first-pass VOD discovery search/filter UI backed by Postgres full-text search.
+- Chapter saves push approved chapters back to Bunny best-effort.
+
+### Shipped in Azotus
+
+- Worker agent updated `workers/vod_publisher.py` to POST signed intake payloads to `OMEGA_VOD_INTAKE_URL` instead of shelling into the Omega repo.
+- `workers/bunny_upload.py` supports per-call Bunny library/API-key overrides.
+- Added `tests/test_vod_publisher.py`; Azotus VOD publisher tests pass.
+
+### Verification
+
+- `pnpm exec tsc --noEmit` ✅
+- `pnpm build` ✅ after rerun with network access for Google fonts
+- `supabase db push` for isolated VOD migration ✅
+- `supabase migration list` confirms `20260518000000` applied ✅
+- Browser QA: `http://localhost:3010/sermons?q=trú&language=is` rendered search/results UI ✅
+- Azotus: `python3 -m py_compile workers/vod_publisher.py workers/bunny_upload.py tests/test_vod_publisher.py` ✅
+- Azotus: `.venv/bin/pytest tests/test_vod_publisher.py` → 2 passed ✅
+
+### Important operational notes
+
+- Matching secrets were set locally and in Vercel Production. Azotus currently points to `https://omega-tv-lovat.vercel.app/api/azotus/vod-intake` because `omega.is` returns `404` for the new endpoint.
+- The normal `supabase db push` is still blocked by old duplicate local migration versions (`20260417`, etc.). This session applied only the new VOD migration from an isolated temp workdir to avoid touching old history.
+- Poster candidate extraction is not built yet. The schema/admin path is ready; Azotus still sends an empty list.
+- Auto-triggering from Azotus `COMPLETED` is still intentionally off. Run one more manual track first.
+
+---
+
+## Session — 2026-05-18 (Azotus → Omega VOD bridge proved)
+
+Hawk handed off the stalled VOD bridge test from Claude. Codex used the committed Azotus branch `omega-vod-handoff` in a separate worktree so the dirty Azotus `main` checkout was left untouched.
+
+### Shipped operationally
+
+- Ran the VOD publisher against the real i2620 Azotus track:
+  - Track ID: `9cfd8236-d1f6-4c36-a9bd-6f717252af17`
+  - Job ID: `i2620_intluk_h264-1080p25-aac-20260516T122859784056Z`
+  - Video: `4_DELIVERY/VIDEO/i2620_intluk_h264-1080p25-aac-20260516T122859784056Z_SUBBED.mp4` (2.1 GB)
+- Uploaded the finished video to Omega's VOD Bunny library `628621`.
+- Bunny GUID: `2b386fa3-3862-486f-8074-65e91c8cc7f3`
+- Omega draft episode created:
+  - Episode ID: `43580ebe-85aa-442c-b196-a0e94e436515`
+  - Status: `draft`
+  - Language: `is`
+  - Series: `null` for human assignment in `/admin/drafts`
+- Azotus track moved from `COMPLETED` to `DELIVERED` with `vod_published=true`.
+
+### Notes
+
+- Claude's handoff said the command was `python -m workers.vod_publisher i2620`, but the DB lookup requires the real track UUID. Bare `i2620` did not resolve.
+- The generated Omega draft title is still filename-like. The metadata bridge works, but the editorial quality of title/description/poster/chapter generation needs the next pass.
+- No code was changed in Omega TV during this session.
+
+### Recommended next pass
+
+Build the real draft-review workflow around this proven bridge: better `/admin/drafts` screen, regenerate metadata, poster candidates, series assignment, publish/schedule. After one or two more manual successes, add the Azotus auto-trigger on eligible `COMPLETED` tracks.
 
 ---
 

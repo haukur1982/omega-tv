@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { publishEpisode, unpublishEpisode } from '@/lib/vod-db';
 
@@ -28,5 +29,9 @@ export async function POST(
     if (!result) {
         return NextResponse.json({ error: 'Ekki tókst að breyta stöðu.' }, { status: 500 });
     }
+    revalidateTag('vod', 'max');
+    revalidatePath('/sermons');
+    if (result.bunny_video_id) revalidatePath(`/sermons/${result.bunny_video_id}`);
+    if (result.series_id) revalidatePath('/sermons');
     return NextResponse.json({ ok: true, episode: result });
 }

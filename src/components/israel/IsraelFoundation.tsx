@@ -54,7 +54,7 @@ export default function IsraelFoundation() {
                         fontWeight: 700,
                         letterSpacing: '0.22em',
                         textTransform: 'uppercase',
-                        color: 'var(--gull)',
+                        color: 'var(--mor)',
                         marginBottom: '14px',
                     }}
                 >
@@ -123,7 +123,7 @@ export default function IsraelFoundation() {
                                 fontSize: 'clamp(56px, 6vw, 76px)',
                                 lineHeight: 0.85,
                                 fontWeight: 400,
-                                color: 'var(--gull)',
+                                color: 'var(--mor)',
                                 marginRight: '12px',
                                 marginTop: '6px',
                                 letterSpacing: '-0.02em',

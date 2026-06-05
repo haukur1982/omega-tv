@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Download, Search, Mail, Calendar, Tag, RefreshCw } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { authedFetch } from '@/lib/admin-fetch';
 
 interface Subscriber {
     id: string;
@@ -20,7 +21,7 @@ export default function AdminSubscribersPage() {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/admin/subscribers');
+            const res = await authedFetch('/api/admin/subscribers');
             if (res.ok) {
                 const data = await res.json();
                 setSubscribers(data);

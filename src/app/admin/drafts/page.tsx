@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { supabase } from '@/lib/supabase';
-import { Loader2, FileText, CheckCircle2, Tag, BookOpen, Plus } from 'lucide-react';
+import { authedFetch } from '@/lib/admin-fetch';
+import { Loader2, FileText, CheckCircle2, Tag, BookOpen, Plus, UserRound, AlertCircle } from 'lucide-react';
 import { displayPassageIs } from '@/lib/passages';
 
 /**
@@ -34,6 +34,12 @@ type DraftEpisode = {
     tags: string[] | null;
     captions_available: string[] | null;
     series_id: string | null;
+    review_status: string | null;
+    assigned_to: string | null;
+    review_notes: string | null;
+    azotus_track_id: string | null;
+    metadata_confidence: number | null;
+    poster_candidates: unknown[] | null;
 };
 
 export default function DraftsPage() {
@@ -43,14 +49,12 @@ export default function DraftsPage() {
 
     const load = async () => {
         setLoading(true);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sb = supabase as any;
-        const { data, error } = await sb
-            .from('episodes')
-            .select('id, title, description, bunny_video_id, thumbnail_custom, episode_number, status, created_at, bible_ref, editor_note, chapters, tags, captions_available, series_id')
-            .eq('status', 'draft')
-            .order('created_at', { ascending: false });
-        if (!error && data) setDrafts(data as DraftEpisode[]);
+        // Service-role server route — never reads drafts over the public anon key.
+        const res = await authedFetch('/api/admin/drafts');
+        if (res.ok) {
+            const { items } = await res.json();
+            setDrafts((items ?? []) as DraftEpisode[]);
+        }
         setLoading(false);
     };
 
@@ -60,13 +64,9 @@ export default function DraftsPage() {
 
     const publish = async (id: string) => {
         setPublishing(id);
-        const { data: { session } } = await supabase.auth.getSession();
-        const res = await fetch(`/api/admin/episodes/${id}/publish`, {
+        const res = await authedFetch(`/api/admin/episodes/${id}/publish`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-            },
+            headers: { 'Content-Type': 'application/json' },
         });
         if (res.ok) {
             setDrafts(prev => prev.filter(d => d.id !== id));
@@ -89,8 +89,16 @@ export default function DraftsPage() {
                             Drög til yfirferðar
                         </h1>
                         <p style={{ margin: '8px 0 0', color: 'var(--admin-text-muted, #888)', fontSize: '0.92rem', lineHeight: 1.5, maxWidth: '58ch' }}>
-                            Nýjar upptökur bíða hér þar til þú ferð yfir þær. Smelltu á dragið til að laga lýsingu, ritningartilvísun og útdrætti — síðan <em>Birta</em> þegar þú ert sáttur.
+                            Nýjar upptökur frá Azotus og handvirkar Bunny-upphleðslur bíða hér þar til einhver tekur yfirferðina, lagar texta og birtir. Þetta er útgáfuherbergið, ekki bara listi.
                         </p>
+                        {!loading && drafts.length > 0 && (
+                            <div style={{ marginTop: '14px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                <QueueStat label="Nýtt" count={drafts.filter(d => !d.review_status || d.review_status === 'new').length} />
+                                <QueueStat label="Í vinnslu" count={drafts.filter(d => d.review_status === 'assigned' || d.review_status === 'in_review').length} />
+                                <QueueStat label="Tilbúið" count={drafts.filter(d => d.review_status === 'ready').length} />
+                                <QueueStat label="Þarf lagfæringu" count={drafts.filter(d => d.review_status === 'needs_changes').length} tone="warn" />
+                            </div>
+                        )}
                     </div>
                     <Link
                         href="/admin/drafts/new"
@@ -162,7 +170,7 @@ function DraftRow({ draft, onPublish, isPublishing }: { draft: DraftEpisode; onP
                 {draft.thumbnail_custom || draft.bunny_video_id ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                        src={draft.thumbnail_custom ?? `https://iframe.mediadelivery.net/thumbnail/${process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID}/${draft.bunny_video_id}/thumbnail.jpg`}
+                        src={draft.thumbnail_custom ?? `/api/bunny/thumbnail/${draft.bunny_video_id}`}
                         alt={draft.title}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
@@ -180,6 +188,16 @@ function DraftRow({ draft, onPublish, isPublishing }: { draft: DraftEpisode; onP
                 </h2>
 
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', fontSize: '0.78rem', color: 'var(--admin-text-muted, #888)' }}>
+                    <ReviewStatusPill status={draft.review_status} />
+                    {draft.assigned_to && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <UserRound size={12} />
+                            {draft.assigned_to}
+                        </span>
+                    )}
+                    {draft.azotus_track_id && (
+                        <span>Azotus</span>
+                    )}
                     {passage && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: 'var(--admin-accent, #E9A860)' }}>
                             <BookOpen size={12} />
@@ -199,6 +217,12 @@ function DraftRow({ draft, onPublish, isPublishing }: { draft: DraftEpisode; onP
                             {draft.tags.length > 3 && ` +${draft.tags.length - 3}`}
                         </span>
                     )}
+                    {typeof draft.metadata_confidence === 'number' && (
+                        <span>AI traust · {Math.round(draft.metadata_confidence * 100)}%</span>
+                    )}
+                    {Array.isArray(draft.poster_candidates) && draft.poster_candidates.length > 0 && (
+                        <span>{draft.poster_candidates.length} posterar</span>
+                    )}
                     {draft.created_at && (
                         <span>Skrá&eth;: {new Date(draft.created_at).toLocaleDateString('is-IS', { day: 'numeric', month: 'short' })}</span>
                     )}
@@ -215,6 +239,13 @@ function DraftRow({ draft, onPublish, isPublishing }: { draft: DraftEpisode; onP
                 ) : (
                     <p style={{ margin: 0, color: 'var(--admin-text-muted, #888)', fontSize: '0.82rem', fontStyle: 'italic' }}>
                         Engin lýsing eða ritstjórnarlína — bættu við áður en þú birtir.
+                    </p>
+                )}
+
+                {draft.review_notes && (
+                    <p style={{ margin: 0, color: 'var(--admin-warning, #E9A860)', fontSize: '0.8rem', lineHeight: 1.45, display: 'inline-flex', gap: '6px', alignItems: 'flex-start' }}>
+                        <AlertCircle size={13} style={{ marginTop: '2px', flexShrink: 0 }} />
+                        {draft.review_notes}
                     </p>
                 )}
 
@@ -266,6 +297,50 @@ function DraftRow({ draft, onPublish, isPublishing }: { draft: DraftEpisode; onP
                 </button>
             </div>
         </article>
+    );
+}
+
+function QueueStat({ label, count, tone }: { label: string; count: number; tone?: 'warn' }) {
+    return (
+        <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '7px',
+            padding: '6px 10px',
+            borderRadius: '999px',
+            border: `1px solid ${tone === 'warn' ? 'rgba(233, 168, 96, 0.35)' : 'var(--admin-border, #333)'}`,
+            background: tone === 'warn' ? 'rgba(233, 168, 96, 0.08)' : 'var(--admin-surface, #1f1d1a)',
+            color: tone === 'warn' ? 'var(--admin-accent, #E9A860)' : 'var(--admin-text-secondary, #aaa)',
+            fontSize: '0.76rem',
+            fontWeight: 650,
+        }}>
+            {label}
+            <strong style={{ color: 'var(--admin-text, #eee)' }}>{count}</strong>
+        </span>
+    );
+}
+
+function ReviewStatusPill({ status }: { status: string | null }) {
+    const labelMap: Record<string, string> = {
+        new: 'Nýtt',
+        assigned: 'Úthlutað',
+        in_review: 'Í yfirferð',
+        needs_changes: 'Þarf lagfæringu',
+        ready: 'Tilbúið',
+        published: 'Birt',
+    };
+    const value = status || 'new';
+    const isWarm = value === 'needs_changes' || value === 'ready';
+    return (
+        <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+            color: isWarm ? 'var(--admin-accent, #E9A860)' : 'var(--admin-text-secondary, #aaa)',
+            fontWeight: 700,
+        }}>
+            {labelMap[value] ?? value}
+        </span>
     );
 }
 

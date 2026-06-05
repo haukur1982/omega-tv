@@ -1,6 +1,38 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
+import { updateBunnyChapters } from '@/lib/bunny';
+import { logEvent } from '@/lib/system-events';
+
+/**
+ * GET /api/admin/episodes/[id]
+ *
+ * Service-role read of a single episode (all fields, drafts + transcript
+ * included). Admin-gated, so the cockpit at /admin/drafts/[id] can load an
+ * unpublished draft WITHOUT exposing it to the public anon key. This is the
+ * secure replacement for the cockpit's old client-side anon read.
+ */
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
+) {
+    const auth = await verifyAdminSession(req);
+    if (auth.error) return auth.error;
+
+    const { id } = await params;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const untyped = supabaseAdmin as any;
+    const { data, error } = await untyped
+        .from('episodes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !data) {
+        return NextResponse.json({ error: error?.message ?? 'Fann ekki þátt.' }, { status: 404 });
+    }
+    return NextResponse.json({ episode: data });
+}
 
 /**
  * PATCH /api/admin/episodes/[id]
@@ -44,6 +76,14 @@ export async function PATCH(
         'transcript_url',
         'captions_available',
         'language_primary',
+        'review_status',
+        'assigned_to',
+        'review_notes',
+        'metadata_confidence',
+        'poster_candidates',
+        'azotus_track_id',
+        'azotus_job_id',
+        'source_language',
     ]);
 
     const patch: Record<string, unknown> = {};
@@ -66,6 +106,20 @@ export async function PATCH(
     if (error) {
         console.error('Episode update failed:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if ('chapters' in patch && data?.bunny_video_id) {
+        const ok = await updateBunnyChapters(
+            data.bunny_video_id,
+            Array.isArray(data.chapters) ? data.chapters : [],
+        );
+        await logEvent(
+            ok ? 'bunny.chapters_updated' : 'bunny.chapters_update_failed',
+            ok ? 'info' : 'warn',
+            ok ? 'Updated Bunny chapters from Omega draft review.' : 'Could not update Bunny chapters from Omega draft review.',
+            { episode_id: id, bunny_video_id: data.bunny_video_id },
+            auth.user.email ?? auth.user.id ?? 'admin',
+        );
     }
 
     return NextResponse.json({ ok: true, episode: data });

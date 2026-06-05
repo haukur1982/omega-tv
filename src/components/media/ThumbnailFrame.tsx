@@ -37,6 +37,15 @@ export default function ThumbnailFrame({
         return 'Ω';
     }, [fallbackLetter, series]);
 
+    // Omega's finished VOD masters have subtitles burned into the bottom band.
+    // A raw Bunny frame-grab therefore shows the captions. Branded posters and
+    // custom thumbnails are clean, so we only crop the caption band when the
+    // src is the Bunny proxy fallback: render the image taller than the frame,
+    // anchored to the top, so the bottom ~22% (the subtitle strip) is clipped
+    // out by the frame's overflow. The hover zoom (a CSS transform) composes
+    // with this untouched.
+    const isRawFrame = !!src && src.includes('/api/bunny/thumbnail/');
+
     const badgeColor = badge?.tone === 'live'
         ? 'var(--blod)'
         : badge?.tone === 'next'
@@ -66,10 +75,16 @@ export default function ThumbnailFrame({
                     loading="lazy"
                     style={{
                         position: 'absolute',
-                        inset: 0,
+                        top: 0,
+                        left: 0,
                         width: '100%',
-                        height: '100%',
+                        // Taller-than-frame + top-anchored = the burned-in
+                        // subtitle band at the bottom of a raw frame is clipped.
+                        // 128% clears a two-line caption band (verified against a
+                        // real Bunny frame) while keeping the subject well-framed.
+                        height: isRawFrame ? '128%' : '100%',
                         objectFit: 'cover',
+                        objectPosition: 'top',
                         filter: 'contrast(1.08) saturate(0.82) brightness(0.96)',
                         transition: 'transform 600ms cubic-bezier(0.2,0.7,0.3,1)',
                     }}

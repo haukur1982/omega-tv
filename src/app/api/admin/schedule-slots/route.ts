@@ -88,6 +88,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Lokatími verður að vera á eftir byrjunartíma.' }, { status: 400 });
     }
 
+    // An admin-created slot is a manual override by definition. Without this
+    // flag it defaults to false and the next daily XML sync purges it as a
+    // stale playout row — silently destroying hand-made schedule entries.
+    payload.is_manual_override = true;
+
     const { data, error } = await sb
         .from('schedule_slots')
         .insert(payload)

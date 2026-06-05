@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Plus, FileText, Calendar, User, Eye, Trash2, Edit3, Search, RefreshCw, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { authedFetch } from '@/lib/admin-fetch';
 
 interface Article {
     id: string;
@@ -39,7 +40,7 @@ export default function AdminArticlesPage() {
     const loadData = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/admin/articles');
+            const res = await authedFetch('/api/admin/articles');
             if (res.ok) {
                 const data = await res.json();
                 setArticles(data);
@@ -96,7 +97,7 @@ export default function AdminArticlesPage() {
                 ? { id: editingArticle.id, ...formData }
                 : formData;
 
-            const res = await fetch('/api/admin/articles', {
+            const res = await authedFetch('/api/admin/articles', {
                 method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
@@ -118,7 +119,7 @@ export default function AdminArticlesPage() {
     const handleDelete = async (id: string) => {
         if (!confirm('Ertu viss um að þú viljir eyða þessari grein?')) return;
         try {
-            const res = await fetch('/api/admin/articles', {
+            const res = await authedFetch('/api/admin/articles', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id }),

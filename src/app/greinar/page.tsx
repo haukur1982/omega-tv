@@ -279,7 +279,7 @@ export default async function ArticlesPage() {
                                     fontWeight: 700,
                                     letterSpacing: '0.22em',
                                     textTransform: 'uppercase',
-                                    color: 'var(--gull)',
+                                    color: 'var(--mor)',
                                     marginBottom: '14px',
                                 }}
                             >
@@ -360,7 +360,7 @@ export default async function ArticlesPage() {
                                     fontWeight: 700,
                                     letterSpacing: '0.22em',
                                     textTransform: 'uppercase',
-                                    color: 'var(--gull)',
+                                    color: 'var(--mor)',
                                     marginBottom: '14px',
                                 }}
                             >
@@ -455,7 +455,7 @@ function FeaturedArticle({ article }: { article: Article }) {
                         fontWeight: 700,
                         letterSpacing: '0.22em',
                         textTransform: 'uppercase',
-                        color: 'var(--gull)',
+                        color: 'var(--mor)',
                         marginBottom: '14px',
                     }}
                 >

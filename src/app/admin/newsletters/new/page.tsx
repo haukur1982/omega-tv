@@ -5,6 +5,7 @@ import { ArrowLeft, Send, Save, Eye, CheckCircle, AlertCircle } from 'lucide-rea
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useRouter } from 'next/navigation';
+import { authedFetch } from '@/lib/admin-fetch';
 
 export default function NewNewsletterPage() {
     const router = useRouter();
@@ -16,7 +17,7 @@ export default function NewNewsletterPage() {
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
     const createNewsletter = async (): Promise<{ id: string } | null> => {
-        const res = await fetch('/api/admin/newsletters', {
+        const res = await authedFetch('/api/admin/newsletters', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, content }),
@@ -60,7 +61,7 @@ export default function NewNewsletterPage() {
         if (!created) { setIsSending(false); return; }
 
         try {
-            const res = await fetch(`/api/admin/newsletters/${created.id}/send`, {
+            const res = await authedFetch(`/api/admin/newsletters/${created.id}/send`, {
                 method: 'POST',
             });
             const data = await res.json();

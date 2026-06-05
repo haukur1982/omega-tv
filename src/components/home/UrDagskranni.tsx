@@ -163,9 +163,8 @@ export default function UrDagskranni({ episodes, register = 'dark' }: Props) {
 
 function PosterCard({ episode, register }: { episode: Episode; register: 'dark' | 'cream' }) {
     const isCream = register === 'cream';
-    const kickerColor = isCream ? 'var(--skra-mjuk)' : 'var(--moskva)';
     const titleColor = isCream ? 'var(--skra-djup)' : 'var(--ljos)';
-    const metaColor = isCream ? 'var(--skra-mjuk)' : 'var(--steinn)';
+    const metaColor = isCream ? 'var(--skra-mjuk)' : 'var(--moskva)';
 
     return (
         <Link
@@ -184,12 +183,8 @@ function PosterCard({ episode, register }: { episode: Episode; register: 'dark' 
                     aspect="4/5"
                 />
                 <div>
-                    <div
-                        className="type-merki"
-                        style={{ color: kickerColor, marginBottom: '6px' }}
-                    >
-                        {episode.speaker}
-                    </div>
+                    {/* Apple TV+ episode treatment: title leads, then ONE quiet
+                        secondary line (series · duration). */}
                     <h3
                         style={{
                             margin: 0,
@@ -205,9 +200,10 @@ function PosterCard({ episode, register }: { episode: Episode; register: 'dark' 
                     </h3>
                     <div
                         className="type-meta"
-                        style={{ color: metaColor, marginTop: '4px' }}
+                        style={{ color: metaColor, marginTop: '6px' }}
                     >
-                        {episode.durationMin} mín
+                        {episode.speaker}
+                        {episode.durationMin ? ` · ${episode.durationMin} mín` : ''}
                     </div>
                 </div>
             </article>
