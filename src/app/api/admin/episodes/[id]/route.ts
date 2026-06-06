@@ -107,10 +107,20 @@ export async function PATCH(
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const untyped = supabaseAdmin as any;
+    // The editor is reachable by episode id OR Bunny video guid (Videos section),
+    // and both are UUID-shaped — resolve to the real episode id before updating so
+    // the .single() never matches zero rows ("cannot coerce ... single JSON object").
+    let realId = id;
+    const byId = await untyped.from('episodes').select('id').eq('id', id).maybeSingle();
+    if (!byId.data) {
+        const byGuid = await untyped.from('episodes').select('id').eq('bunny_video_id', id).maybeSingle();
+        if (byGuid.data) realId = byGuid.data.id;
+    }
+
     const { data, error } = await untyped
         .from('episodes')
         .update(patch)
-        .eq('id', id)
+        .eq('id', realId)
         .select()
         .single();
 
