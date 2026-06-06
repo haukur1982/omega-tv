@@ -29,9 +29,11 @@ interface Props {
      *             the amber CTA; "amber appears once per page" rule).
      */
     ctaAccent?: 'primary' | 'ghost';
+    /** Eyebrow label above the title. Defaults to the Sunday-service label. */
+    kicker?: string;
 }
 
-export default function FeaturedSunday({ series, episode, ctaAccent = 'primary' }: Props) {
+export default function FeaturedSunday({ series, episode, ctaAccent = 'primary', kicker = 'Sunnudagssamkoma vikunnar' }: Props) {
     const date = episode.published_at
         ? new Date(episode.published_at).toLocaleDateString('is-IS', {
             weekday: 'long',
@@ -70,7 +72,7 @@ export default function FeaturedSunday({ series, episode, ctaAccent = 'primary' 
                 >
                     {/* Cover image */}
                     <Link
-                        href={`/sermons/${episode.id}`}
+                        href={`/sermons/${episode.bunny_video_id ?? episode.id}`}
                         className="featured-sunday-media"
                         style={{ display: 'block', textDecoration: 'none' }}
                     >
@@ -133,7 +135,7 @@ export default function FeaturedSunday({ series, episode, ctaAccent = 'primary' 
                                 marginBottom: '14px',
                             }}
                         >
-                            Sunnudagssamkoma vikunnar
+                            {kicker}
                         </div>
 
                         <h2
@@ -197,7 +199,7 @@ export default function FeaturedSunday({ series, episode, ctaAccent = 'primary' 
                         </div>
 
                         <Link
-                            href={`/sermons/${episode.id}`}
+                            href={`/sermons/${episode.bunny_video_id ?? episode.id}`}
                             className="warm-hover"
                             style={{
                                 marginTop: '32px',

@@ -62,16 +62,20 @@ type LatestArticle = {
 
 export default async function Home() {
     // Parallel data fetch
-    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayLatestReal] = await Promise.all([
+    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal] = await Promise.all([
         getNewestEpisodes(3).catch(() => []),
         getAllArticles().catch(() => [] as LatestArticle[]),
         getRecentBroadcastPrayers(7).catch(() => []),
         getLatestEpisodeBySeriesSlug('sunnudagssamkoma').catch(() => null),
+        // No real Sunday service yet → feature Omega's own flagship teaching.
+        getLatestEpisodeBySeriesSlug('vonarljos').catch(() => null),
     ]);
 
-    // Fall back to mock Sunday featured when no real Sunnudagssamkoma episode
-    // exists yet (day-1 state until series + episodes are seeded).
-    const sundayFeatured = sundayLatestReal ?? MOCK_SUNDAY_FEATURED;
+    // Prefer a real Sunnudagssamkoma; else feature the real Vonarljós teaching;
+    // only fall back to mock if NO real content exists at all.
+    const featured = sundayReal ?? omegaFeatureReal;
+    const sundayFeatured = featured ?? MOCK_SUNDAY_FEATURED;
+    const featuredKicker = sundayReal ? 'Sunnudagssamkoma vikunnar' : 'Þáttur vikunnar';
 
     // Pull from the curated episode catalog (real titles, series, scripture,
     // descriptions — the Azotus-generated metadata), NOT the raw Bunny library
@@ -117,6 +121,7 @@ export default async function Home() {
             <FeaturedSunday
                 series={sundayFeatured.series}
                 episode={sundayFeatured.episode}
+                kicker={featuredKicker}
                 ctaAccent="ghost"
             />
             <UrDagskranni episodes={episodes} register="cream" />
