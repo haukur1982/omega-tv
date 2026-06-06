@@ -40,6 +40,15 @@ export default function PosterStudio({
     const [manualLandscape, setManualLandscape] = useState('');
     const [manualPortrait, setManualPortrait] = useState('');
 
+    // ── Hero poster (2:3 hetjuspjald) state ──────────────────────────
+    const [heroTitle, setHeroTitle] = useState(seriesTitle || episodeTitle || '');
+    const [heroTagline, setHeroTagline] = useState('');
+    const [heroHost, setHeroHost] = useState('');
+    const [heroPreview, setHeroPreview] = useState<string | null>(null);
+    const [heroBusy, setHeroBusy] = useState(false);
+    const [heroFullRes, setHeroFullRes] = useState<boolean | null>(null);
+    const [heroError, setHeroError] = useState<string | null>(null);
+
     const load = useCallback(async () => {
         setLoading(true);
         const res = await fetch(`/api/admin/posters?episodeId=${encodeURIComponent(episodeId)}`, {
@@ -76,6 +85,50 @@ export default function PosterStudio({
     const candidates = model?.source_candidates ?? [];
     const selectedId = model?.selected_source?.id ?? null;
     const variants = model?.variants ?? {};
+
+    // Generate a hero-poster preview from the selected frame, pulled at full res.
+    const generateHero = useCallback(async () => {
+        if (!heroTitle.trim()) { setHeroError('Sláðu inn titil fyrst.'); return; }
+        setHeroBusy(true);
+        setHeroError(null);
+        setHeroPreview(null);
+        setHeroFullRes(null);
+        try {
+            const res = await fetch('/api/admin/posters/hero', {
+                method: 'POST',
+                headers: await authHeaders(),
+                body: JSON.stringify({
+                    episodeId,
+                    sourceId: selectedId ?? undefined,
+                    title: heroTitle.trim(),
+                    tagline: heroTagline.trim() || undefined,
+                    host: heroHost.trim() || undefined,
+                    preview: true,
+                }),
+            });
+            const data = await res.json().catch(() => ({ error: 'Villa' }));
+            if (!res.ok || !data.dataUrl) {
+                setHeroError(data.error ?? 'Tókst ekki að búa til hetjuspjald.');
+            } else {
+                setHeroPreview(data.dataUrl);
+                setHeroFullRes(!!data.usedFullRes);
+            }
+        } catch {
+            setHeroError('Netvilla við gerð hetjuspjalds.');
+        }
+        setHeroBusy(false);
+    }, [episodeId, selectedId, heroTitle, heroTagline, heroHost]);
+
+    const downloadHero = useCallback(() => {
+        if (!heroPreview) return;
+        const a = document.createElement('a');
+        a.href = heroPreview;
+        const safe = heroTitle.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'hetjuspjald';
+        a.download = `${safe}-poster-2x3.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }, [heroPreview, heroTitle]);
 
     return (
         <fieldset style={fieldsetStyle}>
@@ -163,6 +216,64 @@ export default function PosterStudio({
                             </p>
                         )}
                     </div>
+
+                    {/* ── Hero poster (2:3 hetjuspjald) ───────────────── */}
+                    <details>
+                        <summary style={{ cursor: 'pointer', color: 'var(--admin-accent, #E9A860)', fontSize: '0.82rem', fontWeight: 700 }}>
+                            Hetjuspjald (2:3 forsíða þáttaraðar) · há-upplausn
+                        </summary>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '14px' }}>
+                            <p style={{ ...figcap, margin: 0 }}>
+                                Notar valda rammann hér að ofan, sækir hann í fullri upplausn (1920×1080) úr Bunny og
+                                býr til vörumerkt 1000×1500 spjald. Veldu ramma með opin augu og gott svipbrigði.
+                            </p>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', maxWidth: '640px' }}>
+                                <label style={fieldLabel}>Titill
+                                    <input type="text" value={heroTitle} onChange={(e) => setHeroTitle(e.target.value)} placeholder="t.d. Vonarljós" style={inputStyle} />
+                                </label>
+                                <label style={fieldLabel}>Kynnir / Stjórnandi
+                                    <input type="text" value={heroHost} onChange={(e) => setHeroHost(e.target.value)} placeholder="t.d. Eiríkur Sigurbjörnsson" style={inputStyle} />
+                                </label>
+                            </div>
+                            <label style={{ ...fieldLabel, maxWidth: '640px' }}>Undirtexti (valfrjáls)
+                                <input type="text" value={heroTagline} onChange={(e) => setHeroTagline(e.target.value)} placeholder="t.d. Ljós í myrkri — von fyrir hjartað" style={inputStyle} />
+                            </label>
+
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                                <button
+                                    type="button"
+                                    onClick={generateHero}
+                                    disabled={heroBusy || !heroTitle.trim()}
+                                    title={selectedId ? 'Sækir valda rammann í fullri upplausn.' : 'Veldu ramma að ofan fyrir bestu gæði (annars notar fyrsta).'}
+                                    style={{ ...btnAccent, opacity: heroBusy || !heroTitle.trim() ? 0.45 : 1 }}
+                                >
+                                    {heroBusy ? <Loader2 size={14} className="admin-spinner" /> : <Sparkles size={14} />}
+                                    {heroBusy ? 'Sæki há-upplausn…' : 'Forskoða hetjuspjald'}
+                                </button>
+                                {heroPreview && (
+                                    <button type="button" onClick={downloadHero} style={btnGhost}>
+                                        <CheckCircle2 size={14} /> Hlaða niður PNG
+                                    </button>
+                                )}
+                            </div>
+                            {heroBusy && (
+                                <p style={{ ...figcap, margin: 0 }}>Þetta tekur ~20–40 sek meðan Bunny endurgerir rammann í fullri upplausn.</p>
+                            )}
+                            {heroFullRes === false && heroPreview && (
+                                <p style={{ ...figcap, margin: 0, color: 'var(--admin-accent, #E9A860)' }}>
+                                    Athugið: full upplausn náðist ekki — notaði 640px rammann (mýkri). Reyndu aftur eða annan ramma.
+                                </p>
+                            )}
+                            {heroPreview && (
+                                <figure style={figure}>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={heroPreview} alt="Hetjuspjald forskoðun" style={{ ...previewImg, width: '240px', aspectRatio: '2 / 3' }} />
+                                    <figcaption style={figcap}>2:3 · forsíða þáttaraðar (1000×1500). Hladdu niður og settu í „Mynd (Poster)“ reitinn.</figcaption>
+                                </figure>
+                            )}
+                            {heroError && <p style={{ margin: 0, color: 'var(--admin-error, #e55)', fontSize: '0.8rem' }}>{heroError}</p>}
+                        </div>
+                    </details>
 
                     {/* ── Manual override ─────────────────────────────── */}
                     <details>
@@ -290,6 +401,15 @@ const figcap: React.CSSProperties = {
     margin: '6px 0 0',
     color: 'var(--admin-text-muted, #888)',
     fontSize: '0.74rem',
+};
+
+const fieldLabel: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    color: 'var(--admin-text-secondary, #aaa)',
+    fontSize: '0.78rem',
+    fontWeight: 600,
 };
 
 const inputStyle: React.CSSProperties = {
