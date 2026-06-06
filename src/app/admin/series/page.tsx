@@ -72,8 +72,7 @@ export default function SeriesListPage() {
                     {series.map((item) => (
                         <Link
                             key={item.id}
-                            href={`/sermons/show/${item.slug}`}
-                            target="_blank"
+                            href={`/admin/series/${item.id}`}
                             className="group relative flex flex-col"
                         >
                             <div className="aspect-[2/3] bg-[var(--admin-surface-hover)] rounded-lg overflow-hidden border border-[var(--admin-border)] group-hover:border-[var(--admin-accent)] transition-all mb-3 shadow-lg group-hover:shadow-[var(--admin-accent-glow)]">
