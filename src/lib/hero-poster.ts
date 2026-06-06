@@ -96,6 +96,12 @@ export interface HeroPosterInput {
     kicker?: string;
     /** Colour theme. Omitted → auto-picked from the title so shows differ. */
     theme?: PosterThemeName;
+    /**
+     * Trim this fraction off the BOTTOM of the source before composing — removes
+     * burned-in Icelandic subtitles and promo/phone-number lower-thirds (common
+     * on translated third-party broadcasts). 0.13 ≈ the subtitle band. Default 0.
+     */
+    trimBottomPct?: number;
 }
 
 function esc(s: string): string {
@@ -125,7 +131,10 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
     const up = await sharp(sourceImage).resize({ width: 2000 }).toBuffer();
     const meta = await sharp(up).metadata();
     const srcW = meta.width ?? 2000;
-    const srcH = meta.height ?? 1125;
+    const srcHfull = meta.height ?? 1125;
+    // Trim the bottom band (burned subtitles / promo lower-thirds) if asked.
+    const trim = Math.max(0, Math.min(0.4, input.trimBottomPct ?? 0));
+    const srcH = Math.round(srcHfull * (1 - trim));
     const cropW = Math.min(srcW, Math.round(srcH * (2 / 3)));
     const cropLeft = Math.max(0, Math.round((srcW - cropW) / 2));
     const photo = await sharp(up)
