@@ -185,6 +185,14 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                 )}
             </section>
 
+            {/* Where to watch on TV — Omega's main audience watches on cable. */}
+            <div style={{ textAlign: 'center', padding: '0 var(--rail-padding)', marginTop: '-8px' }}>
+                <p style={{ margin: 0, fontFamily: 'var(--font-sans)', fontSize: '14px', color: 'var(--moskva)' }}>
+                    Omega er einnig í sjónvarpi —{' '}
+                    <span style={{ color: 'var(--kerti)', fontWeight: 700 }}>Sjónvarp Símans, rás 6</span>
+                </p>
+            </div>
+
             {/* Á meðan þú bíður — only in off-air state */}
             {!isOnAir && <AMedanPuBidur previous={previous} />}
 

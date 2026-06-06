@@ -101,6 +101,20 @@ export default function Footer() {
               Kristin fjölmiðlastöð á Íslandi síðan 1992. Von og sannleikur
               fyrir alla.
             </p>
+            <p
+              style={{
+                marginTop: '1rem',
+                color: 'var(--text-muted)',
+                fontSize: '0.8rem',
+                lineHeight: 1.6,
+                maxWidth: '220px',
+              }}
+            >
+              Í sjónvarpi:{' '}
+              <span style={{ color: 'var(--accent)', fontWeight: 600 }}>
+                Sjónvarp Símans · rás 6
+              </span>
+            </p>
           </div>
 
           {/* Nav columns */}
