@@ -1,19 +1,13 @@
 'use server';
 
 import { addSubscriber } from '@/lib/subscriber-db';
-import { sendVerificationEmail } from '@/lib/email';
 
 /**
  * Public subscribe action — invoked from EmailSignupForm.
  *
- * Flow:
- *   1. Insert (or find existing pending) subscriber row
- *   2. Send the verification email containing a tokenised link
- *   3. Show the user a "check your inbox" confirmation message
- *
- * The subscriber is NOT considered verified until they click the link
- * — only verified subscribers receive newsletters. This is non-negotiable
- * (deliverability + GDPR).
+ * List-building phase: the email is added to the list directly (the web form
+ * is the opt-in). No double-opt-in email yet — the sending domain isn't set up.
+ * When it is, re-enable verification + reinstate sendVerificationEmail here.
  */
 export async function subscribeAction(formData: FormData) {
     const email = formData.get('email') as string;
@@ -27,13 +21,13 @@ export async function subscribeAction(formData: FormData) {
     const segments = segment ? [segment] : ['newsletter'];
     const result = await addSubscriber(email, name, segments);
 
-    if (result.success && result.verificationToken) {
-        // Fire and forget — don't block the user on the email roundtrip.
-        sendVerificationEmail(email, result.verificationToken, name).catch(console.error);
+    if (result.success) {
         return {
             success: true,
             error: undefined,
-            message: 'Við sendum þér staðfestingarpóst. Smelltu á hlekkinn í póstinum til að ljúka skráningunni.',
+            message: result.alreadyOnList
+                ? 'Þú ert nú þegar á póstlistanum okkar — takk!'
+                : 'Takk! Þú ert komin á póstlistann. Við sendum þér fréttir af Omega.',
         };
     }
 

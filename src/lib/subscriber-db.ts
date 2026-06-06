@@ -18,7 +18,7 @@ export async function addSubscriber(
     email: string,
     name?: string,
     segments: string[] = ['newsletter']
-): Promise<{ success: boolean; error?: string; verificationToken?: string }> {
+): Promise<{ success: boolean; error?: string; alreadyOnList?: boolean }> {
     // Service-role client: runs server-side (called from the subscribe server
     // action). The anon client is blocked by RLS from reading the inserted row
     // back, so the verification_token came back null and NO verification email
@@ -33,37 +33,30 @@ export async function addSubscriber(
         .eq('email', email.toLowerCase())
         .maybeSingle();
 
+    // Collect-mode (list-building phase): the web form IS the opt-in, so the
+    // email is added straight to the list. No double-opt-in email yet — the
+    // sending domain isn't configured. When it is, re-enable verification.
     if (existing) {
-        if (existing.verified_at) {
-            return { success: false, error: 'Þetta netfang er þegar staðfest.' };
-        }
-        // Pending — return the existing token so caller can resend the email.
-        return {
-            success: true,
-            verificationToken: existing.verification_token ?? undefined,
-        };
+        // Already on the list — friendly success, not an error.
+        return { success: true, alreadyOnList: true };
     }
 
-    const { data: inserted, error } = await sb
+    const { error } = await sb
         .from('subscribers')
         .insert([{
             email: email.toLowerCase(),
             name: name || null,
             segments: segments,
-            is_verified: false,
-        }])
-        .select('verification_token')
-        .single();
+            is_verified: true,
+            verified_at: new Date().toISOString(),
+        }]);
 
     if (error) {
         console.error("Failed to add subscriber:", error);
         return { success: false, error: 'Villa kom upp. Reyndu aftur.' };
     }
 
-    return {
-        success: true,
-        verificationToken: inserted?.verification_token ?? undefined,
-    };
+    return { success: true };
 }
 
 /**

@@ -78,7 +78,9 @@ const navGroups: {
         title: 'Ritstjórn',
         items: [
             { href: '/admin/articles', label: 'Greinar', icon: FileText },
-            { href: '/admin/news', label: 'Fréttir', icon: Newspaper },
+            // Fréttir hidden until the news translation pipeline is built (table
+            // not yet created; the real feature is EN→Gemini→IS with sourcing).
+            // { href: '/admin/news', label: 'Fréttir', icon: Newspaper },
             { href: '/admin/quotes', label: 'Tilvitnanir', icon: Quote },
             { href: '/admin/social', label: 'Samfélagsmiðlar', icon: Share2 },
         ],
