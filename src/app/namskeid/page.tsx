@@ -95,7 +95,8 @@ export default async function NamskeidPage() {
     } catch (e) {
         console.error('Failed to load courses:', e);
     }
-    if (courses.length === 0) courses = MOCK_COURSES;
+    // Launch policy: real courses only. Mock fillers are dev-only.
+    if (courses.length === 0 && process.env.NEXT_PUBLIC_CONTENT_MOCKS === '1') courses = MOCK_COURSES;
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
@@ -277,29 +278,45 @@ export default async function NamskeidPage() {
                         </p>
                     </header>
 
-                    <ul
-                        style={{
-                            listStyle: 'none',
-                            padding: 0,
-                            margin: 0,
-                            display: 'grid',
-                            gap: 'clamp(20px, 2vw, 28px)',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                        }}
-                    >
-                        {courses.map((c) => (
-                            <li key={c.id}>
-                                <CoursePosterCard
-                                    href={`/namskeid/${c.slug}`}
-                                    title={c.title}
-                                    instructor={c.instructor}
-                                    description={c.description}
-                                    image={c.poster_horizontal ?? c.poster_vertical ?? 'https://images.unsplash.com/photo-1504829857797-ddff29c27927?w=800&h=1000&fit=crop'}
-                                    moduleCount={countModules(c)}
-                                />
-                            </li>
-                        ))}
-                    </ul>
+                    {courses.length > 0 ? (
+                        <ul
+                            style={{
+                                listStyle: 'none',
+                                padding: 0,
+                                margin: 0,
+                                display: 'grid',
+                                gap: 'clamp(20px, 2vw, 28px)',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                            }}
+                        >
+                            {courses.map((c) => (
+                                <li key={c.id}>
+                                    <CoursePosterCard
+                                        href={`/namskeid/${c.slug}`}
+                                        title={c.title}
+                                        instructor={c.instructor}
+                                        description={c.description}
+                                        image={c.poster_horizontal ?? c.poster_vertical ?? undefined}
+                                        moduleCount={countModules(c)}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p
+                            style={{
+                                fontFamily: 'var(--font-serif)',
+                                fontStyle: 'italic',
+                                fontSize: 'clamp(17px, 1.6vw, 20px)',
+                                color: 'var(--skra-mjuk)',
+                                maxWidth: '46ch',
+                                lineHeight: 1.6,
+                                margin: 0,
+                            }}
+                        >
+                            Námskeiðin okkar eru í smíðum. Fyrstu þættirnir koma í safnið á næstunni — fræðsla um trú, Biblíuna og lífið með Guði.
+                        </p>
+                    )}
                 </div>
             </section>
 

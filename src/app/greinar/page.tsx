@@ -32,19 +32,18 @@ import Link from "next/link";
 
 export const revalidate = 3600;
 
+const SHOW_MOCK = process.env.NEXT_PUBLIC_CONTENT_MOCKS === '1';
+
 export default async function ArticlesPage() {
     let articles: Article[] = [];
     try {
         const real = await getAllArticles();
-        if (real && real.length > 0) {
-            const realSlugs = new Set(real.map((a) => a.slug));
-            const uniqueMocks = MOCK_ARTICLES.filter((m) => !realSlugs.has(m.slug));
-            articles = [...real, ...uniqueMocks];
-        }
+        if (real && real.length > 0) articles = real;
     } catch (err) {
         console.error('Failed to load articles:', err);
     }
-    if (articles.length === 0) articles = [...MOCK_ARTICLES];
+    // Launch policy: real articles only. Mock fillers are dev-only.
+    if (articles.length === 0 && SHOW_MOCK) articles = [...MOCK_ARTICLES];
 
     articles.sort((a, b) => {
         const da = a.published_at ? new Date(a.published_at).getTime() : 0;
