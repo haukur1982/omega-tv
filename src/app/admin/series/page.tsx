@@ -72,7 +72,8 @@ export default function SeriesListPage() {
                     {series.map((item) => (
                         <Link
                             key={item.id}
-                            href={`/admin/series/${item.id}`}
+                            href={`/sermons/show/${item.slug}`}
+                            target="_blank"
                             className="group relative flex flex-col"
                         >
                             <div className="aspect-[2/3] bg-[var(--admin-surface-hover)] rounded-lg overflow-hidden border border-[var(--admin-border)] group-hover:border-[var(--admin-accent)] transition-all mb-3 shadow-lg group-hover:shadow-[var(--admin-accent-glow)]">
@@ -95,8 +96,8 @@ export default function SeriesListPage() {
                             </h3>
                             <div className="text-sm text-[var(--admin-text-muted)] flex justify-between">
                                 <span>{item.host || 'Enginn stjórnandi'}</span>
-                                {/* @ts-ignore - joined count property */}
-                                {item.seasons && <span>{item.seasons[0]?.count || 0} þættir</span>}
+                                {/* @ts-ignore - joined episode count */}
+                                <span>{(item.episodes?.[0]?.count ?? 0)} þættir</span>
                             </div>
                         </Link>
                     ))}

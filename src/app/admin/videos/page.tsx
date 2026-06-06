@@ -302,13 +302,21 @@ export default function VideosPage() {
                                         <h3 className="font-medium text-[var(--admin-text)] line-clamp-2 mb-2">{video.title}</h3>
                                         <div className="mt-auto flex items-center justify-between pt-4 border-t border-[var(--admin-border)]">
                                             <div className="text-xs text-[var(--admin-text-muted)] flex items-center gap-1">
-                                                <Calendar size={12} /><span>{new Date(video.date).toLocaleDateString()}</span>
+                                                <Calendar size={12} /><span>{(() => { const d = new Date(video.date); return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('is-IS'); })()}</span>
                                             </div>
                                             <div className="text-xs text-[var(--admin-text-muted)] flex items-center gap-1">
                                                 <Eye size={12} /><span>{video.views}</span>
                                             </div>
                                         </div>
-                                        {!isLinked && (
+                                        {isLinked ? (
+                                            <Link
+                                                href={`/sermons/${video.guid}`}
+                                                target="_blank"
+                                                className="mt-4 w-full py-2 bg-[var(--admin-surface-hover)] hover:bg-[var(--admin-accent)] hover:text-white text-[var(--admin-text-secondary)] rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Eye size={14} />Skoða þátt
+                                            </Link>
+                                        ) : (
                                             <button
                                                 onClick={() => handleConnectClick(video)}
                                                 className="mt-4 w-full py-2 bg-[var(--admin-surface-hover)] hover:bg-[var(--admin-accent)] hover:text-white text-[var(--admin-text-secondary)] rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"

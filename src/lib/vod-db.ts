@@ -81,7 +81,7 @@ export async function getAllSeries() {
         .from('series')
         .select(`
             *,
-            seasons ( count )
+            episodes ( count )
         `)
         .order('title');
 
