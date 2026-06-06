@@ -38,7 +38,7 @@ export default function HeroV2() {
             <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                    src="https://images.unsplash.com/photo-1519681393784-d120267933ba?w=2400&auto=format&fit=crop"
+                    src="/images/hero/iceland-sunset-hero.jpg"
                     alt=""
                     style={{
                         position: 'absolute',
