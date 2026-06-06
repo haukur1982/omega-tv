@@ -84,8 +84,11 @@ export default function ThumbnailFrame({
                         // real Bunny frame) while keeping the subject well-framed.
                         height: isRawFrame ? '128%' : '100%',
                         objectFit: 'cover',
-                        objectPosition: 'top',
-                        filter: 'contrast(1.08) saturate(0.82) brightness(0.96)',
+                        objectPosition: isRawFrame ? 'top' : 'center',
+                        // Raw Bunny frames get a normalising grade; branded images
+                        // (image-set variants) already carry the Omega grade, so
+                        // we leave them untouched to avoid muting them.
+                        filter: isRawFrame ? 'contrast(1.08) saturate(0.82) brightness(0.96)' : 'none',
                         transition: 'transform 600ms cubic-bezier(0.2,0.7,0.3,1)',
                     }}
                 />
