@@ -52,11 +52,18 @@ const CATEGORY_FILTERS = [
     { value: 'kids', label: 'Barnaefni' },
 ];
 
+// Launch policy: show ONLY real published series. Empty categories are hidden
+// entirely (see render below) rather than filled with mock placeholders — a
+// page with fake shows reads as broken, not "coming soon". The mock data stays
+// in the repo for local/design work but never ships to visitors.
+const SHOW_MOCK_SHELVES = process.env.NEXT_PUBLIC_SERMONS_MOCKS === '1';
+
 function withMockFallback(
     real: SeriesWithLatest[],
     category: keyof typeof MOCK_SERIES_BY_CATEGORY,
 ): SeriesWithLatest[] {
-    return real.length > 0 ? real : (MOCK_SERIES_BY_CATEGORY[category] ?? []);
+    if (real.length > 0) return real;
+    return SHOW_MOCK_SHELVES ? (MOCK_SERIES_BY_CATEGORY[category] ?? []) : [];
 }
 
 export default async function SermonsPage({
@@ -101,7 +108,7 @@ export default async function SermonsPage({
             : Promise.resolve([]),
     ]);
 
-    const sundayLatest = sundayLatestReal ?? MOCK_SUNDAY_FEATURED;
+    const sundayLatest = sundayLatestReal ?? (SHOW_MOCK_SHELVES ? MOCK_SUNDAY_FEATURED : null);
     const omegaProduced = withMockFallback(omegaReal, 'omega-produced');
     const icelandPartners = withMockFallback(icelandReal, 'iceland-partners');
     const international = withMockFallback(intlReal, 'international');
@@ -109,9 +116,11 @@ export default async function SermonsPage({
     const music = withMockFallback(musicReal, 'music');
     const kids = withMockFallback(kidsReal, 'kids');
 
-    // Prefer real published episodes; fall back to mock only when zero exist.
-    // Don't merge — a half-real, half-mock rail is worse than either alone.
-    const newestEpisodes = newestReal.length > 0 ? newestReal : getMockNewestEpisodes(8);
+    // Prefer real published episodes; fall back to mock only when zero exist AND
+    // mocks are explicitly enabled. At launch, real-only.
+    const newestEpisodes = newestReal.length > 0
+        ? newestReal
+        : (SHOW_MOCK_SHELVES ? getMockNewestEpisodes(8) : []);
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
@@ -127,63 +136,77 @@ export default async function SermonsPage({
                 active={hasDiscoveryFilter}
             />
 
-            <FeaturedSunday
-                series={sundayLatest.series}
-                episode={sundayLatest.episode}
-            />
+            {sundayLatest && (
+                <FeaturedSunday
+                    series={sundayLatest.series}
+                    episode={sundayLatest.episode}
+                />
+            )}
 
-            <NewestRail episodes={newestEpisodes} />
+            {newestEpisodes.length > 0 && <NewestRail episodes={newestEpisodes} />}
 
-            <SeriesShelf
-                kicker="Eigin dagskrá"
-                title="Útsendingar Omega"
-                subtitle="Sunnudagssamkomur, bænakvöld, viðtöl og fræðsla — frá Omega Stöðinni sjálfri."
-                series={omegaProduced}
-                emptyMessage="Þættir Omega bætast hér við jafnóðum og þeir koma úr safninu."
-            />
+            {omegaProduced.length > 0 && (
+                <SeriesShelf
+                    kicker="Eigin dagskrá"
+                    title="Útsendingar Omega"
+                    subtitle="Sunnudagssamkomur, bænakvöld, viðtöl og fræðsla — frá Omega Stöðinni sjálfri."
+                    series={omegaProduced}
+                    emptyMessage="Þættir Omega bætast hér við jafnóðum og þeir koma úr safninu."
+                />
+            )}
 
-            <SeriesShelf
-                kicker="Söfnuðir"
-                title="Söfnuðir á Íslandi"
-                subtitle="Samkomur frá íslenskum kirkjum og söfnuðum — endurfluttar í þáttasafni."
-                series={icelandPartners}
-                emptyMessage="Samkomur frá íslenskum söfnuðum birtast hér jafnóðum."
-                register="pergament"
-            />
+            {icelandPartners.length > 0 && (
+                <SeriesShelf
+                    kicker="Söfnuðir"
+                    title="Söfnuðir á Íslandi"
+                    subtitle="Samkomur frá íslenskum kirkjum og söfnuðum — endurfluttar í þáttasafni."
+                    series={icelandPartners}
+                    emptyMessage="Samkomur frá íslenskum söfnuðum birtast hér jafnóðum."
+                    register="pergament"
+                />
+            )}
 
-            <SeriesShelf
-                kicker="Útlönd"
-                title="Frá útlöndum"
-                subtitle="Þáttaraðir frá samstarfsaðilum erlendis — þýtt og textað á íslensku samkvæmt heimildarsamningum."
-                series={international}
-                emptyMessage="Erlent efni er á leiðinni, þýtt og textað."
-            />
+            {international.length > 0 && (
+                <SeriesShelf
+                    kicker="Útlönd"
+                    title="Frá útlöndum"
+                    subtitle="Þáttaraðir frá samstarfsaðilum erlendis — þýtt og textað á íslensku samkvæmt heimildarsamningum."
+                    series={international}
+                    emptyMessage="Erlent efni er á leiðinni, þýtt og textað."
+                />
+            )}
 
-            <SeriesShelf
-                kicker="Heimildarmyndir"
-                title="Heimildarmyndir og þáttaraðir"
-                subtitle="Lengri verk — saga, vitnisburðir, og þættir sem dýpka skilninginn á trú og tímum."
-                series={documentaries}
-                emptyMessage="Heimildarmyndir bætast hér við þegar þær koma úr þýðingarstöðinni."
-                register="pergament"
-            />
+            {documentaries.length > 0 && (
+                <SeriesShelf
+                    kicker="Heimildarmyndir"
+                    title="Heimildarmyndir og þáttaraðir"
+                    subtitle="Lengri verk — saga, vitnisburðir, og þættir sem dýpka skilninginn á trú og tímum."
+                    series={documentaries}
+                    emptyMessage="Heimildarmyndir bætast hér við þegar þær koma úr þýðingarstöðinni."
+                    register="pergament"
+                />
+            )}
 
-            <SeriesShelf
-                kicker="Tónlist"
-                title="Lofgjörð & tónleikar"
-                subtitle="Lofgjörðarstundir, tónleikakvöld og tónlist sem nærir andann."
-                series={music}
-                emptyMessage="Tónlistarefni birtist hér jafnóðum."
-            />
+            {music.length > 0 && (
+                <SeriesShelf
+                    kicker="Tónlist"
+                    title="Lofgjörð & tónleikar"
+                    subtitle="Lofgjörðarstundir, tónleikakvöld og tónlist sem nærir andann."
+                    series={music}
+                    emptyMessage="Tónlistarefni birtist hér jafnóðum."
+                />
+            )}
 
-            <SeriesShelf
-                kicker="Krakkar"
-                title="Barnaefni"
-                subtitle="Biblíusögur, söngur og þættir sem börn og foreldrar geta horft á saman."
-                series={kids}
-                emptyMessage="Barnaefni birtist hér jafnóðum."
-                register="pergament"
-            />
+            {kids.length > 0 && (
+                <SeriesShelf
+                    kicker="Krakkar"
+                    title="Barnaefni"
+                    subtitle="Biblíusögur, söngur og þættir sem börn og foreldrar geta horft á saman."
+                    series={kids}
+                    emptyMessage="Barnaefni birtist hér jafnóðum."
+                    register="pergament"
+                />
+            )}
 
             {/* "Annað efni" — uncategorized real series. No mock fallback —
                 this shelf exists precisely to surface unfiled content so
