@@ -22,11 +22,22 @@ export async function GET(
     const { id } = await params;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const untyped = supabaseAdmin as any;
-    const { data, error } = await untyped
+    // Resolve by episode id first; fall back to the Bunny video guid so the
+    // editor is reachable from the Videos section (which only has the guid).
+    // Both are UUID-shaped, so we can't tell them apart by format — try in order.
+    let { data, error } = await untyped
         .from('episodes')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
+
+    if (!data) {
+        ({ data, error } = await untyped
+            .from('episodes')
+            .select('*')
+            .eq('bunny_video_id', id)
+            .maybeSingle());
+    }
 
     if (error || !data) {
         return NextResponse.json({ error: error?.message ?? 'Fann ekki þátt.' }, { status: 404 });

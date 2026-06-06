@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
     Search, Film, Calendar, Eye, Link as LinkIcon, AlertCircle,
-    CheckCircle, X, Upload, Loader2, Plus, Inbox, ArrowRight
+    CheckCircle, X, Upload, Loader2, Plus, Inbox, ArrowRight, Pencil
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { getLinkedBunnyIds, getAllSeries, Series } from '@/lib/vod-db';
@@ -309,13 +309,22 @@ export default function VideosPage() {
                                             </div>
                                         </div>
                                         {isLinked ? (
-                                            <Link
-                                                href={`/sermons/${video.guid}`}
-                                                target="_blank"
-                                                className="mt-4 w-full py-2 bg-[var(--admin-surface-hover)] hover:bg-[var(--admin-accent)] hover:text-white text-[var(--admin-text-secondary)] rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
-                                            >
-                                                <Eye size={14} />Skoða þátt
-                                            </Link>
+                                            <div className="mt-4 flex gap-2">
+                                                <Link
+                                                    href={`/admin/drafts/${video.guid}`}
+                                                    className="flex-1 py-2 bg-[var(--admin-accent)] text-white hover:opacity-90 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Pencil size={14} />Breyta þátt
+                                                </Link>
+                                                <Link
+                                                    href={`/sermons/${video.guid}`}
+                                                    target="_blank"
+                                                    title="Skoða í beinni"
+                                                    className="px-3 py-2 bg-[var(--admin-surface-hover)] hover:text-[var(--admin-accent)] text-[var(--admin-text-secondary)] rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <Eye size={14} />
+                                                </Link>
+                                            </div>
                                         ) : (
                                             <button
                                                 onClick={() => handleConnectClick(video)}
