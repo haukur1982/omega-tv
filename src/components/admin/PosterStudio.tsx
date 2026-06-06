@@ -44,6 +44,7 @@ export default function PosterStudio({
     const [heroTitle, setHeroTitle] = useState(seriesTitle || episodeTitle || '');
     const [heroTagline, setHeroTagline] = useState('');
     const [heroHost, setHeroHost] = useState('');
+    const [heroTheme, setHeroTheme] = useState('auto');
     const [heroPreview, setHeroPreview] = useState<string | null>(null);
     const [heroBusy, setHeroBusy] = useState(false);
     const [heroFullRes, setHeroFullRes] = useState<boolean | null>(null);
@@ -103,6 +104,7 @@ export default function PosterStudio({
                     title: heroTitle.trim(),
                     tagline: heroTagline.trim() || undefined,
                     host: heroHost.trim() || undefined,
+                    theme: heroTheme === 'auto' ? undefined : heroTheme,
                     preview: true,
                 }),
             });
@@ -117,7 +119,7 @@ export default function PosterStudio({
             setHeroError('Netvilla við gerð hetjuspjalds.');
         }
         setHeroBusy(false);
-    }, [episodeId, selectedId, heroTitle, heroTagline, heroHost]);
+    }, [episodeId, selectedId, heroTitle, heroTagline, heroHost, heroTheme]);
 
     const downloadHero = useCallback(() => {
         if (!heroPreview) return;
@@ -238,6 +240,20 @@ export default function PosterStudio({
                             <label style={{ ...fieldLabel, maxWidth: '640px' }}>Undirtexti (valfrjáls)
                                 <input type="text" value={heroTagline} onChange={(e) => setHeroTagline(e.target.value)} placeholder="t.d. Ljós í myrkri — von fyrir hjartað" style={inputStyle} />
                             </label>
+                            <label style={{ ...fieldLabel, maxWidth: '320px' }}>Litaþema
+                                <select value={heroTheme} onChange={(e) => setHeroTheme(e.target.value)} style={inputStyle}>
+                                    <option value="auto">Sjálfvirkt (mismunandi per þáttaröð)</option>
+                                    <option value="kerti">Kerti — gyllt/hlýtt (Omega-merki)</option>
+                                    <option value="nott">Nótt — djúpblátt</option>
+                                    <option value="aurora">Norðurljós — grænblátt</option>
+                                    <option value="glod">Glóð — brons/rauðgyllt</option>
+                                    <option value="skira">Skíra — mjúkt steinngrátt</option>
+                                </select>
+                            </label>
+                            <p style={{ ...figcap, margin: 0 }}>
+                                Hvert þema gefur ólíkan blæ svo þættir líti ekki allir eins út. „Sjálfvirkt“ velur
+                                fast þema út frá titlinum — sama þáttaröð fær alltaf sama blæ, ólíkar fá ólíkan.
+                            </p>
 
                             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
                                 <button

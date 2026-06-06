@@ -26,6 +26,63 @@ const FONT_FILES = [
 const W = 1000;
 const H = 1500;
 
+/**
+ * Color themes — so shows don't all look identical. Each is an on-brand "mood":
+ * the photo always grades into a dark→colour wash at the bottom where the title
+ * sits, but the colour of that wash + glow + photo tint changes per theme.
+ * Background stays warm-black; --blod red (LIVE dot) is never used here.
+ */
+export interface PosterTheme {
+    /** bottom wash gradient stops (top→bottom of the lower band) */
+    wash: [string, string, string];
+    /** the soft glow rising from the bottom */
+    glow: string;
+    /** photo tint (subtle colour cast on the still) */
+    tint: { r: number; g: number; b: number };
+    /** the short rule line above the host name */
+    rule: string;
+    /** tagline colour (sits on the wash) */
+    tagline: string;
+}
+
+export const POSTER_THEMES: Record<string, PosterTheme> = {
+    // Candle amber — the Omega signature (warm, default).
+    kerti: {
+        wash: ['rgba(42,28,15,0.40)', 'rgba(122,83,38,0.72)', 'rgba(160,110,48,0.95)'],
+        glow: '#F0BE7C', tint: { r: 255, g: 244, b: 230 }, rule: '#C88A3E', tagline: '#F5DFC0',
+    },
+    // Nordic night — deep indigo blue, cool and still.
+    nott: {
+        wash: ['rgba(20,22,34,0.42)', 'rgba(40,54,84,0.74)', 'rgba(60,82,120,0.95)'],
+        glow: '#8FB8E0', tint: { r: 232, g: 240, b: 255 }, rule: '#6FA5D8', tagline: '#CFE0F2',
+    },
+    // Aurora — teal/green northern lights. Distinctly Icelandic.
+    aurora: {
+        wash: ['rgba(18,34,30,0.42)', 'rgba(29,80,72,0.72)', 'rgba(47,125,106,0.95)'],
+        glow: '#8FE0C8', tint: { r: 234, g: 248, b: 243 }, rule: '#7FCAB0', tagline: '#CDEFE2',
+    },
+    // Ember — deep bronze/burnt-orange, richer and darker than candle.
+    glod: {
+        wash: ['rgba(46,24,16,0.44)', 'rgba(106,52,24,0.76)', 'rgba(154,83,32,0.96)'],
+        glow: '#E8915A', tint: { r: 255, g: 238, b: 224 }, rule: '#C8702E', tagline: '#F3D2B5',
+    },
+    // Stone — muted warm taupe, soft and gentle (lower saturation).
+    skira: {
+        wash: ['rgba(42,38,32,0.42)', 'rgba(90,80,72,0.72)', 'rgba(138,125,110,0.94)'],
+        glow: '#D8C8B0', tint: { r: 246, g: 242, b: 234 }, rule: '#C88A3E', tagline: '#E7DCCB',
+    },
+};
+
+const THEME_ORDER = ['kerti', 'nott', 'aurora', 'glod', 'skira'] as const;
+export type PosterThemeName = (typeof THEME_ORDER)[number];
+
+/** Deterministically pick a theme from a string (so each series varies, stably). */
+export function themeForKey(key: string): PosterThemeName {
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    return THEME_ORDER[h % THEME_ORDER.length];
+}
+
 export interface HeroPosterInput {
     /** Full-res source frame (JPEG/PNG buffer). Use the 1920×1080 frame, not a 640px candidate. */
     sourceImage: Buffer;
@@ -37,6 +94,8 @@ export interface HeroPosterInput {
     host?: string;
     /** Kicker above the mark. Defaults to "OMEGA STÖÐIN". */
     kicker?: string;
+    /** Colour theme. Omitted → auto-picked from the title so shows differ. */
+    theme?: PosterThemeName;
 }
 
 function esc(s: string): string {
@@ -59,9 +118,10 @@ function titleFontSize(title: string): number {
 
 export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer> {
     const { sourceImage, title, tagline, host, kicker = 'OMEGA STÖÐIN' } = input;
+    const theme = POSTER_THEMES[input.theme ?? themeForKey(title)] ?? POSTER_THEMES.kerti;
 
     // 1) Photo layer: composed 2:3 crop biased to the top (head/torso in upper
-    //    two-thirds), graded warm + cinematic.
+    //    two-thirds), graded cinematic with the theme's colour tint.
     const up = await sharp(sourceImage).resize({ width: 2000 }).toBuffer();
     const meta = await sharp(up).metadata();
     const srcW = meta.width ?? 2000;
@@ -74,7 +134,7 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
         .modulate({ saturation: 1.12, brightness: 1.06 })
         .linear(1.12, -(128 * 0.12))
         .gamma(1.05)
-        .tint({ r: 255, g: 244, b: 230 })
+        .tint(theme.tint)
         .toBuffer();
 
     // 2) Branded overlay (transparent where the photo should show).
@@ -92,13 +152,13 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
     </linearGradient>
     <linearGradient id="botwarm" x1="0" y1="0" x2="0" y2="1">
       <stop offset="50%" stop-color="#14120F" stop-opacity="0"/>
-      <stop offset="70%" stop-color="#2a1c0f" stop-opacity="0.40"/>
-      <stop offset="86%" stop-color="#7a5326" stop-opacity="0.72"/>
-      <stop offset="100%" stop-color="#a06e30" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="${theme.wash[0]}"/>
+      <stop offset="86%" stop-color="${theme.wash[1]}"/>
+      <stop offset="100%" stop-color="${theme.wash[2]}"/>
     </linearGradient>
     <radialGradient id="glow" cx="50%" cy="100%" r="60%">
-      <stop offset="0%" stop-color="#F0BE7C" stop-opacity="0.6"/>
-      <stop offset="45%" stop-color="#E9A860" stop-opacity="0.18"/>
+      <stop offset="0%" stop-color="${theme.glow}" stop-opacity="0.6"/>
+      <stop offset="45%" stop-color="${theme.glow}" stop-opacity="0.18"/>
       <stop offset="72%" stop-color="#14120F" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="edge" cx="50%" cy="44%" r="72%">
@@ -120,8 +180,8 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
   <text x="${W / 2}" y="218" text-anchor="middle" font-family="Inter" font-size="22" font-weight="600" letter-spacing="9" fill="#E7DECF">${esc(kicker)}</text>
 
   <text x="${W / 2}" y="1230" text-anchor="middle" font-family="Fraunces" font-size="${tFs}" font-weight="300" letter-spacing="-2" fill="#F6F2EA">${esc(title)}</text>
-  ${tagline ? `<text x="${W / 2}" y="1292" text-anchor="middle" font-family="Newsreader" font-style="italic" font-size="35" fill="#F5DFC0">${esc(tagline)}</text>` : ''}
-  ${host ? `<line x1="${W / 2 - 70}" y1="1340" x2="${W / 2 + 70}" y2="1340" stroke="#C88A3E" stroke-width="2"/>
+  ${tagline ? `<text x="${W / 2}" y="1292" text-anchor="middle" font-family="Newsreader" font-style="italic" font-size="35" fill="${theme.tagline}">${esc(tagline)}</text>` : ''}
+  ${host ? `<line x1="${W / 2 - 70}" y1="1340" x2="${W / 2 + 70}" y2="1340" stroke="${theme.rule}" stroke-width="2"/>
   <text x="${W / 2}" y="1392" text-anchor="middle" font-family="Inter" font-size="25" font-weight="600" letter-spacing="5" fill="#F0E5D4">${esc(host.toUpperCase())}</text>` : ''}
 </svg>`;
 

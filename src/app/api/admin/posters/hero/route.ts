@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { normalizePosterModel } from '@/lib/poster';
-import { generateHeroPoster } from '@/lib/hero-poster';
+import { generateHeroPoster, POSTER_THEMES, type PosterThemeName } from '@/lib/hero-poster';
 
 /**
  * POST /api/admin/posters/hero
@@ -37,6 +37,7 @@ export async function POST(request: Request) {
         title?: string;
         tagline?: string;
         host?: string;
+        theme?: string;
         preview?: boolean;
         seriesId?: string;
     };
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
     const { episodeId, sourceId, title, tagline, host, preview, seriesId } = body;
     if (!episodeId) return NextResponse.json({ error: 'episodeId is required' }, { status: 400 });
     if (!title?.trim()) return NextResponse.json({ error: 'title is required' }, { status: 400 });
+    const theme = (body.theme && body.theme in POSTER_THEMES ? body.theme : undefined) as PosterThemeName | undefined;
 
     const sb = supabaseAdmin as any;
     const { data: ep } = await sb
@@ -93,6 +95,7 @@ export async function POST(request: Request) {
             title: title.trim(),
             tagline: tagline?.trim() || undefined,
             host: host?.trim() || undefined,
+            theme,
         });
     } catch (e) {
         return NextResponse.json(
