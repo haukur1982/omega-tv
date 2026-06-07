@@ -1,9 +1,38 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-05-30 (Claude Opus — Platform foundation rebuild)
+**Last Updated:** 2026-06-06 (Claude Opus — Launch content + real-timestamp chapters + comms audit)
 **Last Agent:** Claude Opus 4.8 (Claude Code)
-**Branch:** `experiment/vellum-prayer-cards`
-**Build Status:** `npx tsc --noEmit` green on 2026-05-30. Dev server (`pnpm dev`, :3010) boots clean; all changed admin routes compile and 401 correctly under the new auth gate. `pnpm build` last green 2026-05-18.
+**Branch:** `main` (all work this session committed + deployed to prod)
+**Build Status:** `npx tsc --noEmit` green + `pnpm build` green on 2026-06-06. Prod live at omega-tv-lovat.vercel.app.
+
+---
+
+## Session — 2026-06-06 (Claude Opus — Drive to launch: real content, images, chapters, comms)
+
+Long session. Goal was Hawk's: **stop polishing, get it launched.** Everything below is committed to `main` and verified live in prod.
+
+### Shipped (live)
+- **Real content published.** 4 series (Vonarljós, Máttarstund, Times Square Church, CBN) + 6 episodes, branded posters + Icelandic descriptions. Home hero features a real program (Vonarljós), not a mock Sunday.
+- **All fake content removed.** `/sermons` mock shelves hidden (empty categories don't render); `/greinar` + `/namskeid` real-only (gated behind `NEXT_PUBLIC_*_MOCKS` flags); Námskeið removed from nav. Hawk's 2 real articles restored to DB (they were stranded in `mock-articles.ts`).
+- **Cohesive image system.** `src/lib/image-set.ts` — one engine: smart-crop (attention/centre), subtitle-band trim, natural warm grade, 16:9/4:5/2:3 variants. Backfilled all episodes + series. Hero-poster tool (`src/lib/hero-poster.ts`) with 5 colour themes in admin (Hetjuspjald) so shows don't look identical. Real Icelandic hero (Kirkjufell sunset) replaced the generic mountain.
+- **Real-timestamp chapters FIXED.** Pulled ElevenLabs SKELETON word-timings from the mini, regenerated chapters for all 6 episodes via Gemini with REAL timestamps (was: Gemini guessing → wrong jumps). Bunny chapters synced.
+- **Episode page** = the handoff's §4 "watch" surface, now complete: player + chapters + synopsis + scripture threads + related rail + **"Um þáttinn" info table** (added tonight).
+- **Giving page accurate.** Only the 2 real ways: Aur **@Omega** + bank transfer (**0113-26-25707**, kt **630890-1019**, "Sjónvarpsstöðin Omega"). Removed fabricated allocation %/tiers. "Sjónvarp Símans · rás 6" now in footer + /live.
+- **Newsletter = collect-mode.** Form adds emails straight to the list (no broken verification email until a Resend domain is set up). Honest success messages.
+- **Admin bug-fixes.** Series edit page (was 404); episode count fix; Invalid Date fix; edit-from-Videos ("Breyta þátt"); save/publish works when editor reached via Bunny guid (id-or-guid resolution in GET/PATCH/publish). News section hidden until the translation pipeline exists.
+
+### Design handoff verdict (`/design/omega-vod-handoff.md`)
+Strong handoff — but **~80% already realized** through this session's work (§1 grade ≈ baked image variants; §2 keyart ≈ hero-poster tool; §4 episode page ≈ done). Remaining, each best as its own deliberate pass: (a) render-time "house grade" — needs re-architecting away from baked variants, taste-sensitive; (b) time-aware hero + countdown — **blocked on stale schedule**; (c) custom player scrubber w/ chapter ticks.
+
+### ⚠️ Flag for next session
+- **Schedule data is STALE** — ends ~today (only ~9 future slots). The daily FTP schedule sync (`/api/schedule`, host 212.30.195.77 / MBLuser) may have stalled. Quietly affects the live ribbon, "næsta sending," and any countdown. **Worth investigating first.**
+
+### Hawk's to-dos (not mine)
+- Provide **FTP folder paths + native/translate mapping** → unblocks Task #5 (auto-pull watcher; design is locked: same server, 2 folders, reuse MBLuser cred).
+- Verify a **Resend domain** + set `RESEND_FROM_EMAIL` → unblocks actually sending newsletters.
+
+### Guardrails to preserve
+- NEVER `git pull` the Mac mini (32 uncommitted prod files; scp single files only). Don't rotate the shared FTP credential. Respect the auto-mode classifier blocks (no prod-secret dumps, no inserting attributed content without authorization). Use `open <file>` to show Hawk images — he can't see Read.
 
 ---
 
