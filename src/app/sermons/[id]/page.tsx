@@ -422,6 +422,47 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
             {/* Chapters */}
             {chapters && chapters.length > 0 && <ChapterList chapters={chapters} />}
 
+            {/* Um þáttinn — fact table (handoff §4) */}
+            {(() => {
+              const langLabel = (episode?.language_primary ?? 'is') === 'is' ? 'Íslenska' : 'Enska';
+              const rows: Array<[string, string]> = [
+                ['Lengd', `${durationMin} mín`],
+                ['Tungumál', langLabel],
+              ];
+              if (captionCodes.length > 0) rows.push(['Texti', captionCodes.map(c => c.toUpperCase()).join(' · ')]);
+              rows.push(['Gæði', 'HD']);
+              return (
+                <div style={{
+                  marginTop: 'clamp(2rem, 3vw, 2.5rem)',
+                  paddingTop: 'clamp(1.5rem, 2vw, 2rem)',
+                  borderTop: '1px solid var(--border)',
+                }}>
+                  <h2 className="type-merki" style={{
+                    color: 'var(--gull)', letterSpacing: '0.22em', fontSize: '0.7rem',
+                    textTransform: 'uppercase', margin: '0 0 1.1rem',
+                  }}>Um þáttinn</h2>
+                  <dl style={{
+                    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                    gap: '1.1rem 2rem', margin: 0,
+                  }}>
+                    {rows.map(([label, value]) => (
+                      <div key={label}>
+                        <dt style={{
+                          fontFamily: 'var(--font-sans)', fontSize: '0.62rem', fontWeight: 700,
+                          letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--steinn)',
+                          marginBottom: '0.4rem',
+                        }}>{label}</dt>
+                        <dd style={{
+                          margin: 0, fontFamily: 'var(--font-serif)', fontSize: '1.05rem',
+                          color: 'var(--ljos)',
+                        }}>{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              );
+            })()}
+
             {/* Share rail — text links only */}
             <div
               style={{
