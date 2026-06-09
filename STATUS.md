@@ -1,9 +1,21 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-06-06 (Claude Opus — Launch content + real-timestamp chapters + comms audit)
+**Last Updated:** 2026-06-09 (Claude Opus — FTP /VOD auto-pull watcher, live on the mini)
 **Last Agent:** Claude Opus 4.8 (Claude Code)
-**Branch:** `main` (all work this session committed + deployed to prod)
-**Build Status:** `npx tsc --noEmit` green + `pnpm build` green on 2026-06-06. Prod live at omega-tv-lovat.vercel.app.
+**Branch:** `main` (omega-tv); Azotus watcher deployed on the mini (scp, not committed)
+**Build Status:** omega-tv green on 2026-06-06. Azotus watcher py_compile + node --check green on 2026-06-09; proven end-to-end (real file pulled /VOD → 1_INBOX).
+
+---
+
+## Session — 2026-06-09 (Claude Opus — FTP /VOD auto-pull watcher)
+
+Built the auto-pull pipeline so Icelandic programs flow to the web without the manual import window. **Lives on the Azotus mini, not this repo.**
+
+- **What:** new `~/Azotus/scripts/ftp_vod_watcher.py` + PM2 service `omega-ftp-vod-watcher` (added to `ecosystem.config.js`, backup `.bak_ftpvod`, `pm2 save`'d). Polls FTP `212.30.195.77:/VOD` (user `upload`) every 90s; waits 60s for size-stability; downloads to `MEDIA_ROOT/.ftp_incoming`; writes native-IS sidecar into `1_INBOX`; atomically moves the video in. `omega_manager` then ingests exactly like the manual Native-Icelandic import. Non-destructive on the FTP; dedups via `.ftp_vod_state.json`.
+- **Creds:** in `~/Azotus/.env` (gitignored): `FTP_VOD_HOST/USER/PASSWORD/DIR/REVIEW_MODE`. Same server as the schedule sync; the `upload` account is separate from `MBLuser` (which is schedule-only/chrooted).
+- **PROVEN:** Hawk dropped a 2.74 GB program in `/VOD` → watcher pulled it (76s @ 36 MB/s) → landed in `1_INBOX` with native sidecar. (One bug fixed live: must `cwd` into `/VOD` before `RETR`, else `550 Couldn't open the file`.)
+- **Going forward:** team uploads Icelandic programs to `/VOD` in Transmit → they appear in the web Innhólf as drafts to review + publish. No import window needed.
+- **Open/next:** confirm `omega_manager` pickup of that first file landed in Innhólf (background watch was stopped before confirming — the file was correctly in `1_INBOX`; manager is the existing proven path). `FTP_VOD_REVIEW_MODE=auto` → AUTO mode; set `human` + `pm2 restart` if in-Azotus review is wanted first. **Still NEVER git pull the mini.**
 
 ---
 
