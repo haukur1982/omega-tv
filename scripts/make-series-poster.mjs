@@ -37,6 +37,29 @@ const SERIES = {
     grade: { sat: 1.06, bright: 1.07, warmAlpha: 0.6 },   // = H2
     haloCy: 0.30,
   },
+  mattarstund: {
+    // amber god-rays through storm cloud onto the sea (Pexels 32846075, 2400×1600)
+    source: path.join(ROOT, 'design/poster-sources/mattarstund-geislar-pexels-32846075.jpg'),
+    title: 'Máttarstund',
+    tagline: 'Uppörvandi boðskapur um trú, náð og nýtt upphaf',
+    host: 'HOUR OF POWER Á ÍSLENSKU',
+    crop2x3: { left: 1007, top: 0, width: 1067, height: 1600 },
+    crop4x5: { left: 900, top: 0, width: 1280, height: 1600 },
+    grade: { sat: 1.05, bright: 1.04, warmAlpha: 0.5 },
+    haloCy: 0.18,
+  },
+  'times-square-church': {
+    // Brooklyn Bridge + Lower Manhattan in golden haze (Pexels 24589220, 2400×3600)
+    source: path.join(ROOT, 'design/poster-sources/times-square-church-brooklyn-bridge-pexels-24589220.jpg'),
+    title: 'Times Square Church',
+    titleSize: 84,
+    tagline: 'Kraftmikil prédikun um iðrun og trú',
+    host: 'ÚR HJARTA NEW YORK',
+    crop2x3: { left: 0, top: 0, width: 2400, height: 3600 },
+    crop4x5: { left: 0, top: 300, width: 2400, height: 3000 },
+    grade: { sat: 1.04, bright: 1.0, warmAlpha: 0.45 },
+    haloCy: 0.35,
+  },
 };
 
 const svgToPng = (svg, width) => new Resvg(svg, {
@@ -63,7 +86,7 @@ function overlay(W, H, cfg, t) {
   <rect width="${W}" height="${H}" fill="url(#halo)"/>
   <rect width="${W}" height="${H}" fill="url(#s)"/>
   <text x="${W / 2}" y="${t.omega}" text-anchor="middle" font-family="Fraunces" font-size="84" font-weight="600" fill="${C.gull}">&#937;</text>
-  <text x="${W / 2}" y="${t.title}" text-anchor="middle" font-family="Fraunces" font-size="118" font-weight="400" letter-spacing="-2" fill="${C.ljos}">${cfg.title}</text>
+  <text x="${W / 2}" y="${t.title}" text-anchor="middle" font-family="Fraunces" font-size="${cfg.titleSize ?? 118}" font-weight="400" letter-spacing="-2" fill="${C.ljos}">${cfg.title}</text>
   <text x="${W / 2}" y="${t.tagline}" text-anchor="middle" font-family="Newsreader" font-style="italic" font-size="33" fill="${C.moskva}">${cfg.tagline}</text>
   <line x1="${W / 2 - 26}" y1="${t.dash}" x2="${W / 2 + 26}" y2="${t.dash}" stroke="${C.gull}" stroke-width="2"/>
   <text x="${W / 2}" y="${t.host}" text-anchor="middle" font-family="Inter" font-size="23" font-weight="600" letter-spacing="5" fill="#E7DECF">${cfg.host}</text>
