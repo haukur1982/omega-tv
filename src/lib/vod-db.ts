@@ -69,9 +69,12 @@ export async function getIsraelEpisodes(limit = 24): Promise<IsraelEpisode[]> {
             // Primary path: explicit series.category='israel' (canonical).
             if (e.series?.category === 'israel') return true;
             // Legacy fallback while the back-catalog is still being tagged.
+            // Jerúsalem/Síon/Gyðing- count too — "Beðið fyrir friði í
+            // Jerúsalem" IS an Israel episode even without the word Ísrael.
+            const ISRAEL_WORDS = /ísrael|israel|jerúsalem|jerusalem|gyðing|síon|zion/;
             const seriesTitle = e.series?.title?.toLowerCase() ?? '';
             const epTitle = e.title?.toLowerCase() ?? '';
-            return /ísrael|israel/.test(seriesTitle) || /ísrael|israel/.test(epTitle);
+            return ISRAEL_WORDS.test(seriesTitle) || ISRAEL_WORDS.test(epTitle);
         })
         .slice(0, limit);
 }

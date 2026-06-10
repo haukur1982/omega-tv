@@ -4,6 +4,7 @@ import Footer from '@/components/layout/Footer';
 import IsraelMasthead from '@/components/israel/IsraelMasthead';
 import IsraelDoorsGrid from '@/components/israel/IsraelDoorsGrid';
 import IsraelFoundation from '@/components/israel/IsraelFoundation';
+import IsraelRoot from '@/components/israel/IsraelRoot';
 import IsraelGreinarRail from '@/components/israel/IsraelGreinarRail';
 import IsraelHolidaysRail from '@/components/israel/IsraelHolidaysRail';
 import IsraelDocumentaries from '@/components/israel/IsraelDocumentaries';
@@ -77,6 +78,7 @@ export default async function IsraelPage() {
             <IsraelMasthead nextSlot={nextIsraelSlot} />
             <IsraelDoorsGrid />
             <IsraelFoundation />
+            <IsraelRoot />
             <IsraelGreinarRail articles={articles} />
             <IsraelHolidaysRail holidays={holidays} />
             <IsraelDocumentaries episodes={episodes} />

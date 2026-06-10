@@ -40,6 +40,44 @@ export default function IsraelMasthead({ nextSlot }: Props) {
                 borderBottom: '1px solid var(--border)',
             }}
         >
+            {/* Jerusalem — the stepped stone of the Old City, graded to
+                evening amber, melting into the night register from the
+                right. The wall the watchmen stand on, present but quiet:
+                heavy left+bottom fade keeps the typography in charge. */}
+            <div
+                className="israel-masthead-photo"
+                aria-hidden
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: '46%',
+                    backgroundImage: 'url(/images/israel/masthead-jerusalem.jpg)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center top',
+                    opacity: 0.55,
+                    maskImage:
+                        'linear-gradient(to left, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 92%)',
+                    WebkitMaskImage:
+                        'linear-gradient(to left, rgba(0,0,0,1) 25%, rgba(0,0,0,0) 92%)',
+                    pointerEvents: 'none',
+                }}
+            />
+            {/* floor fade — the photo settles into the dark before the
+                epigraph and ribbon zone so text never fights the stone */}
+            <div
+                aria-hidden
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background:
+                        'linear-gradient(to bottom, rgba(20,18,15,0.25) 0%, transparent 28%, transparent 50%, rgba(20,18,15,0.92) 88%, var(--nott) 100%)',
+                    pointerEvents: 'none',
+                }}
+            />
+            <style>{`@media (max-width: 860px) { .israel-masthead-photo { width: 100%; opacity: 0.3; } }`}</style>
+
             {/* Dawn light — quiet warmth in the upper-right. Stays well
                 below the typography weight; just adds breath. */}
             <div
