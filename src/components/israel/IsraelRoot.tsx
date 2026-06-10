@@ -16,12 +16,14 @@
 export default function IsraelRoot() {
     return (
         <section
+            id="rotin"
             style={{
                 position: 'relative',
                 background: 'var(--nott)',
                 borderTop: '1px solid var(--border)',
                 borderBottom: '1px solid var(--border)',
                 overflow: 'hidden',
+                scrollMarginTop: '88px',
             }}
         >
             {/* Olive branch — fades in from the right, melts into the night bg.
