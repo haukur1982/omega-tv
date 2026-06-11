@@ -23,6 +23,7 @@ import {
     Newspaper,
     Quote,
     Activity,
+    BookOpen,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OmegaMark } from '@/components/brand/OmegaMark';
@@ -70,6 +71,7 @@ const navGroups: {
             { href: '/admin/prayers', label: 'Bænir', icon: Heart },
             { href: '/admin/campaigns', label: 'Bænaátak', icon: Megaphone },
             { href: '/admin/testimonials', label: 'Vitnisburðir', icon: MessageSquare },
+            { href: '/admin/bokavinir', label: 'Bókavinir', icon: BookOpen },
             { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
             { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
         ],
