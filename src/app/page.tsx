@@ -7,6 +7,7 @@ import BaenDagsins from "@/components/home/BaenDagsins";
 import UrDagskranni from "@/components/home/UrDagskranni";
 import PullQuote from "@/components/home/PullQuote";
 import IsraelTeaser from "@/components/home/IsraelTeaser";
+import BaekurTeaser from "@/components/home/BaekurTeaser";
 import StyrkjaBand from "@/components/home/StyrkjaBand";
 import Legacy34Years from "@/components/home/Legacy34Years";
 import FeaturedSunday from "@/components/sermon/FeaturedSunday";
@@ -130,6 +131,7 @@ export default async function Home() {
 
             {/* ─── Dark closing anchor ─────────────────────────────── */}
             <IsraelTeaser />
+            <BaekurTeaser />
             <StyrkjaBand />
             <Legacy34Years />
             <Footer />
