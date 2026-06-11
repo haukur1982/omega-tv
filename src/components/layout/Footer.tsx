@@ -18,6 +18,7 @@ const NAV_COLUMNS = [
       // { label: 'Námskeið', href: '/namskeid' }, // Hidden until courses are ready
       { label: 'Greinar', href: '/greinar' },
       { label: 'Ísrael', href: '/israel' },
+      { label: 'Bækur', href: '/baekur' },
       { label: 'Vitnisburdur', href: '/vitnisburdur' },
     ],
   },
