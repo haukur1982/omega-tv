@@ -3,6 +3,10 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import EmailSignupForm from '@/components/forms/EmailSignupForm';
 
+// Newsletters publish from the admin/DB — refetch on an interval instead
+// of staying frozen at build time (a new letter only appeared on redeploy).
+export const revalidate = 300;
+
 export default async function NewsletterPage() {
     const newsletters = await getNewsletters();
     const latest = newsletters[0];
