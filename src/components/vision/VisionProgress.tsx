@@ -69,7 +69,7 @@ export default function VisionProgress() {
                         </motion.div>
                         <h2 className="text-4xl md:text-5xl font-bold mb-6">Breytum Íslandi saman</h2>
                         <p className="text-xl text-[var(--text-secondary)] leading-relaxed">
-                            Við erum ekki bara að byggja sjónvarpsstöð. Við erum að skapa vettvang fyrir
+                            Við erum ekki bara að byggja sjónvarpsstöð. Við erum að búa til rými fyrir
                             kraftaverk, trú og von. Hér getur þú séð hvernig við erum að styrkja innviðina
                             til að mæta framtíðinni.
                         </p>
@@ -79,7 +79,7 @@ export default function VisionProgress() {
                     <div className="w-full md:w-80 p-6 rounded-3xl bg-white/5 border border-white/5 relative overflow-hidden h-40 flex flex-col justify-center">
                         <div className="absolute top-4 left-6 flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Bein Uppfærsla</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-muted)]">Bein uppfærsla</span>
                         </div>
                         <motion.div
                             key={feedIndex}
@@ -120,7 +120,7 @@ export default function VisionProgress() {
                                     </div>
                                     <div className="text-right">
                                         <div className="text-2xl font-black text-white">{m.progress}%</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">Nálgast Takmark</div>
+                                        <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--accent)]">Nálgast takmark</div>
                                     </div>
                                 </div>
 

@@ -37,7 +37,7 @@ const TIERS: Record<Cadence, Array<{ amount: number; label: string; note?: strin
 };
 
 const ALLOCATION = [
-    { pct: 42, label: 'Útsending', note: 'Senditæknin sjálf — gervihnöttur, streymi, stafrænn vettvangur' },
+    { pct: 42, label: 'Útsending', note: 'Senditæknin sjálf — gervihnöttur, streymi, stafræn miðlun' },
     { pct: 31, label: 'Dagskrárgerð', note: 'Upptökur, klipping, hljóð, grafík — það sem þú sérð á skjánum' },
     { pct: 18, label: 'Bænastarf & þjónusta', note: 'Bænatorg, tölvupóstsvörun, persónuleg umönnun áhorfenda' },
     { pct: 9, label: 'Rekstur', note: 'Húsnæði, kerfi, bókhald — það sem heldur öllu gangandi' },
@@ -342,7 +342,7 @@ export default function StyrkjaDonationClient() {
                                 marginBottom: '20px',
                             }}
                         >
-                            Þín upplýsingar
+                            Þínar upplýsingar
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
@@ -472,7 +472,7 @@ export default function StyrkjaDonationClient() {
                                     lineHeight: 1.5,
                                 }}
                             >
-                                Styrkurinn minn sé ekki birtur í neinu þakkaryfirliti.
+                                Ég vil að framlagið sé nafnlaust og birtist ekki í þakkaryfirlitum.
                             </div>
                         </label>
 

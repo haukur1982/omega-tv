@@ -50,7 +50,7 @@ export default function VisionPage() {
                     className="font-bold mb-8 leading-[0.9] tracking-tight"
                     style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2.5rem, 7vw, 4.5rem)' }}
                 >
-                    Hjartað í<br />Starfi Omega.
+                    Hjartað í<br />starfi Omega.
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0 }}
@@ -111,7 +111,7 @@ export default function VisionPage() {
             {/* Email Signup */}
             <section className="py-24 border-t border-[var(--border)]">
                 <div className="max-w-xl mx-auto px-6 text-center">
-                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.5rem, 4vw, 2rem)' }} className="font-bold mb-4 tracking-tight">Vertu hluti af hreyfingunni</h2>
+                    <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.5rem, 4vw, 2rem)' }} className="font-bold mb-4 tracking-tight">Vertu með</h2>
                     <p className="text-[var(--text-secondary)] mb-10">
                         Skráðu þig á póstlistann okkar til að fá fréttir af nýju efni og vitnisburði.
                     </p>

@@ -1,9 +1,19 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-06-09 (Claude Opus — FTP /VOD auto-pull watcher, live on the mini)
-**Last Agent:** Claude Opus 4.8 (Claude Code)
-**Branch:** `main` (omega-tv); Azotus watcher deployed on the mini (scp, not committed)
-**Build Status:** omega-tv green on 2026-06-06. Azotus watcher py_compile + node --check green on 2026-06-09; proven end-to-end (real file pulled /VOD → 1_INBOX).
+**Last Updated:** 2026-06-12 (Antigravity — Icelandic language audit)
+**Last Agent:** Antigravity (Gemini)
+**Branch:** `main` (omega-tv)
+
+---
+
+## Session — 2026-06-12 (Antigravity — Icelandic language audit & grammar fix)
+
+Hawk requested an audit of the public-facing pages to remove "obvious AI translations" and grammar errors. The site's language now feels more native, authentic, and matches the Omega brand.
+
+### Shipped (live)
+- **AI tropes removed:** Scandinavian loanwords (*Glimt* -> *Svipmyndir*) and AI buzzwords (*skapa vettvang* -> *búa til rými*, *stafrænn vettvangur* -> *stafræn miðlun*) replaced with natural Icelandic phrasing.
+- **Anglicisms removed:** "Frá Reykjavík til sveitanna" replaced with "Hringinn í kringum landið". Headline capitalization changed from English title-casing ("Hjartað í Starfi Omega") to correct Icelandic sentence-casing ("Hjartað í starfi Omega").
+- **Grammar fixed:** Corrected "Þín upplýsingar" to "Þínar upplýsingar" on the donate page. Fixed pronoun mismatch in the prayer ticker placeholder ("Systkin biður fyrir bænarefni sínu").
 
 ---
 

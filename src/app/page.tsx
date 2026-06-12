@@ -160,7 +160,7 @@ function tickerLineFor(name: string | null, content: string, isAnswered: boolean
     // the identity + action instead.
     const starts = /^(bið|biðjið|þakka)/i.test(clipped);
     if (starts) {
-        return `${identity} ${action} fyrir því sem liggur þeim á hjarta.`;
+        return `${identity} ${action} fyrir bænarefni sínu.`;
     }
 
     return `${identity} ${action} ${extractTopicFragment(clipped)}`;
@@ -170,5 +170,5 @@ function extractTopicFragment(text: string): string {
     // Heuristic: find "fyrir X" / "um X" phrases to keep a sense of topic.
     const match = text.match(/\b(fyrir|um|að)\b\s+(.{5,60})/i);
     if (match) return `${match[1]} ${match[2]}.`;
-    return 'fyrir því sem liggur þeim á hjarta.';
+    return 'fyrir bænarefni sínu.';
 }
