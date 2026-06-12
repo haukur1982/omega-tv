@@ -69,7 +69,7 @@ export default function StyrkjaHero() {
                             maxWidth: '20ch',
                         }}
                     >
-                        Omega lifir af þeim sem kunna að meta hana.
+                        Omega er borin uppi af þeim sem kunna að meta hana.
                     </h1>
 
                     <p

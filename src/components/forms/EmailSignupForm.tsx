@@ -17,7 +17,7 @@ export default function EmailSignupForm({
     segment = 'newsletter',
     placeholder = 'Netfang',
     buttonText = 'Skrá mig',
-    successMessage = 'Takk fyrir skráninguna! 🙏',
+    successMessage = 'Takk — þú ert komin/n á póstlistann.',
     className = '',
     showName = false,
     layout = 'inline'

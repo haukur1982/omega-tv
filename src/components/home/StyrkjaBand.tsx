@@ -58,7 +58,7 @@ export default function StyrkjaBand() {
                             textWrap: 'balance',
                         }}
                     >
-                        Omega lifir af þeim sem sá í hana — og uppsker með Drottni.
+                        Omega lifir af þeim sem sá í þennan akur — og uppskera með Drottni.
                     </h2>
                     <p
                         style={{
@@ -71,7 +71,7 @@ export default function StyrkjaBand() {
                             lineHeight: 1.55,
                         }}
                     >
-                        Engar auglýsingar. Engin áskrift. Aðeins hendur sem halda merkinu uppi.
+                        Engar auglýsingar. Engin áskrift. Aðeins hendur sem halda merkinu á lofti.
                     </p>
                 </div>
 

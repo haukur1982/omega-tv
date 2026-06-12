@@ -79,7 +79,7 @@ export default async function NewsletterPage() {
                         Vertu með í hópnum
                     </h3>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
-                        Skráðu þig á póstlistann og fáðu vikulega uppörvun og fréttir af starfinu.
+                        Skráðu þig á póstlistann og fáðu fréttir af starfinu og hvatningarorð frá Eiríki.
                     </p>
                     <EmailSignupForm
                         segment="newsletter"

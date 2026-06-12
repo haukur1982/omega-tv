@@ -131,7 +131,7 @@ export default function IsraelFoundation() {
                         >
                             A
                         </span>
-                        llt frá dögum Abrahams, Ísaks og Jakobs, hefur Guð valið sér land og þjóð til að opinbera tilgang sinn fyrir mannkynið. Ísrael er ekki aðeins landfræðilegur staður, heldur lifandi vitnisburður um trúfesti Guðs við orð sín.
+                        llt frá dögum Abrahams, Ísaks og Jakobs hefur Guð valið sér land og þjóð til að opinbera tilgang sinn fyrir mannkynið. Ísrael er ekki aðeins landfræðilegur staður, heldur lifandi vitnisburður um trúfesti Guðs við orð sín.
                     </p>
                     <p style={{ margin: '0 0 22px' }}>
                         Ritningin er full af loforðum um uppreisn og varðveislu Ísraels. Það er í gegnum þessa þjóð sem Orð Guðs kom til manna, og það var í gegnum þessa sömu þjóð sem frelsarinn, Jesús Kristur, fæddist inn í þennan heim.

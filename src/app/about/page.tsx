@@ -149,7 +149,7 @@ export default function AboutPage() {
                                 textWrap: 'pretty',
                             }}
                         >
-                            Í rúmlega 34 ár höfum við verið hjartsláttur kristinnar miðlunar á Íslandi. Nýsköpun er okkar hefð. Fagnaðarerindið er okkar boðskapur.
+                            Í rúmlega 34 ár hefur Omega flutt fagnaðarerindið inn á íslensk heimili — alla daga, allan sólarhringinn.
                         </p>
                     </motion.div>
                 </div>
@@ -197,7 +197,7 @@ export default function AboutPage() {
                             textWrap: 'balance',
                         }}
                     >
-                        Eina kristna sjónvarpsstöðin á Íslandi. Stofnuð af trú, rekin af ást, varðveitt af Guði.
+                        Eina kristna sjónvarpsstöðin á Íslandi. Stofnuð í trú, rekin í kærleika, varðveitt af Guði.
                     </motion.p>
                 </div>
             </section>

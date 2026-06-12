@@ -51,7 +51,7 @@ const VERIFICATION_EMAIL = {
 
 // Email templates
 const WELCOME_EMAIL = {
-    subject: 'Velkomin/n í Omega fjölskylduna! 🙏',
+    subject: 'Velkomin/n á póstlista Omega',
     getHtml: (name?: string) => `
 <!DOCTYPE html>
 <html>
