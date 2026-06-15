@@ -21,10 +21,12 @@ export async function getTestimonials(): Promise<Testimonial[]> {
 }
 
 /**
- * Submit a new testimonial (public — uses public client, RLS-safe)
+ * Submit a new testimonial. Called from a server action; uses the
+ * service-role client because the anon client's insert().select() hits
+ * the RLS SELECT policy (approved-only) and rolls the insert back.
  */
 export async function createTestimonial(testimonial: { name: string; email?: string; content: string }): Promise<Testimonial | null> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
         .from('testimonials')
         .insert(testimonial)
         .select()

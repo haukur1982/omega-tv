@@ -13,11 +13,15 @@ export async function submitTestimonial(formData: FormData) {
     }
 
     try {
-        await createTestimonial({
+        const created = await createTestimonial({
             name,
             email: email || undefined,
             content
         });
+
+        if (!created) {
+            return { success: false, message: 'Eitthvað fór úrskeiðis. Vinsamlegast reyndu aftur.' };
+        }
 
         revalidatePath('/admin/testimonials');
         return { success: true, message: 'Takk fyrir að deila sögu þinni!' };

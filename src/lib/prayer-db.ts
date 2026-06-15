@@ -88,7 +88,10 @@ export async function addPrayer(prayer: {
     categoryType?: string;
     autoApprove?: boolean;
 }): Promise<Prayer | null> {
-    const { data, error } = await supabase
+    // Service role: this runs in a server action. The anon client's
+    // insert().select() trips the RLS SELECT policy (only approved rows
+    // are selectable) and rolls the insert back. supabaseAdmin bypasses it.
+    const { data, error } = await supabaseAdmin
         .from('prayers')
         .insert([{
             name: prayer.name,

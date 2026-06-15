@@ -18,13 +18,17 @@ export async function submitPrayerAction(formData: FormData) {
         return { success: false, error: 'Bænin er of löng (hámark 500 stafir).' };
     }
 
-    await addPrayer({
+    const created = await addPrayer({
         name: name || "Nafnlaus/t",
         email,
         topic,
         content,
         categoryType,
     });
+
+    if (!created) {
+        return { success: false, error: 'Eitthvað fór úrskeiðis. Vinsamlegast reyndu aftur.' };
+    }
 
     revalidatePath('/baenatorg');
     return { success: true };
