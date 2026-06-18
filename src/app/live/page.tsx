@@ -2,8 +2,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import LiveMeta from "@/components/live/LiveMeta";
 import OnAirEditorial from "@/components/live/OnAirEditorial";
-import NaestaSending from "@/components/live/NaestaSending";
-import AMedanPuBidur from "@/components/live/AMedanPuBidur";
 import DagskraTimeline from "@/components/live/DagskraTimeline";
 import LivePrayerPulse from "@/components/live/LivePrayerPulse";
 import { getCurrentAndNext, getScheduleInRange, type ScheduleSlot } from "@/lib/schedule-db";
@@ -11,19 +9,15 @@ import { getCurrentAndNext, getScheduleInRange, type ScheduleSlot } from "@/lib/
 /**
  * /live — "Beint"
  *
- * Two first-class states, per the Beint Redesign spec:
- *   A. On-air — there's a current broadcast. Player + LiveMeta + OnAirEditorial.
- *   B. Off-air — no broadcast. NaestaSending countdown + AMedanPuBidur row.
+ * Omega is a 24/7 channel, so the live player is ALWAYS shown (embed via
+ * NEXT_PUBLIC_LIVE_STREAM_EMBED_URL). The schedule is supplementary:
+ *   - when a current slot is known → LiveMeta + OnAirEditorial + prayer pulse
+ *   - otherwise → a quiet "Omega sendir út allan sólarhringinn" line
+ * The DagskraTimeline shows only when the schedule has upcoming slots, so an
+ * empty/unsynced schedule degrades to an honest player-only page (never a
+ * broken "off-air" countdown or fabricated programming).
  *
- * Both states end with the chronological DagskraTimeline (next 6 broadcasts).
- *
- * PrayerHall is no longer inlined here — "Senda bænaefni" becomes a link
- * to /baenatorg, which owns the prayer experience end-to-end. Live stays
- * about the broadcast.
- *
- * The state-A player is still Bunny Stream iframe via NEXT_PUBLIC_LIVE_STREAM_EMBED_URL.
- * A ?state=off-air query (dev-only escape hatch) forces State B so both
- * states are testable without waiting for a schedule gap.
+ * PrayerHall is not inlined — "Senda bænaefni" links to /baenatorg.
  */
 
 export const revalidate = 60;
@@ -49,10 +43,6 @@ export default async function LivePage({ searchParams }: LivePageProps) {
     const allSlots = await getScheduleInRange(rangeStart.toISOString(), rangeEnd.toISOString());
 
     const upcoming = allSlots.filter((s) => new Date(s.ends_at).getTime() > now.getTime()).slice(0, 6);
-    const previous =
-        [...allSlots].reverse().find((s) => new Date(s.ends_at).getTime() <= now.getTime()) ?? null;
-
-    const isOnAir = effectiveCurrent !== null;
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
@@ -88,7 +78,7 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                     className="type-vaka"
                     style={{ margin: 0, color: 'var(--ljos)' }}
                 >
-                    {isOnAir ? 'Í beinni útsendingu.' : 'Næsta sending.'}
+                    Í beinni útsendingu.
                 </h1>
             </div>
 
@@ -100,8 +90,8 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                     padding: '0 var(--rail-padding)',
                 }}
             >
-                {isOnAir && effectiveCurrent ? (
-                    <div>
+                {/* 24/7 channel — the live player is always shown. */}
+                <div>
                         {/* Player */}
                         <div
                             style={{
@@ -176,13 +166,28 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                             </div>
                         </div>
 
-                        <LiveMeta current={effectiveCurrent} />
-                        <OnAirEditorial current={effectiveCurrent} />
-                        <LivePrayerPulse slotId={effectiveCurrent.id} />
+                        {effectiveCurrent ? (
+                            <>
+                                <LiveMeta current={effectiveCurrent} />
+                                <OnAirEditorial current={effectiveCurrent} />
+                                <LivePrayerPulse slotId={effectiveCurrent.id} />
+                            </>
+                        ) : (
+                            <p
+                                style={{
+                                    margin: '28px 0 0',
+                                    fontFamily: 'var(--font-serif)',
+                                    fontStyle: 'italic',
+                                    fontSize: 'clamp(17px, 1.6vw, 20px)',
+                                    lineHeight: 1.6,
+                                    color: 'var(--moskva)',
+                                    maxWidth: '54ch',
+                                }}
+                            >
+                                Omega sendir út allan sólarhringinn — orð Guðs, lofgjörð og bæn.
+                            </p>
+                        )}
                     </div>
-                ) : (
-                    <NaestaSending next={next} />
-                )}
             </section>
 
             {/* Where to watch on TV — Omega's main audience watches on cable. */}
@@ -193,15 +198,14 @@ export default async function LivePage({ searchParams }: LivePageProps) {
                 </p>
             </div>
 
-            {/* Á meðan þú bíður — only in off-air state */}
-            {!isOnAir && <AMedanPuBidur previous={previous} />}
-
-            {/* Dagskrá timeline — both states */}
-            <DagskraTimeline
-                slots={upcoming}
-                currentId={effectiveCurrent?.id ?? null}
-                nextId={next?.id ?? null}
-            />
+            {/* Dagskrá timeline — only when the schedule has upcoming slots. */}
+            {upcoming.length > 0 && (
+                <DagskraTimeline
+                    slots={upcoming}
+                    currentId={effectiveCurrent?.id ?? null}
+                    nextId={next?.id ?? null}
+                />
+            )}
 
             <Footer />
         </main>
