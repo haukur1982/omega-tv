@@ -46,69 +46,53 @@ export async function GET(req: NextRequest) {
     }
 
     const dateParam = req.nextUrl.searchParams.get('date');
-    const date = dateParam ? new Date(dateParam + 'T00:00:00Z') : new Date();
 
-    const result = await syncScheduleXmlForDate(date);
-
-    if (result.ok) {
-        const summary = `Imported ${result.imported} slots for ${result.date} from ${result.filename}.`;
-        console.log(
-            `[cron sync-xml] ${result.date} — imported ${result.imported} slots from ${result.filename}` +
-                (result.unlabeled.length > 0
-                    ? ` · ${result.unlabeled.length} unlabeled: ${result.unlabeled.join(', ')}`
-                    : '') +
-                (result.skipped_manual > 0 ? ` · kept ${result.skipped_manual} manual overrides` : ''),
-        );
-        await logEvent(
-            'cron.schedule_xml',
-            result.unlabeled.length > 0 ? 'warn' : 'info',
-            summary,
-            {
-                date: result.date,
-                imported: result.imported,
-                unlabeled: result.unlabeled,
-                skipped_manual: result.skipped_manual,
-            },
-            'vercel-cron',
-        );
-        return NextResponse.json(result);
+    // Dates to sync: a single ?date=YYYY-MM-DD (manual/testing), or a rolling
+    // window of today + the next 7 days. The window keeps schedule_slots
+    // populated ahead so the /live timeline never empties when the day rolls
+    // over or one cron run is missed — the FTP holds several days in advance.
+    const dates: Date[] = [];
+    if (dateParam) {
+        dates.push(new Date(dateParam + 'T00:00:00Z'));
+    } else {
+        const base = new Date();
+        for (let i = 0; i < 8; i++) dates.push(new Date(base.getTime() + i * 86_400_000));
     }
 
-    // Soft-succeed on "file not on FTP yet" — return 200 with reason so
-    // the cron log shows what happened without alerting as a failure.
-    if (result.reason === 'not_found') {
-        console.log(`[cron sync-xml] ${result.filename} not on FTP yet — will retry tomorrow.`);
-        await logEvent(
-            'cron.schedule_xml',
-            'info',
-            `XML not on FTP yet (${result.filename}). Will retry tomorrow.`,
-            { filename: result.filename },
-            'vercel-cron',
-        );
-        return NextResponse.json({
-            ok: false,
-            filename: result.filename,
-            reason: result.reason,
-            message: result.message,
-        });
+    let daysImported = 0;
+    let totalSlots = 0;
+    const notFound: string[] = [];
+    const failed: { filename: string; reason: string; message: string; status: number }[] = [];
+
+    for (const d of dates) {
+        const r = await syncScheduleXmlForDate(d);
+        if (r.ok) {
+            daysImported += 1;
+            totalSlots += r.imported;
+        } else if (r.reason === 'not_found') {
+            notFound.push(r.filename);
+        } else {
+            failed.push({ filename: r.filename, reason: r.reason, message: r.message, status: r.status });
+        }
     }
 
-    // True errors propagate as 5xx so Vercel surfaces them in cron logs.
-    console.error(`[cron sync-xml] ${result.reason}: ${result.message}`);
+    const summary =
+        `Synced ${daysImported}/${dates.length} day(s), ${totalSlots} slots` +
+        (notFound.length ? ` · not on FTP yet: ${notFound.join(', ')}` : '') +
+        (failed.length ? ` · failed: ${failed.map((f) => f.filename).join(', ')}` : '');
+    console.log(`[cron sync-xml] ${summary}`);
     await logEvent(
         'cron.schedule_xml',
-        'error',
-        `XML sync failed: ${result.message}`,
-        { reason: result.reason, filename: result.filename, status: result.status },
+        failed.length ? 'error' : 'info',
+        summary,
+        { daysImported, totalSlots, notFound, failed },
         'vercel-cron',
     );
-    return NextResponse.json(
-        {
-            ok: false,
-            filename: result.filename,
-            reason: result.reason,
-            error: result.message,
-        },
-        { status: result.status },
-    );
+
+    // Hard error only when nothing imported AND a real (non-404) failure occurred.
+    if (daysImported === 0 && failed.length > 0) {
+        return NextResponse.json({ ok: false, summary, notFound, failed }, { status: failed[0].status });
+    }
+
+    return NextResponse.json({ ok: true, summary, daysImported, totalSlots, notFound });
 }
