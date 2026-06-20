@@ -25,6 +25,25 @@ interface ThreadsSidebarProps {
     article: ThreadArticle | null;
 }
 
+/**
+ * Trim long passages (whole chapters) to a focused, readable scripture moment.
+ * A wall of text in the sidebar never gets read — the opening verses, cut at a
+ * sentence boundary, keep the value. Short passages (verse ranges) pass through
+ * untouched.
+ */
+function scriptureExcerpt(text: string, max = 420): { text: string; truncated: boolean } {
+    const clean = text.trim();
+    if (clean.length <= max) return { text: clean, truncated: false };
+    const slice = clean.slice(0, max);
+    const lastStop = Math.max(
+        slice.lastIndexOf('. '),
+        slice.lastIndexOf('! '),
+        slice.lastIndexOf('? '),
+    );
+    const cut = lastStop > max * 0.5 ? lastStop + 1 : slice.lastIndexOf(' ');
+    return { text: clean.slice(0, cut > 0 ? cut : max).trim(), truncated: true };
+}
+
 export default function ThreadsSidebar({
     bibleRef,
     passage,
@@ -33,6 +52,7 @@ export default function ThreadsSidebar({
 }: ThreadsSidebarProps) {
     const passageDisplay = displayPassageIs(bibleRef);
     const hasAnchor = Boolean(bibleRef);
+    const verse = passage?.text_is ? scriptureExcerpt(passage.text_is) : null;
 
     return (
         <aside
@@ -72,7 +92,7 @@ export default function ThreadsSidebar({
                         >
                             {passage?.ref_display_is ?? passageDisplay}
                         </h3>
-                        {passage?.text_is ? (
+                        {verse ? (
                             <p
                                 className="type-tilvisun"
                                 style={{
@@ -83,11 +103,12 @@ export default function ThreadsSidebar({
                                     fontStyle: 'italic',
                                 }}
                             >
-                                {passage.text_is}
+                                {verse.text}
+                                {verse.truncated && <span style={{ color: 'var(--steinn)' }}>…</span>}
                             </p>
                         ) : (
                             <p className="type-ritskrift" style={{ margin: 0, color: 'var(--steinn)' }}>
-                                Ritningartextinn er ekki enn í safninu — við erum að vinna í því.
+                                Ritningartextinn er ekki enn kominn í safnið.
                             </p>
                         )}
                     </>

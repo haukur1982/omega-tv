@@ -9,6 +9,8 @@ import SectionHeader from "@/components/layout/SectionHeader";
 import ShareCopyLink from "@/components/sermon/ShareCopyLink";
 import { getVideos, parseVideoMetadata, getBunnyVideoDetail } from "@/lib/bunny";
 import { getEpisodeByBunnyId, getEpisodesInSeries, getArticleByPassage, getPrayerByPassage } from "@/lib/threads-db";
+import { getNewestEpisodes } from "@/lib/vod-db";
+import { resolvePoster } from "@/lib/poster";
 import { getBiblePassage, displayPassageIs } from "@/lib/passages";
 
 /**
@@ -193,7 +195,7 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
   ]);
 
   // 4. Related rail — series siblings from DB, fallback to Bunny-parsed siblings.
-  let related: {
+  type RelatedCard = {
     id: string;
     title: string;
     show?: string | null;
@@ -202,7 +204,9 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
     thumbnail: string;
     editorNote?: string | null;
     captions?: string[] | null;
-  }[] = [];
+  };
+  let related: RelatedCard[] = [];
+  let relatedFromSeries = false;
 
   if (episode?.series_id) {
     const seriesEps = await getEpisodesInSeries(episode.series_id, episode.id, 4);
@@ -216,30 +220,33 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
         dateDisplay: e.published_at
           ? new Date(e.published_at).toLocaleDateString('is-IS', { day: 'numeric', month: 'short' })
           : null,
-        thumbnail: e.thumbnail_custom || `/api/bunny/thumbnail/${e.bunny_video_id}`,
+        thumbnail: resolvePoster(e, 'landscape_16x9') ?? `/api/bunny/thumbnail/${e.bunny_video_id}`,
         editorNote: e.editor_note,
         captions: e.captions_available,
       }));
+    relatedFromSeries = related.length > 0;
   }
 
   if (related.length === 0) {
-    // Fallback: siblings by show name from Bunny
-    related = videos
-      .filter(v => v.guid !== id && parseVideoMetadata(v).show === meta.show)
+    // Fallback: newest published episodes — real, branded, well-titled cards.
+    // (Never raw Bunny library items: those carry filename titles like "20" and
+    // un-graded/broken frames, which read as unprofessional.)
+    const newest = await getNewestEpisodes(8);
+    related = newest
+      .filter(e => e.bunny_video_id && e.bunny_video_id !== id)
       .slice(0, 4)
-      .map(v => {
-        const vm = parseVideoMetadata(v);
-        return {
-          id: v.guid,
-          title: vm.title,
-          show: vm.show,
-          durationMin: Math.floor(v.length / 60),
-          dateDisplay: vm.dateDisplay,
-          thumbnail: vm.thumbnail,
-          editorNote: null,
-          captions: null,
-        };
-      });
+      .map(e => ({
+        id: e.bunny_video_id,
+        title: e.title,
+        show: e.series_title,
+        durationMin: e.duration ? Math.floor(e.duration / 60) : null,
+        dateDisplay: e.published_at
+          ? new Date(e.published_at).toLocaleDateString('is-IS', { day: 'numeric', month: 'short' })
+          : null,
+        thumbnail: resolvePoster(e, 'landscape_16x9') ?? `/api/bunny/thumbnail/${e.bunny_video_id}`,
+        editorNote: null,
+        captions: null,
+      }));
   }
 
   if (related.length === 0 && isMock) {
@@ -517,7 +524,7 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
           }}
         >
           <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-            <SectionHeader title={`Fleiri úr ${meta.show}`} href="/sermons" />
+            <SectionHeader title={relatedFromSeries ? `Fleiri úr ${meta.show}` : 'Fleiri þættir'} href="/sermons" />
             <div
               style={{
                 display: 'grid',

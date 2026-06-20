@@ -26,6 +26,16 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'omega-tv.b-cdn.net',
+      },
+      {
+        // Supabase Storage — branded key-art variants + article images.
+        protocol: 'https',
+        hostname: 'dvzwpwlgucsdyrkhrpah.supabase.co',
+      },
+      {
+        // fal.ai hosted outputs (AI-repolished frames), if ever rendered directly.
+        protocol: 'https',
+        hostname: 'fal.media',
       }
     ],
   },
