@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import ThumbnailFrame from '@/components/media/ThumbnailFrame';
 import { getEpisodesBySeriesSlug } from '@/lib/vod-db';
 import { findMockSeriesBySlug, getMockEpisodesForMockSeries } from '@/lib/mock-series';
 
@@ -42,7 +43,14 @@ export default async function SeriesPage({ params }: PageProps) {
     // No real series → fall back to a mock catalog so clicking a mock
     // card from /sermons doesn't dead-end. The banner makes the preview
     // status explicit.
-    let series: { title: string; description: string | null; host: string | null; slug: string };
+    let series: {
+        title: string;
+        description: string | null;
+        host: string | null;
+        slug: string;
+        poster_vertical: string | null;
+        poster_horizontal: string | null;
+    };
     let episodes: EpisodeRow[];
     let isMockPreview = false;
 
@@ -52,6 +60,8 @@ export default async function SeriesPage({ params }: PageProps) {
             description: result.series.description,
             host: result.series.host,
             slug: result.series.slug,
+            poster_vertical: result.series.poster_vertical ?? null,
+            poster_horizontal: result.series.poster_horizontal ?? null,
         };
         episodes = result.episodes as EpisodeRow[];
     } else {
@@ -62,6 +72,8 @@ export default async function SeriesPage({ params }: PageProps) {
             description: mockSeries.description,
             host: mockSeries.host,
             slug: mockSeries.slug,
+            poster_vertical: mockSeries.poster_vertical ?? null,
+            poster_horizontal: mockSeries.poster_horizontal ?? null,
         };
         episodes = getMockEpisodesForMockSeries(mockSeries);
         isMockPreview = true;
@@ -83,6 +95,16 @@ export default async function SeriesPage({ params }: PageProps) {
                 }}
             >
                 <div className="article-cover-shell" style={{ maxWidth: '80rem', margin: '0 auto' }}>
+                    <div className="show-cover-grid">
+                        <div className="show-cover-poster">
+                            <ThumbnailFrame
+                                src={series.poster_vertical ?? series.poster_horizontal}
+                                series={series.title}
+                                aspect="2/3"
+                                hover="none"
+                                playOnHover={false}
+                            />
+                        </div>
                     <div className="article-cover-copy">
                         <div
                             style={{
@@ -175,6 +197,7 @@ export default async function SeriesPage({ params }: PageProps) {
                                 </span>
                             )}
                         </div>
+                    </div>
                     </div>
                 </div>
             </section>
@@ -282,6 +305,15 @@ export default async function SeriesPage({ params }: PageProps) {
             </section>
 
             <Footer />
+
+            <style>{`
+                .show-cover-grid { display: grid; gap: clamp(28px, 4vw, 52px); }
+                .show-cover-poster { width: clamp(160px, 52vw, 230px); margin: 0 auto; }
+                @media (min-width: 768px) {
+                    .show-cover-grid { grid-template-columns: 290px minmax(0, 1fr); align-items: center; }
+                    .show-cover-poster { width: 290px; margin: 0; }
+                }
+            `}</style>
         </main>
     );
 }
