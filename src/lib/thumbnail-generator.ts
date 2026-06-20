@@ -182,7 +182,7 @@ export async function generateThumbnail(options: ThumbnailOptions): Promise<Buff
     const sourceWidth = sourceMeta.width ?? width;
     const sourceHeight = sourceMeta.height ?? height;
     const sourceCrop = options.cleanVodCrop !== false
-        ? getCleanVodCrop(sourceWidth, sourceHeight, format)
+        ? getCleanVodCrop(sourceWidth, sourceHeight)
         : null;
 
     // 2. Resize and color grade
@@ -203,16 +203,19 @@ export async function generateThumbnail(options: ThumbnailOptions): Promise<Buff
         .linear(1.1, -(128 * 0.1))
         .gamma(1.05);
 
-    // 3. Composite overlays
+    // 3. Composite overlays. The bottom gradient exists only to keep baked text
+    //    legible — for clean, Apple-TV-style stills (no baked text) we skip it
+    //    and keep just a soft vignette, so the still reads as key art rather
+    //    than a darkened caption plate.
+    const hasText = Boolean(options.seriesName || options.episodeTitle);
     const composites: sharp.OverlayOptions[] = [
-        // Vignette
         { input: createVignetteOverlay(width, height), top: 0, left: 0 },
-        // Bottom gradient
-        { input: createBottomGradient(width, height), top: 0, left: 0 },
     ];
 
-    // 4. Text overlay (if series/title provided)
-    if (options.seriesName || options.episodeTitle) {
+    // 4. Baked text (only when explicitly requested — e.g. the manual thumbnail
+    //    tool). The key-art pipeline omits it; the UI renders titles itself.
+    if (hasText) {
+        composites.push({ input: createBottomGradient(width, height), top: 0, left: 0 });
         composites.push({
             input: createTextOverlay(width, height, options.seriesName, options.episodeTitle),
             top: 0,
@@ -232,24 +235,15 @@ export async function generateThumbnail(options: ThumbnailOptions): Promise<Buff
 function getCleanVodCrop(
     sourceWidth: number,
     sourceHeight: number,
-    format: ThumbnailFormat,
 ): sharp.Region {
-    const targetRatio = DIMENSIONS[format].width / DIMENSIONS[format].height;
-    const safeHeight = Math.max(1, Math.floor(sourceHeight * 0.72));
-    // Wide targets (≥1:1) can keep a wider slice of the live frame;
-    // tall targets (4:5, 2:3) need a tighter, more central crop.
-    const biasedWidth = targetRatio >= 1
-        ? Math.floor(sourceWidth * 0.52)
-        : Math.floor(sourceWidth * 0.42);
-    const cropWidth = Math.max(1, Math.min(sourceWidth, biasedWidth, Math.floor(safeHeight * targetRatio)));
-    const cropHeight = Math.max(1, Math.min(safeHeight, Math.floor(cropWidth / targetRatio)));
-
-    return {
-        left: 0,
-        top: Math.max(0, Math.floor(sourceHeight * 0.02)),
-        width: cropWidth,
-        height: cropHeight,
-    };
+    // Trim the burned-in subtitle band off the bottom (and a sliver off the
+    // top), keeping FULL WIDTH. The later resize(cover, centre) then crops to
+    // the target aspect CENTERED on the subject — talking-head framing — instead
+    // of slicing the left edge, which cut off any center-right subject.
+    const top = Math.max(0, Math.floor(sourceHeight * 0.02));
+    const bottomBand = Math.floor(sourceHeight * 0.20);
+    const height = Math.max(1, sourceHeight - top - bottomBand);
+    return { left: 0, top, width: sourceWidth, height };
 }
 
 /**

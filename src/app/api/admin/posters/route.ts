@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { verifyAdminSession } from '@/lib/admin-auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { generatePosterVariants } from '@/lib/thumbnail-generator';
 import {
     normalizePosterModel,
-    POSTER_BRAND_VERSION,
     type PosterModel,
 } from '@/lib/poster';
+import { polishAndBrandEpisode } from '@/lib/poster-polish';
 
 /**
  * Poster Machine V1 — admin endpoint (DISPATCH-003 §4).
@@ -38,13 +37,6 @@ async function loadEpisode(episodeId: string): Promise<EpisodeRow | null> {
         .eq('id', episodeId)
         .maybeSingle();
     return (data as EpisodeRow) ?? null;
-}
-
-async function seriesTitle(seriesId: string | null): Promise<string | undefined> {
-    if (!seriesId) return undefined;
-    const sb = supabaseAdmin as any;
-    const { data } = await sb.from('series').select('title').eq('id', seriesId).maybeSingle();
-    return data?.title ?? undefined;
 }
 
 async function persistModel(
@@ -157,67 +149,36 @@ export async function POST(request: Request) {
         }
 
         if (action === 'generate') {
-            if (!model.selected_source?.url) {
+            // Delegate to the shared key-art pipeline: select (respecting any
+            // human pick) → AI re-polish → brand → upload → persist. `force`
+            // because this is a deliberate admin action.
+            const outcome = await polishAndBrandEpisode(
+                {
+                    id: episode.id,
+                    title: episode.title,
+                    bunny_video_id: episode.bunny_video_id,
+                    poster_candidates: episode.poster_candidates,
+                    series_id: episode.series_id,
+                },
+                { force: true },
+            );
+            if (outcome.status === 'skipped_no_source') {
                 return NextResponse.json(
-                    { error: 'No source frame selected. Pick a candidate first.' },
+                    { error: 'No source frame available to brand.' },
                     { status: 400 },
                 );
             }
-
-            // Fetch the chosen source frame into a buffer.
-            const srcRes = await fetch(model.selected_source.url, { cache: 'no-store' });
-            if (!srcRes.ok) {
+            if (outcome.status === 'failed') {
                 return NextResponse.json(
-                    { error: `Could not fetch selected source frame (${srcRes.status})` },
-                    { status: 502 },
+                    { error: outcome.error ?? 'Poster generation failed' },
+                    { status: 500 },
                 );
             }
-            const sourceImage = Buffer.from(await srcRes.arrayBuffer());
-
-            const variants = await generatePosterVariants({
-                sourceImage,
-                seriesName: body.seriesName ?? (await seriesTitle(episode.series_id)),
-                episodeTitle: body.episodeTitle ?? episode.title ?? undefined,
-                cleanVodCrop: true,
+            return NextResponse.json({
+                success: true,
+                model: outcome.model ?? model,
+                usedAi: outcome.usedAi ?? false,
             });
-
-            const stamp = Date.now();
-            const base = episode.bunny_video_id || episode.id;
-            const uploads: Record<'landscape_16x9' | 'portrait_4x5', string> = {
-                landscape_16x9: '',
-                portrait_4x5: '',
-            };
-
-            for (const aspect of ['landscape_16x9', 'portrait_4x5'] as const) {
-                const filename = `${base}_${aspect}_${stamp}.png`;
-                const { error: upErr } = await (supabaseAdmin as any).storage
-                    .from('thumbnails')
-                    .upload(filename, variants[aspect], {
-                        contentType: 'image/png',
-                        cacheControl: '3600',
-                        upsert: true,
-                    });
-                if (upErr) {
-                    return NextResponse.json(
-                        { error: `Failed to upload ${aspect}: ${upErr.message ?? upErr}` },
-                        { status: 500 },
-                    );
-                }
-                const { data: urlData } = (supabaseAdmin as any).storage
-                    .from('thumbnails')
-                    .getPublicUrl(filename);
-                uploads[aspect] = urlData.publicUrl;
-            }
-
-            model.variants.landscape_16x9 = uploads.landscape_16x9;
-            model.variants.portrait_4x5 = uploads.portrait_4x5;
-            model.brand_version = POSTER_BRAND_VERSION;
-            model.updated_at = new Date().toISOString();
-
-            await persistModel(episodeId, model, {
-                thumbnail_custom: uploads.landscape_16x9,
-            });
-            return NextResponse.json({ success: true, model });
         }
 
         return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 });

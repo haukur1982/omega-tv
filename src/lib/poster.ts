@@ -37,15 +37,38 @@ export interface PosterVariants {
     wide_21x9?: string | null;
 }
 
+/**
+ * Set by the AI key-art pipeline (src/lib/poster-polish.ts). Records how the
+ * variants were produced so the pipeline is idempotent and auditable.
+ * `used_ai === true` means the frame was AI-upscaled/restored (fal); `false`
+ * means a Sharp-only grade (no FAL_KEY or fal failed) and is upgradable later.
+ * Absent (null) on legacy rows branded before this pipeline existed.
+ */
+export interface PosterPolish {
+    provider: string | null;       // 'fal' when AI re-polish ran
+    model: string | null;          // e.g. 'fal-ai/codeformer'
+    fidelity: number | null;       // identity-preservation weight used
+    select_method: string | null;  // 'gemini' | 'heuristic' | 'human'
+    source_w: number | null;
+    source_h: number | null;
+    output_w: number | null;
+    output_h: number | null;
+    est_cost_usd: number | null;
+    used_ai: boolean;
+    attempts: number;
+    updated_at: string | null;
+}
+
 export interface PosterModel {
     source_candidates: PosterSourceCandidate[];
     selected_source: PosterSelectedSource | null;
     variants: PosterVariants;
     brand_version: string | null;
+    polish?: PosterPolish | null;
     updated_at: string | null;
 }
 
-export const POSTER_BRAND_VERSION = 'omega-v1';
+export const POSTER_BRAND_VERSION = 'omega-v3';
 
 export function emptyPosterModel(): PosterModel {
     return {
@@ -53,6 +76,7 @@ export function emptyPosterModel(): PosterModel {
         selected_source: null,
         variants: {},
         brand_version: null,
+        polish: null,
         updated_at: null,
     };
 }
@@ -116,6 +140,25 @@ function normalizeVariants(raw: unknown): PosterVariants {
     return out;
 }
 
+function normalizePolish(raw: unknown): PosterPolish | null {
+    if (!raw || typeof raw !== 'object') return null;
+    const o = raw as Record<string, unknown>;
+    return {
+        provider: asString(o.provider),
+        model: asString(o.model),
+        fidelity: asNumber(o.fidelity),
+        select_method: asString(o.select_method),
+        source_w: asNumber(o.source_w),
+        source_h: asNumber(o.source_h),
+        output_w: asNumber(o.output_w),
+        output_h: asNumber(o.output_h),
+        est_cost_usd: asNumber(o.est_cost_usd),
+        used_ai: o.used_ai === true,
+        attempts: asNumber(o.attempts) ?? 0,
+        updated_at: asString(o.updated_at),
+    };
+}
+
 /**
  * Accepts any historical shape and returns the canonical PosterModel.
  *
@@ -160,6 +203,7 @@ export function normalizePosterModel(raw: unknown): PosterModel {
 
         model.variants = normalizeVariants(obj.variants);
         model.brand_version = asString(obj.brand_version);
+        model.polish = normalizePolish(obj.polish);
         model.updated_at = asString(obj.updated_at);
         return model;
     }
