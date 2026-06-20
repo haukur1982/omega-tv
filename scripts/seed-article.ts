@@ -11,7 +11,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-const article = {
+export const article = {
     title: 'Hvernig Guð sér þig — og hvers vegna það breytir öllu',
     slug: 'hvernig-gud-ser-thig',
     author_name: 'Omega',
@@ -145,4 +145,9 @@ async function main() {
     console.log('   View at: /greinar/hvernig-gud-ser-thig');
 }
 
-main();
+// Only insert when run directly (npx tsx scripts/seed-article.ts), not when
+// imported for its `article` body (e.g. scripts/restore-article-bodies.ts).
+import { fileURLToPath } from 'node:url';
+if (process.argv[1] && process.argv[1] === fileURLToPath(import.meta.url)) {
+    main();
+}
