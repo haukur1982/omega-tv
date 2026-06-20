@@ -86,6 +86,7 @@ export default async function Home() {
         ? latestEpisodes.slice(0, 3).map((e) => ({
             id: e.bunny_video_id,
             title: e.title,
+            description: e.description,
             speaker: e.series_title,
             durationMin: e.duration ? Math.floor(e.duration / 60).toString() : '',
             thumbnail: resolvePoster(e, 'portrait_4x5') ?? `/api/bunny/thumbnail/${e.bunny_video_id}`,
@@ -93,6 +94,7 @@ export default async function Home() {
         : MOCK_VIDEOS.map((v) => ({
             id: v.id,
             title: v.title,
+            description: null,
             speaker: v.speaker,
             durationMin: v.duration,
             thumbnail: v.thumbnail,

@@ -19,6 +19,7 @@ import ThumbnailFrame from "@/components/media/ThumbnailFrame";
 interface RailEpisode {
     id: string;
     title: string;
+    description: string | null;
     published_at: string | null;
     thumbnail_custom: string | null;
     bunny_video_id: string;
@@ -168,6 +169,23 @@ function RailCard({ ep }: { ep: RailEpisode }) {
                         >
                             {ep.title}
                         </h3>
+                        {ep.description && (
+                            <p
+                                style={{
+                                    margin: '8px 0 0',
+                                    fontFamily: 'var(--font-sans)',
+                                    fontSize: '14px',
+                                    lineHeight: 1.5,
+                                    color: 'var(--skra-mjuk)',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {ep.description}
+                            </p>
+                        )}
                         {meta && (
                             <div
                                 className="type-meta"

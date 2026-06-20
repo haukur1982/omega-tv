@@ -14,6 +14,7 @@ import ThumbnailFrame from "@/components/media/ThumbnailFrame";
 interface Episode {
     id: string;
     title: string;
+    description?: string | null;
     speaker: string;
     durationMin: string;
     thumbnail: string;
@@ -198,6 +199,23 @@ function PosterCard({ episode, register }: { episode: Episode; register: 'dark' 
                     >
                         {episode.title}
                     </h3>
+                    {episode.description && (
+                        <p
+                            style={{
+                                margin: '8px 0 0',
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '14px',
+                                lineHeight: 1.5,
+                                color: metaColor,
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            {episode.description}
+                        </p>
+                    )}
                     <div
                         className="type-meta"
                         style={{ color: metaColor, marginTop: '6px' }}

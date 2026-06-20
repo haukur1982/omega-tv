@@ -316,6 +316,23 @@ function EpisodeCard({ ep }: { ep: IsraelEpisode }) {
                             )}
                         </div>
                     </div>
+                    {ep.description && (
+                        <p
+                            style={{
+                                margin: 0,
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '14px',
+                                lineHeight: 1.55,
+                                color: 'var(--skra-mjuk)',
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            {ep.description}
+                        </p>
+                    )}
                 </article>
             </Link>
         </li>

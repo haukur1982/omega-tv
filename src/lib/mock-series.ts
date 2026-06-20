@@ -453,6 +453,7 @@ export function getMockNewestEpisodes(limit = 8) {
         .filter((s) => s.latest_episode)
         .map((s) => ({
             ...s.latest_episode!,
+            description: s.description ?? null,
             series_title: s.title,
             series_slug: s.slug,
         }))

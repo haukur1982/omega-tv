@@ -250,6 +250,7 @@ export type NewestEpisode = {
     id: string;
     bunny_video_id: string;
     title: string;
+    description: string | null;
     published_at: string | null;
     thumbnail_custom: string | null;
     duration: number | null;
@@ -282,6 +283,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
             id,
             bunny_video_id,
             title,
+            description,
             published_at,
             thumbnail_custom,
             duration,
@@ -303,6 +305,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
         id: string;
         bunny_video_id: string;
         title: string;
+        description: string | null;
         published_at: string | null;
         thumbnail_custom: string | null;
         duration: number | null;
@@ -316,6 +319,7 @@ export async function getNewestEpisodes(limit = 8): Promise<NewestEpisode[]> {
             id: r.id,
             bunny_video_id: r.bunny_video_id,
             title: r.title,
+            description: r.description,
             published_at: r.published_at,
             thumbnail_custom: r.thumbnail_custom,
             duration: r.duration,
