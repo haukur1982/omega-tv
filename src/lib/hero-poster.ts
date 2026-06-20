@@ -23,9 +23,6 @@ const FONT_FILES = [
     path.join(FONT_DIR, 'Inter.ttf'),
 ];
 
-const W = 1000;
-const H = 1500;
-
 /**
  * Color themes — so shows don't all look identical. Each is an on-brand "mood":
  * the photo always grades into a dark→colour wash at the bottom where the title
@@ -102,6 +99,14 @@ export interface HeroPosterInput {
      * on translated third-party broadcasts). 0.13 ≈ the subtitle band. Default 0.
      */
     trimBottomPct?: number;
+    /** Output width in px. Default 1000. */
+    width?: number;
+    /** Output height in px. Default 1500 (2:3). Use 1250 for a 4:5 shelf poster. */
+    height?: number;
+    /** Horizontal crop bias 0..1 (0 left, 0.5 centre, 1 right) — aim the crop at an off-centre subject. Default 0.5. */
+    focusX?: number;
+    /** Brightness multiplier for dark stage/worship footage (lifts shadows too). 1 = default grade. ~1.5 for dim services. */
+    brightnessBoost?: number;
 }
 
 function esc(s: string): string {
@@ -125,9 +130,14 @@ function titleFontSize(title: string): number {
 export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer> {
     const { sourceImage, title, tagline, host, kicker = 'OMEGA STÖÐIN' } = input;
     const theme = POSTER_THEMES[input.theme ?? themeForKey(title)] ?? POSTER_THEMES.kerti;
+    const W = input.width ?? 1000;
+    const H = input.height ?? 1500;
+    const focusX = Math.max(0, Math.min(1, input.focusX ?? 0.5));
+    const boost = Math.max(1, input.brightnessBoost ?? 1);
 
-    // 1) Photo layer: composed 2:3 crop biased to the top (head/torso in upper
-    //    two-thirds), graded cinematic with the theme's colour tint.
+    // 1) Photo layer: crop biased to the top (head/torso in the upper band) and to
+    //    focusX horizontally, graded cinematic with the theme's colour tint. For
+    //    dark worship footage, brightnessBoost lifts the figure out of the shadow.
     const up = await sharp(sourceImage).resize({ width: 2000 }).toBuffer();
     const meta = await sharp(up).metadata();
     const srcW = meta.width ?? 2000;
@@ -135,13 +145,16 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
     // Trim the bottom band (burned subtitles / promo lower-thirds) if asked.
     const trim = Math.max(0, Math.min(0.4, input.trimBottomPct ?? 0));
     const srcH = Math.round(srcHfull * (1 - trim));
-    const cropW = Math.min(srcW, Math.round(srcH * (2 / 3)));
-    const cropLeft = Math.max(0, Math.round((srcW - cropW) / 2));
+    const cropW = Math.min(srcW, Math.round(srcH * (W / H)));
+    const cropLeft = Math.max(0, Math.min(srcW - cropW, Math.round((srcW - cropW) * focusX)));
+    // When boosting dark footage, lift shadows (positive offset) instead of crushing them.
+    const linSlope = boost > 1 ? 1.04 : 1.12;
+    const linOffset = boost > 1 ? 6 * boost : -(128 * 0.12);
     const photo = await sharp(up)
         .extract({ left: cropLeft, top: 0, width: cropW, height: srcH })
         .resize(W, H, { fit: 'cover', position: 'top' })
-        .modulate({ saturation: 1.12, brightness: 1.06 })
-        .linear(1.12, -(128 * 0.12))
+        .modulate({ saturation: 1.12, brightness: 1.06 * boost })
+        .linear(linSlope, linOffset)
         .gamma(1.05)
         .tint(theme.tint)
         .toBuffer();
@@ -179,7 +192,7 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
   <g>${stars}</g>
   <rect width="${W}" height="${H}" fill="url(#topdark)"/>
   <rect width="${W}" height="${H}" fill="url(#botwarm)"/>
-  <rect x="-120" y="780" width="${W + 240}" height="${H - 500}" fill="url(#glow)"/>
+  <rect x="-120" y="${Math.round(H * 0.52)}" width="${W + 240}" height="${H - 500}" fill="url(#glow)"/>
   <rect width="${W}" height="${H}" fill="url(#edge)"/>
 
   <g transform="translate(${W / 2 - 44}, 72)">
@@ -188,10 +201,10 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
   </g>
   <text x="${W / 2}" y="218" text-anchor="middle" font-family="Inter" font-size="22" font-weight="600" letter-spacing="9" fill="#E7DECF">${esc(kicker)}</text>
 
-  <text x="${W / 2}" y="1230" text-anchor="middle" font-family="Fraunces" font-size="${tFs}" font-weight="300" letter-spacing="-2" fill="#F6F2EA">${esc(title)}</text>
-  ${tagline ? `<text x="${W / 2}" y="1292" text-anchor="middle" font-family="Newsreader" font-style="italic" font-size="35" fill="${theme.tagline}">${esc(tagline)}</text>` : ''}
-  ${host ? `<line x1="${W / 2 - 70}" y1="1340" x2="${W / 2 + 70}" y2="1340" stroke="${theme.rule}" stroke-width="2"/>
-  <text x="${W / 2}" y="1392" text-anchor="middle" font-family="Inter" font-size="25" font-weight="600" letter-spacing="5" fill="#F0E5D4">${esc(host.toUpperCase())}</text>` : ''}
+  <text x="${W / 2}" y="${H - 270}" text-anchor="middle" font-family="Fraunces" font-size="${tFs}" font-weight="300" letter-spacing="-2" fill="#F6F2EA">${esc(title)}</text>
+  ${tagline ? `<text x="${W / 2}" y="${H - 208}" text-anchor="middle" font-family="Newsreader" font-style="italic" font-size="35" fill="${theme.tagline}">${esc(tagline)}</text>` : ''}
+  ${host ? `<line x1="${W / 2 - 70}" y1="${H - 160}" x2="${W / 2 + 70}" y2="${H - 160}" stroke="${theme.rule}" stroke-width="2"/>
+  <text x="${W / 2}" y="${H - 108}" text-anchor="middle" font-family="Inter" font-size="25" font-weight="600" letter-spacing="5" fill="#F0E5D4">${esc(host.toUpperCase())}</text>` : ''}
 </svg>`;
 
     const overlayPng = new Resvg(overlay, {
