@@ -150,13 +150,14 @@ export async function generateHeroPoster(input: HeroPosterInput): Promise<Buffer
     // When boosting dark footage, lift shadows (positive offset) instead of crushing them.
     const linSlope = boost > 1 ? 1.04 : 1.12;
     const linOffset = boost > 1 ? 6 * boost : -(128 * 0.12);
+    // NOTE: no sharp.tint() — it duotones (greys) the image. Keep the photo in
+    // natural colour; the themed warm wash + glow gradients below carry the mood.
     const photo = await sharp(up)
         .extract({ left: cropLeft, top: 0, width: cropW, height: srcH })
         .resize(W, H, { fit: 'cover', position: 'top' })
-        .modulate({ saturation: 1.12, brightness: 1.06 * boost })
+        .modulate({ saturation: 1.2, brightness: 1.06 * boost })
         .linear(linSlope, linOffset)
         .gamma(1.05)
-        .tint(theme.tint)
         .toBuffer();
 
     // 2) Branded overlay (transparent where the photo should show).
