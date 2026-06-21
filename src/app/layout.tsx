@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Newsreader, Fraunces } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // UI sans — Inter for labels, kickers, meta, UI elements
@@ -74,6 +75,7 @@ export default function RootLayout({
         <main className="flex-grow">
           {children}
         </main>
+        <Analytics />
       </body>
     </html>
   );

@@ -27,6 +27,7 @@ interface Activity {
 export default function AdminDashboardPage() {
     const [stats, setStats] = useState<Stats>({ prayers: { total: 0, pending: 0 }, subscribers: 0, newsletters: 0 });
     const [activities, setActivities] = useState<Activity[]>([]);
+    const [vodViews, setVodViews] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const loadData = async () => {
@@ -39,6 +40,12 @@ export default function AdminDashboardPage() {
             // Fetch subscribers
             const subRes = await authedFetch('/api/admin/subscribers');
             const subscribers = subRes.ok ? await subRes.json() : [];
+
+            // VOD views (best-effort — full picture lives on /admin/analytics)
+            try {
+                const aRes = await authedFetch('/api/admin/analytics');
+                if (aRes.ok) { const a = await aRes.json(); setVodViews(a?.vod?.views30d ?? null); }
+            } catch { /* analytics is non-critical for the overview */ }
 
             // Calculate stats
             setStats({
@@ -111,19 +118,20 @@ export default function AdminDashboardPage() {
                     label="Áskrifendur"
                     value={stats.subscribers}
                     icon={<Users size={16} />}
-                    trend={{ value: 12, isPositive: true }}
                 />
                 <StatCard
                     label="Fréttabréf send"
                     value={stats.newsletters}
                     icon={<FileText size={16} />}
                 />
-                <StatCard
-                    label="Heimsóknir í dag"
-                    value="—"
-                    icon={<Eye size={16} />}
-                    subtitle="Tengdu Plausible"
-                />
+                <Link href="/admin/analytics" className="block">
+                    <StatCard
+                        label="VOD áhorf (30 d)"
+                        value={vodViews != null ? vodViews.toLocaleString('is-IS') : '—'}
+                        icon={<Eye size={16} />}
+                        subtitle="Sjá greiningu"
+                    />
+                </Link>
             </div>
 
             {/* Content Grid */}
@@ -137,6 +145,10 @@ export default function AdminDashboardPage() {
                 <div className="admin-card">
                     <h3 className="admin-h3 mb-4">Flýtiaðgerðir</h3>
                     <div className="space-y-2">
+                        <QuickAction
+                            href="/admin/analytics"
+                            label="Skoða greiningu"
+                        />
                         <QuickAction
                             href="/admin/prayers"
                             label="Skoða bænabeiðnir"
