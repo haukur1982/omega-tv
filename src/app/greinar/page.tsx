@@ -5,6 +5,7 @@ import LetterPlaceholder from "@/components/articles/LetterPlaceholder";
 import { type Article, readingMinutes, formatDateIs } from "@/components/articles/article-helpers";
 import { MOCK_ARTICLES } from "@/components/articles/mock-articles";
 import { getAllArticles } from "@/lib/articles-db";
+import TopicStrip from "@/components/articles/TopicStrip";
 import Link from "next/link";
 
 /**
@@ -217,6 +218,8 @@ export default async function ArticlesPage() {
                     </aside>
                 </div>
             </section>
+
+            <TopicStrip />
 
             {/* ─── Cream featured (Brennidepill) ──────────────────────── */}
             {featured && (
