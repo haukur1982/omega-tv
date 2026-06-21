@@ -14,8 +14,7 @@ const dq = (s: string | null): string =>
 
 const inserts = FAITH_SEED.map(
     (a) =>
-        `INSERT INTO articles (slug, title, category, author_name, excerpt, featured_image, content, published_at, created_at)\n` +
-        `VALUES (${dq(a.slug)}, ${dq(a.title)}, ${dq(a.category)}, ${dq(a.author_name)}, ${dq(a.excerpt)}, NULL, ${dq(a.content)}, ${dq(a.published_at)}, ${dq(a.created_at)});`,
+        `UPDATE articles SET title = ${dq(a.title)}, category = ${dq(a.category)}, author_name = ${dq(a.author_name)}, excerpt = ${dq(a.excerpt)}, content = ${dq(a.content)}, published_at = ${dq(a.published_at)} WHERE slug = ${dq(a.slug)};`,
 ).join("\n\n");
 
 console.log(inserts);

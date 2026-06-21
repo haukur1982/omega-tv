@@ -434,28 +434,13 @@ function buildFallbackDescription(input: MetadataInput, transcript: string): str
     const isEnglish = input.language === 'en';
     const themes = inferThemes(transcript, isEnglish);
 
-    if (isEnglish) {
-        return [
-            `A teaching episode from ${show} about ${themes}.`,
-            'This automatic draft description is based on the transcript and should be reviewed before publishing.',
-        ].join('\n\n');
-    }
-
-    const quote = extractReadableSentence(transcript);
-    const quoteLine = quote ? ` Úr textanum má sjá að áherslan liggur meðal annars á þetta: ${quote}` : '';
-
-    return [
-        `Þáttur úr ${show} um ${themes}.${quoteLine}`,
-        'Þetta er sjálfvirk drög að lýsingu úr transcriptinu og á að fara í ritstjórnarlega yfirferð áður en þátturinn er birtur.',
-    ].join('\n\n');
-}
-
-function extractReadableSentence(transcript: string): string {
-    const sentence = transcript
-        .split(/(?<=[.!?])\s+/)
-        .map((part) => part.trim())
-        .find((part) => part.length >= 70 && part.length <= 220);
-    return sentence ? clean(sentence, 220) : '';
+    // The fallback only runs when the LLM is unavailable. It must NEVER paste
+    // raw transcript or an internal "draft, review before publishing" note into
+    // the public description — that warning belongs in `notes` (reviewer-facing,
+    // shown in /admin/drafts). Keep this short, clean, and safe to publish as-is.
+    return isEnglish
+        ? `A teaching episode from ${show} about ${themes}.`
+        : `Þáttur úr ${show} um ${themes}.`;
 }
 
 function inferThemes(transcript: string, isEnglish: boolean): string {
