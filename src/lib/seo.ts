@@ -27,8 +27,10 @@ export const SITE = {
         "Omega is Iceland's Christian television station, broadcasting since 1992: live TV, sermons, prayer, Bible teaching and the gospel of Jesus Christ in Icelandic.",
     logo: 'https://omega.is/omega-logo.png',
     ogImage: 'https://omega.is/og-default.png',
-    /** Official Omega profiles. Fill once confirmed — wrong URLs hurt, so empty until then. */
-    sameAs: [] as string[],
+    /** Official Omega profiles. Wrong URLs hurt the entity, so only confirmed ones. */
+    sameAs: [
+        'https://www.facebook.com/Omegasjonvarp',
+    ] as string[],
     keywords: [
         'Iceland Christian Television', 'Christian TV Iceland', 'Omega', 'Omega Stöðin',
         'kristin sjónvarpsstöð', 'kristið sjónvarp', 'kristin trú', 'fagnaðarerindið',
