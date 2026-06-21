@@ -53,6 +53,13 @@ export interface AnalyticsPayload {
         prayersPending: number;
         bookSignups: number;
     };
+    web: {
+        pageviews: number;
+        visitors: number;
+        topPages: { path: string; views: number }[];
+        topArticles: { title: string; slug: string; views: number }[];
+        byDay: { date: string; views: number }[];
+    };
 }
 
 interface BunnyStats {
@@ -95,11 +102,12 @@ async function countRows(table: string, filter?: (q: CountQuery) => CountQuery):
 interface EpJoinRow { bunny_video_id: string | null; title: string; series: { title: string } | null }
 
 export async function getAnalytics(): Promise<AnalyticsPayload> {
-    const [stats, videos, epRes, recentRes] = await Promise.all([
+    const [stats, videos, epRes, recentRes, webRes] = await Promise.all([
         fetchBunnyStats(),
         getVideos(1, 100).catch(() => []),
         db.from('episodes').select('bunny_video_id, title, series:series_id ( title )'),
         db.from('episodes').select('title, created_at').order('created_at', { ascending: false }).limit(5),
+        db.rpc('web_analytics', { days: 30 }),
     ]);
     // Supabase types a to-one embed as an array, but at runtime it's an object.
     const episodes = (epRes.data ?? []) as unknown as EpJoinRow[];
@@ -156,6 +164,8 @@ export async function getAnalytics(): Promise<AnalyticsPayload> {
     const recentImports = ((recentRes.data ?? []) as { title: string; created_at: string }[])
         .map((e) => ({ title: e.title, at: e.created_at }));
 
+    const web = (webRes.data ?? {}) as Partial<AnalyticsPayload['web']>;
+
     return {
         generatedAt: new Date().toISOString(),
         vod: {
@@ -170,5 +180,12 @@ export async function getAnalytics(): Promise<AnalyticsPayload> {
         },
         content: { shows, episodesPublished, episodesDraft, recentImports },
         engagement: { subscribers, testimonials, prayersTotal, prayersPending, bookSignups },
+        web: {
+            pageviews: web.pageviews ?? 0,
+            visitors: web.visitors ?? 0,
+            topPages: web.topPages ?? [],
+            topArticles: web.topArticles ?? [],
+            byDay: web.byDay ?? [],
+        },
     };
 }

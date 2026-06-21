@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import {
     Eye, Clock, Film, Users, RefreshCw, Play, Globe,
-    Heart, MessageSquare, BookOpen, ArrowUpRight, Inbox,
+    Heart, MessageSquare, BookOpen, ArrowUpRight, Inbox, MousePointerClick, FileText,
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import StatCard from '@/components/admin/StatCard';
@@ -33,9 +33,12 @@ export default function AdminAnalyticsPage() {
     useEffect(() => { load(); }, []);
 
     const vod = data?.vod;
+    const web = data?.web;
     const maxDayViews = Math.max(1, ...(vod?.viewsByDay ?? []).map((d) => d.views));
     const maxVideoViews = Math.max(1, ...(vod?.topVideos ?? []).map((v) => v.views));
     const maxCountry = Math.max(1, ...(vod?.countries ?? []).map((c) => c.views));
+    const maxPageViews = Math.max(1, ...(web?.topPages ?? []).map((p) => p.views));
+    const maxArticleViews = Math.max(1, ...(web?.topArticles ?? []).map((a) => a.views));
 
     return (
         <AdminLayout>
@@ -163,8 +166,57 @@ export default function AdminAnalyticsPage() {
                 )}
             </div>
 
+            {/* ── Vefumferð: which pages + articles people actually visit ───── */}
+            <div className="admin-card mb-6">
+                <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+                    <div className="flex items-center gap-2">
+                        <MousePointerClick size={16} className="text-[var(--admin-accent)]" />
+                        <h3 className="admin-h3">Vefumferð</h3>
+                    </div>
+                    <div className="flex gap-8">
+                        <div>
+                            <div className="admin-stat-number">{web ? nf(web.pageviews) : '—'}</div>
+                            <div className="admin-label">Flettingar (30 d)</div>
+                        </div>
+                        <div>
+                            <div className="admin-stat-number">{web ? nf(web.visitors) : '—'}</div>
+                            <div className="admin-label">Gestir (30 d)</div>
+                        </div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div>
+                        <p className="admin-label mb-3 flex items-center gap-1.5"><Globe size={13} /> Mest skoðuðu síður</p>
+                        {web && web.topPages.length > 0 ? (
+                            <div className="space-y-2.5">
+                                {web.topPages.map((p) => (
+                                    <BarRow key={p.path} label={pageLabel(p.path)} value={p.views} max={maxPageViews} />
+                                ))}
+                            </div>
+                        ) : <EmptyNote text="Söfnun hefst um leið og fyrstu gestir koma inn." />}
+                    </div>
+                    <div>
+                        <p className="admin-label mb-3 flex items-center gap-1.5"><FileText size={13} /> Mest lesnu greinar</p>
+                        {web && web.topArticles.length > 0 ? (
+                            <div className="space-y-2.5">
+                                {web.topArticles.map((a) => (
+                                    <BarRow key={a.slug} label={a.title} value={a.views} max={maxArticleViews} />
+                                ))}
+                            </div>
+                        ) : <EmptyNote text="Engin grein lesin enn." />}
+                    </div>
+                </div>
+                <a
+                    href="https://vercel.com/haukur1982-1838s-projects/omega-tv/analytics"
+                    target="_blank" rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--admin-accent)] hover:underline mt-5"
+                >
+                    Ítarleg vefumferð og vefhraði í Vercel <ArrowUpRight size={14} />
+                </a>
+            </div>
+
             {/* ── Engagement + pipeline ───────────────────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="admin-card">
                     <h3 className="admin-h3 mb-4">Þátttaka</h3>
                     <div className="space-y-3">
@@ -191,22 +243,6 @@ export default function AdminAnalyticsPage() {
                     )}
                 </div>
 
-                {/* Web traffic lives in Vercel — be honest about where it is. */}
-                <div className="admin-card">
-                    <h3 className="admin-h3 mb-2">Vefumferð</h3>
-                    <p className="text-sm text-[var(--admin-text-secondary)] mb-4">
-                        Heimsóknir og flettingar á omega.is eru mældar með Vercel Web Analytics. Tölurnar
-                        sjást í Vercel mælaborðinu.
-                    </p>
-                    <a
-                        href="https://vercel.com/haukur1982-1838s-projects/omega-tv/analytics"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--admin-accent)] hover:underline"
-                    >
-                        Opna Vercel Analytics <ArrowUpRight size={14} />
-                    </a>
-                </div>
             </div>
 
             {data && (
@@ -231,6 +267,33 @@ function MiniStat({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function EmptyNote({ text }: { text: string }) {
     return <p className="text-sm text-[var(--admin-text-muted)] py-4">{text}</p>;
+}
+
+function BarRow({ label, value, max }: { label: string; value: number; max: number }) {
+    return (
+        <div>
+            <div className="flex items-baseline justify-between gap-3 mb-1">
+                <span className="text-sm text-[var(--admin-text)] truncate">{label}</span>
+                <span className="text-sm font-semibold text-[var(--admin-text)] shrink-0">{nf(value)}</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-[var(--admin-bg)] overflow-hidden">
+                <div className="h-full rounded-full bg-[var(--admin-accent)]" style={{ width: `${(value / max) * 100}%` }} />
+            </div>
+        </div>
+    );
+}
+
+const PAGE_LABELS: Record<string, string> = {
+    '/': 'Forsíða', '/sermons': 'Sjónvarp / VOD', '/greinar': 'Greinar', '/give': 'Styrkja',
+    '/live': 'Bein útsending', '/baenatorg': 'Bænatorg', '/vitnisburdur': 'Vitnisburðir',
+    '/frettabref': 'Fréttabréf', '/about': 'Um okkur', '/israel': 'Ísrael', '/baekur': 'Bækur',
+    '/namskeid': 'Námskeið', '/frettir': 'Fréttir', '/framtid': 'Framtíð',
+};
+function pageLabel(path: string): string {
+    if (PAGE_LABELS[path]) return PAGE_LABELS[path];
+    if (path.startsWith('/sermons/show/')) return `Þáttaröð · ${path.split('/').pop()}`;
+    if (path.startsWith('/greinar/flokkur/')) return `Flokkur · ${path.split('/').pop()}`;
+    return path;
 }
 
 const COUNTRY_NAMES: Record<string, string> = {
