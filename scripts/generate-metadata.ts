@@ -104,14 +104,14 @@ athugasemdir (// eða /* */), engin "..." — aðeins hreint, gilt JSON-hlutur.
 Lyklar og reglur fyrir hvert gildi:
 - "title": strengur. Stuttur titill á ${input.language === 'en' ? 'English' : 'íslensku'}, 3-9 orð.
 - "description": strengur. 2-3 efnisgreinar á ${input.language === 'en' ? 'English' : 'íslensku'}, kraftmikil og einlæg, ekki markaðslegt.
-- "editor_note": strengur. Ein málsgrein í fyrstu persónu, 40-70 orð, innilegt — eins og Haukur tali beint við áhorfandann.
+- "editor_note": strengur. Ein málsgrein, 40-70 orð, hlý ritstjórnarlína í nafni Omega (ritstjórnarinnar), ekki nafngreinds einstaklings. Lýstu þættinum og hvers vegna hann er þess virði að horfa. Notaðu ENGA fyrstu persónu eintölu ("ég", "mér", "mig", "minn") og engar persónulegar tilfinningar eða játningar (ekki t.d. "þetta snerti mig djúpt" eða "ég hef áhyggjur"). Ávarp í 2. persónu ("þú") er í lagi, og almennt "við/okkur" um trúsystkin er í lagi.
 - "bible_ref": strengur eða null. OSIS-snið. Dæmi: "MAT.5.3-MAT.5.10", "JHN.3.16", "PSA.23". null ef óviss.
 - "chapters": fylki af hlutum, hver með "t" (heiltala, sekúndur) og "title" (strengur). 4-8 kaflar.
 - "tags": fylki af strengjum, 2-5 stk, lágstafir, bandstrik milli orða, þematísk.
 - "notes": fylki af strengjum (má vera tómt).
 
 Innihaldsreglur:
-- Engir markaðs­frasar. Engin uppskrúfuð orð. Raunveruleg mannleg rödd.
+- Engir markaðs­frasar. Engin uppskrúfuð orð. Hlý en ópersónuleg ritstjórnarrödd Omega, ekki rödd nafngreinds einstaklings.
 - bible_ref: ef transcript nefnir ritningu beint, notaðu hana. Annars álykta varlega. Ef óviss → null.
 - tags: íslenska, ekki merkingarlaus ("vídeó", "þáttur").`;
 

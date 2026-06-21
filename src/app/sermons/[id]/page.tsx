@@ -63,7 +63,7 @@ const MOCK_SERMONS: Record<string, {
     dateDisplay: '28. MAR',
     description: 'Dr. Charles Stanley deilir kenningu sinni um hvernig við getum treyst Guði jafnvel þegar allt virðist vonlaust og vegurinn er óljós.\n\nTrúin er ekki bara hugmynd — hún er lífsreynsla sem þroskast í gegnum reynslur. Þegar við stöndum frammi fyrir áskorunum er trúin okkar prófuð, og í þeim prófum verðum við sterkari.',
     bibleRef: 'MAT.5.3-MAT.5.10',
-    editorNote: 'Þetta er þátturinn sem ég deili mest — byrjaðu hér ef þú ert nýr hjá Omega.',
+    editorNote: 'Góður staður til að byrja fyrir þá sem eru að kynnast Omega.',
     chapters: [
       { t: 0, title: 'Inngangur · Hvað er trú í raun?' },
       { t: 240, title: 'Sælir eru fátækir í anda' },
