@@ -18,7 +18,7 @@ import type { CSSProperties, ReactNode } from "react";
 export const metadata = {
     title: "Heimakirkja — Omega",
     description:
-        "Kirkjan fyrir okkur sem hættum að mæta, en ekki að trúa. Láttu sóknargjaldið þitt, sem ríkið greiðir nú þegar, byggja kristið sjónvarp á Íslandi. 0 kr. aukakostnaður.",
+        "Kirkjan heim til þjóðarinnar. Láttu sóknargjaldið þitt, sem ríkið greiðir nú þegar, byggja kristna sjónvarpsstöð, þýðingar, bækur og öpp fyrir Ísland. 0 kr. aukakostnaður.",
 };
 
 const SKRA_URL = "https://www.skra.is/umsoknir/rafraen-skil/tru-og-lifsskodunarfelag/";
@@ -78,7 +78,7 @@ export default function HeimakirkjaPage() {
                             maxWidth: "18ch",
                         }}
                     >
-                        Kirkjan fyrir okkur sem hættum að mæta, en ekki að trúa.
+                        Kirkjan heim til þjóðarinnar.
                     </h1>
                     <p
                         style={{
@@ -92,7 +92,20 @@ export default function HeimakirkjaPage() {
                             textWrap: "pretty",
                         }}
                     >
-                        Þúsundir Íslendinga hafa gengið úr þjóðkirkjunni en bera enn trú í hjarta. Heimakirkja er félagið þeirra, og um leið grunnurinn undir kristið sjónvarp á Íslandi.
+                        Omega hefur borið fagnaðarerindið inn á íslensk heimili í meira en þrjá áratugi. Nú getum við byggt næsta kafla saman.
+                    </p>
+
+                    <p
+                        style={{
+                            margin: "24px 0 0",
+                            fontFamily: "var(--font-sans)",
+                            fontSize: "clamp(15px, 1.4vw, 18px)",
+                            lineHeight: 1.6,
+                            color: "var(--steinn)",
+                            maxWidth: "40rem",
+                        }}
+                    >
+                        Með því að skrá þig í Heimakirkju lætur þú sóknargjaldið þitt renna til kristinnar sjónvarpsstöðvar, þýðinga, bóka, appa og efnis sem getur náð inn á hvert heimili á Íslandi. Það kostar þig ekkert aukalega.
                     </p>
 
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginTop: "44px" }}>
@@ -123,7 +136,7 @@ export default function HeimakirkjaPage() {
                             maxWidth: "20ch",
                         }}
                     >
-                        Þú ert nú þegar að borga. Þú færð bara að velja hvert það fer.
+                        Sóknargjaldið fer hvort eð er eitthvað. Þú færð að velja hvert.
                     </h2>
                     <p
                         style={{
@@ -183,28 +196,21 @@ export default function HeimakirkjaPage() {
                             maxWidth: "16ch",
                         }}
                     >
-                        Hugsaðu þér hvað 3.000 manns gætu byggt.
+                        Ef 3.000 manns segja já, verður það grunnur undir heila kristna fjölmiðlastöð.
                     </h2>
 
-                    <div style={{ display: "grid", gap: "clamp(40px, 6vw, 80px)", gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 0.9fr)", alignItems: "center", marginTop: "clamp(40px, 5vw, 64px)" }} className="heimakirkja-vision-grid">
-                        <div>
-                            <p style={{ margin: 0, fontFamily: "var(--font-serif)", fontSize: "clamp(18px, 1.7vw, 22px)", lineHeight: 1.6, color: "var(--moskva)" }}>
-                                Margir Íslendingar hafa kvatt þjóðkirkjuna en ekki Guð. Þeir mæta ekki á sunnudögum, en trúin lifir. Í 34 ár hefur Omega verið heimili þeirra á skjánum, allan sólarhringinn, án auglýsinga.
-                            </p>
-                            <p style={{ margin: "22px 0 0", fontFamily: "var(--font-serif)", fontSize: "clamp(18px, 1.7vw, 22px)", lineHeight: 1.6, color: "var(--moskva)" }}>
-                                Heimakirkja gerir þetta heimili að félagi sem þú tilheyrir. Sóknargjaldið þitt, sem fer hvort eð er eitthvað, verður þá grunnurinn sem heldur útsendingunni gangandi og lætur hana vaxa.
-                            </p>
-                        </div>
+                    <p style={{ margin: "clamp(28px, 4vw, 44px) 0 0", maxWidth: "46rem", fontFamily: "var(--font-serif)", fontSize: "clamp(18px, 1.8vw, 23px)", lineHeight: 1.6, color: "var(--moskva)" }}>
+                        Omega er fyrsta og eina kristna sjónvarpsstöðin á Íslandi. Heimakirkja er leiðin fyrir venjulegt fólk til að halda ljósinu logandi, koma fagnaðarerindinu inn á heimili landsins, þýða bækur, byggja öpp og skapa kristna miðlun fyrir næstu kynslóð.
+                    </p>
 
-                        <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: "clamp(28px, 4vw, 48px)" }}>
-                            <div style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(48px, 7vw, 92px)", lineHeight: 1, fontWeight: 400, color: "var(--gull)", letterSpacing: "-0.02em", fontFeatureSettings: '"lnum","tnum"' }}>
-                                44 millj.
-                            </div>
-                            <div style={{ marginTop: "16px", fontFamily: "var(--font-sans)", fontSize: "14px", lineHeight: 1.6, color: "var(--steinn)", letterSpacing: "0.02em" }}>
-                                3.000 meðlimir gefa um 44 milljónir króna á ári. Nóg til að halda úti útsendingu, húsnæði og starfi, ár eftir ár, án þess að biðja nokkurn um aukakrónu.
-                            </div>
-                        </div>
-                    </div>
+                    <ul style={{ listStyle: "none", padding: 0, margin: "clamp(40px, 5vw, 60px) 0 0", maxWidth: "52rem", borderTop: "1px solid var(--border)" }}>
+                        {["Útsendingar", "Íslenskt efni", "Þýddar bækur", "Öpp fyrir fjölskyldur", "Bæn", "Fræðsla", "Von á skjánum, allan sólarhringinn"].map((item) => (
+                            <li key={item} style={{ borderBottom: "1px solid var(--border)", padding: "16px 0", display: "flex", alignItems: "baseline", gap: "18px" }}>
+                                <span aria-hidden style={{ width: "6px", height: "6px", borderRadius: "50%", background: "var(--gull)", flex: "0 0 auto", transform: "translateY(-3px)" }} />
+                                <span style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(20px, 2.2vw, 28px)", fontWeight: 400, color: "var(--ljos)", letterSpacing: "-0.005em" }}>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
             </section>
 
@@ -317,7 +323,7 @@ export default function HeimakirkjaPage() {
                     </div>
 
                     <p style={{ margin: "32px 0 0", maxWidth: "44rem", fontFamily: "var(--font-sans)", fontSize: "13.5px", lineHeight: 1.65, color: "var(--steinn)" }}>
-                        Athugið: hver einstaklingur getur aðeins tilheyrt einu skráðu trú- eða lífsskoðunarfélagi. Skráning í Heimakirkju færir sóknargjaldið þitt þangað frá fyrri skráningu, og þú getur breytt því aftur hvenær sem er. Börn undir 16 ára fylgja sjálfkrafa skráningu foreldris.
+                        Athugið: hver einstaklingur getur aðeins tilheyrt einu skráðu trú- eða lífsskoðunarfélagi. Breytingin er gjaldfrjáls og tekur gildi samdægurs. Skráning í Heimakirkju færir sóknargjaldið þitt þangað frá fyrri skráningu, og þú getur breytt því aftur hvenær sem er. Börn 15 ára og yngri breytast ekki sjálfkrafa; til þess þarf sérstakt eyðublað fyrir börn hjá Þjóðskrá.
                     </p>
                 </div>
             </section>
@@ -333,7 +339,7 @@ export default function HeimakirkjaPage() {
                     <div>
                         {[
                             ["Kostar þetta mig eitthvað?", "Nei. Sóknargjöldin koma af sköttum sem þú borgar nú þegar. Það bætist engin króna við hjá þér."],
-                            ["Hvað með börnin mín?", "Börn undir 16 ára fylgja skráningu foreldris sjálfkrafa."],
+                            ["Hvað með börnin mín?", "Skráning barns breytist ekki sjálfkrafa þegar þú breytir þinni. Fyrir börn 15 ára og yngri þarf að fylla út sérstakt eyðublað hjá Þjóðskrá."],
                             ["Get ég breytt þessu aftur?", "Já, hvenær sem er á skra.is. Breytingin tekur gildi samstundis."],
                             ["Hvað verður um núverandi skráningu mína?", "Hver getur aðeins tilheyrt einu félagi, svo skráning í Heimakirkju kemur í stað fyrri skráningar, til dæmis í þjóðkirkjunni."],
                             ["Hvert fer stuðningurinn?", "Í rekstur Omega: útsendingu, húsnæði, starfsfólk, búnað og nýtt efni á íslensku."],
