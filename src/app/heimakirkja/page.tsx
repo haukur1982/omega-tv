@@ -44,71 +44,90 @@ export default function HeimakirkjaPage() {
         <main style={{ minHeight: "100vh", backgroundColor: "var(--nott)", color: "var(--ljos)" }}>
             <Navbar />
 
-            {/* ─── 1. Hero ─────────────────────────────────────────────── */}
+            <style>{`
+              @keyframes hkDrift {0%{transform:translate3d(0,0,0) scale(1);opacity:.7}100%{transform:translate3d(0,-4%,0) scale(1.12);opacity:1}}
+              @keyframes hkPulse {0%,100%{opacity:.25;transform:scaleY(.6)}50%{opacity:.9;transform:scaleY(1)}}
+              .hk-aurora{animation:hkDrift 16s ease-in-out infinite alternate;will-change:transform,opacity}
+              .hk-scroll{animation:hkPulse 2.6s ease-in-out infinite;transform-origin:top center}
+              @media (prefers-reduced-motion: reduce){.hk-aurora,.hk-scroll{animation:none}}
+            `}</style>
+
+            {/* ─── 1. Hero (cinematic, full viewport) ─────────────────── */}
             <section
                 style={{
                     position: "relative",
-                    background: "var(--nott)",
+                    minHeight: "100svh",
+                    display: "flex",
+                    alignItems: "center",
                     overflow: "hidden",
-                    padding: "clamp(140px, 14vw, 200px) " + railPad + " clamp(80px, 10vw, 120px)",
+                    background: "var(--nott)",
                     borderBottom: "1px solid var(--border)",
                 }}
             >
                 <div
                     aria-hidden
+                    className="hk-aurora"
                     style={{
                         position: "absolute",
-                        inset: 0,
-                        background: "radial-gradient(ellipse at 70% 25%, rgba(233,168,96,0.14) 0%, transparent 58%)",
+                        inset: "-12%",
+                        background:
+                            "radial-gradient(48% 38% at 26% 16%, rgba(126,148,196,0.13) 0%, transparent 60%), radial-gradient(55% 45% at 80% 24%, rgba(233,168,96,0.10) 0%, transparent 58%)",
                         pointerEvents: "none",
                     }}
                 />
-                <div style={{ ...shell, position: "relative" }}>
+                <div
+                    aria-hidden
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                            "radial-gradient(125% 85% at 66% 120%, rgba(233,168,96,0.32) 0%, rgba(233,168,96,0.08) 34%, transparent 60%)",
+                        pointerEvents: "none",
+                    }}
+                />
+                <div
+                    aria-hidden
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        background: "linear-gradient(180deg, var(--nott) 0%, transparent 24%, transparent 70%, var(--nott) 100%)",
+                        pointerEvents: "none",
+                    }}
+                />
+
+                <div style={{ ...shell, position: "relative", width: "100%", padding: "clamp(150px, 20vh, 230px) " + railPad + " clamp(120px, 16vh, 180px)" }}>
                     <Kicker>Heimakirkja</Kicker>
                     <h1
                         style={{
-                            margin: "26px 0 0",
+                            margin: "30px 0 0",
                             fontFamily: "var(--font-serif)",
-                            fontSize: "clamp(40px, 6vw, 82px)",
-                            lineHeight: 1.04,
+                            fontSize: "clamp(48px, 8.5vw, 116px)",
+                            lineHeight: 0.98,
                             fontWeight: 400,
                             color: "var(--ljos)",
-                            letterSpacing: "-0.01em",
+                            letterSpacing: "-0.02em",
                             textWrap: "balance",
-                            maxWidth: "18ch",
+                            maxWidth: "15ch",
                         }}
                     >
                         Kirkjan heim til þjóðarinnar.
                     </h1>
                     <p
                         style={{
-                            margin: "32px 0 0",
+                            margin: "36px 0 0",
                             fontFamily: "var(--font-serif)",
                             fontStyle: "italic",
-                            fontSize: "clamp(19px, 2vw, 25px)",
-                            lineHeight: 1.5,
+                            fontSize: "clamp(20px, 2.2vw, 29px)",
+                            lineHeight: 1.45,
                             color: "var(--moskva)",
-                            maxWidth: "40rem",
+                            maxWidth: "44rem",
                             textWrap: "pretty",
                         }}
                     >
                         Omega hefur borið fagnaðarerindið inn á íslensk heimili í meira en þrjá áratugi. Nú getum við byggt næsta kafla saman.
                     </p>
 
-                    <p
-                        style={{
-                            margin: "24px 0 0",
-                            fontFamily: "var(--font-sans)",
-                            fontSize: "clamp(15px, 1.4vw, 18px)",
-                            lineHeight: 1.6,
-                            color: "var(--steinn)",
-                            maxWidth: "40rem",
-                        }}
-                    >
-                        Með því að skrá þig í Heimakirkju lætur þú sóknargjaldið þitt renna til kristinnar sjónvarpsstöðvar, þýðinga, bóka, appa og efnis sem getur náð inn á hvert heimili á Íslandi. Það kostar þig ekkert aukalega.
-                    </p>
-
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginTop: "44px" }}>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "16px", marginTop: "48px" }}>
                         <a href={SKRA_URL} target="_blank" rel="noopener noreferrer" style={primaryBtn}>
                             Skráðu þig (0 kr.)
                         </a>
@@ -116,6 +135,25 @@ export default function HeimakirkjaPage() {
                             Sjá hvernig það virkar
                         </a>
                     </div>
+                </div>
+
+                <div
+                    aria-hidden
+                    style={{
+                        position: "absolute",
+                        bottom: "30px",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "12px",
+                    }}
+                >
+                    <span style={{ fontFamily: "var(--font-sans)", fontSize: "10px", fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--steinn)" }}>
+                        Sýnin
+                    </span>
+                    <span className="hk-scroll" style={{ width: "1px", height: "44px", background: "linear-gradient(var(--gull), transparent)", display: "block" }} />
                 </div>
             </section>
 
@@ -272,6 +310,23 @@ export default function HeimakirkjaPage() {
                 </div>
             </section>
 
+            {/* ─── 5b. The future (dark, dramatic) ────────────────────── */}
+            <section style={{ position: "relative", background: "var(--nott)", color: "var(--ljos)", overflow: "hidden", borderTop: "1px solid var(--border)" }}>
+                <div aria-hidden className="hk-aurora" style={{ position: "absolute", inset: "-10%", background: "radial-gradient(80% 60% at 50% -10%, rgba(233,168,96,0.12) 0%, transparent 55%)", pointerEvents: "none" }} />
+                <div style={{ maxWidth: "60rem", margin: "0 auto", position: "relative", padding: "clamp(100px, 13vw, 168px) " + railPad, textAlign: "center" }}>
+                    <Kicker>Framtíðin</Kicker>
+                    <h2 style={{ margin: "22px 0 0", fontFamily: "var(--font-serif)", fontSize: "clamp(34px, 5.2vw, 68px)", lineHeight: 1.05, fontWeight: 400, color: "var(--ljos)", letterSpacing: "-0.015em", textWrap: "balance" }}>
+                        Þetta er rétt að byrja.
+                    </h2>
+                    <p style={{ margin: "30px auto 0", maxWidth: "42rem", fontFamily: "var(--font-serif)", fontSize: "clamp(18px, 1.9vw, 24px)", lineHeight: 1.6, color: "var(--moskva)" }}>
+                        Ímyndaðu þér íslenskt kristið efni alla daga. Þýddar bækur og öpp fyrir hverja fjölskyldu. Barnaefni sem nær til næstu kynslóðar. Viðburði um allt land. Von á hverjum skjá, inn á hvert heimili. Ekki draumur fyrir fáa, heldur hreyfing heillar þjóðar.
+                    </p>
+                    <p style={{ margin: "34px auto 0", maxWidth: "36rem", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "clamp(20px, 2.2vw, 28px)", lineHeight: 1.35, color: "var(--gull)" }}>
+                        Og það byrjar með einu já.
+                    </p>
+                </div>
+            </section>
+
             {/* ─── 6. A word from the heart (cream) ────────────────────── */}
             <section style={{ background: "var(--skra-warm)", color: "var(--skra-djup)" }}>
                 <div style={{ maxWidth: "44rem", margin: "0 auto", padding: "clamp(80px, 10vw, 128px) " + railPad, textAlign: "center" }}>
@@ -358,16 +413,17 @@ export default function HeimakirkjaPage() {
                 </div>
             </section>
 
-            {/* ─── 9. Final CTA (dark) ─────────────────────────────────── */}
-            <section style={{ background: "var(--nott)", color: "var(--ljos)", borderTop: "1px solid var(--border)" }}>
-                <div style={{ maxWidth: "44rem", margin: "0 auto", padding: "clamp(88px, 11vw, 144px) " + railPad, textAlign: "center" }}>
-                    <h2 style={{ margin: 0, fontFamily: "var(--font-serif)", fontSize: "clamp(34px, 5vw, 64px)", lineHeight: 1.06, fontWeight: 400, color: "var(--ljos)", letterSpacing: "-0.015em", textWrap: "balance" }}>
+            {/* ─── 9. Final CTA (cinematic crescendo) ─────────────────── */}
+            <section style={{ position: "relative", background: "var(--nott)", color: "var(--ljos)", overflow: "hidden", borderTop: "1px solid var(--border)" }}>
+                <div aria-hidden className="hk-aurora" style={{ position: "absolute", inset: "-12%", background: "radial-gradient(60% 55% at 50% 125%, rgba(233,168,96,0.30) 0%, rgba(233,168,96,0.07) 38%, transparent 62%)", pointerEvents: "none" }} />
+                <div style={{ maxWidth: "48rem", margin: "0 auto", position: "relative", padding: "clamp(120px, 16vh, 200px) " + railPad, textAlign: "center" }}>
+                    <h2 style={{ margin: 0, fontFamily: "var(--font-serif)", fontSize: "clamp(40px, 7vw, 92px)", lineHeight: 1.0, fontWeight: 400, color: "var(--ljos)", letterSpacing: "-0.02em", textWrap: "balance" }}>
                         Vertu hluti af þessu.
                     </h2>
-                    <p style={{ margin: "24px 0 0", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "clamp(18px, 1.8vw, 23px)", lineHeight: 1.5, color: "var(--moskva)" }}>
-                        Það kostar þig ekkert. En það getur byggt eitthvað sem stendur.
+                    <p style={{ margin: "28px 0 0", fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: "clamp(20px, 2.1vw, 28px)", lineHeight: 1.45, color: "var(--moskva)" }}>
+                        Það kostar þig ekkert. En það getur breytt heilli þjóð.
                     </p>
-                    <div style={{ display: "flex", justifyContent: "center", marginTop: "40px" }}>
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "48px" }}>
                         <a href={SKRA_URL} target="_blank" rel="noopener noreferrer" style={primaryBtn}>
                             Skráðu þig (0 kr.)
                         </a>
