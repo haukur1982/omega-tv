@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Newsreader, Fraunces } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import PageViewTracker from "@/components/PageViewTracker";
+import JsonLd from "@/components/JsonLd";
+import { SITE, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 // UI sans — Inter for labels, kickers, meta, UI elements
@@ -34,22 +38,45 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "Omega Stöðin | Allt á einum stað",
-    template: "%s | Omega Stöðin",
+    default: "Omega — Kristin sjónvarpsstöð á Íslandi",
+    template: "%s | Omega",
   },
-  description: "Omega Stöðin — kristin fjölmiðlastöð á Íslandi síðan 1992. Bein útsending, þáttasafn, bænir, fræðsluefni og námskeið á íslensku.",
-  metadataBase: new URL("https://omega.is"),
+  description:
+    "Omega er kristin sjónvarpsstöð á Íslandi frá 1992. Bein útsending, prédikanir, þáttasafn, bænir og fagnaðarerindið um Jesú Krist. Iceland's Christian television station since 1992.",
+  metadataBase: new URL(SITE.url),
+  applicationName: "Omega",
+  keywords: [...SITE.keywords],
+  authors: [{ name: "Omega Stöðin", url: SITE.url }],
+  publisher: "Omega Stöðin",
+  category: "religion",
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "is_IS",
+    alternateLocale: "en_US",
+    url: SITE.url,
     siteName: "Omega",
-    title: "Omega Stöðin | Allt á einum stað",
-    description: "Kristin fjölmiðlastöð á Íslandi síðan 1992.",
+    title: "Omega — Kristin sjónvarpsstöð á Íslandi",
+    description:
+      "Kristin sjónvarpsstöð á Íslandi frá 1992. Bein útsending, prédikanir, bænir og fagnaðarerindið. Iceland's Christian TV.",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Omega — kristin sjónvarpsstöð á Íslandi" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Omega Stöðin | Allt á einum stað",
-    description: "Kristin fjölmiðlastöð á Íslandi síðan 1992.",
+    title: "Omega — Kristin sjónvarpsstöð á Íslandi",
+    description: "Kristin sjónvarpsstöð á Íslandi frá 1992. Iceland's Christian TV.",
+    images: ["/og-default.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   icons: {
     icon: "/favicon.ico",
@@ -71,9 +98,12 @@ export default function RootLayout({
   return (
     <html lang="is">
       <body className={`min-h-screen flex flex-col antialiased selection:bg-[var(--kerti)] selection:text-black ${inter.variable} ${newsreader.variable} ${fraunces.variable} font-sans`}>
+        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <main className="flex-grow">
           {children}
         </main>
+        <Analytics />
+        <PageViewTracker />
       </body>
     </html>
   );

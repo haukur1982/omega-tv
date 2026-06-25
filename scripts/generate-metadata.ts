@@ -104,14 +104,14 @@ athugasemdir (// eða /* */), engin "..." — aðeins hreint, gilt JSON-hlutur.
 Lyklar og reglur fyrir hvert gildi:
 - "title": strengur. Stuttur titill á ${input.language === 'en' ? 'English' : 'íslensku'}, 3-9 orð.
 - "description": strengur. 2-3 efnisgreinar á ${input.language === 'en' ? 'English' : 'íslensku'}, kraftmikil og einlæg, ekki markaðslegt.
-- "editor_note": strengur. Ein málsgrein í fyrstu persónu, 40-70 orð, innilegt — eins og Haukur tali beint við áhorfandann.
+- "editor_note": strengur. Ein málsgrein, 40-70 orð, hlý ritstjórnarlína í nafni Omega (ritstjórnarinnar), ekki nafngreinds einstaklings. Lýstu þættinum og hvers vegna hann er þess virði að horfa. Notaðu ENGA fyrstu persónu eintölu ("ég", "mér", "mig", "minn") og engar persónulegar tilfinningar eða játningar (ekki t.d. "þetta snerti mig djúpt" eða "ég hef áhyggjur"). Ávarp í 2. persónu ("þú") er í lagi, og almennt "við/okkur" um trúsystkin er í lagi.
 - "bible_ref": strengur eða null. OSIS-snið. Dæmi: "MAT.5.3-MAT.5.10", "JHN.3.16", "PSA.23". null ef óviss.
 - "chapters": fylki af hlutum, hver með "t" (heiltala, sekúndur) og "title" (strengur). 4-8 kaflar.
 - "tags": fylki af strengjum, 2-5 stk, lágstafir, bandstrik milli orða, þematísk.
 - "notes": fylki af strengjum (má vera tómt).
 
 Innihaldsreglur:
-- Engir markaðs­frasar. Engin uppskrúfuð orð. Raunveruleg mannleg rödd.
+- Engir markaðs­frasar. Engin uppskrúfuð orð. Hlý en ópersónuleg ritstjórnarrödd Omega, ekki rödd nafngreinds einstaklings.
 - bible_ref: ef transcript nefnir ritningu beint, notaðu hana. Annars álykta varlega. Ef óviss → null.
 - tags: íslenska, ekki merkingarlaus ("vídeó", "þáttur").`;
 
@@ -434,28 +434,13 @@ function buildFallbackDescription(input: MetadataInput, transcript: string): str
     const isEnglish = input.language === 'en';
     const themes = inferThemes(transcript, isEnglish);
 
-    if (isEnglish) {
-        return [
-            `A teaching episode from ${show} about ${themes}.`,
-            'This automatic draft description is based on the transcript and should be reviewed before publishing.',
-        ].join('\n\n');
-    }
-
-    const quote = extractReadableSentence(transcript);
-    const quoteLine = quote ? ` Úr textanum má sjá að áherslan liggur meðal annars á þetta: ${quote}` : '';
-
-    return [
-        `Þáttur úr ${show} um ${themes}.${quoteLine}`,
-        'Þetta er sjálfvirk drög að lýsingu úr transcriptinu og á að fara í ritstjórnarlega yfirferð áður en þátturinn er birtur.',
-    ].join('\n\n');
-}
-
-function extractReadableSentence(transcript: string): string {
-    const sentence = transcript
-        .split(/(?<=[.!?])\s+/)
-        .map((part) => part.trim())
-        .find((part) => part.length >= 70 && part.length <= 220);
-    return sentence ? clean(sentence, 220) : '';
+    // The fallback only runs when the LLM is unavailable. It must NEVER paste
+    // raw transcript or an internal "draft, review before publishing" note into
+    // the public description — that warning belongs in `notes` (reviewer-facing,
+    // shown in /admin/drafts). Keep this short, clean, and safe to publish as-is.
+    return isEnglish
+        ? `A teaching episode from ${show} about ${themes}.`
+        : `Þáttur úr ${show} um ${themes}.`;
 }
 
 function inferThemes(transcript: string, isEnglish: boolean): string {

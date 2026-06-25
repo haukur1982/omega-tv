@@ -12,6 +12,9 @@ import { getEpisodeByBunnyId, getEpisodesInSeries, getArticleByPassage, getPraye
 import { getNewestEpisodes } from "@/lib/vod-db";
 import { resolvePoster } from "@/lib/poster";
 import { getBiblePassage, displayPassageIs } from "@/lib/passages";
+import JsonLd from "@/components/JsonLd";
+import { SITE, videoJsonLd } from "@/lib/seo";
+import type { Metadata } from "next";
 
 /**
  * Sermon detail — "Horfusíða"
@@ -63,7 +66,7 @@ const MOCK_SERMONS: Record<string, {
     dateDisplay: '28. MAR',
     description: 'Dr. Charles Stanley deilir kenningu sinni um hvernig við getum treyst Guði jafnvel þegar allt virðist vonlaust og vegurinn er óljós.\n\nTrúin er ekki bara hugmynd — hún er lífsreynsla sem þroskast í gegnum reynslur. Þegar við stöndum frammi fyrir áskorunum er trúin okkar prófuð, og í þeim prófum verðum við sterkari.',
     bibleRef: 'MAT.5.3-MAT.5.10',
-    editorNote: 'Þetta er þátturinn sem ég deili mest — byrjaðu hér ef þú ert nýr hjá Omega.',
+    editorNote: 'Góður staður til að byrja fyrir þá sem eru að kynnast Omega.',
     chapters: [
       { t: 0, title: 'Inngangur · Hvað er trú í raun?' },
       { t: 240, title: 'Sælir eru fátækir í anda' },
@@ -90,6 +93,32 @@ const MOCK_SERMONS: Record<string, {
   v7: { title: 'Bænin breytir öllu', show: 'Bænakvöld', thumbnail: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=900&fit=crop', durationSec: 40 * 60, dateDisplay: '12. MAR', description: 'Bænin breytir fyrst og fremst okkur sjálfum.', bibleRef: 'JHN.3.16' },
   v8: { title: 'Friður í storminum', show: 'Í Snertingu', thumbnail: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1600&h=900&fit=crop', durationSec: 32 * 60, dateDisplay: '10. MAR', description: 'Hvernig við finnum frið í miðjum stormi lífsins.', bibleRef: 'PSA.23' },
 };
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const episode = await getEpisodeByBunnyId(id).catch(() => null);
+  const fallback = MOCK_SERMONS[id];
+  const title = episode?.title ?? fallback?.title ?? 'Þáttur';
+  const show = episode?.series?.title ?? fallback?.show ?? 'Omega';
+  const raw = episode?.description ?? fallback?.description ?? '';
+  const description = raw
+    ? raw.replace(/\s+/g, ' ').trim().slice(0, 200)
+    : `${title} — ${show} á Omega, kristin sjónvarpsstöð á Íslandi.`;
+  const image = episode?.thumbnail_custom ?? undefined;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/sermons/${id}` },
+    openGraph: {
+      type: 'video.other',
+      title,
+      description,
+      url: `${SITE.url}/sermons/${id}`,
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
+    twitter: { card: 'summary_large_image', title, description, ...(image ? { images: [image] } : {}) },
+  };
+}
 
 export default async function SermonDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -277,6 +306,17 @@ export default async function SermonDetailPage({ params }: { params: Promise<{ i
 
   return (
     <main style={{ minHeight: '100vh', background: 'var(--mold)', color: 'var(--ljos)' }}>
+      <JsonLd
+        data={videoJsonLd({
+          name: meta.title,
+          description: (description ?? `${meta.title}. ${meta.show} á Omega.`).replace(/\s+/g, ' ').trim().slice(0, 320),
+          thumbnailUrl: meta.thumbnail,
+          uploadDate: episode?.published_at ?? null,
+          durationSec,
+          embedUrl: `https://iframe.mediadelivery.net/embed/${process.env.NEXT_PUBLIC_BUNNY_LIBRARY_ID}/${id}`,
+          url: `${SITE.url}/sermons/${id}`,
+        })}
+      />
       <Navbar />
 
       {/* ═══ PLAYER ═══ */}

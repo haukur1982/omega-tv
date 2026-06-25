@@ -24,6 +24,7 @@ import {
     Quote,
     Activity,
     BookOpen,
+    BarChart3,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OmegaMark } from '@/components/brand/OmegaMark';
@@ -52,6 +53,7 @@ const navGroups: {
         title: null,
         items: [
             { href: '/admin/dashboard', label: 'Yfirlit', icon: LayoutDashboard },
+            { href: '/admin/analytics', label: 'Greining', icon: BarChart3 },
         ],
     },
     {
