@@ -101,8 +101,8 @@ export const HTML = `<main id="hk-root" style="min-height: 100vh; background: va
   <section data-screen-label="Hero" style="position: relative; min-height: 100svh; display: flex; align-items: center; overflow: hidden; background: var(--nott); border-bottom: 1px solid var(--border);">
     <image-slot id="hk-hero" fit="cover" placeholder="Hetjumynd · íslensk dögun eða ljós inn á heimili (slepptu mynd hér)" style="position: absolute; inset: 0px; width: 100%; height: 100%; display: block; border-radius: 0px;"></image-slot>
 
-    <div aria-hidden="true" style="position: absolute; inset: 0px; pointer-events: none; background: linear-gradient(180deg, rgba(20,18,15,0.55) 0%, rgba(20,18,15,0) 24%, rgba(20,18,15,0) 50%, var(--nott) 100%);"></div>
-    <div aria-hidden="true" style="position: absolute; inset: 0px; pointer-events: none; background: linear-gradient(90deg, rgba(20, 18, 15, 0.62) 0%, rgba(20, 18, 15, 0.12) 46%, transparent 72%);"></div>
+    <div aria-hidden="true" style="position: absolute; inset: 0px; pointer-events: none; background: linear-gradient(180deg, rgba(20,18,15,0.66) 0%, rgba(20,18,15,0.18) 26%, rgba(20,18,15,0.18) 46%, var(--nott) 100%);"></div>
+    <div aria-hidden="true" style="position: absolute; inset: 0px; pointer-events: none; background: linear-gradient(90deg, rgba(20,18,15,0.90) 0%, rgba(20,18,15,0.74) 30%, rgba(20,18,15,0.42) 54%, rgba(20,18,15,0) 80%);"></div>
 
     <div style="position: relative; width: 100%; max-width: 72rem; margin: 0px auto; padding: clamp(150px,20vh,232px) var(--rail-padding) clamp(120px,16vh,180px); pointer-events: none;">
       <div style="font-family: var(--font-sans); font-size: 11px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: var(--nordurljos);">Heimakirkja</div>
