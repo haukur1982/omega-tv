@@ -39,19 +39,40 @@ body{margin:0;background:var(--nott)}
 .scp2{transition:border-color .25s ease, background .25s ease}
 .scp2:hover{border-color:var(--ljos)}
 
-/* Cinematic fallback until real media is dropped into the slots:
-   a warm Icelandic-dawn glow instead of flat black. */
-#hk-hero{background:
-  radial-gradient(90% 70% at 76% 18%, rgba(228,178,110,0.20), transparent 58%),
-  radial-gradient(120% 90% at 18% 108%, rgba(120,150,170,0.16), transparent 60%),
-  var(--nott)}
-#hk-moment{background:
-  radial-gradient(80% 70% at 50% 120%, rgba(214,158,92,0.22), transparent 62%),
-  var(--nott)}
-#hk-final{background:
-  radial-gradient(100% 80% at 50% 8%, rgba(228,182,118,0.20), transparent 60%),
-  radial-gradient(80% 60% at 50% 116%, rgba(150,176,196,0.12), transparent 64%),
-  var(--nott)}
+/* Real media. Each photo layers over the warm dawn-glow fallback (shown only
+   if the file is missing) over a solid night base, so the page never drops to
+   flat black. Slow ken-burns drift gives it cinematic life; off for
+   reduced-motion. Files live in public/heimakirkja/. */
+#hk-hero,#hk-moment,#hk-final{background-repeat:no-repeat}
+#hk-hero{
+  background-image:
+    url('/heimakirkja/hero.jpg'),
+    radial-gradient(90% 70% at 76% 18%, rgba(228,178,110,0.20), transparent 58%),
+    radial-gradient(120% 90% at 18% 108%, rgba(120,150,170,0.16), transparent 60%),
+    linear-gradient(var(--nott),var(--nott));
+  background-size:cover,cover,cover,cover;
+  background-position:center 58%, center, center, center;
+  animation:hkKen 26s ease-in-out infinite alternate;
+}
+#hk-moment{
+  background-image:
+    url('/heimakirkja/homes.jpg'),
+    radial-gradient(80% 70% at 50% 120%, rgba(214,158,92,0.22), transparent 62%),
+    linear-gradient(var(--nott),var(--nott));
+  background-size:cover,cover,cover;
+  background-position:center, center, center;
+  animation:hkKen 32s ease-in-out infinite alternate;
+}
+#hk-final{
+  background-image:
+    url('/heimakirkja/hero.jpg'),
+    radial-gradient(100% 80% at 50% 8%, rgba(228,182,118,0.20), transparent 60%),
+    linear-gradient(var(--nott),var(--nott));
+  background-size:cover,cover,cover;
+  background-position:center 50%, center, center;
+}
+@keyframes hkKen{from{transform:scale(1.03)}to{transform:scale(1.11)}}
+@media (prefers-reduced-motion:reduce){#hk-hero,#hk-moment,#hk-final{animation:none}}
 
 @media (max-width:760px){
   .hk-nav-links{display:none!important}
