@@ -11,16 +11,15 @@ import { HkNavScroll } from "./HkNavScroll";
  * and footer, so the page renders without the global Navbar/Footer. Markup and
  * page-specific CSS live in ./_design.
  *
- * Route is live but deliberately unlinked and kept out of search until launch.
- * Real hero/section media still to come (the image-slots fall back to a warm
- * dawn glow until then). Registration: Þjóðskrá (skra.is).
+ * Route is public but deliberately unlinked: not in the nav or the sitemap,
+ * so it is shared by direct URL only. Hero/middle/closing carry real photos
+ * (public/heimakirkja/) over a dawn-glow fallback. Registration: Þjóðskrá (skra.is).
  */
 
 export const metadata = {
     title: "Heimakirkja — Omega",
     description:
         "Kirkjan heim til þjóðarinnar. Láttu sóknargjaldið þitt, sem ríkið greiðir nú þegar, byggja kristna sjónvarpsstöð, þýðingar, bækur og öpp fyrir Ísland. 0 kr. aukakostnaður.",
-    robots: { index: false, follow: false },
 };
 
 export default function HeimakirkjaPage() {
