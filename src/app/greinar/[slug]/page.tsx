@@ -7,6 +7,9 @@ import { MOCK_ARTICLES } from "@/components/articles/mock-articles";
 import { getArticleBySlug, getAllArticles } from "@/lib/articles-db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import JsonLd from "@/components/JsonLd";
+import { SITE, articleJsonLd } from "@/lib/seo";
+import type { Metadata } from "next";
 
 /**
  * /greinar/[slug] — article detail.
@@ -23,6 +26,32 @@ export async function generateStaticParams() {
 
 interface PageProps {
     params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { slug } = await params;
+    const real = await getArticleBySlug(slug).catch(() => null);
+    const article = real ?? MOCK_ARTICLES.find((a) => a.slug === slug) ?? null;
+    if (!article) return { title: 'Grein' };
+    const description =
+        (article.excerpt || article.content || '')
+            .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200)
+        || `${article.title} — grein á Omega, kristin sjónvarpsstöð á Íslandi.`;
+    const image = article.featured_image ?? undefined;
+    return {
+        title: article.title,
+        description,
+        alternates: { canonical: `/greinar/${slug}` },
+        openGraph: {
+            type: 'article',
+            title: article.title,
+            description,
+            url: `${SITE.url}/greinar/${slug}`,
+            ...(article.published_at ? { publishedTime: article.published_at } : {}),
+            ...(image ? { images: [{ url: image }] } : {}),
+        },
+        twitter: { card: 'summary_large_image', title: article.title, description, ...(image ? { images: [image] } : {}) },
+    };
 }
 
 export default async function ArticleDetailPage({ params }: PageProps) {
@@ -43,6 +72,16 @@ export default async function ArticleDetailPage({ params }: PageProps) {
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
+            <JsonLd
+                data={articleJsonLd({
+                    title: article.title,
+                    description: (article.excerpt || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300) || undefined,
+                    image: article.featured_image ?? undefined,
+                    datePublished: article.published_at ?? undefined,
+                    authorName: article.author_name ?? undefined,
+                    url: `${SITE.url}/greinar/${slug}`,
+                })}
+            />
             <Navbar />
 
             <section
