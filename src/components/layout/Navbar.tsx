@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { OmegaMark } from '@/components/brand/OmegaMark';
+import { OmegaWordmark } from '@/components/brand/OmegaWordmark';
 
 /* ════════════════════════════════════════════════════════════════
    Omega Navbar — editorial, transparent-over-hero.
@@ -125,22 +125,13 @@ export default function Navbar() {
                         href="/"
                         aria-label="Omega — heim"
                         style={{
-                            display: 'flex',
-                            alignItems: 'baseline',
-                            gap: '10px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
                             textDecoration: 'none',
                             color: 'var(--ljos)',
                         }}
                     >
-                        <span style={{ color: 'var(--ljos)', display: 'inline-flex' }}>
-                            <OmegaMark size={28} title="Omega" />
-                        </span>
-                        <span
-                            className="type-merki"
-                            style={{ color: 'var(--moskva)', letterSpacing: '0.22em', fontSize: '11px' }}
-                        >
-                            Omega
-                        </span>
+                        <OmegaWordmark height={26} uid="nav" />
                     </Link>
 
                     {/* ── Desktop nav ───────────────────────────────────── */}
@@ -276,14 +267,9 @@ export default function Navbar() {
                             <Link
                                 href="/"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                style={{ display: 'flex', alignItems: 'baseline', gap: '10px', textDecoration: 'none' }}
+                                style={{ display: 'inline-flex', alignItems: 'center', textDecoration: 'none', color: 'var(--ljos)' }}
                             >
-                                <span style={{ color: 'var(--ljos)', display: 'inline-flex' }}>
-                                    <OmegaMark size={32} title="Omega" />
-                                </span>
-                                <span className="type-merki" style={{ color: 'var(--moskva)', letterSpacing: '0.22em', fontSize: '11px' }}>
-                                    Omega
-                                </span>
+                                <OmegaWordmark height={30} uid="mobile" />
                             </Link>
                             <button
                                 onClick={() => setIsMobileMenuOpen(false)}
