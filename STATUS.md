@@ -1,8 +1,53 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-06-12 (Antigravity — Icelandic language audit)
-**Last Agent:** Antigravity (Gemini)
-**Branch:** `main` (omega-tv)
+**Last Updated:** 2026-06-25 (Claude Opus — three-moves strategy + plan docs)
+**Last Agent:** Claude Opus
+**Branch:** `feat/faith-library-articles` (omega-tv)
+
+---
+
+## Session — 2026-06-25 (Claude Opus — strategy: from broadcast to home; three build-ready plans)
+
+Hawk opened a vision conversation: he does not want Omega to "just be a website," he wants the place the whole NATION returns to, every generation. He explicitly retired the 60-75-only / iPad framing (see memory `project_omega_audience`). No code changed; the deliverable is strategy + plans.
+
+**Diagnosis** (from a 14-surface walk-through + live prod analytics): a beautiful broadcast, but every surface forgets the visitor (no public identity layer anywhere). Live analytics pulled 2026-06-25 (site 4 days old): ~300 pageviews, a big share internal, real IS traffic a few dozen people; `/live` is the #2 page (the watch instinct transfers); 18 Google referrers and ZERO social; 1 subscriber, 0 prayers. The fire hose (cable, biggest in Iceland) is not pointed at the cup (web).
+
+**Strategy = three moves, in order:** BRIDGE (cable->web + email capture, fastest ROI), RETAIN (the prayer that comes back answered + daily word + weekly letter), REACH (clips + social for off-cable generations, with a Claude Design handoff). Built via deep multi-agent planning with an adversarial review pass.
+
+**Shipped to the repo:** `docs/plans/00-omega-three-moves.md` (overview, foundations, decisions index), `01-bridge.md`, `02-retain.md`, `03-reach.md`. Each has the experience end to end, architecture with concrete file paths, data changes, a phased build with a small first slice, guardrails (cost + privacy + reverence), risks, and the decisions only Hawk can make.
+
+**Two live bugs the review surfaced (fix in Phase 0, before any email/prayer capture):**
+- `src/lib/prayer-db.ts` getPrayers/getAllPrayers use `select('*')` and map `row.email` into the public Prayer payload (verified: `select('*')` at lines 62/77, `email: row.email` at line 32). Latent today (0 prayers) but a real sensitive-data exposure the moment a prayer with an email is approved. Fix: public column allow-list + confirm RLS.
+- `src/app/api/subscribers/verify/route.ts` redirects unknown/expired tokens to `verified=1` (fake success). Fix before any double opt-in.
+
+**Foundations all three moves need first:** a real `/personuverndarstefna` page (footer currently dead-ends to `/about`), consent logging on subscribers, a VERIFIED Resend sending domain (today it is the sandbox `onboarding@resend.dev`, which cannot reach real inboxes), passwordless magic-link (already wired for admin).
+
+**Waiting on Hawk (hard inputs, not design choices):** Omega's registered legal entity name + Reykjavík postal address (privacy page + every email footer); confirm `omega.is/tv` as the on-air destination; confirm sender addresses (`postur@` general, `baen@` sacred). Then: which move to build first. Recommended order Bridge -> Retain -> Reach; the answered-prayer note inside Retain is the most sacred single artifact and is self-contained.
+
+### Built this session — Phase 0 foundations started (verified locally, NOT deployed)
+- **New `/personuverndarstefna` page** (`src/app/personuverndarstefna/page.tsx`): real GDPR privacy policy, data controller = Omega Kristniboðskirkja, kt 630890-1019, Ármúla 15, 108 Reykjavík (confirmed by Hawk + Fyrirtækjaskrá; see memory `reference_omega_legal_entity`). Footer `Persónuverndarstefna` link repointed from `/about` to `/personuverndarstefna`.
+- **Fixed the prayer email leak:** `src/lib/prayer-db.ts` getPrayers now selects an explicit `PUBLIC_PRAYER_COLUMNS` allow-list (no email); `mapPrayer` no longer maps email; admin `getAllPrayers` re-adds it. Verified no other public path exposes prayer email (broadcast/sanctuary flow never reads email).
+- **Fixed the verify route:** unknown/expired token now redirects to `?verified=expired` (was fake `verified=1`); token kept on the row so double-clicks resolve via `verified_at`.
+- **Verified:** tsc clean; `/personuverndarstefna` renders on-brand with a clean console; `/baenatorg` still renders; no server or client errors.
+- **Open / not done:** retention periods on the privacy page (18 mánuðir / 6 mánuðir eftir svar) are the recommended defaults — Hawk to confirm before prod. `Skilmálar` footer link still points to `/about` (no terms page yet; small follow-up). Sender addresses (`postur@`/`baen@`) still to confirm. NOT committed, NOT deployed (prod gated; awaiting Hawk's go).
+
+---
+
+## Session — 2026-06-24 (Codex — `/heimakirkja` effectiveness/copy/layout review)
+
+Hawk asked for a judgment pass on `localhost:3010/heimakirkja`. No page code was changed.
+
+### Findings
+- **Overall:** strong concept and conversion angle. The core hook works: people who left church but not faith can redirect an existing public payment to build Omega.
+- **Copy:** headline is strong. Main weakness is trust/proof: the page says the right things but could use one concrete Omega proof point earlier. Avoid clumsy headline inclusivity like `komin/n`; rewrite that line naturally.
+- **Desktop layout:** polished and on-brand, but the hero fills the first viewport without a hint of the next section. The benefits grid leaves one orphan card, making the offer feel thinner than it is.
+- **Mobile layout:** hero and benefit cards hold up well. Two inline grids do not collapse: the 3,000/44 million vision grid and the stewardship rows become cramped two-column strips on phone. Fix before launch.
+- **Fact check:** Þjóðskrá page confirms the registration is free, same-day, one active registration only, and handles children separately. Still verify the `1.221 kr.` 2026 amount before publishing.
+
+### Next
+- Add mobile CSS for `.heimakirkja-vision-grid` and `.heimakirkja-build-row` to collapse to one column under ~900px.
+- Consider adding a human proof block near the top: one sentence about 34 years on air plus one concrete line about what Omega already reaches today.
+- Tighten the CTA copy and change `Þrjár mínútur og þú ert komin/n í hús.` to a cleaner Icelandic line.
 
 ---
 

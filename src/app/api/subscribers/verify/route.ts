@@ -5,13 +5,16 @@ import { supabaseAdmin } from '@/lib/supabase';
  * GET /api/subscribers/verify?token=<uuid>
  *
  * Confirms a subscriber's email by matching the verification_token from
- * the verification email. On success: sets verified_at + clears the
- * token (single-use). Redirects to a friendly /frettabref?verified=1
- * page so the user lands on real content, not a JSON blob.
+ * the verification email. On success: sets verified_at + is_verified.
  *
- * Idempotent: hitting an already-verified token returns the same
- * success redirect rather than an error, so users who click twice
- * don't see "Villa".
+ * Idempotent via verified_at: the token is intentionally NOT cleared, so a
+ * second click finds the row, sees verified_at set, and shows the same
+ * success rather than looking "unknown".
+ *
+ * Honesty rule: an unknown/expired token must NOT be treated as success.
+ * Telling someone "staðfest" while they sit unverified is a silent broken
+ * promise. Unknown tokens go to ?verified=expired so they can request a
+ * fresh link.
  */
 export async function GET(req: NextRequest) {
     const token = req.nextUrl.searchParams.get('token');
@@ -35,9 +38,10 @@ export async function GET(req: NextRequest) {
     }
 
     if (!sub) {
-        // Token unknown OR already used (we clear it on success).
-        // Treat as success — user clicked the link, that's the intent.
-        return NextResponse.redirect(new URL('/frettabref?verified=1', req.url));
+        // Unknown or expired token. Do NOT claim success — that would tell
+        // someone "staðfest" while they remain unverified. Send them to a
+        // state that offers a fresh link.
+        return NextResponse.redirect(new URL('/frettabref?verified=expired', req.url));
     }
 
     if (sub.verified_at) {
@@ -50,7 +54,8 @@ export async function GET(req: NextRequest) {
         .update({
             verified_at: new Date().toISOString(),
             is_verified: true,
-            verification_token: null,
+            // Token kept on purpose: a second click resolves via verified_at
+            // (already-confirmed) instead of looking like an unknown token.
         })
         .eq('id', sub.id);
 

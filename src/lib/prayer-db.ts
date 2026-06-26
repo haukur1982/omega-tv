@@ -25,11 +25,18 @@ export interface PrayerCampaign {
     createdAt: string;
 }
 
+// Columns safe to expose on the PUBLIC prayer wall. Deliberately excludes
+// `email` (and any future consent columns): the public Bænatorg payload must
+// never carry a submitter's email. Admin reads (getAllPrayers) add it back.
+const PUBLIC_PRAYER_COLUMNS =
+    'id, name, topic, content, category_type, created_at, pray_count, is_answered, is_approved';
+
+// Public-safe mapper: NO email. Admin/owner code that needs the email adds it
+// explicitly after calling this.
 function mapPrayer(row: any): Prayer {
     return {
         id: row.id,
         name: row.name,
-        email: row.email,
         topic: row.topic,
         content: row.content,
         categoryType: row.category_type || 'personal',
@@ -59,7 +66,7 @@ function mapCampaign(row: any): PrayerCampaign {
 export async function getPrayers(filters?: { topic?: string; categoryType?: string }): Promise<Prayer[]> {
     let query = supabase
         .from('prayers')
-        .select('*')
+        .select(PUBLIC_PRAYER_COLUMNS)
         .eq('is_approved', true)
         .order('created_at', { ascending: false });
 
@@ -72,12 +79,14 @@ export async function getPrayers(filters?: { topic?: string; categoryType?: stri
 }
 
 export async function getAllPrayers(): Promise<Prayer[]> {
+    // Admin-only (service role, behind admin auth) — the moderation view needs
+    // the submitter's email, so add it back on top of the public-safe mapper.
     const { data, error } = await supabaseAdmin
         .from('prayers')
         .select('*')
         .order('created_at', { ascending: false });
     if (error) { console.error("Failed to fetch all prayers:", error); return []; }
-    return (data || []).map(mapPrayer);
+    return (data || []).map((row: any) => ({ ...mapPrayer(row), email: row.email }));
 }
 
 export async function addPrayer(prayer: {

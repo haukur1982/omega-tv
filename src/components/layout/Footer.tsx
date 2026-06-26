@@ -192,7 +192,7 @@ export default function Footer() {
           </p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <Link
-              href="/about"
+              href="/personuverndarstefna"
               style={{
                 color: 'var(--text-muted)',
                 fontSize: '0.7rem',
