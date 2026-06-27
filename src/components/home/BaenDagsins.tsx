@@ -16,19 +16,31 @@ import Link from "next/link";
  * TODO: wire to a `featured_prayers` table so this rotates daily.
  */
 
-interface Props {
-    register?: 'dark' | 'cream';
+export interface DailyPrayer {
+    date: string;
+    body: string;
+    scripture: string | null;
+    author: string;
 }
 
-const TODAY_PRAYER = {
-    date: '24. apríl 2026',
-    body: 'Drottinn, kenn mér að þekkja rödd þína í dag — í hávaðanum, í önnunum, í smæstu stundum. Lát mig ekki flýta mér fram úr þér, heldur ganga við hlið þér.',
-    scripture: 'Sálmur 95:7–8',
+interface Props {
+    register?: 'dark' | 'cream';
+    /** Today's prayer from featured_prayers. Falls back to the constant below. */
+    prayer?: DailyPrayer;
+}
+
+// Fallback only — used if featured_prayers is empty/unreachable so the slot
+// never renders blank. The live prayer comes from the `prayer` prop.
+const TODAY_PRAYER: DailyPrayer = {
+    date: '',
+    body: 'Drottinn, kenn mér að þekkja rödd þína í dag, í hávaðanum og í kyrrðinni. Lát mig ekki flýta mér fram úr þér, heldur ganga við hlið þér.',
+    scripture: 'Sálmur 95:7-8',
     author: 'borið fram af Omega',
 };
 
-export default function BaenDagsins({ register = 'dark' }: Props) {
+export default function BaenDagsins({ register = 'dark', prayer }: Props) {
     const isCream = register === 'cream';
+    const p = prayer ?? TODAY_PRAYER;
 
     const tokens = isCream
         ? {
@@ -58,8 +70,8 @@ export default function BaenDagsins({ register = 'dark' }: Props) {
             divider: 'var(--border)',
         };
 
-    const firstLetter = TODAY_PRAYER.body.charAt(0);
-    const restOfBody = TODAY_PRAYER.body.slice(1);
+    const firstLetter = p.body.charAt(0);
+    const restOfBody = p.body.slice(1);
 
     return (
         <section
@@ -110,10 +122,14 @@ export default function BaenDagsins({ register = 'dark' }: Props) {
                     }}
                 >
                     Bæn dagsins
-                    <span style={{ color: tokens.metaSecondaryColor, opacity: 0.6, padding: '0 10px' }}>·</span>
-                    <span style={{ color: tokens.metaSecondaryColor, fontWeight: 600 }}>
-                        {TODAY_PRAYER.date}
-                    </span>
+                    {p.date && (
+                        <>
+                            <span style={{ color: tokens.metaSecondaryColor, opacity: 0.6, padding: '0 10px' }}>·</span>
+                            <span style={{ color: tokens.metaSecondaryColor, fontWeight: 600 }}>
+                                {p.date}
+                            </span>
+                        </>
+                    )}
                 </div>
 
                 {/* The prayer body — italic, centered, integrated drop cap.
@@ -181,10 +197,14 @@ export default function BaenDagsins({ register = 'dark' }: Props) {
                         justifyContent: 'center',
                     }}
                 >
-                    <span style={{ color: tokens.scriptureColor, fontWeight: 700 }}>
-                        {TODAY_PRAYER.scripture}
-                    </span>
-                    <span style={{ opacity: 0.5 }}>·</span>
+                    {p.scripture && (
+                        <>
+                            <span style={{ color: tokens.scriptureColor, fontWeight: 700 }}>
+                                {p.scripture}
+                            </span>
+                            <span style={{ opacity: 0.5 }}>·</span>
+                        </>
+                    )}
                     <span
                         style={{
                             fontFamily: 'var(--font-serif)',
@@ -196,7 +216,7 @@ export default function BaenDagsins({ register = 'dark' }: Props) {
                             fontWeight: 400,
                         }}
                     >
-                        {TODAY_PRAYER.author}
+                        {p.author}
                     </span>
                 </div>
 

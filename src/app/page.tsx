@@ -13,6 +13,7 @@ import Legacy34Years from "@/components/home/Legacy34Years";
 import FeaturedSunday from "@/components/sermon/FeaturedSunday";
 import { getAllArticles } from "@/lib/articles-db";
 import { getRecentBroadcastPrayers } from "@/lib/sanctuary-db";
+import { getFeaturedPrayer } from "@/lib/featured-prayer-db";
 import { getLatestEpisodeBySeriesSlug, getNewestEpisodes } from "@/lib/vod-db";
 import { resolvePoster } from "@/lib/poster";
 import { MOCK_SUNDAY_FEATURED } from "@/lib/mock-series";
@@ -63,13 +64,14 @@ type LatestArticle = {
 
 export default async function Home() {
     // Parallel data fetch
-    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal] = await Promise.all([
+    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal, dailyPrayer] = await Promise.all([
         getNewestEpisodes(3).catch(() => []),
         getAllArticles().catch(() => [] as LatestArticle[]),
         getRecentBroadcastPrayers(7).catch(() => []),
         getLatestEpisodeBySeriesSlug('sunnudagssamkoma').catch(() => null),
         // No real Sunday service yet → feature Omega's own flagship teaching.
         getLatestEpisodeBySeriesSlug('vonarljos').catch(() => null),
+        getFeaturedPrayer().catch(() => null),
     ]);
 
     // Prefer a real Sunnudagssamkoma; else feature the real Vonarljós teaching;
@@ -128,7 +130,7 @@ export default async function Home() {
                 ctaAccent="ghost"
             />
             <UrDagskranni episodes={episodes} register="cream" />
-            <BaenDagsins register="cream" />
+            <BaenDagsins register="cream" prayer={dailyPrayer ?? undefined} />
             {leadArticle && <PullQuote article={leadArticle} register="pergament" />}
 
             {/* ─── Dark closing anchor ─────────────────────────────── */}
