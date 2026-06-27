@@ -60,6 +60,12 @@ export interface AnalyticsPayload {
         topArticles: { title: string; slug: string; views: number }[];
         byDay: { date: string; views: number }[];
     };
+    bridge: {
+        tvViews30d: number;
+        tvVisitors30d: number;
+        sources: { source: string; views: number }[];
+        tvSubscribers: number;
+    };
 }
 
 interface BunnyStats {
@@ -166,6 +172,27 @@ export async function getAnalytics(): Promise<AnalyticsPayload> {
 
     const web = (webRes.data ?? {}) as Partial<AnalyticsPayload['web']>;
 
+    // ── Bridge (cable → web): /tv arrivals, on-air source split, captures ──
+    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const [tvRowsRes, tvSubsRes] = await Promise.all([
+        db.from('page_views').select('source, visitor_hash').eq('path', '/tv').gte('created_at', since30),
+        db.from('subscribers').select('*', { count: 'exact', head: true }).contains('segments', ['tv']),
+    ]);
+    const tvRows = (tvRowsRes.data ?? []) as { source: string | null; visitor_hash: string | null }[];
+    const tvSourceMap = new Map<string, number>();
+    for (const r of tvRows) {
+        const key = r.source || 'beint';
+        tvSourceMap.set(key, (tvSourceMap.get(key) ?? 0) + 1);
+    }
+    const bridge: AnalyticsPayload['bridge'] = {
+        tvViews30d: tvRows.length,
+        tvVisitors30d: new Set(tvRows.map((r) => r.visitor_hash).filter(Boolean)).size,
+        sources: [...tvSourceMap.entries()]
+            .map(([source, views]) => ({ source, views }))
+            .sort((a, b) => b.views - a.views),
+        tvSubscribers: tvSubsRes.count ?? 0,
+    };
+
     return {
         generatedAt: new Date().toISOString(),
         vod: {
@@ -187,5 +214,6 @@ export async function getAnalytics(): Promise<AnalyticsPayload> {
             topArticles: web.topArticles ?? [],
             byDay: web.byDay ?? [],
         },
+        bridge,
     };
 }

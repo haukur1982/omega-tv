@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import {
     Eye, Clock, Film, Users, RefreshCw, Play, Globe,
-    Heart, MessageSquare, BookOpen, ArrowUpRight, Inbox, MousePointerClick, FileText,
+    Heart, MessageSquare, BookOpen, ArrowUpRight, Inbox, MousePointerClick, FileText, Tv,
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import StatCard from '@/components/admin/StatCard';
@@ -39,6 +39,7 @@ export default function AdminAnalyticsPage() {
     const maxCountry = Math.max(1, ...(vod?.countries ?? []).map((c) => c.views));
     const maxPageViews = Math.max(1, ...(web?.topPages ?? []).map((p) => p.views));
     const maxArticleViews = Math.max(1, ...(web?.topArticles ?? []).map((a) => a.views));
+    const maxBridgeSource = Math.max(1, ...(data?.bridge.sources ?? []).map((s) => s.views));
 
     return (
         <AdminLayout>
@@ -215,6 +216,38 @@ export default function AdminAnalyticsPage() {
                 </a>
             </div>
 
+            {/* ── Brúin: sjónvarp → vefur ── */}
+            <div className="admin-card mb-6">
+                <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+                    <div className="flex items-center gap-2">
+                        <Tv size={16} className="text-[var(--admin-accent)]" />
+                        <h3 className="admin-h3">Brúin · sjónvarp → vefur</h3>
+                    </div>
+                    <div className="flex gap-8">
+                        <div>
+                            <div className="admin-stat-number">{data ? nf(data.bridge.tvViews30d) : '—'}</div>
+                            <div className="admin-label">/tv heimsóknir (30 d)</div>
+                        </div>
+                        <div>
+                            <div className="admin-stat-number">{data ? nf(data.bridge.tvSubscribers) : '—'}</div>
+                            <div className="admin-label">Skráð af /tv</div>
+                        </div>
+                    </div>
+                </div>
+                <p className="admin-label mb-3">Hvaðan þau komu (kóði í útsendingu)</p>
+                {data && data.bridge.sources.length > 0 ? (
+                    <div className="space-y-2.5">
+                        {data.bridge.sources.map((s) => (
+                            <BarRow key={s.source} label={sourceLabel(s.source)} value={s.views} max={maxBridgeSource} />
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-[var(--admin-text-muted)] py-2">
+                        Söfnun hefst þegar fólk kemur inn um omega.is/tv.
+                    </p>
+                )}
+            </div>
+
             {/* ── Engagement + pipeline ───────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="admin-card">
@@ -294,6 +327,15 @@ function pageLabel(path: string): string {
     if (path.startsWith('/sermons/show/')) return `Þáttaröð · ${path.split('/').pop()}`;
     if (path.startsWith('/greinar/flokkur/')) return `Flokkur · ${path.split('/').pop()}`;
     return path;
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+    ls: 'Borði í útsendingu',
+    ec: 'Lokaspjald',
+    beint: 'Slegið eða talað',
+};
+function sourceLabel(s: string): string {
+    return SOURCE_LABELS[s] ?? s;
 }
 
 const COUNTRY_NAMES: Record<string, string> = {
