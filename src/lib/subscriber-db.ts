@@ -17,7 +17,8 @@ export interface Subscriber {
 export async function addSubscriber(
     email: string,
     name?: string,
-    segments: string[] = ['newsletter']
+    segments: string[] = ['newsletter'],
+    consent?: { textVersion?: string; source?: string }
 ): Promise<{ success: boolean; error?: string; alreadyOnList?: boolean }> {
     // Service-role client: runs server-side (called from the subscribe server
     // action). The anon client is blocked by RLS from reading the inserted row
@@ -49,6 +50,12 @@ export async function addSubscriber(
             segments: segments,
             is_verified: true,
             verified_at: new Date().toISOString(),
+            // Provable opt-in: the timestamp is the moment they submitted; source
+            // is where it happened; text_version is the exact wording (when a
+            // form shows a consent box — e.g. /tv).
+            consent_given_at: new Date().toISOString(),
+            consent_source: consent?.source || (segments[0] ?? null),
+            consent_text_version: consent?.textVersion || null,
         }]);
 
     if (error) {

@@ -13,9 +13,19 @@ export default function PageViewTracker() {
 
     useEffect(() => {
         if (!pathname || pathname.startsWith('/admin')) return;
+        // On-air / campaign source: read ?q= (or ?utm_source=) on the landing URL
+        // so a cable-driven arrival at /tv?q=ls is attributable. Only meaningful
+        // on the first inbound load; internal navigations carry no q and report none.
+        const source =
+            typeof window !== 'undefined'
+                ? new URLSearchParams(window.location.search).get('q') ||
+                  new URLSearchParams(window.location.search).get('utm_source') ||
+                  undefined
+                : undefined;
         const payload = JSON.stringify({
             path: pathname,
             referrer: typeof document !== 'undefined' ? document.referrer || undefined : undefined,
+            source,
         });
         try {
             const blob = new Blob([payload], { type: 'application/json' });

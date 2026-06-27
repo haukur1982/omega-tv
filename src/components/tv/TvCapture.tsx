@@ -4,6 +4,11 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { subscribeAction } from '@/actions/subscribe';
 
+// The canonical consent wording, stored as proof when someone opts in.
+// Must stay identical to the visible label text rendered below.
+const CONSENT_TEXT =
+    'Ég hef lesið persónuverndarstefnuna og samþykki að fá vikulegt bréf frá Omega.';
+
 /**
  * /tv email capture — the "thank-you", offered AFTER the gift of watching.
  *
@@ -15,11 +20,12 @@ import { subscribeAction } from '@/actions/subscribe';
  *    real privacy page,
  *  - states the cadence and the one-tap exit up front.
  *
- * Writes to the subscribers list with segment 'tv' (collect-mode).
- * NOTE (pre-deploy): column-level consent logging (consent_given_at /
- * consent_text_version) still needs its migration + a wired subscribeAction.
- * The consent here is enforced in the UI; persisting the proof is the last
- * Phase 0 backend step before this goes to production.
+ * Writes to the subscribers list with segment 'tv' (collect-mode). Consent is
+ * provable end to end: the exact wording shown (CONSENT_TEXT) is stored as
+ * consent_text_version, with consent_given_at and consent_source='tv', via
+ * subscribeAction (migration 20260625_tv_bridge_consent_and_source, applied).
+ * Remaining before sending goes live: a VERIFIED Resend domain — collect-mode
+ * stores the email now; the weekly letter sends once the domain is set up.
  */
 export default function TvCapture() {
     const [isPending, startTransition] = useTransition();
@@ -60,6 +66,9 @@ export default function TvCapture() {
                 </div>
             ) : (
                 <form action={handleSubmit}>
+                    {/* The exact wording shown below, logged as proof of consent.
+                        Keep this string identical to the visible label text. */}
+                    <input type="hidden" name="consent_text" value={CONSENT_TEXT} />
                     <h3 style={headingStyle}>Fáðu vikulegt bréf frá Omega</h3>
                     <p style={{ ...bodyStyle, marginTop: '0.6rem', maxWidth: '40ch' }}>
                         Stutt hugvekja og það sem framundan er á Omega, einu sinni í viku.
@@ -99,6 +108,7 @@ export default function TvCapture() {
                             <input
                                 type="checkbox"
                                 name="consent"
+                                value="true"
                                 checked={consent}
                                 onChange={(e) => setConsent(e.target.checked)}
                                 style={{ marginTop: '0.2rem', width: '1.05rem', height: '1.05rem', accentColor: 'var(--gull)', flexShrink: 0 }}

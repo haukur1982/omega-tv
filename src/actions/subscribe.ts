@@ -18,8 +18,21 @@ export async function subscribeAction(formData: FormData) {
         return { success: false, error: 'Vinsamlegast sláðu inn gilt netfang.' };
     }
 
+    // Consent: when a form renders a consent box (e.g. /tv), it sends `consent`
+    // + the exact `consent_text` shown. If that box is present it MUST be
+    // affirmative — never store an email when the box was rendered but not ticked.
+    // Legacy forms that don't render a box are unaffected (collect-mode opt-in).
+    const consentRaw = formData.get('consent');
+    const consentText = (formData.get('consent_text') as string) || undefined;
+    if (consentRaw !== null && consentRaw !== 'true' && consentRaw !== 'on') {
+        return { success: false, error: 'Vinsamlegast samþykktu til að halda áfram.' };
+    }
+
     const segments = segment ? [segment] : ['newsletter'];
-    const result = await addSubscriber(email, name, segments);
+    const result = await addSubscriber(email, name, segments, {
+        textVersion: consentText,
+        source: segment,
+    });
 
     if (result.success) {
         return {

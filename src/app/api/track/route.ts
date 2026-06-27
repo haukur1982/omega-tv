@@ -22,7 +22,7 @@ function isBot(ua: string): boolean {
 }
 
 export async function POST(request: Request) {
-    let body: { path?: string; referrer?: string };
+    let body: { path?: string; referrer?: string; source?: string };
     try { body = await request.json(); } catch { return noContent(); }
 
     let path = (body.path || '').trim();
@@ -51,6 +51,12 @@ export async function POST(request: Request) {
         } catch { /* ignore malformed referrer */ }
     }
 
+    // On-air / campaign source bucket (e.g. ?q=ls on omega.is/tv). Kept short and
+    // boring so a stray querystring can't write arbitrary data into analytics:
+    // lowercase, [a-z0-9_-], max 32 chars; anything else is dropped.
+    let source = (body.source || '').toString().trim().toLowerCase().slice(0, 32);
+    if (source && !/^[a-z0-9_-]+$/.test(source)) source = '';
+
     try {
         const db = supabaseAdmin as unknown as SupabaseClient;
         await db.from('page_views').insert({
@@ -58,6 +64,7 @@ export async function POST(request: Request) {
             referrer_host: referrerHost,
             country: country || null,
             visitor_hash: visitorHash,
+            source: source || null,
         });
     } catch { /* analytics must never break navigation */ }
 
