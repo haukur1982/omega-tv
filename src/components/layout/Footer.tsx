@@ -203,7 +203,7 @@ export default function Footer() {
               Persónuverndarstefna
             </Link>
             <Link
-              href="/about"
+              href="/skilmalar"
               style={{
                 color: 'var(--text-muted)',
                 fontSize: '0.7rem',
