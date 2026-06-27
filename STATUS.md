@@ -34,6 +34,15 @@ Hawk opened a vision conversation: he does not want Omega to "just be a website,
 - **Consent logging + on-air source split: DONE** (verified against the live DB, test rows cleaned up; 3-lens review = correctness + security clean). Migration `20260625_tv_bridge_consent_and_source` applied (additive, nullable): `subscribers.consent_{text_version,given_at,source}` + `page_views.source`. `/tv` signups now store provable consent (exact wording shown + timestamp + `source='tv'`); a `/tv?q=ls` arrival stores the source bucket so on-air placements are attributable in admin. Still zero login (email + checkbox only). The `?q` is carried by `PageViewTracker` and sanitized in `/api/track` (lowercase, `[a-z0-9_-]`, max 32).
 - **Open / not done:** retention periods on the privacy page (18 mánuðir, eða 6 mánuðir eftir svar) are recommended defaults; Hawk to confirm before prod. The one remaining blocker before `/tv` capture can actually SEND email: a VERIFIED Resend sending domain (today the sandbox `onboarding@resend.dev` cannot reach inboxes) + `RESEND_FROM_EMAIL` set. `Skilmálar` footer link still points to `/about` (no terms page yet). Sender addresses (`postur@`/`baen@`) still to confirm. NOT deployed (prod gated; awaiting Hawk's explicit go).
 
+### While Hawk was away (autonomous batch — all verified, committed on `feat/omega-web-bridge`, NOT deployed)
+Hawk stepped away ("do everything else while I'm away"); built the safe, no-send, no-deploy items.
+- **Daily prayer rotates** (`7c9d4ee`, `58ab679`): new `featured_prayers` table (migration `20260627_featured_prayers`, public-read RLS) + 7-prayer STARTER pool (Omega voice, scripture-anchored — **needs Hawk's review/extension**). `BaenDagsins` + homepage now show today's prayer (verified: "27. júní 2026" live from DB; old hardcoded 24. apríl gone). Admin curation page `/admin/baen-dagsins` (auth-gated) manages the pool without SQL.
+- **Bridge readout in admin** (`5f715f9`): "Brúin · sjónvarp → vefur" card on Greining — /tv views, on-air source split (Borði/Lokaspjald/Slegið-eða-talað), tv-segment captures. Empty state until /tv traffic.
+- **/skilmalar terms page** (`6197663`): real terms page; footer Skilmálar repointed from /about. Both footer legal links now resolve.
+- **Claude Design handoff** (`e07136e`): `docs/social-clip-handoff.md` — stable interface (SocialFormat/FORMAT_DIMENSIONS/ALTINGI) + Design-vs-engineering ownership + asset list.
+- **Verified:** tsc clean; homepage prayer rotates from DB; admin routes 200 + auth-gated 401; /skilmalar 200; footer hrefs correct. Admin authed-CRUD not exercised (needs Hawk login; thin wrapper over the proven data layer).
+- **Deliberately NOT done (blocked on Hawk or its own pass):** anything that sends email or needs the Resend domain (weekly-letter send, answered-prayer email, /min-baen magic-link); prod deploy; the larger Retain UI (prayer consent + held-not-vanished) and the clip engine (each deserves its own deliberate pass). The 7 seed prayers need Hawk's review before deploy.
+
 ---
 
 ## Session — 2026-06-24 (Codex — `/heimakirkja` effectiveness/copy/layout review)
