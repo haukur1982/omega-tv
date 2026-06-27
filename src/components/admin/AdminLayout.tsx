@@ -25,6 +25,7 @@ import {
     Activity,
     BookOpen,
     BarChart3,
+    Sunrise,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OmegaMark } from '@/components/brand/OmegaMark';
@@ -71,6 +72,7 @@ const navGroups: {
         title: 'Samskipti',
         items: [
             { href: '/admin/prayers', label: 'Bænir', icon: Heart },
+            { href: '/admin/baen-dagsins', label: 'Bæn dagsins', icon: Sunrise },
             { href: '/admin/campaigns', label: 'Bænaátak', icon: Megaphone },
             { href: '/admin/testimonials', label: 'Vitnisburðir', icon: MessageSquare },
             { href: '/admin/bokavinir', label: 'Bókavinir', icon: BookOpen },
