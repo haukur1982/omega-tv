@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThumbnailFrame from "@/components/media/ThumbnailFrame";
+import { resolvePoster } from "@/lib/poster";
 
 /**
  * NewestRail — horizontal-scrolling rail of newest episodes across
@@ -145,7 +146,7 @@ function RailCard({ ep }: { ep: RailEpisode }) {
             >
                 <article style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <ThumbnailFrame
-                        src={ep.thumbnail_custom}
+                        src={resolvePoster(ep, 'landscape_16x9')}
                         series={ep.series_title}
                         aspect="16/9"
                     />
