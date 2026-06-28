@@ -1,8 +1,36 @@
 # STATUS.md — Omega TV
 
-**Last Updated:** 2026-06-25 (Claude Opus — three-moves strategy + plan docs)
+**Last Updated:** 2026-06-28 (Claude Opus — Today on Omega + foundation build-verified)
 **Last Agent:** Claude Opus
-**Branch:** `feat/faith-library-articles` (omega-tv)
+**Branch:** `feat/omega-web-bridge` (the web-bridge foundation lives here, branched off `feat/faith-library-articles`)
+
+---
+
+## Session — 2026-06-28 (Claude Opus — review folded in + "Í dag á Omega"; foundation build-verified, awaiting deploy)
+
+Hawk shared Codex's live-site review (the entry below) for analysis. It independently validated the three-moves strategy and sharpened the language ("this is where your Christian day starts; watch, read, pray, return"). Folded into `docs/plans/00`.
+
+- **"Í dag á Omega" daily front-door block** (`a6be3ba`): one dashboard under the hero — live now (accented action), today's prayer, newest teaching, one article, each a real card + link. Verified on the homepage with real data; tsc clean.
+- **Whole web-bridge foundation is built on `feat/omega-web-bridge`** (`2a34ff2` -> `a6be3ba`) and addresses Codex's review directly: privacy page + terms + both footer links fixed; `/tv` watch-first + consent-gated capture; provable consent logging + on-air source split; daily prayer rotates (`featured_prayers` + admin `/admin/baen-dagsins`); Bridge readout in Greining; Today on Omega.
+- **Production build verified:** `pnpm build` passes clean; `/tv`, `/personuverndarstefna`, `/skilmalar` static, homepage builds with the new block. Deploy-ready.
+- **Deploy gated on Hawk:** needs his explicit "deploy it" + a look at the 7 seed prayers (they go live on the homepage) + a scope decision (deploy just the web-bridge work, or also the `feat/faith-library-articles` WIP this branch was cut from). The single highest-leverage action on Codex's list is to deploy this branch.
+- Pending external: the verified Resend sending domain (Hawk is creating the account) unblocks all email.
+
+---
+
+## Session — 2026-06-28 (Codex — live-site future platform strategy review)
+
+Hawk asked how to shape the newly launched Omega site into the main Christian media platform for Iceland: media, articles, news, prayer, and a daily anchor for believers. No code changed.
+
+### Live-site read
+- `omega.is` is visually strong and serious. The hero, live broadcast, program archive, articles, prayer, testimonies, newsletter, and giving surfaces are already present.
+- The biggest gap is not missing pages. It is missing return rhythm: the site still feels like separate surfaces instead of one daily Christian home.
+- The strongest future direction is a daily front door: live now, prayer of the day, newest teaching, newest article/news, and one clear next action.
+- The platform should grow around four habits: watch, read, pray, return. Cable brings people in; email/personal prayer/news rhythm brings them back.
+- Live production gaps noticed: `/tv` is still 404 on `omega.is`, and footer privacy/terms links still point to `/about`, so the latest bridge/legal foundation work appears not deployed yet.
+
+### Recommendation
+Build in this order: deploy foundations, make `/tv` the cable-to-phone bridge, turn the homepage into a daily command center, make the email/prayer loop real, then add Christian news/editorial as a trusted Icelandic stream. Treat accounts/apps/social clips as later layers after the weekly return habit is alive.
 
 ---
 
