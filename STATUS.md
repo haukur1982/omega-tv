@@ -6,14 +6,15 @@
 
 ---
 
-## Session — 2026-06-28 (Claude Opus — review folded in + "Í dag á Omega"; foundation build-verified, awaiting deploy)
+## Session — 2026-06-28 (Claude Opus — review folded in + "Í dag á Omega"; foundation DEPLOYED to omega.is)
 
 Hawk shared Codex's live-site review (the entry below) for analysis. It independently validated the three-moves strategy and sharpened the language ("this is where your Christian day starts; watch, read, pray, return"). Folded into `docs/plans/00`.
 
 - **"Í dag á Omega" daily front-door block** (`a6be3ba`): one dashboard under the hero — live now (accented action), today's prayer, newest teaching, one article, each a real card + link. Verified on the homepage with real data; tsc clean.
 - **Whole web-bridge foundation is built on `feat/omega-web-bridge`** (`2a34ff2` -> `a6be3ba`) and addresses Codex's review directly: privacy page + terms + both footer links fixed; `/tv` watch-first + consent-gated capture; provable consent logging + on-air source split; daily prayer rotates (`featured_prayers` + admin `/admin/baen-dagsins`); Bridge readout in Greining; Today on Omega.
 - **Production build verified:** `pnpm build` passes clean; `/tv`, `/personuverndarstefna`, `/skilmalar` static, homepage builds with the new block. Deploy-ready.
-- **Deploy gated on Hawk:** needs his explicit "deploy it" + a look at the 7 seed prayers (they go live on the homepage) + a scope decision (deploy just the web-bridge work, or also the `feat/faith-library-articles` WIP this branch was cut from). The single highest-leverage action on Codex's list is to deploy this branch.
+- **DEPLOYED to production 2026-06-28** (`vercel --prod` from `feat/omega-web-bridge`; Hawk approved the seed prayers + gave the go, deploy `dpl_G55EuAfzQ9jVYy37iQDwMqrZv89s`). Verified live: omega.is `/tv`, `/personuverndarstefna`, `/skilmalar` now 200 (were 404); homepage shows "Í dag á Omega" + the rotating daily prayer; `/heimakirkja` + `/greinar` still 200 (no regression).
+- **DEPLOY TOPOLOGY (important for next time):** omega.is deploys via `vercel --prod` from the working tree, so the WHOLE branch ships. The faith-library work was ALREADY live, and this foundation builds on it (the analytics dashboard + pageview tracking), so a "clean cut" of just these commits onto the stale local `main` would have REGRESSED prod (removed heimakirkja + the article library). Always check what's actually live before cutting; deploy the whole branch here.
 - Pending external: the verified Resend sending domain (Hawk is creating the account) unblocks all email.
 
 ---
