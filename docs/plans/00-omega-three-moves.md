@@ -36,6 +36,19 @@ The diagnosis writes itself. You have a fire hose (the biggest Christian cable a
 
 They reinforce each other. Bridge fills the room. Retain holds the people in it. Reach walks strangers up to the door that Retain built.
 
+## Outside review (2026-06-27), folded in
+
+An outside read of the live site independently confirmed this whole strategy: bridge the cable audience first, make prayer the relationship engine, build email before an app, turn a broadcast into a place people return to. It also sharpened the language, and we use it now: **"this is where your Christian day starts. Watch, read, pray, return."** That is the same "give the ministry a memory" idea, said for a real person.
+
+Two builds came out of it:
+- **"Í dag á Omega" daily front door — BUILT** (commit `a6be3ba`). One dashboard under the hero: live now, today's prayer, newest teaching, one article, one clear action.
+- **Topic pages (archive becomes a library) — PLANNED.** Land on a need (healing, fear, marriage, grief, the Holy Spirit, Israel) and find videos, articles, prayers, and clips pulled together. It is how people actually search, it turns the archive into a discipleship tool, and it is the connective tissue for the clips later. The next big build after the prayer loop.
+
+Refinements we made to the review:
+- The **Christian news digest** ("each item ends with how to pray") is a good instinct, but it is an ongoing editorial commitment, not a build-once. Do not build out `/frettir` until a named person owns the weekly digest; fold "news with a prayer" into the weekly email first. Keep the empty `/frettir` quiet, where it is.
+- The **Mon/Wed/Fri email cadence** is too much on top of a daily 7am prayer. Let the daily prayer be the daily rhythm, send one warm weekly letter, and add more only once people clearly lean in.
+- The review's "critical fixes" (`/tv` 404, footer links going to `/about`) are already fixed on this branch. They read as critical only because the live site predates this week's work. The real takeaway is one word: deploy.
+
 ## The foundations all three need first (do these once)
 
 Every move depends on the same small set of foundations. Build them once, up front. None of them is user facing on its own, but the moment anything asks for an email, these must already be true.
