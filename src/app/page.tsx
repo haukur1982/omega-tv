@@ -4,6 +4,7 @@ import HeroV2 from "@/components/home/HeroV2";
 import OnAirRibbon from "@/components/home/OnAirRibbon";
 import PrayerTicker from "@/components/home/PrayerTicker";
 import BaenDagsins from "@/components/home/BaenDagsins";
+import TodayOnOmega from "@/components/home/TodayOnOmega";
 import UrDagskranni from "@/components/home/UrDagskranni";
 import PullQuote from "@/components/home/PullQuote";
 import IsraelTeaser from "@/components/home/IsraelTeaser";
@@ -120,6 +121,9 @@ export default async function Home() {
             {/* ─── Dark masthead + chrome ──────────────────────────── */}
             <HeroV2 />
             <OnAirRibbon />
+
+            {/* ─── Daily front door: "Í dag á Omega" ───────────────── */}
+            <TodayOnOmega prayer={dailyPrayer} episode={episodes[0]} article={leadArticle} />
 
             {/* ─── Cream sanctuary ─────────────────────────────────── */}
             <PrayerTicker lines={tickerLines} register="cream" />
