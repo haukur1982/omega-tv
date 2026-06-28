@@ -103,7 +103,7 @@ athugasemdir (// eða /* */), engin "..." — aðeins hreint, gilt JSON-hlutur.
 
 Lyklar og reglur fyrir hvert gildi:
 - "title": strengur. Stuttur titill á ${input.language === 'en' ? 'English' : 'íslensku'}, 3-9 orð.
-- "description": strengur. 2-3 efnisgreinar á ${input.language === 'en' ? 'English' : 'íslensku'}, kraftmikil og einlæg, ekki markaðslegt.
+- "description": strengur. 2-3 stuttar efnisgreinar á ${input.language === 'en' ? 'English' : 'íslensku'} sem segja hreinskilnislega hvað þátturinn fjallar um. Byrjaðu á efninu sjálfu, EKKI á frösum eins og "Í þessum þætti" eða "Í þessum kraftmikla þætti" (sama gildir á ensku: ekki "In this powerful episode"). Forðastu uppskrúfuð lýsingarorð (kraftmikill, einstakur, áhrifaríkur, magnaður) og klisjur. Skrifaðu skýrt, hlýtt og blátt áfram, eins og þú værir að segja vini frá þættinum, ekki að auglýsa hann.
 - "editor_note": strengur. Ein málsgrein, 40-70 orð, hlý ritstjórnarlína í nafni Omega (ritstjórnarinnar), ekki nafngreinds einstaklings. Lýstu þættinum og hvers vegna hann er þess virði að horfa. Notaðu ENGA fyrstu persónu eintölu ("ég", "mér", "mig", "minn") og engar persónulegar tilfinningar eða játningar (ekki t.d. "þetta snerti mig djúpt" eða "ég hef áhyggjur"). Ávarp í 2. persónu ("þú") er í lagi, og almennt "við/okkur" um trúsystkin er í lagi.
 - "bible_ref": strengur eða null. OSIS-snið. Dæmi: "MAT.5.3-MAT.5.10", "JHN.3.16", "PSA.23". null ef óviss.
 - "chapters": fylki af hlutum, hver með "t" (heiltala, sekúndur) og "title" (strengur). 4-8 kaflar.
