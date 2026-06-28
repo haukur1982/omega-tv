@@ -15,6 +15,7 @@ import FeaturedSunday from "@/components/sermon/FeaturedSunday";
 import { getAllArticles } from "@/lib/articles-db";
 import { getRecentBroadcastPrayers } from "@/lib/sanctuary-db";
 import { getFeaturedPrayer } from "@/lib/featured-prayer-db";
+import { getDailyWord } from "@/lib/daily-word-db";
 import { getLatestEpisodeBySeriesSlug, getNewestEpisodes } from "@/lib/vod-db";
 import { resolvePoster } from "@/lib/poster";
 import { MOCK_SUNDAY_FEATURED } from "@/lib/mock-series";
@@ -65,7 +66,7 @@ type LatestArticle = {
 
 export default async function Home() {
     // Parallel data fetch
-    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal, dailyPrayer] = await Promise.all([
+    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal, dailyPrayer, dailyWord] = await Promise.all([
         getNewestEpisodes(3).catch(() => []),
         getAllArticles().catch(() => [] as LatestArticle[]),
         getRecentBroadcastPrayers(7).catch(() => []),
@@ -73,6 +74,7 @@ export default async function Home() {
         // No real Sunday service yet → feature Omega's own flagship teaching.
         getLatestEpisodeBySeriesSlug('vonarljos').catch(() => null),
         getFeaturedPrayer().catch(() => null),
+        getDailyWord().catch(() => null),
     ]);
 
     // Prefer a real Sunnudagssamkoma; else feature the real Vonarljós teaching;
@@ -123,7 +125,7 @@ export default async function Home() {
             <OnAirRibbon />
 
             {/* ─── Daily front door: "Í dag á Omega" ───────────────── */}
-            <TodayOnOmega prayer={dailyPrayer} episode={episodes[0]} article={leadArticle} />
+            <TodayOnOmega prayer={dailyPrayer} word={dailyWord} episode={episodes[0]} article={leadArticle} />
 
             {/* ─── Cream sanctuary ─────────────────────────────────── */}
             <PrayerTicker lines={tickerLines} register="cream" />

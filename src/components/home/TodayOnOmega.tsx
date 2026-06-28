@@ -13,14 +13,16 @@ import Link from 'next/link';
 interface TodayPrayer { date?: string; body: string; scripture: string | null; }
 interface TodayEpisode { id: string; title: string; speaker: string | null; }
 interface TodayArticle { slug?: string; title: string; }
+interface TodayWord { reference: string; verse: string | null; reflection: string; }
 
 interface Props {
     prayer?: TodayPrayer | null;
+    word?: TodayWord | null;
     episode?: TodayEpisode | null;
     article?: TodayArticle | null;
 }
 
-export default function TodayOnOmega({ prayer, episode, article }: Props) {
+export default function TodayOnOmega({ prayer, word, episode, article }: Props) {
     return (
         <section style={{ background: 'var(--nott)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
             <div
@@ -77,6 +79,31 @@ export default function TodayOnOmega({ prayer, episode, article }: Props) {
                         <span style={cardMeta}>Omega sendir út allan sólarhringinn</span>
                         <span style={{ ...arrow, color: 'var(--kerti)' }}>Horfa →</span>
                     </Link>
+
+                    {/* Orð dagsins — the daily word */}
+                    {word && (
+                        <Link href="/greinar" style={cardBase}>
+                            <span style={kicker}>Orð dagsins</span>
+                            <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', color: 'var(--kerti)' }}>
+                                {word.reference}
+                            </span>
+                            <span
+                                style={{
+                                    fontFamily: 'var(--font-serif)',
+                                    fontSize: '1rem',
+                                    lineHeight: 1.5,
+                                    color: 'var(--ljos)',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 3,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                }}
+                            >
+                                {word.reflection}
+                            </span>
+                            <span style={arrow}>Meira →</span>
+                        </Link>
+                    )}
 
                     {/* Today's prayer */}
                     {prayer && (
