@@ -3,6 +3,10 @@ import { Resend } from 'resend';
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const resend = new Resend(RESEND_API_KEY ?? 'unconfigured');
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Omega TV <onboarding@resend.dev>';
+// mail.omega.is is send-only (Resend). Replies must land in a real, read
+// inbox — set EMAIL_REPLY_TO to whichever omega.is (or fallback) address a
+// human actually opens. Unset → no Reply-To header.
+const REPLY_TO = process.env.EMAIL_REPLY_TO || undefined;
 
 /** Returned and logged when RESEND_API_KEY is missing — no silent placeholder sends. */
 const EMAIL_NOT_CONFIGURED = 'RESEND_API_KEY is not set — email sending is disabled.';
@@ -142,6 +146,7 @@ export async function sendWelcomeEmail(to: string, name?: string): Promise<{ suc
         const { error } = await resend.emails.send({
             from: FROM_EMAIL,
             to: to,
+            replyTo: REPLY_TO,
             subject: WELCOME_EMAIL.subject,
             html: WELCOME_EMAIL.getHtml(name)
         });
@@ -177,6 +182,7 @@ export async function sendVerificationEmail(
         const { error } = await resend.emails.send({
             from: FROM_EMAIL,
             to,
+            replyTo: REPLY_TO,
             subject: VERIFICATION_EMAIL.subject,
             html: VERIFICATION_EMAIL.getHtml(verifyUrl, name),
         });
@@ -218,6 +224,7 @@ export async function sendNewsletter(
             const { error } = await resend.emails.send({
                 from: FROM_EMAIL,
                 to: recipient.email,
+                replyTo: REPLY_TO,
                 subject,
                 headers: {
                     // RFC 8058 — lets gmail.com etc. show a one-click unsubscribe button.
