@@ -1,5 +1,16 @@
 # STATUS.md — Omega TV
 
+## 2026-07-15 — /studio vision fundraising page (Claude Code)
+
+Built the whole studio-fundraising system in one push (Hawk's ask: wow factor, progress people can watch, online giving ready):
+- **/studio** (noindex + unlinked until Hawk links it): cinematic hero ("Ljósið þarf stúdíó."), vision section w/ Matt 24:14, itemized gear section (fal-generated warm-black imagery: lens/lights/podcast + camera hero), LIVE progress board (count-up total, glowing kerti bar, cumulative milestone states, anonymized gifts, updates), giving section (millifærsla 0113-26-25707 + Aur @Omega + gateway "á leiðinni" + Heimakirkja line).
+- **DB**: fundraising_projects / fundraising_gifts / fundraising_updates (RLS-locked, server-only reads). Seeded nytt-studio, goal 9.500.000 kr. **PROVISIONAL budget — Hawk/Eiríkur must confirm real numbers before public launch.**
+- **/admin/styrkir**: enter gifts (they appear on /studio instantly — verified end-to-end with a test gift), post updates, edit goal + item amounts. Nav entry under Samskipti.
+- Rapyd contract pending; its webhook will insert into the same gifts table (no page changes needed).
+- Gotchas fixed: Icelandic number/date formatting is deterministic (browser is-IS ICU not guaranteed — was showing "July 15" + comma grouping); fundraising-shared.ts is the client-safe module (never import fundraising-db in client components).
+- NOT deployed. Needs Hawk's explicit deploy go, and budget confirmation before linking anywhere.
+
+
 **Last Updated:** 2026-06-28 (Claude Opus — Today on Omega + foundation build-verified)
 **Last Agent:** Claude Opus
 **Branch:** `feat/omega-web-bridge` (the web-bridge foundation lives here, branched off `feat/faith-library-articles`)
