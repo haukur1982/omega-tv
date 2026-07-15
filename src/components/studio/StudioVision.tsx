@@ -6,8 +6,12 @@ import Reveal from './Reveal';
  * The WHY — daily programs + podcasts, gospel of the kingdom to the nation.
  * Editorial two-column: statement + the three concrete outcomes.
  * One short Scripture line in the human voice (italic Newsreader).
+ *
+ * `personSrc` (optional): a real face near the top builds more trust than
+ * another equipment image (Codex review, point 4). Renders only when the
+ * photo file actually exists — drop it at public/studio/eirikur.jpg.
  */
-export default function StudioVision() {
+export default function StudioVision({ personSrc }: { personSrc?: string | null }) {
     const outcomes = [
         {
             title: 'Dagleg dagskrá',
@@ -121,6 +125,39 @@ export default function StudioVision() {
                     </div>
 
                     <div style={{ display: 'grid', gap: '14px' }}>
+                        {personSrc && (
+                            <Reveal>
+                                <figure
+                                    style={{
+                                        margin: 0,
+                                        borderRadius: '4px',
+                                        overflow: 'hidden',
+                                        border: '1px solid rgba(246,242,234,0.06)',
+                                        background: 'var(--torfa)',
+                                    }}
+                                >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={personSrc}
+                                        alt="Eiríkur Sigurbjörnsson, stofnandi Omega"
+                                        style={{ display: 'block', width: '100%', aspectRatio: '16 / 10', objectFit: 'cover' }}
+                                    />
+                                    <figcaption
+                                        style={{
+                                            padding: '14px 20px',
+                                            fontFamily: 'var(--font-sans)',
+                                            fontSize: '12px',
+                                            fontWeight: 600,
+                                            letterSpacing: '0.14em',
+                                            textTransform: 'uppercase',
+                                            color: 'var(--moskva)',
+                                        }}
+                                    >
+                                        Eiríkur Sigurbjörnsson · stofnandi Omega
+                                    </figcaption>
+                                </figure>
+                            </Reveal>
+                        )}
                         {outcomes.map((o, i) => (
                             <Reveal key={o.title} delay={0.12 * i}>
                                 <div

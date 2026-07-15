@@ -6,17 +6,15 @@ import Reveal from './Reveal';
 import {
     formatIsk,
     formatNumberIs,
-    type ProjectItem,
     type PublicGift,
     type ProjectUpdate,
 } from '@/lib/fundraising-shared';
 
 /**
- * Framvindan — the living heart of /studio. Everything here is real data:
- * the count-up total, the glowing bar, per-item funding states (cumulative:
- * gifts fund the list top-down), recent gifts (anonymous unless the giver
- * opted in) and editorial updates. Designed to encourage: every number is
- * someone who said já.
+ * Framvindan — the living heart of /studio. Real data only: count-up total,
+ * the glowing bar, recent gifts (anonymous unless the giver opted in) and
+ * editorial updates. Per-item funding states live on the equipment cards
+ * (GearGrid) — this board carries the money, the pulse and the news.
  */
 
 function useCountUp(target: number, run: boolean, ms = 1400): number {
@@ -55,14 +53,12 @@ export default function ProgressBoard({
     goal,
     raised,
     giftCount,
-    items,
     gifts,
     updates,
 }: {
     goal: number;
     raised: number;
     giftCount: number;
-    items: ProjectItem[];
     gifts: PublicGift[];
     updates: ProjectUpdate[];
 }) {
@@ -71,16 +67,6 @@ export default function ProgressBoard({
     const reduce = useReducedMotion();
     const shown = useCountUp(raised, inView);
     const pct = goal > 0 ? Math.min(100, (raised / goal) * 100) : 0;
-
-    // Cumulative funding: gifts fill the item list top-down.
-    let cumulative = 0;
-    const itemStates = items.map((item) => {
-        const start = cumulative;
-        cumulative += item.amount_isk;
-        const funded = raised >= cumulative;
-        const active = !funded && raised > start;
-        return { ...item, funded, active };
-    });
 
     return (
         <section
@@ -169,9 +155,9 @@ export default function ProgressBoard({
                                 gap: '28px',
                                 flexWrap: 'wrap',
                                 fontFamily: 'var(--font-sans)',
-                                fontSize: '13px',
-                                letterSpacing: '0.06em',
-                                color: 'var(--steinn)',
+                                fontSize: '14px',
+                                letterSpacing: '0.04em',
+                                color: 'var(--moskva)',
                             }}
                         >
                             <span style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -186,17 +172,16 @@ export default function ProgressBoard({
                     </Reveal>
                 </div>
 
-                {/* Milestones + gifts/updates */}
+                {/* Gifts + updates */}
                 <div
                     style={{
-                        marginTop: 'clamp(48px, 6vw, 72px)',
+                        marginTop: 'clamp(40px, 5vw, 64px)',
                         display: 'grid',
                         gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
                         gap: 'clamp(32px, 4vw, 56px)',
                         alignItems: 'start',
                     }}
                 >
-                    {/* Item funding states */}
                     <div>
                         <Reveal>
                             <h3
@@ -208,65 +193,47 @@ export default function ProgressBoard({
                                     color: 'var(--ljos)',
                                 }}
                             >
-                                Áfangarnir
+                                Nýjustu gjafirnar
                             </h3>
                         </Reveal>
-                        <div style={{ display: 'grid', gap: '10px' }}>
-                            {itemStates.map((item, i) => (
-                                <Reveal key={item.key || item.label} delay={0.07 * i}>
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            flexWrap: 'wrap',
-                                            gap: '10px 14px',
-                                            padding: '14px 18px',
-                                            borderRadius: '4px',
-                                            background: 'var(--torfa)',
-                                            border: `1px solid ${item.active ? 'rgba(233,168,96,0.35)' : 'rgba(246,242,234,0.06)'}`,
-                                            boxShadow: item.active ? '0 0 22px rgba(233,168,96,0.12)' : 'none',
-                                        }}
-                                    >
-                                        {/* state mark: hand-authored stroke icons per brand */}
-                                        <span aria-hidden style={{ display: 'inline-flex', width: 20, height: 20, color: item.funded ? 'var(--gull)' : item.active ? 'var(--kerti)' : 'var(--steinn)' }}>
-                                            {item.funded ? (
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12.5 9.5 18 20 6.5" /></svg>
-                                            ) : (
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><circle cx="12" cy="12" r="8" /></svg>
-                                            )}
-                                        </span>
-                                        <span
+                        {gifts.length === 0 ? (
+                            <Reveal>
+                                <p style={{ margin: 0, fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '16.5px', color: 'var(--moskva)' }}>
+                                    Söfnunin er nýhafin. Gjafir birtast hér jafnóðum.
+                                </p>
+                            </Reveal>
+                        ) : (
+                            <div style={{ display: 'grid', gap: '8px' }}>
+                                {gifts.map((g, i) => (
+                                    <Reveal key={`${g.given_at}-${i}`} delay={0.06 * i}>
+                                        <div
                                             style={{
-                                                flex: 1,
-                                                fontFamily: 'var(--font-sans)',
-                                                fontSize: '14.5px',
-                                                fontWeight: 500,
-                                                color: item.funded ? 'var(--ljos)' : 'var(--moskva)',
+                                                display: 'flex',
+                                                alignItems: 'baseline',
+                                                justifyContent: 'space-between',
+                                                flexWrap: 'wrap',
+                                                gap: '6px 16px',
+                                                padding: '12px 18px',
+                                                borderRadius: '4px',
+                                                background: 'var(--torfa)',
+                                                border: '1px solid rgba(246,242,234,0.06)',
                                             }}
                                         >
-                                            {item.label}
-                                        </span>
-                                        <span
-                                            style={{
-                                                fontFamily: 'var(--font-sans)',
-                                                fontVariantNumeric: 'tabular-nums',
-                                                fontSize: '13px',
-                                                fontWeight: 600,
-                                                whiteSpace: 'nowrap',
-                                                color: item.funded ? 'var(--gull)' : item.active ? 'var(--kerti)' : 'var(--steinn)',
-                                                letterSpacing: '0.04em',
-                                            }}
-                                        >
-                                            {item.funded ? 'Fjármagnað' : item.active ? 'Í söfnun' : formatIsk(item.amount_isk)}
-                                        </span>
-                                    </div>
-                                </Reveal>
-                            ))}
-                        </div>
+                                            <span style={{ fontFamily: 'var(--font-serif)', fontSize: '15px', color: 'var(--moskva)' }}>
+                                                {g.donor_name ?? 'Nafnlaus'}
+                                                <span style={{ color: 'var(--steinn)' }}> · {dateIs(g.given_at)}</span>
+                                            </span>
+                                            <span style={{ fontFamily: 'var(--font-sans)', fontVariantNumeric: 'tabular-nums', fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', color: 'var(--kerti)' }}>
+                                                {formatIsk(g.amount_isk)}
+                                            </span>
+                                        </div>
+                                    </Reveal>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Recent gifts + updates */}
-                    <div style={{ display: 'grid', gap: '40px' }}>
+                    {updates.length > 0 && (
                         <div>
                             <Reveal>
                                 <h3
@@ -278,97 +245,45 @@ export default function ProgressBoard({
                                         color: 'var(--ljos)',
                                     }}
                                 >
-                                    Nýjustu gjafirnar
+                                    Fréttir af verkefninu
                                 </h3>
                             </Reveal>
-                            {gifts.length === 0 ? (
-                                <Reveal>
-                                    <p style={{ margin: 0, fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '16px', color: 'var(--steinn)' }}>
-                                        Fyrsta gjöfin er ekki komin enn. Hún gæti verið þín.
-                                    </p>
-                                </Reveal>
-                            ) : (
-                                <div style={{ display: 'grid', gap: '8px' }}>
-                                    {gifts.map((g, i) => (
-                                        <Reveal key={`${g.given_at}-${i}`} delay={0.06 * i}>
+                            <div style={{ display: 'grid', gap: '12px' }}>
+                                {updates.map((u, i) => (
+                                    <Reveal key={u.id} delay={0.08 * i}>
+                                        <article
+                                            style={{
+                                                padding: '20px 22px',
+                                                borderRadius: '4px',
+                                                background: 'var(--torfa)',
+                                                border: '1px solid rgba(246,242,234,0.06)',
+                                            }}
+                                        >
                                             <div
                                                 style={{
-                                                    display: 'flex',
-                                                    alignItems: 'baseline',
-                                                    justifyContent: 'space-between',
-                                                    gap: '16px',
-                                                    padding: '12px 18px',
-                                                    borderRadius: '4px',
-                                                    background: 'var(--torfa)',
-                                                    border: '1px solid rgba(246,242,234,0.06)',
+                                                    fontFamily: 'var(--font-sans)',
+                                                    fontSize: '11px',
+                                                    fontWeight: 700,
+                                                    letterSpacing: '0.18em',
+                                                    textTransform: 'uppercase',
+                                                    color: 'var(--moskva)',
+                                                    marginBottom: '8px',
                                                 }}
                                             >
-                                                <span style={{ fontFamily: 'var(--font-serif)', fontSize: '15px', color: 'var(--moskva)' }}>
-                                                    {g.donor_name ?? 'Nafnlaus'}
-                                                    <span style={{ color: 'var(--steinn)' }}> · {dateIs(g.given_at)}</span>
-                                                </span>
-                                                <span style={{ fontFamily: 'var(--font-sans)', fontVariantNumeric: 'tabular-nums', fontSize: '14px', fontWeight: 600, color: 'var(--kerti)' }}>
-                                                    {formatIsk(g.amount_isk)}
-                                                </span>
+                                                {dateIs(u.published_at.slice(0, 10))}
                                             </div>
-                                        </Reveal>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {updates.length > 0 && (
-                            <div>
-                                <Reveal>
-                                    <h3
-                                        style={{
-                                            margin: '0 0 18px',
-                                            fontFamily: 'var(--font-display)',
-                                            fontWeight: 400,
-                                            fontSize: '22px',
-                                            color: 'var(--ljos)',
-                                        }}
-                                    >
-                                        Fréttir af verkefninu
-                                    </h3>
-                                </Reveal>
-                                <div style={{ display: 'grid', gap: '12px' }}>
-                                    {updates.map((u, i) => (
-                                        <Reveal key={u.id} delay={0.08 * i}>
-                                            <article
-                                                style={{
-                                                    padding: '20px 22px',
-                                                    borderRadius: '4px',
-                                                    background: 'var(--torfa)',
-                                                    border: '1px solid rgba(246,242,234,0.06)',
-                                                }}
-                                            >
-                                                <div
-                                                    style={{
-                                                        fontFamily: 'var(--font-sans)',
-                                                        fontSize: '11px',
-                                                        fontWeight: 700,
-                                                        letterSpacing: '0.18em',
-                                                        textTransform: 'uppercase',
-                                                        color: 'var(--steinn)',
-                                                        marginBottom: '8px',
-                                                    }}
-                                                >
-                                                    {dateIs(u.published_at.slice(0, 10))}
-                                                </div>
-                                                <h4 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '18px', color: 'var(--ljos)' }}>
-                                                    {u.title}
-                                                </h4>
-                                                <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-serif)', fontSize: '15px', lineHeight: 1.6, color: 'var(--moskva)' }}>
-                                                    {u.body}
-                                                </p>
-                                            </article>
-                                        </Reveal>
-                                    ))}
-                                </div>
+                                            <h4 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '18px', color: 'var(--ljos)' }}>
+                                                {u.title}
+                                            </h4>
+                                            <p style={{ margin: '8px 0 0', fontFamily: 'var(--font-serif)', fontSize: '15px', lineHeight: 1.6, color: 'var(--moskva)' }}>
+                                                {u.body}
+                                            </p>
+                                        </article>
+                                    </Reveal>
+                                ))}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>

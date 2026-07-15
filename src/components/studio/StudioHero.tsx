@@ -103,10 +103,9 @@ export default function StudioHero() {
                             color: 'var(--moskva)',
                         }}
                     >
-                        Omega ætlar að senda út daglega dagskrá og hlaðvörp — fagnaðarerindið
-                        um ríkið til íslensku þjóðarinnar. Til þess þarf myndavélar, ljós og
-                        hljóð. Hér sérðu hvað vantar, hvað er komið inn og hvernig þú getur
-                        tekið þátt.
+                        Í 34 ár hefur Omega sent fagnaðarerindið inn á íslensk heimili. Nú
+                        byggjum við stúdíó fyrir daglega dagskrá, viðtöl og hlaðvörp. Hér
+                        sérðu hvert hver króna fer og hvernig verkið vex.
                     </p>
                 </Reveal>
                 <Reveal delay={0.36}>

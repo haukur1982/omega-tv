@@ -1,6 +1,9 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import StudioHero from '@/components/studio/StudioHero';
+import HeroProgressStrip from '@/components/studio/HeroProgressStrip';
 import StudioVision from '@/components/studio/StudioVision';
 import GearGrid from '@/components/studio/GearGrid';
 import ProgressBoard from '@/components/studio/ProgressBoard';
@@ -32,19 +35,30 @@ export const metadata = {
 
 export default async function StudioPage() {
     const data = await getProjectProgress('nytt-studio');
+    // The real-person moment renders only when the photo actually exists —
+    // drop it at public/studio/eirikur.jpg (see StudioVision).
+    const personSrc = existsSync(path.join(process.cwd(), 'public/studio/eirikur.jpg'))
+        ? '/studio/eirikur.jpg'
+        : null;
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
-            <Navbar />
+            <Navbar styrkjaHref="#styrkja" />
             <StudioHero />
-            <StudioVision />
-            {data && <GearGrid items={data.project.items} />}
+            {data && <HeroProgressStrip raised={data.raised_isk} goal={data.project.goal_isk} />}
+            <StudioVision personSrc={personSrc} />
+            {data && (
+                <GearGrid
+                    items={data.project.items}
+                    goal={data.project.goal_isk}
+                    raised={data.raised_isk}
+                />
+            )}
             {data && (
                 <ProgressBoard
                     goal={data.project.goal_isk}
                     raised={data.raised_isk}
                     giftCount={data.gift_count}
-                    items={data.project.items}
                     gifts={data.recent_gifts}
                     updates={data.updates}
                 />

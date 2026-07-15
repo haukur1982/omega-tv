@@ -38,3 +38,26 @@ export function formatNumberIs(n: number): string {
 export function formatIsk(amount: number): string {
     return `${formatNumberIs(amount)} kr.`;
 }
+
+/** Compact millions for tight spaces: 9500000 → "9,5 m.kr." (Icelandic decimal comma). */
+export function formatMkr(amount: number): string {
+    if (amount < 1_000_000) return formatIsk(amount);
+    const m = Math.round(amount / 100_000) / 10;
+    const s = String(m).replace('.', ',').replace(/,0$/, '');
+    return `${s} m.kr.`;
+}
+
+export interface ItemState extends ProjectItem {
+    funded: boolean;
+    active: boolean;
+}
+
+/** Cumulative funding: gifts fill the item list top-down. */
+export function computeItemStates(items: ProjectItem[], raised: number): ItemState[] {
+    let cumulative = 0;
+    return items.map((item) => {
+        const start = cumulative;
+        cumulative += item.amount_isk;
+        return { ...item, funded: raised >= cumulative, active: raised < cumulative && raised > start };
+    });
+}

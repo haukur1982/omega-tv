@@ -54,7 +54,12 @@ const isActive = (pathname: string | null, href: string) => {
     return pathname === href || pathname.startsWith(href + '/');
 };
 
-export default function Navbar() {
+export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
+    // Campaign pages (e.g. /studio) keep the Styrkja link inside the
+    // campaign (#styrkja) instead of leaving for /give.
+    const links = styrkjaHref
+        ? navLinks.map((l) => (l.href === '/give' ? { ...l, href: styrkjaHref } : l))
+        : navLinks;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const pathname = usePathname();
@@ -136,7 +141,7 @@ export default function Navbar() {
 
                     {/* ── Desktop nav ───────────────────────────────────── */}
                     <div className="hidden md:flex" style={{ alignItems: 'center', gap: 'clamp(1rem, 1.8vw, 1.75rem)' }}>
-                        {navLinks.map(link => {
+                        {links.map(link => {
                             const active = isActive(pathname, link.href);
                             return (
                                 <Link
@@ -289,7 +294,7 @@ export default function Navbar() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(1.25rem, 2.8vh, 1.75rem)' }}>
-                            {navLinks.map((link, i) => {
+                            {links.map((link, i) => {
                                 const active = isActive(pathname, link.href);
                                 return (
                                     <motion.div
