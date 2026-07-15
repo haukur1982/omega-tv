@@ -27,6 +27,7 @@ import {
     BarChart3,
     Sunrise,
     ScrollText,
+    HandCoins,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OmegaMark } from '@/components/brand/OmegaMark';
@@ -80,6 +81,7 @@ const navGroups: {
             { href: '/admin/bokavinir', label: 'Bókavinir', icon: BookOpen },
             { href: '/admin/subscribers', label: 'Áskrifendur', icon: Users },
             { href: '/admin/newsletters', label: 'Fréttabréf', icon: FileText },
+            { href: '/admin/styrkir', label: 'Styrkir', icon: HandCoins },
         ],
     },
     {
