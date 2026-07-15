@@ -59,6 +59,7 @@ export default async function StudioPage() {
                     goal={data.project.goal_isk}
                     raised={data.raised_isk}
                     giftCount={data.gift_count}
+                    items={data.project.items}
                     gifts={data.recent_gifts}
                     updates={data.updates}
                 />

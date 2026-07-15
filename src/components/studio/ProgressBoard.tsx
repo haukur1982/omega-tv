@@ -4,8 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useInView, useReducedMotion } from 'framer-motion';
 import Reveal from './Reveal';
 import {
+    computeItemStates,
+    milestoneBoundaries,
     formatIsk,
     formatNumberIs,
+    type ProjectItem,
     type PublicGift,
     type ProjectUpdate,
 } from '@/lib/fundraising-shared';
@@ -24,7 +27,10 @@ function useCountUp(target: number, run: boolean, ms = 1400): number {
     useEffect(() => {
         if (!run || started.current) return;
         started.current = true;
-        if (reduce || target <= 0) { setValue(target); return; }
+        if (reduce || target <= 0) {
+            const id = requestAnimationFrame(() => setValue(target));
+            return () => cancelAnimationFrame(id);
+        }
         const t0 = performance.now();
         let raf = 0;
         const tick = (t: number) => {
@@ -53,12 +59,14 @@ export default function ProgressBoard({
     goal,
     raised,
     giftCount,
+    items,
     gifts,
     updates,
 }: {
     goal: number;
     raised: number;
     giftCount: number;
+    items: ProjectItem[];
     gifts: PublicGift[];
     updates: ProjectUpdate[];
 }) {
@@ -67,6 +75,12 @@ export default function ProgressBoard({
     const reduce = useReducedMotion();
     const shown = useCountUp(raised, inView);
     const pct = goal > 0 ? Math.min(100, (raised / goal) * 100) : 0;
+
+    // Milestones: a funded count that celebrates progress even early, and
+    // internal cumulative boundaries drawn as tick marks on the bar.
+    const states = computeItemStates(items, raised);
+    const milestonesFunded = states.filter((s) => s.funded).length;
+    const tickPcts = milestoneBoundaries(items, goal).slice(0, -1).map((b) => b * 100);
 
     return (
         <section
@@ -118,6 +132,22 @@ export default function ProgressBoard({
                         </div>
                     </Reveal>
 
+                    <Reveal delay={0.12}>
+                        <div
+                            style={{
+                                marginTop: '12px',
+                                fontFamily: 'var(--font-sans)',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                letterSpacing: '0.14em',
+                                textTransform: 'uppercase',
+                                color: 'var(--gull)',
+                            }}
+                        >
+                            {milestonesFunded} af {states.length} áföngum í höfn
+                        </div>
+                    </Reveal>
+
                     {/* The glowing bar — kerti fill, candle-glow halo. Fills once, on view. */}
                     <Reveal delay={0.16}>
                         <div
@@ -127,7 +157,8 @@ export default function ProgressBoard({
                             aria-valuenow={raised}
                             aria-label="Söfnun í nýtt stúdíó"
                             style={{
-                                marginTop: '30px',
+                                position: 'relative',
+                                marginTop: '24px',
                                 height: '10px',
                                 borderRadius: '2px',
                                 background: 'var(--torfa)',
@@ -144,6 +175,22 @@ export default function ProgressBoard({
                                     transition: reduce ? 'none' : 'width 1.4s cubic-bezier(0.2, 0, 0.1, 1) 0.2s',
                                 }}
                             />
+                            {/* Milestone boundaries — each tick is one funded goal to cross */}
+                            {tickPcts.map((t, i) => (
+                                <span
+                                    key={i}
+                                    aria-hidden
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        bottom: 0,
+                                        left: `${t}%`,
+                                        width: '2px',
+                                        background: 'var(--nott)',
+                                        opacity: 0.65,
+                                    }}
+                                />
+                            ))}
                         </div>
                     </Reveal>
 

@@ -94,7 +94,7 @@ export default function GivingSection() {
                             maxWidth: '58ch',
                         }}
                     >
-                        Merktu gjöfina „Stúdíó" og hún birtist í framvindunni hér að ofan.
+                        Merktu gjöfina „Stúdíó“ og hún birtist í framvindunni hér að ofan.
                         Viljir þú láta nafnið þitt fylgja, láttu það koma fram — annars er
                         gjöfin nafnlaus.
                     </p>
@@ -130,7 +130,7 @@ export default function GivingSection() {
                                 </div>
                                 <div>
                                     <dt style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--moskva)' }}>Skýring</dt>
-                                    <dd style={{ margin: '4px 0 0', fontSize: '17px', color: 'var(--ljos)' }}>„Stúdíó"</dd>
+                                    <dd style={{ margin: '4px 0 0', fontSize: '17px', color: 'var(--ljos)' }}>„Stúdíó“</dd>
                                 </div>
                             </dl>
                         </div>
@@ -163,7 +163,7 @@ export default function GivingSection() {
                                 </div>
                                 <div>
                                     <dt style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--moskva)' }}>Skýring</dt>
-                                    <dd style={{ margin: '4px 0 0', fontSize: '17px', color: 'var(--ljos)' }}>„Stúdíó" — og nafn ef á að birta</dd>
+                                    <dd style={{ margin: '4px 0 0', fontSize: '17px', color: 'var(--ljos)' }}>„Stúdíó“ — og nafn ef á að birta</dd>
                                 </div>
                             </dl>
                         </div>

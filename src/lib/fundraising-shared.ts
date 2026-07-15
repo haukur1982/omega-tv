@@ -52,6 +52,21 @@ export interface ItemState extends ProjectItem {
     active: boolean;
 }
 
+/**
+ * Cumulative milestone boundaries as fractions of goal (0..1), one per item.
+ * Drop the last (always ~1.0) to get the internal tick positions on a bar.
+ * A plain function so the accumulator isn't a mutation during React render.
+ */
+export function milestoneBoundaries(items: ProjectItem[], goal: number): number[] {
+    const out: number[] = [];
+    let acc = 0;
+    for (const it of items) {
+        acc += it.amount_isk;
+        out.push(goal > 0 ? acc / goal : 0);
+    }
+    return out;
+}
+
 /** Cumulative funding: gifts fill the item list top-down. */
 export function computeItemStates(items: ProjectItem[], raised: number): ItemState[] {
     let cumulative = 0;
