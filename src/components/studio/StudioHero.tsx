@@ -73,7 +73,7 @@ export default function StudioHero() {
                             marginBottom: '20px',
                         }}
                     >
-                        Omega · Nýtt stúdíó
+                        Omega · Ljósið
                     </div>
                 </Reveal>
                 <Reveal delay={0.12}>
@@ -89,7 +89,7 @@ export default function StudioHero() {
                             color: 'var(--ljos)',
                         }}
                     >
-                        Ljósið þarf stúdíó.
+                        Kveikjum Ljósið.
                     </h1>
                 </Reveal>
                 <Reveal delay={0.24}>
@@ -103,9 +103,9 @@ export default function StudioHero() {
                             color: 'var(--moskva)',
                         }}
                     >
-                        Í 34 ár hefur Omega sent fagnaðarerindið inn á íslensk heimili. Nú
-                        byggjum við stúdíó fyrir daglega dagskrá, viðtöl og hlaðvörp. Hér
-                        sérðu hvert hver króna fer og hvernig verkið vex.
+                        Ljósið er nýja stúdíó Omega, fyrir daglega dagskrá, viðtöl og
+                        hlaðvörp. Í 34 ár hefur Omega borið ljós inn á íslensk heimili. Nú
+                        reisum við húsið sem heldur því logandi, og hér sérðu hvernig það rís.
                     </p>
                 </Reveal>
                 <Reveal delay={0.36}>

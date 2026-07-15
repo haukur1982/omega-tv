@@ -1,8 +1,9 @@
 # Studio campaign — on-air graphics (TriCaster)
 
 Layer 1 of the broadcast package: live, self-updating graphics for the
-"Nýtt stúdíó" campaign. All of them read the same gift database as the web
-page, so the numbers update on air by themselves as gifts are entered in
+**Ljósið** campaign (Omega's new studio). All of them read the same gift
+database as the web page, so the numbers update on air by themselves as gifts
+are entered in
 `/admin/styrkir` (and later through the Rapyd gateway). Nobody remakes a
 graphic.
 

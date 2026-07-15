@@ -11,8 +11,8 @@ import GivingSection from '@/components/studio/GivingSection';
 import { getProjectProgress } from '@/lib/fundraising-db';
 
 /**
- * /studio — the vision fundraising page. First project: Nýtt stúdíó
- * (cameras, lights, audio → daily programs + podcasts).
+ * /studio — the vision fundraising page. First project: Ljósið, Omega's
+ * new studio (cameras, lights, audio → daily programs + podcasts).
  *
  * Blackmagic-release energy inside the Omega system: cinematic warm-black
  * imagery, huge Fraunces numerals, a living progress board fed by
@@ -27,9 +27,9 @@ import { getProjectProgress } from '@/lib/fundraising-db';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-    title: 'Nýtt stúdíó — Omega',
+    title: 'Ljósið, nýja stúdíó Omega',
     description:
-        'Omega ætlar að senda út daglega dagskrá og hlaðvörp. Hér sérðu hvað vantar, hvað er komið inn og hvernig þú getur tekið þátt.',
+        'Ljósið er nýja stúdíó Omega fyrir daglega dagskrá, viðtöl og hlaðvörp. Hér sérðu hvað þarf, hvað er komið inn og hvernig þú getur tekið þátt.',
     robots: { index: false, follow: false },
 };
 
@@ -87,8 +87,8 @@ export default async function StudioPage() {
                             color: 'var(--ljos)',
                         }}
                     >
-                        Stúdíó er ekki markmiðið. Þjóð sem heyrir fagnaðarerindið á hverjum
-                        degi — það er markmiðið.
+                        Ljósið er ekki markmiðið. Þjóð sem heyrir fagnaðarerindið á hverjum
+                        degi, það er markmiðið.
                     </p>
                     <p
                         style={{

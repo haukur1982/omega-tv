@@ -87,8 +87,8 @@ export default function StudioVision({ personSrc }: { personSrc?: string | null 
                                 Omega hefur sent út í 34 ár. Núna er markmiðið stærra: dagleg
                                 dagskrá sem fylgir fólki í gegnum vikuna og hlaðvörp sem ná til
                                 kynslóðar sem horfir ekki á sjónvarp. Það gerist ekki með
-                                gömlum búnaði í láni. Það gerist í stúdíói sem er byggt fyrir
-                                verkið.
+                                gömlum búnaði í láni. Það gerist í Ljósinu, stúdíói sem er
+                                byggt fyrir verkið.
                             </p>
                         </Reveal>
                         <Reveal delay={0.3}>

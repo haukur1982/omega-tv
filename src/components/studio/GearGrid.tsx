@@ -106,7 +106,7 @@ export default function GearGrid({
                         }}
                     >
                         Markmiðið er skýrt: {count} áfangar, samtals {formatMkr(goal)} Þegar
-                        síðasti áfanginn er fjármagnaður er stúdíóið tilbúið.
+                        síðasti áfanginn er fjármagnaður er Ljósið tilbúið.
                     </p>
                 </Reveal>
 

@@ -155,7 +155,7 @@ export default function ProgressBoard({
                             aria-valuemin={0}
                             aria-valuemax={goal}
                             aria-valuenow={raised}
-                            aria-label="Söfnun í nýtt stúdíó"
+                            aria-label="Söfnun fyrir Ljósið"
                             style={{
                                 position: 'relative',
                                 marginTop: '24px',

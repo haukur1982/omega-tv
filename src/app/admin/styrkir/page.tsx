@@ -184,7 +184,7 @@ export default function AdminStyrkirPage() {
         <AdminLayout>
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="admin-h1">Styrkir — Nýtt stúdíó</h1>
+                    <h1 className="admin-h1">Styrkir fyrir Ljósið</h1>
                     <p className="admin-body mt-1">
                         Skráðu gjafir um leið og þær berast í heimabankann. Þær birtast strax í framvindunni á /studio.
                     </p>

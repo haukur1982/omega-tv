@@ -117,7 +117,7 @@ export default function StudioFiller({ initial }: { initial: BroadcastStatus }) 
                 {/* Scene 1 — the mark + the line */}
                 <div style={sceneStyle('scn1')}>
                     <OmegaRing size={140} />
-                    <div style={{ ...DISPLAY, fontSize: '116px', marginTop: '44px' }}>Ljósið þarf stúdíó.</div>
+                    <div style={{ ...DISPLAY, fontSize: '116px', marginTop: '44px' }}>Kveikjum Ljósið.</div>
                 </div>
 
                 {/* Scene 2 — the vision */}

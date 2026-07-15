@@ -183,7 +183,7 @@ export default function BroadcastGraphic({
                         <div style={{ maxWidth: '1060px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '40px' }}>
                                 <OmegaRing size={64} />
-                                <span style={{ ...KICKER, fontSize: '24px' }}>Söfnun í nýtt stúdíó</span>
+                                <span style={{ ...KICKER, fontSize: '24px' }}>Söfnun fyrir Ljósið</span>
                             </div>
                             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '150px', lineHeight: 0.98, letterSpacing: '-0.01em', fontVariantNumeric: 'tabular-nums' }}>
                                 {formatNumberIs(raised)} kr.
@@ -204,7 +204,7 @@ export default function BroadcastGraphic({
                         <QrPanel />
                     </div>
                     <div style={{ position: 'absolute', left: '110px', bottom: '70px', fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 300, fontSize: '40px', color: 'var(--ljos)', opacity: 0.9 }}>
-                        Ljósið þarf stúdíó.
+                        Kveikjum Ljósið.
                     </div>
                 </div>
             ) : (
@@ -227,7 +227,7 @@ export default function BroadcastGraphic({
                         <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '14px' }}>
                                 <OmegaRing size={40} />
-                                <span style={{ ...KICKER, fontSize: '20px' }}>Söfnun í nýtt stúdíó</span>
+                                <span style={{ ...KICKER, fontSize: '20px' }}>Söfnun fyrir Ljósið</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '18px' }}>
                                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '66px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>

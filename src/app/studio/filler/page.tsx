@@ -12,7 +12,7 @@ import { computeItemStates, milestoneBoundaries } from '@/lib/fundraising-shared
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-    title: 'Omega · Söfnun (kynning)',
+    title: 'Omega · Ljósið (kynning)',
     robots: { index: false, follow: false },
 };
 
