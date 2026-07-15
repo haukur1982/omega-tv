@@ -15,15 +15,15 @@ export default function StudioVision({ personSrc }: { personSrc?: string | null 
     const outcomes = [
         {
             title: 'Dagleg dagskrá',
-            body: 'Orðsending á hverjum degi — stutt, skýr og fyrir venjulegt fólk. Stöð sem lifir daglega, ekki bara á sunnudögum.',
+            body: 'Orðsending á hverjum degi, stutt, skýr og fyrir venjulegt fólk. Stöð sem lifir daglega, ekki bara á sunnudögum.',
         },
         {
             title: 'Hlaðvörp',
-            body: 'Samtöl og kennsla þar sem þjóðin hlustar nú þegar — í símanum, í bílnum, á leið til vinnu.',
+            body: 'Samtöl og kennsla þar sem þjóðin hlustar nú þegar: í símanum, í bílnum, á leið til vinnu.',
         },
         {
             title: 'Fjölbreyttir þættir',
-            body: 'Samtalsþættir, biblíukennsla, vitnisburðir og lofgjörð — dagskrárgerð fyrir hverja kynslóð.',
+            body: 'Samtalsþættir, biblíukennsla, vitnisburðir og lofgjörð, dagskrárgerð fyrir hverja kynslóð.',
         },
     ];
 

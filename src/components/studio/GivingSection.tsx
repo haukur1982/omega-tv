@@ -180,7 +180,7 @@ export default function GivingSection() {
                             color: 'var(--moskva)',
                         }}
                     >
-                        Kortagreiðsla á netinu — stök gjöf eða mánaðarleg — er væntanleg.
+                        Kortagreiðsla á netinu, stök gjöf eða mánaðarleg, er væntanleg.
                         Framvindan uppfærist þá sjálfkrafa.
                     </p>
                 </Reveal>
@@ -200,7 +200,7 @@ export default function GivingSection() {
                         <a href="/heimakirkja" style={{ color: 'var(--nordurljos)', textDecoration: 'none' }}>
                             Heimakirkju
                         </a>{' '}
-                        beinir sóknargjaldinu þínu — sem ríkið innheimtir hvort sem er — í
+                        beinir sóknargjaldinu þínu, sem ríkið innheimtir hvort sem er, í
                         þetta starf, mánuð eftir mánuð.
                     </p>
                 </Reveal>
