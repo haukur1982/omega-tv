@@ -1,5 +1,37 @@
 # STATUS.md — Omega TV
 
+## 2026-07-15 — Ljósið (/studio) LIVE in production (Claude Code)
+
+Deployed the whole studio-fundraising package to omega.is (commit ac05631, from a clean worktree at HEAD; prod was at 8b6342f). Verified live: omega.is/studio (200, "Kveikjum Ljósið"), /studio/skjar (+?layout=bordi), /studio/filler — all 200. Page carries noindex and is unlinked (nav + sitemap), so it's public-by-URL only (Heimakirkja pattern), for the Iceland team.
+- Studio is named **Ljósið**. Founder photo + confirmed caption "Eiríkur Sigurbjörnsson · stofnandi Omega".
+- **DEMO gifts still live** (3.100.000 kr, note LIKE 'DEMO%') — intentional for the team walkthrough. MUST "clear the demo" before real giving opens.
+- Budget still PROVISIONAL (9,5 m.kr.) — Hawk/Eiríkur to set real numbers in /admin/styrkir before public launch.
+- Broadcast graphics live for the TriCaster (NDI in; docs/studio-broadcast.md). Layer 2 (Eiríkur on-camera spot) not built yet.
+
+
+## 2026-07-15 — /studio copy + layout review (Codex)
+
+Reviewed `localhost:3010/studio?fresh=2` on desktop (1440×1000) and phone (390×844). No page code changed.
+
+### Verdict
+- The campaign looks credible and cinematic. `Ljósið þarf stúdíó.` is the right headline, the warm-black image system works, and the phone layout has no horizontal overflow.
+- The main conversion problem is distance. The phone page is roughly 7,600px tall; the full progress board appears after the purpose and equipment sections, and the real giving methods land even later.
+- The six budget lines are presented once in `Búnaðurinn` and again in `Áfangarnir`. That repetition makes the middle feel longer than the story needs.
+
+### Recommended next pass
+- Put a compact progress strip directly under the hero: amount raised, 9.5m goal, percentage, and a `Styrkja` action. Keep the detailed board lower down.
+- Make the sticky-nav `Styrkja` action point to this campaign's `#styrkja`; it currently leaves `/studio` for the general `/give` page.
+- Combine the equipment list with the milestone state so each item appears once. This is the biggest mobile-length win.
+- In the giving section, lead with Aur on phone, add copy/open actions, keep bank transfer second, and reduce the unavailable card gateway to a small `væntanlegt` note until it is live.
+- Raise the contrast of progress metadata, the zero-gift message, and the Heimakirkja line. They are too dim on phone.
+- Add one real human proof point near the top: a short clip/photo from the current studio or a direct line from Hawk/Eiríkur. The page currently shows the gear well but not the people doing the work.
+
+### Copy direction
+- Keep the hero headline and the final line.
+- Tighten the hero body around the 34-year proof and the next step: `Í 34 ár hefur Omega sent fagnaðarerindið inn á íslensk heimili. Nú byggjum við stúdíó fyrir daglega dagskrá, viðtöl og hlaðvörp. Hér sérðu hvert hver króna fer og hvernig verkið vex.`
+- Replace the defensive equipment intro (`Þetta er ekki óljós sjóður`) with a factual one: `Markmiðið er skýrt: sex áfangar, samtals 9,5 m.kr. Þegar síðasti áfanginn er fjármagnaður er stúdíóið tilbúið.`
+- At zero gifts, prefer `Söfnunin er nýhafin. Gjafir birtast hér jafnóðum.` over `Hún gæti verið þín.` Better still: launch publicly after the first real gift is recorded.
+
 ## 2026-07-15 — /studio vision fundraising page (Claude Code)
 
 Built the whole studio-fundraising system in one push (Hawk's ask: wow factor, progress people can watch, online giving ready):
