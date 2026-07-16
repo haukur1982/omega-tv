@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Reveal from './Reveal';
 import {
     computeItemStates,
     formatNumberIs,
+    formatMkr,
     type ProjectItem,
 } from '@/lib/fundraising-shared';
 
@@ -27,6 +28,36 @@ const FEE_RATE = 0.025;
 
 const TIERS = [2500, 5000, 10000, 20000, 50000, 100000];
 
+// Each column of light is one real gear milestone — named + iconed so you
+// can read what's funded and toward what. Keyed on the DB item key, with a
+// first-word fallback for any future items.
+const MAX_BAR = 320;
+
+const PILLAR_META: Record<string, string> = {
+    myndavelar: 'Myndavélar',
+    ljos: 'Ljós',
+    hljod: 'Hljóð',
+    stjornbord: 'Útsending',
+    leikmynd: 'Leikmynd',
+    uppsetning: 'Uppsetning',
+};
+
+function PillarIcon({ k }: { k: string }) {
+    const paths: Record<string, ReactNode> = {
+        myndavelar: <><rect x="3" y="7" width="12" height="10" rx="2" /><path d="M15 10.5 21 7v10l-6-3.5" /></>,
+        ljos: <><path d="M9.5 18.5h5M10.5 21.5h3" /><path d="M12 2.5a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2v.2h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 2.5Z" /></>,
+        hljod: <><rect x="9" y="2.5" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4M8.5 21.5h7" /></>,
+        stjornbord: <><path d="M4 7h16M4 12h16M4 17h16" /><rect x="7" y="5.3" width="3.4" height="3.4" rx="1" /><rect x="14" y="10.3" width="3.4" height="3.4" rx="1" /><rect x="9" y="15.3" width="3.4" height="3.4" rx="1" /></>,
+        leikmynd: <><rect x="3" y="4.5" width="18" height="15" rx="2" /><path d="M3 15l4.5-4 3 2.2 4-3.2L21 17" /></>,
+        uppsetning: <><path d="M13 2.5 5.5 13H10l-1 8.5L17 10h-4.5z" /></>,
+    };
+    return (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            {paths[k] ?? <circle cx="12" cy="12" r="8" />}
+        </svg>
+    );
+}
+
 export default function GivingSection({
     raised,
     goal,
@@ -41,13 +72,19 @@ export default function GivingSection({
     const [custom, setCustom] = useState('');
     const [coverFee, setCoverFee] = useState(false);
     const [methodsOpen, setMethodsOpen] = useState(false);
+    const [lit, setLit] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => setLit(true), 120);
+        return () => clearTimeout(t);
+    }, []);
 
     const pct = goal > 0 ? Math.floor((raised / goal) * 100) : 0;
     const eff = custom ? Math.max(0, parseInt(custom.replace(/\D/g, ''), 10) || 0) : amount;
     const fee = Math.round(eff * FEE_RATE);
     const total = coverFee ? eff + fee : eff;
 
-    // Columns of light = the real gear milestones, filled cumulatively.
+    // Columns of light = the real gear milestones, filled cumulatively. Each
+    // carries its name, cost and funded state so the pillar reads on its own.
     const states = computeItemStates(items, raised);
     const maxA = Math.max(1, ...items.map((i) => i.amount_isk));
     let cum = 0;
@@ -55,7 +92,17 @@ export default function GivingSection({
         const start = cum;
         cum += it.amount_isk;
         const fill = Math.max(0, Math.min(1, (raised - start) / it.amount_isk));
-        return { h: 0.42 + 0.58 * (it.amount_isk / maxA), fill };
+        const funded = raised >= cum;
+        const active = !funded && raised > start;
+        return {
+            key: it.key,
+            short: PILLAR_META[it.key] ?? it.label.split(' ')[0],
+            amount: it.amount_isk,
+            barH: Math.round((0.42 + 0.58 * (it.amount_isk / maxA)) * MAX_BAR),
+            fill,
+            funded,
+            active,
+        };
     });
 
     return (
@@ -105,11 +152,16 @@ export default function GivingSection({
                                     {formatNumberIs(raised)} kr.
                                     <span> af {formatNumberIs(goal)} kr. · {pct}%</span>
                                 </div>
-                                <div className="cols" aria-hidden>
+                                <div className="pillars">
                                     {cols.map((c, i) => (
-                                        <span key={i} className="col" style={{ height: `${c.h * 100}%` }}>
-                                            <span className="f" style={{ height: `${c.fill * 100}%` }} />
-                                        </span>
+                                        <div key={c.key} className={`pillar ${c.funded ? 'funded' : c.active ? 'active' : 'pending'}`}>
+                                            <span className="picon"><PillarIcon k={c.key} /></span>
+                                            <span className="pbar" style={{ height: c.barH }}>
+                                                <span className="pfill" style={{ height: lit ? `${c.fill * 100}%` : '0%', transitionDelay: `${i * 90}ms` }} />
+                                            </span>
+                                            <span className="plabel">{c.short}</span>
+                                            <span className="pamt">{formatMkr(c.amount)}</span>
+                                        </div>
                                     ))}
                                 </div>
                                 <div className="miles">
@@ -209,11 +261,17 @@ const CSS = `
 .give-prog .lab{font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--moskva)}
 .give-prog .num{font-family:var(--font-serif);font-size:clamp(26px,3vw,34px);color:var(--ljos);font-variant-numeric:tabular-nums;margin-top:6px}
 .give-prog .num span{font-family:var(--font-sans);font-size:14px;color:var(--moskva)}
-.give-prog .cols{display:flex;align-items:flex-end;gap:12px;height:335px;margin-top:22px;max-width:460px}
-.give-prog .col{flex:1;position:relative;border-radius:7px 7px 3px 3px;overflow:hidden;background:rgba(20,18,15,0.5);border:1px solid rgba(246,242,234,0.12)}
-.give-prog .col .f{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#F4C57E,#E9A860 30%,#C6853B);box-shadow:0 0 24px rgba(233,168,96,0.55)}
-.give-prog .col .f::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#FFF3DE;box-shadow:0 0 11px 2px rgba(255,240,210,0.8)}
-.give-prog .miles{margin-top:14px;font-family:var(--font-sans);font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gull)}
+.give-prog .pillars{display:flex;align-items:flex-end;gap:14px;margin-top:24px;max-width:480px}
+.give-prog .pillar{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:9px}
+.give-prog .picon{color:var(--moskva);transition:color .5s ease}
+.give-prog .pbar{position:relative;width:100%;border-radius:7px 7px 3px 3px;overflow:hidden;background:rgba(20,18,15,0.5);border:1px solid rgba(246,242,234,0.12)}
+.give-prog .pfill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#F4C57E,#E9A860 30%,#C6853B);box-shadow:0 0 24px rgba(233,168,96,0.55);transition:height 1.1s cubic-bezier(0.2,0,0.1,1)}
+.give-prog .pfill::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#FFF3DE;box-shadow:0 0 11px 2px rgba(255,240,210,0.85)}
+.give-prog .plabel{font-family:var(--font-sans);font-size:11.5px;font-weight:600;color:var(--moskva);text-align:center;line-height:1.2}
+.give-prog .pamt{font-family:var(--font-sans);font-size:11px;font-variant-numeric:tabular-nums;color:var(--moskva);text-align:center}
+.give-prog .pillar.funded .picon,.give-prog .pillar.active .picon,.give-prog .pillar.funded .plabel,.give-prog .pillar.active .plabel{color:var(--kerti)}
+.give-prog .pillar.funded .pamt,.give-prog .pillar.active .pamt{color:var(--gull)}
+.give-prog .miles{margin-top:18px;font-family:var(--font-sans);font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gull)}
 
 .give-card{background:var(--skra);color:var(--skra-djup);border-radius:16px;padding:28px 28px 24px;box-shadow:0 40px 90px -30px rgba(0,0,0,0.85)}
 .give-card .card-head{font-family:var(--font-display);font-weight:400;font-size:22px;color:var(--skra-djup);margin-bottom:18px}
@@ -241,6 +299,8 @@ const CSS = `
   .give-grid{grid-template-columns:1fr;gap:36px}
   .give-card{padding:24px 20px 22px}
   .give-card .amts{grid-template-columns:repeat(2,1fr)}
-  .give-prog .cols{max-width:none}
+  .give-prog .pillars{max-width:none;gap:9px}
+  .give-prog .plabel{font-size:10.5px}
+  .give-prog .pamt{font-size:10px}
 }
 `;
