@@ -1,5 +1,3 @@
-import { existsSync } from 'node:fs';
-import path from 'node:path';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import StudioHero from '@/components/studio/StudioHero';
@@ -35,18 +33,13 @@ export const metadata = {
 
 export default async function StudioPage() {
     const data = await getProjectProgress('nytt-studio');
-    // The real-person moment renders only when the photo actually exists —
-    // drop it at public/studio/eirikur.jpg (see StudioVision).
-    const personSrc = existsSync(path.join(process.cwd(), 'public/studio/eirikur.jpg'))
-        ? '/studio/eirikur.jpg'
-        : null;
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
             <Navbar styrkjaHref="#styrkja" />
             <StudioHero />
             {data && <HeroProgressStrip raised={data.raised_isk} goal={data.project.goal_isk} />}
-            <StudioVision personSrc={personSrc} />
+            <StudioVision />
             {data && (
                 <GivingSection
                     raised={data.raised_isk}
