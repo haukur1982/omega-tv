@@ -64,7 +64,13 @@ export default async function StudioPage() {
                     updates={data.updates}
                 />
             )}
-            <GivingSection />
+            {data && (
+                <GivingSection
+                    raised={data.raised_isk}
+                    goal={data.project.goal_isk}
+                    items={data.project.items}
+                />
+            )}
 
             {/* Closing — quiet, institutional, honest */}
             <section style={{ background: 'var(--mold)', padding: 'clamp(56px, 8vw, 96px) 0' }}>
