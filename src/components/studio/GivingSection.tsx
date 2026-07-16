@@ -196,7 +196,7 @@ const CSS = `
 .give-h2{margin:16px 0 12px;font-family:var(--font-display);font-weight:300;font-size:clamp(30px,3.6vw,48px);line-height:1.12;color:var(--ljos);max-width:24ch}
 .give-lead{margin:0 0 44px;font-family:var(--font-serif);font-size:17px;line-height:1.6;color:var(--moskva);max-width:52ch}
 .give-grid{display:grid;grid-template-columns:1fr 460px;gap:clamp(32px,4vw,56px);align-items:stretch}
-.give-left{display:flex;flex-direction:column;justify-content:space-between;gap:32px}
+.give-left{display:flex;flex-direction:column;justify-content:space-between;gap:28px}
 
 .give-chip{display:inline-flex;align-items:center;gap:13px;background:rgba(36,32,25,0.55);backdrop-filter:blur(8px);border:1px solid rgba(246,242,234,0.12);border-radius:100px;padding:7px 20px 7px 7px}
 .give-chip .av{position:relative;width:44px;height:44px;border-radius:50%;overflow:hidden;flex:0 0 auto}
@@ -209,7 +209,7 @@ const CSS = `
 .give-prog .lab{font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--moskva)}
 .give-prog .num{font-family:var(--font-serif);font-size:clamp(26px,3vw,34px);color:var(--ljos);font-variant-numeric:tabular-nums;margin-top:6px}
 .give-prog .num span{font-family:var(--font-sans);font-size:14px;color:var(--moskva)}
-.give-prog .cols{display:flex;align-items:flex-end;gap:12px;height:200px;margin-top:22px;max-width:460px}
+.give-prog .cols{display:flex;align-items:flex-end;gap:12px;height:335px;margin-top:22px;max-width:460px}
 .give-prog .col{flex:1;position:relative;border-radius:7px 7px 3px 3px;overflow:hidden;background:rgba(20,18,15,0.5);border:1px solid rgba(246,242,234,0.12)}
 .give-prog .col .f{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#F4C57E,#E9A860 30%,#C6853B);box-shadow:0 0 24px rgba(233,168,96,0.55)}
 .give-prog .col .f::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:#FFF3DE;box-shadow:0 0 11px 2px rgba(255,240,210,0.8)}
