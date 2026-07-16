@@ -48,6 +48,13 @@ export default async function StudioPage() {
             {data && <HeroProgressStrip raised={data.raised_isk} goal={data.project.goal_isk} />}
             <StudioVision personSrc={personSrc} />
             {data && (
+                <GivingSection
+                    raised={data.raised_isk}
+                    goal={data.project.goal_isk}
+                    items={data.project.items}
+                />
+            )}
+            {data && (
                 <GearGrid
                     items={data.project.items}
                     goal={data.project.goal_isk}
@@ -62,13 +69,6 @@ export default async function StudioPage() {
                     items={data.project.items}
                     gifts={data.recent_gifts}
                     updates={data.updates}
-                />
-            )}
-            {data && (
-                <GivingSection
-                    raised={data.raised_isk}
-                    goal={data.project.goal_isk}
-                    items={data.project.items}
                 />
             )}
 
