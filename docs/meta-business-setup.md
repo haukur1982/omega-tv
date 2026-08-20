@@ -83,3 +83,28 @@ decline. Omega's ad account, his hands on the wheel via partner access.
 - Birkir = **Partner** with task permissions. Never admin, never owner.
 - Ad spend billed to **Omega's** card, in Omega's ad account.
 - Two admins (Hawk + Eiríkur), 2FA on.
+
+## Gotcha: auto-restriction on a brand-new portfolio (hit 2026-08-20)
+
+Minutes after creating the portfolio + claiming the page + opening the
+partner screens, Meta auto-restricted the business: "created or used with an
+automation that doesn't follow our rules" (Advertising Standards → Account
+Integrity). No ads, no pixel, no boosting, no managing ad assets.
+
+This is a routine false positive on new portfolios, especially when the
+creating profile already belongs to several other portfolios and the setup
+steps happen in a rapid burst.
+
+**Do:** click *Request review* once (179-day window; usually clears in
+24–48h). Tell the agency — they see this constantly.
+
+**Don't:** create a second portfolio, or resubmit repeatedly. Meta reads
+that as evasion and it can escalate to a permanent ban.
+
+**Note:** the Facebook Page itself is not restricted by this — posting and
+followers are unaffected. Only the portfolio's advertising capabilities.
+
+**Interim fallback if review drags:** the agency uses *Request shared access
+to a Facebook Page* from their own portfolio (access only, no ownership
+transfer). Accept the tradeoff knowingly: ads then run from their ad
+account, so ad history/audiences accrue on their side. Temporary only.
