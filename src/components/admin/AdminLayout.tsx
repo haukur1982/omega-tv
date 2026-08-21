@@ -28,6 +28,7 @@ import {
     Sunrise,
     ScrollText,
     HandCoins,
+    BookMarked,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OmegaMark } from '@/components/brand/OmegaMark';
@@ -87,6 +88,7 @@ const navGroups: {
     {
         title: 'Ritstjórn',
         items: [
+            { href: '/admin/hugleidingar', label: 'Hugleiðingar', icon: BookMarked },
             { href: '/admin/articles', label: 'Greinar', icon: FileText },
             // Fréttir hidden until the news translation pipeline is built (table
             // not yet created; the real feature is EN→Gemini→IS with sourcing).
