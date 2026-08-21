@@ -6,6 +6,8 @@ import {
     updateDevotional,
     getDevotionalProgress,
     recordCorrections,
+    getNeighbours,
+    listGlossary,
 } from '@/lib/devotional-db';
 
 /**
@@ -26,9 +28,13 @@ export async function GET(request: Request) {
 
     const slug = new URL(request.url).searchParams.get('slug');
     if (slug) {
-        const item = await getDevotionalBySlug(slug);
+        const [item, nav, glossary] = await Promise.all([
+            getDevotionalBySlug(slug),
+            getNeighbours(slug),
+            listGlossary(),
+        ]);
         if (!item) return NextResponse.json({ error: 'Fannst ekki' }, { status: 404 });
-        return NextResponse.json({ success: true, item });
+        return NextResponse.json({ success: true, item, nav, glossary });
     }
 
     const [items, progress] = await Promise.all([listAllDevotionals(), getDevotionalProgress()]);

@@ -178,3 +178,67 @@ export async function getCorrectionCount(): Promise<number> {
         .select('id', { count: 'exact', head: true });
     return count ?? 0;
 }
+
+/* ── glossary ──────────────────────────────────────────────────────────── */
+
+export interface GlossaryRow {
+    id: string;
+    term_en: string;
+    term_is: string;
+    variants_is: string[];
+    note: string | null;
+    active: boolean;
+}
+
+export async function listGlossary(activeOnly = true): Promise<GlossaryRow[]> {
+    let q = sb.from('devotional_glossary').select('id, term_en, term_is, variants_is, note, active');
+    if (activeOnly) q = q.eq('active', true);
+    const { data } = await q.order('term_en');
+    return (data ?? []) as GlossaryRow[];
+}
+
+export async function upsertGlossaryTerm(
+    term: { id?: string; term_en: string; term_is: string; variants_is?: string[]; note?: string | null; active?: boolean },
+): Promise<{ ok: boolean; error?: string }> {
+    const row = {
+        term_en: term.term_en.trim(),
+        term_is: term.term_is.trim(),
+        variants_is: (term.variants_is ?? []).map((v) => v.trim()).filter(Boolean),
+        note: term.note?.trim() || null,
+        active: term.active !== false,
+    };
+    const { error } = term.id
+        ? await sb.from('devotional_glossary').update(row).eq('id', term.id)
+        : await sb.from('devotional_glossary').upsert(row, { onConflict: 'term_en' });
+    return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+export async function deleteGlossaryTerm(id: string): Promise<boolean> {
+    const { error } = await sb.from('devotional_glossary').delete().eq('id', id);
+    return !error;
+}
+
+/**
+ * The pieces immediately before and after this one in reading order, so the
+ * reviewer moves straight from day 1 morning to day 1 evening without
+ * returning to the index. Order is (day, slot) with morning first.
+ */
+export async function getNeighbours(
+    slug: string,
+): Promise<{ prev: string | null; next: string | null; position: number; total: number }> {
+    const { data } = await sb
+        .from('devotionals')
+        .select('slug, day, slot')
+        .order('day')
+        .order('slot', { ascending: false }); // 'morning' > 'evening' alphabetically reversed
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows = (data ?? []) as any[];
+    const idx = rows.findIndex((r) => r.slug === slug);
+    if (idx === -1) return { prev: null, next: null, position: 0, total: rows.length };
+    return {
+        prev: idx > 0 ? rows[idx - 1].slug : null,
+        next: idx < rows.length - 1 ? rows[idx + 1].slug : null,
+        position: idx + 1,
+        total: rows.length,
+    };
+}
