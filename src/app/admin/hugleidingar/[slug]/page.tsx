@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ExternalLink, Save, Check, Sparkles, AlertTriangle } from 'lucide-react';
+import {
+    ArrowLeft, ExternalLink, Save, Check, Sparkles, AlertTriangle, Volume2, Square,
+} from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { authedFetch } from '@/lib/admin-fetch';
 import { flagParagraph, type Flag } from '@/lib/devotional-review';
@@ -10,11 +12,16 @@ import { flagParagraph, type Flag } from '@/lib/devotional-review';
 /**
  * /admin/hugleidingar/[slug] — bilingual review desk for one devotional.
  *
- * The English source sits beside every Icelandic paragraph (the snapshot is
- * paragraph-aligned 1:1), flagged paragraphs are marked so 40+ paragraphs
- * don't need equal attention, and each paragraph can ask for a second
- * opinion against its source. The reviewer accepts or ignores — the
- * judgement stays human, which is the whole point of the read.
+ * Built for wording, not just error-hunting:
+ *  - the English source sits beside every Icelandic paragraph (1:1 aligned)
+ *  - flags point at the paragraphs worth a second look
+ *  - the assistant returns THREE renderings at different registers, so the
+ *    reviewer chooses rather than judges a single option
+ *  - a free-form instruction box lets him ask in his own words
+ *  - each paragraph can be read aloud — the ear catches clunky Icelandic
+ *    that the eye lets through, and this reviewer is a broadcaster
+ *  - every change is recorded server-side as house-voice memory, so the
+ *    suggestions drift toward how HE writes
  */
 
 const SLOT_IS: Record<string, string> = { morning: 'Morgunn', evening: 'Kvöld' };
@@ -27,7 +34,8 @@ interface Item {
     reviewed: boolean; review_note: string | null; status: 'draft' | 'published';
 }
 
-interface Suggestion { text: string; note: string; changed: boolean }
+interface SuggestOption { label: string; text: string }
+interface Suggestion { options: SuggestOption[]; note: string; learnedFrom: number }
 
 const NARROW_CSS =
     '@media (max-width: 1100px){ .devo-row{ grid-template-columns: minmax(0,1fr) !important; } ' +
@@ -48,6 +56,40 @@ export default function ReviewDevotionalPage() {
     const [notice, setNotice] = useState<string | null>(null);
     const [busyIdx, setBusyIdx] = useState<number | null>(null);
     const [sugg, setSugg] = useState<Record<number, Suggestion>>({});
+    const [instr, setInstr] = useState<Record<number, string>>({});
+    const [openInstr, setOpenInstr] = useState<Record<number, boolean>>({});
+    const [usedSuggestion, setUsedSuggestion] = useState(false);
+    const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
+    const [voice, setVoice] = useState<SpeechSynthesisVoice | null>(null);
+
+    // Icelandic system voice, if the machine has one (macOS usually does).
+    useEffect(() => {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
+        const pick = () => {
+            const vs = window.speechSynthesis.getVoices();
+            setVoice(vs.find((v) => v.lang?.toLowerCase().startsWith('is')) ?? null);
+        };
+        pick();
+        window.speechSynthesis.addEventListener('voiceschanged', pick);
+        return () => {
+            window.speechSynthesis.removeEventListener('voiceschanged', pick);
+            window.speechSynthesis.cancel();
+        };
+    }, []);
+
+    const speak = (i: number, text: string) => {
+        if (!window.speechSynthesis) return;
+        if (speakingIdx === i) { window.speechSynthesis.cancel(); setSpeakingIdx(null); return; }
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        if (voice) u.voice = voice;
+        u.lang = 'is-IS';
+        u.rate = 0.95;
+        u.onend = () => setSpeakingIdx(null);
+        u.onerror = () => setSpeakingIdx(null);
+        setSpeakingIdx(i);
+        window.speechSynthesis.speak(u);
+    };
 
     const load = useCallback(async () => {
         setIsLoading(true);
@@ -61,6 +103,7 @@ export default function ReviewDevotionalPage() {
             setParas(it.body_is);
             setNote(it.review_note ?? '');
             setSugg({});
+            setUsedSuggestion(false);
         } catch (e) {
             setNotice(e instanceof Error ? e.message : 'Tókst ekki að sækja');
         }
@@ -96,6 +139,7 @@ export default function ReviewDevotionalPage() {
                     title_is: title,
                     body_is: paras.map((p) => p.trim()).filter(Boolean),
                     review_note: note,
+                    origin: usedSuggestion ? 'edited' : 'manual',
                     ...extra,
                 }),
             });
@@ -118,11 +162,18 @@ export default function ReviewDevotionalPage() {
             const res = await authedFetch('/api/admin/devotionals/suggest', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ en: item.body_en?.[i] ?? '', is: paras[i] }),
+                body: JSON.stringify({
+                    en: item.body_en?.[i] ?? '',
+                    is: paras[i],
+                    instruction: instr[i] ?? '',
+                }),
             });
             const d = await res.json();
             if (!res.ok) throw new Error(d.error || `Villa ${res.status}`);
-            setSugg((s) => ({ ...s, [i]: { text: d.suggestion, note: d.note, changed: d.changed } }));
+            setSugg((s) => ({
+                ...s,
+                [i]: { options: d.options ?? [], note: d.note ?? '', learnedFrom: d.learnedFrom ?? 0 },
+            }));
         } catch (e) {
             setNotice(e instanceof Error ? e.message : 'Tillaga mistókst');
         }
@@ -179,11 +230,11 @@ export default function ReviewDevotionalPage() {
                     >
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: flaggedCount ? 'var(--admin-accent)' : 'var(--admin-text-secondary)' }}>
                             <AlertTriangle size={15} />
-                            {flaggedCount === 0 ? 'Engar ábendingar' : `${flaggedCount} málsgreinar með ábendingu`}
+                            {flaggedCount === 0 ? 'Engar ábendingar' : `${flaggedCount} með ábendingu`}
                         </span>
                         <label className="admin-body" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', cursor: 'pointer' }}>
                             <input type="checkbox" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} />
-                            Sýna aðeins ábendingar
+                            Aðeins ábendingar
                         </label>
                         <div style={{ flex: 1 }} />
                         {dirty && <span className="admin-body" style={{ fontSize: '0.8rem', opacity: 0.75 }}>óvistað</span>}
@@ -232,14 +283,40 @@ export default function ReviewDevotionalPage() {
                                         ))}
                                         <div style={{ flex: 1 }} />
                                         <button
+                                            onClick={() => speak(i, paras[i])}
+                                            title={voice ? 'Lesa upphátt' : 'Engin íslensk rödd fannst í þessu tæki'}
+                                            className="admin-btn admin-btn-secondary"
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.78rem', padding: '0.3rem 0.55rem' }}
+                                        >
+                                            {speakingIdx === i ? <Square size={12} /> : <Volume2 size={13} />}
+                                            {speakingIdx === i ? 'Stopp' : 'Hlusta'}
+                                        </button>
+                                        <button
+                                            onClick={() => setOpenInstr((o) => ({ ...o, [i]: !o[i] }))}
+                                            className="admin-btn admin-btn-secondary"
+                                            style={{ fontSize: '0.78rem', padding: '0.3rem 0.55rem' }}
+                                        >
+                                            Ósk
+                                        </button>
+                                        <button
                                             onClick={() => askSuggestion(i)}
                                             disabled={busyIdx === i}
                                             className="admin-btn admin-btn-secondary"
                                             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', padding: '0.3rem 0.6rem' }}
                                         >
-                                            <Sparkles size={13} /> {busyIdx === i ? 'Hugsa…' : 'Tillaga'}
+                                            <Sparkles size={13} /> {busyIdx === i ? 'Hugsa…' : 'Tillögur'}
                                         </button>
                                     </div>
+
+                                    {openInstr[i] && (
+                                        <input
+                                            value={instr[i] ?? ''}
+                                            onChange={(e) => setInstr((x) => ({ ...x, [i]: e.target.value }))}
+                                            onKeyDown={(e) => { if (e.key === 'Enter') askSuggestion(i); }}
+                                            placeholder="Segðu hvað þú vilt — t.d. „of stíft, mýkri“ eða „eins og úr prédikunarstól“"
+                                            style={{ ...inputStyle, marginBottom: '0.6rem' }}
+                                        />
+                                    )}
 
                                     <div className="devo-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: '1rem' }}>
                                         <div
@@ -259,30 +336,47 @@ export default function ReviewDevotionalPage() {
                                     </div>
 
                                     {s && (
-                                        <div style={{ marginTop: '0.75rem', padding: '0.75rem 0.9rem', borderRadius: '9px', background: 'var(--admin-bg)', border: '1px solid rgba(233,168,96,0.35)' }}>
-                                            <div className="admin-label" style={{ marginBottom: '0.35rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                <Sparkles size={12} /> Tillaga {s.changed ? '' : '(engin breyting lögð til)'}
-                                            </div>
-                                            <p style={{ margin: '0 0 0.5rem', fontFamily: 'var(--font-serif, Georgia, serif)', fontSize: '0.98rem', lineHeight: 1.7 }}>{s.text}</p>
+                                        <div style={{ marginTop: '0.75rem', display: 'grid', gap: '0.5rem' }}>
                                             {s.note && (
-                                                <p className="admin-body" style={{ margin: '0 0 0.6rem', fontSize: '0.82rem', opacity: 0.8 }}>{s.note}</p>
+                                                <p className="admin-body" style={{ margin: 0, fontSize: '0.82rem', opacity: 0.8 }}>
+                                                    {s.note}
+                                                    {s.learnedFrom > 0 && (
+                                                        <span style={{ opacity: 0.6 }}> · lærir af fyrri lagfæringum þínum</span>
+                                                    )}
+                                                </p>
                                             )}
-                                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <button
-                                                    onClick={() => { setPara(i, s.text); dropSuggestion(i); }}
-                                                    className="admin-btn admin-btn-primary"
-                                                    style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem' }}
-                                                >
-                                                    Nota
-                                                </button>
-                                                <button
-                                                    onClick={() => dropSuggestion(i)}
-                                                    className="admin-btn admin-btn-secondary"
-                                                    style={{ fontSize: '0.78rem', padding: '0.3rem 0.7rem' }}
-                                                >
-                                                    Hafna
-                                                </button>
-                                            </div>
+                                            {s.options.map((o, k) => (
+                                                <div key={k} style={{ padding: '0.7rem 0.85rem', borderRadius: '9px', background: 'var(--admin-bg)', border: '1px solid rgba(233,168,96,0.3)' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                                                        <span className="admin-label" style={{ margin: 0 }}>{o.label}</span>
+                                                        <div style={{ flex: 1 }} />
+                                                        <button
+                                                            onClick={() => speak(1000 + i * 10 + k, o.text)}
+                                                            className="admin-btn admin-btn-secondary"
+                                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.72rem', padding: '0.2rem 0.45rem' }}
+                                                        >
+                                                            {speakingIdx === 1000 + i * 10 + k ? <Square size={11} /> : <Volume2 size={12} />}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { setPara(i, o.text); setUsedSuggestion(true); dropSuggestion(i); }}
+                                                            className="admin-btn admin-btn-primary"
+                                                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem' }}
+                                                        >
+                                                            Nota
+                                                        </button>
+                                                    </div>
+                                                    <p style={{ margin: 0, fontFamily: 'var(--font-serif, Georgia, serif)', fontSize: '0.97rem', lineHeight: 1.7 }}>
+                                                        {o.text}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                            <button
+                                                onClick={() => dropSuggestion(i)}
+                                                className="admin-btn admin-btn-secondary"
+                                                style={{ fontSize: '0.75rem', padding: '0.25rem 0.65rem', justifySelf: 'start' }}
+                                            >
+                                                Loka tillögum
+                                            </button>
                                         </div>
                                     )}
                                 </div>

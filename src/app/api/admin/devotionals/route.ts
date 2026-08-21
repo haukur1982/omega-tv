@@ -5,6 +5,7 @@ import {
     getDevotionalBySlug,
     updateDevotional,
     getDevotionalProgress,
+    recordCorrections,
 } from '@/lib/devotional-db';
 
 /**
@@ -88,6 +89,23 @@ export async function PATCH(request: Request) {
 
     if (Object.keys(patch).length === 0) {
         return NextResponse.json({ error: 'Ekkert til að uppfæra' }, { status: 400 });
+    }
+
+    // Style memory: capture what the reviewer actually changed, paragraph by
+    // paragraph, before the write. These pairs teach the suggestion assistant
+    // the house voice over time.
+    if (Array.isArray(patch.body_is)) {
+        const before = await getDevotionalBySlug(String(body.slug ?? ''));
+        if (before) {
+            await recordCorrections(
+                before.id,
+                before.body_is,
+                patch.body_is as string[],
+                before.body_en,
+                typeof body.instruction === 'string' ? body.instruction : undefined,
+                body.origin === 'accepted' || body.origin === 'edited' ? body.origin : 'manual',
+            );
+        }
     }
 
     const res = await updateDevotional(id, patch);

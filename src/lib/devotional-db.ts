@@ -21,6 +21,7 @@ export interface Devotional {
     title_is: string;
     title_en: string | null;
     body_is: string[];
+    body_en: string[];
     scripture_refs: string[];
     source_url: string | null;
     reviewed: boolean;
@@ -33,7 +34,7 @@ export interface Devotional {
 const sb = supabaseAdmin as any;
 
 const COLS =
-    'id, collection, day, slot, slug, title_is, title_en, body_is, scripture_refs, source_url, reviewed, reviewed_at, review_note, status';
+    'id, collection, day, slot, slug, title_is, title_en, body_is, body_en, scripture_refs, source_url, reviewed, reviewed_at, review_note, status';
 
 /** Reykjavík day-of-month — the site's clock, not the server's. */
 export function reykjavikDayOfMonth(d: Date = new Date()): number {
@@ -132,3 +133,48 @@ export const DEVOTIONAL_ATTRIBUTION = {
         'Gríski grunntextinn er KJTR, Center for New Testament Restoration (Alan Bunning), notaður samkvæmt CC BY 4.0. Hebreski grunntextinn er Westminster Leningrad Codex.',
     author: 'Hugleiðingar eftir Wade E. Taylor · Parousia Ministries',
 } as const;
+
+/**
+ * Store what the reviewer changed, paragraph by paragraph.
+ *
+ * Only genuine differences are kept, and only where the paragraph existed
+ * before — so re-ordering or appending doesn't pollute the style record.
+ * These pairs are read back by the suggestion assistant as examples of the
+ * house voice, which is what makes the editor improve as it is used.
+ */
+export async function recordCorrections(
+    devotionalId: string,
+    before: string[],
+    after: string[],
+    sourceEn: string[] = [],
+    instruction?: string,
+    origin: 'manual' | 'accepted' | 'edited' = 'manual',
+): Promise<number> {
+    const rows: Record<string, unknown>[] = [];
+    const n = Math.min(before.length, after.length);
+    for (let i = 0; i < n; i++) {
+        const b = (before[i] ?? '').trim();
+        const a = (after[i] ?? '').trim();
+        if (!b || !a || b === a) continue;
+        rows.push({
+            devotional_id: devotionalId,
+            paragraph_index: i,
+            source_en: sourceEn[i] ?? null,
+            before_is: b,
+            after_is: a,
+            instruction: instruction ?? null,
+            origin,
+        });
+    }
+    if (rows.length === 0) return 0;
+    const { error } = await sb.from('devotional_corrections').insert(rows);
+    return error ? 0 : rows.length;
+}
+
+/** How much house-voice memory has been collected so far. */
+export async function getCorrectionCount(): Promise<number> {
+    const { count } = await sb
+        .from('devotional_corrections')
+        .select('id', { count: 'exact', head: true });
+    return count ?? 0;
+}
