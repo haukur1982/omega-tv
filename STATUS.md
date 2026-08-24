@@ -1,5 +1,74 @@
 # STATUS.md — Omega TV
 
+## 2026-08-21 — Hugleiðingar: BookForge intake + the reading room (Claude Code)
+
+**LIVE on omega.is** (admin only, public side not built yet).
+
+Built the devotional pipeline end to end, from BookForge snapshot to a review
+desk Hawk will use every morning:
+- **Intake**: `devotionals` table (31-day cycle x morning/evening, RLS-locked,
+  status+reviewed gate enforced in the API). All 62 Wade Taylor pieces
+  imported with English source paragraph-aligned 1:1 (`body_en`).
+  `scripts/import-devotionals.mjs` is idempotent and will NOT clobber
+  reviewer edits (learned the hard way — it did once; use --force to restore
+  from snapshot deliberately).
+- **Auto-repair**: 185 scripture citations that lost their Bible book name in
+  translation were restored (`scripts/fix-scripture-refs.mjs`). 56 damaged
+  pieces -> 17; the rest are ambiguous by design and left for the human.
+- **The reading room** (`/admin/hugleidingar/[slug]`): vellum + Newsreader at
+  reading measure, paragraphs ARE the interface (borderless auto-growing
+  fields), English opens per-paragraph on demand, flags reduce to a margin
+  dot. Draft autosave + restore, warn-on-leave, per-paragraph revert, ⌘S,
+  ⌥↓ between marks, focus mode.
+- **Wording tools**: three registers (nákvæmt/eðlilegt/prédikun) with
+  word-level diff, free-form "Ósk" instruction, read-aloud (system is-IS
+  voice), and **style memory** — `devotional_corrections` records every
+  before/after and feeds recent pairs back to the assistant so suggestions
+  drift toward Hawk's voice.
+- **Glossary** (`/admin/hugleidingar/hugtok`): lock a theological term once,
+  every paragraph whose English uses it gets flagged when the agreed
+  Icelandic is missing. EMPTY — needs the term list from Iceland.
+- **The month** (`/admin/hugleidingar`): vellum 31-day grid, marks light as
+  pieces are read, "Halda áfram · dagur N" resumes where he stopped.
+
+**State:** 62 pieces, 0 reviewed, 0 published. Hawk starts reading now.
+**Workload measured:** 1,851 paragraphs, only 61 flagged (~3%).
+
+**Open / next:**
+- Public side NOT built: devotional pages, signup landing page, 07:00 sender.
+  Deliberately after the read — nothing can send until pieces are reviewed.
+- Suggestion model is gemini-3.5-flash; Hawk was using Gemini Pro manually.
+  Offered upgrading the endpoint to Pro (better for literary Icelandic,
+  negligible cost at this volume) — awaiting his word.
+- Five open questions sent to Iceland as an artifact (evening email?, day 32?,
+  start at 30 reviewed?, second reviewer?, locked terms?).
+- Untested: iPad/touch, and whether Hawk's Mac has an Icelandic TTS voice.
+
+**Also this session:** production Resend key finally swapped (site can send
+mail now), Meta Business Portfolio created + page claimed (auto-restricted by
+Meta's bot, review requested — see docs/meta-business-setup.md), plan 05
+traffic-readiness written, traffic-vs-retention research pack archived.
+
+
+## 2026-07-16 — `_mock-give2` giving-section review (Codex)
+
+Reviewed `localhost:3010/_mock-give2.html` as a proposed addition to `/studio`. No page code changed.
+
+- Strong direction: the Icelandic homes at night, Eiríkur video prompt, visible progress, monthly/stök choice, preset amounts, and payment CTA make a convincing final conversion section.
+- Do **not** add the mock whole. Its `Kveikjum Ljósið` headline and 34-year introduction repeat the live `/studio` hero almost word for word. Keep the existing hero; use the mock's two-column video/progress + giving card as the replacement for the current `Taktu þátt` section when online payments are ready.
+- Phone layout is currently broken: the document remains ~817px wide in a 390px viewport. Stack story/progress above the form, make the card `width:100%`, and use two amount columns on phone.
+- The mock uses 4,2m of 5,4m while `/studio` uses the DB-backed 9,5m project. All numbers and progress must come from the existing fundraising data source.
+- The 78% dial is labeled `Þitt framlag`, which makes campaign progress look like the donor's personal impact. Label it `Framvinda söfnunar` and show the selected-gift impact separately.
+- Do not publish `10.000 kr. = 4 klst af nýrri dagskrá` unless that conversion is documented and defensible. Safer copy: `10.000 kr. á mánuði hjálpa til við að fjármagna daglega dagskrá.`
+- Replace `afskráning hvenær sem er` with `Hægt að stöðva mánaðarlega gjöf hvenær sem er.` Make the fee contribution a real, optional checkbox and confirm the actual gateway fee before showing a calculated total.
+- Keep the background image; remove the floating ember effect. The lit windows already carry the idea.
+
+### Color/psychology follow-up
+- Dark is right for the Ljósið story: it gives the light metaphor emotional force and makes the candle accent memorable. But the payment form should be a warm light island, preferably the existing cream `--skra` surface with dark ink, inside the dark section.
+- Research on donation pages suggests warm visual cues can strengthen affect-based trust, while clear information and human/social proof build both emotional and reasoned trust. Eiríkur's video, real progress, exact amounts, and payment clarity matter more than finding a supposedly perfect button color.
+- Current palette contrast is strong for `--ljos`, `--moskva`, and `--kerti` on dark. `--steinn` is only 3.95:1 on `--nott` and 3.42:1 on `--torfa`, so it fails WCAG AA for small text. Do not use it for 11–13px payment, fee, safety, progress, or instruction copy; use `--moskva` instead.
+- Recommendation: keep roughly three quarters of the campaign dark, switch the giving card to cream, reserve candle gold for the selected state + one main CTA, and keep the surrounding trust/payment copy high-contrast.
+
 ## 2026-07-15 — Ljósið (/studio) LIVE in production (Claude Code)
 
 Deployed the whole studio-fundraising package to omega.is (commit ac05631, from a clean worktree at HEAD; prod was at 8b6342f). Verified live: omega.is/studio (200, "Kveikjum Ljósið"), /studio/skjar (+?layout=bordi), /studio/filler — all 200. Page carries noindex and is unlinked (nav + sitemap), so it's public-by-URL only (Heimakirkja pattern), for the Iceland team.
