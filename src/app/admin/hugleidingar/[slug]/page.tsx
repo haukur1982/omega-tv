@@ -268,7 +268,13 @@ export default function ReviewDevotionalPage() {
                 <button onClick={() => setFocusMode((v) => !v)} className="devo-ghost" title="Fela hliðarstiku">
                     {focusMode ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
                 </button>
-                <button onClick={() => save()} disabled={saving} className="devo-ghost">
+                <button
+                    onClick={() => save({}, item && !item.reviewed
+                        ? 'Vistað — smelltu á „Yfirlesin“ þegar hún er tilbúin.'
+                        : 'Vistað.')}
+                    disabled={saving}
+                    className="devo-ghost"
+                >
                     {saving ? 'Vista…' : 'Vista'}
                 </button>
                 {item && !item.reviewed && (

@@ -18,7 +18,12 @@ import { supabaseAdmin } from '@/lib/supabase';
  * Nothing is written to the devotional here. The reviewer decides.
  */
 
-const MODEL = process.env.GEMINI_METADATA_MODEL ?? 'gemini-3.5-flash';
+// Wording judgement, not bulk metadata: this endpoint runs a few dozen times
+// across a collection and the whole point is nuance in Icelandic literary
+// prose, so it uses Pro rather than the Flash model the metadata pipeline
+// shares. Override with GEMINI_SUGGEST_MODEL if Google rotates the name —
+// a retired id returns 404 and the UI surfaces it rather than failing quietly.
+const MODEL = process.env.GEMINI_SUGGEST_MODEL ?? 'gemini-3.1-pro-preview';
 const STYLE_EXAMPLES = 12;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
