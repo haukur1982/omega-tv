@@ -9,7 +9,9 @@ into Icelandic homes.
 - Replaced the normal site navigation with a campaign header and one action.
 - Rebuilt the hero in the dark Omega register with the live total, 5m goal and
   a direct jump to giving.
-- Added a short 34-year trust section using a real 1992 Omega photograph.
+- Added a short 34-year trust section using a real Omega archive photograph;
+  after Hawk's review, replaced the static 1992 desk portrait with a stronger
+  1996 equipment-room image that connects the station's history to the upgrade.
 - Reworked the three-camera budget into one compact, sequential funding view.
 - Rebuilt giving around honest Aur and bank-transfer instructions. Removed the
   unused transaction-fee option, fake video treatment and card-payment feel.
