@@ -5,15 +5,16 @@ import Reveal from './Reveal';
 import { formatNumberIs, type PublicGift } from '@/lib/fundraising-shared';
 
 /**
- * Taktu þátt — the giving moment.
+ * Taktu þátt — the giving moment, in the light register.
  *
- * "Use darkness to tell the story, light to receive the gift": the section
- * sits on the dusk photograph with Eiríkur's message and the live total,
- * while the card itself is warm cream with dark ink — clarity and safety
- * exactly where someone reaches for their money.
+ * The earlier version sat the whole section on a darkened dusk photograph and
+ * lit only the card. Now the page is vellum throughout, so the card earns its
+ * place by being the *brightest* surface on it, the one thing lifted off the
+ * paper. The dusk photograph that used to carry this section is gone: on cream
+ * it read as a cold slab and undid the point of the light version.
  *
- * Honest about today: card payment is not live yet, so the button reveals
- * the methods that actually work rather than pretending to take a card.
+ * Honest about today: card payment is not live yet, so the button reveals the
+ * methods that actually work rather than pretending to take a card.
  */
 
 const FEE_RATE = 0.025;
@@ -47,11 +48,8 @@ export default function GivingSection({
     const total = coverFee ? eff + fee : eff;
 
     return (
-        <section id="gefa" style={{ position: 'relative', scrollMarginTop: '80px', overflow: 'hidden' }}>
+        <section id="gefa" className="give">
             <style>{CSS}</style>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/studio/dusk-homes.jpg" alt="" aria-hidden className="give-bg" />
-            <div aria-hidden className="give-scrim" />
 
             <div className="give-wrap">
                 <Reveal>
@@ -68,7 +66,7 @@ export default function GivingSection({
                 </Reveal>
 
                 <div className="give-grid">
-                    {/* Dark: the story and the proof */}
+                    {/* The story and the proof */}
                     <div className="give-left">
                         <Reveal>
                             <div className="give-chip">
@@ -76,7 +74,9 @@ export default function GivingSection({
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src="/studio/eirikur.jpg" alt="" />
                                     <span className="pl">
-                                        <svg width="12" height="14" viewBox="0 0 12 14"><path d="M0 0 L12 7 L0 14 Z" fill="#14120F" /></svg>
+                                        <svg width="12" height="14" viewBox="0 0 12 14" aria-hidden>
+                                            <path d="M0 0 L12 7 L0 14 Z" fill="#F3EDE0" />
+                                        </svg>
                                     </span>
                                 </span>
                                 <span className="t">
@@ -114,9 +114,10 @@ export default function GivingSection({
                                 )}
                             </div>
                         </Reveal>
+
                     </div>
 
-                    {/* Light: the giving card */}
+                    {/* The giving card — the brightest surface on the page */}
                     <Reveal delay={0.12}>
                         <div className="give-card">
                             <div className="card-head">Þín gjöf</div>
@@ -150,7 +151,7 @@ export default function GivingSection({
                             <button className="cta" onClick={() => setMethodsOpen(true)}>
                                 Gefa {formatNumberIs(total)} kr.
                                 <svg width="18" height="12" viewBox="0 0 18 12" aria-hidden>
-                                    <path d="M1 6 H16 M11 1 L16 6 L11 11" fill="none" stroke="#C88A3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M1 6 H16 M11 1 L16 6 L11 11" fill="none" stroke="#E9A860" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </button>
 
@@ -177,36 +178,35 @@ export default function GivingSection({
 }
 
 const CSS = `
-.give-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.give-scrim{position:absolute;inset:0;z-index:1;background:
-  linear-gradient(90deg,rgba(20,18,15,0.92) 0%,rgba(20,18,15,0.64) 44%,rgba(20,18,15,0.72) 68%,rgba(20,18,15,0.94) 100%),
-  linear-gradient(180deg,rgba(20,18,15,0.82) 0%,rgba(20,18,15,0.36) 32%,rgba(20,18,15,0.9) 100%)}
-.give-wrap{position:relative;z-index:2;max-width:80rem;margin:0 auto;padding:clamp(72px,10vw,116px) var(--rail-padding)}
-.give-kick{font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--kerti)}
-.give-h2{margin:16px 0 12px;font-family:var(--font-display);font-weight:300;font-size:clamp(30px,3.6vw,46px);line-height:1.12;color:var(--ljos);max-width:22ch}
-.give-lead{margin:0 0 44px;font-family:var(--font-serif);font-size:17px;line-height:1.6;color:var(--moskva);max-width:48ch}
+.give{background:var(--skra);color:var(--skra-djup);scroll-margin-top:80px}
+.give-wrap{max-width:80rem;margin:0 auto;padding:clamp(72px,10vw,116px) var(--rail-padding)}
+.give-kick{font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:#8A5A22}
+.give-h2{margin:16px 0 12px;font-family:var(--font-display);font-weight:300;font-size:clamp(30px,3.6vw,46px);line-height:1.12;color:var(--skra-djup);max-width:22ch}
+.give-lead{margin:0 0 44px;font-family:var(--font-serif);font-size:17px;line-height:1.6;color:var(--skra-mjuk);max-width:48ch}
 .give-grid{display:grid;grid-template-columns:1fr 440px;gap:clamp(32px,4vw,56px);align-items:start}
 
-.give-chip{display:inline-flex;align-items:center;gap:13px;background:rgba(36,32,25,0.6);backdrop-filter:blur(8px);border:1px solid rgba(246,242,234,0.12);border-radius:100px;padding:7px 20px 7px 7px}
+.give-chip{display:inline-flex;align-items:center;gap:13px;background:var(--skra-warm);border:1px solid rgba(27,24,20,0.10);border-radius:100px;padding:7px 20px 7px 7px}
 .give-chip .av{position:relative;width:44px;height:44px;border-radius:50%;overflow:hidden;flex:0 0 auto}
 .give-chip .av img{width:100%;height:100%;object-fit:cover}
-.give-chip .av .pl{position:absolute;inset:0;background:rgba(20,18,15,0.3);display:grid;place-items:center}
-.give-chip .t b{display:block;font-family:var(--font-serif);font-size:15px;font-weight:400;color:var(--ljos)}
-.give-chip .t span{font-size:12px;color:var(--moskva)}
+.give-chip .av .pl{position:absolute;inset:0;background:rgba(27,24,20,0.42);display:grid;place-items:center}
+.give-chip .t b{display:block;font-family:var(--font-serif);font-size:15px;font-weight:400;color:var(--skra-djup)}
+.give-chip .t span{font-size:12px;color:var(--skra-mjuk)}
 
 .give-prog{margin-top:30px}
-.give-prog .lab{font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--moskva)}
-.give-prog .num{font-family:var(--font-serif);font-size:clamp(26px,3vw,34px);color:var(--ljos);font-variant-numeric:tabular-nums;margin-top:6px}
-.give-prog .num span{font-family:var(--font-sans);font-size:14px;color:var(--moskva)}
-.give-prog .bar{height:8px;border-radius:2px;background:rgba(246,242,234,0.12);overflow:hidden;margin-top:16px;max-width:440px}
-.give-prog .fill{height:100%;background:var(--kerti);box-shadow:0 0 18px rgba(233,168,96,0.55)}
+.give-prog .lab{font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--skra-mjuk)}
+.give-prog .num{font-family:var(--font-serif);font-size:clamp(26px,3vw,34px);color:var(--skra-djup);font-variant-numeric:tabular-nums;margin-top:6px}
+.give-prog .num span{font-family:var(--font-sans);font-size:14px;color:var(--skra-mjuk)}
+.give-prog .bar{height:8px;border-radius:100px;background:rgba(27,24,20,0.10);overflow:hidden;margin-top:16px;max-width:440px}
+.give-prog .fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#8A5A22 0%,var(--gull) 100%)}
 .give-prog .recent{margin-top:26px;max-width:440px}
-.give-prog .gift{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid rgba(246,242,234,0.08);font-family:var(--font-serif);font-size:15px;color:var(--moskva)}
-.give-prog .gift em{font-style:normal;color:var(--steinn)}
-.give-prog .gift b{font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--kerti);font-variant-numeric:tabular-nums;white-space:nowrap}
-.give-prog .first{margin:22px 0 0;font-family:var(--font-serif);font-style:italic;font-size:16.5px;color:var(--moskva)}
+.give-prog .gift{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px solid rgba(27,24,20,0.10);font-family:var(--font-serif);font-size:15px;color:var(--skra-djup)}
+.give-prog .gift em{font-style:normal;color:var(--skra-mjuk)}
+.give-prog .gift b{font-family:var(--font-sans);font-size:14px;font-weight:600;color:#8A5A22;font-variant-numeric:tabular-nums;white-space:nowrap}
+.give-prog .first{margin:22px 0 0;font-family:var(--font-serif);font-style:italic;font-size:16.5px;color:var(--skra-mjuk)}
 
-.give-card{background:var(--skra);color:var(--skra-djup);border-radius:16px;padding:28px 28px 24px;box-shadow:0 40px 90px -30px rgba(0,0,0,0.85)}
+
+.give-card{background:#FDFBF6;color:var(--skra-djup);border-radius:16px;padding:28px 28px 24px;
+    border:1px solid rgba(27,24,20,0.08);box-shadow:0 30px 70px -34px rgba(27,24,20,0.45)}
 .give-card .card-head{font-family:var(--font-display);font-weight:400;font-size:22px;margin-bottom:18px}
 .give-card .amts{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 .give-card .amt{background:transparent;border:1px solid rgba(27,24,20,0.16);border-radius:9px;padding:15px 0;text-align:center;font-family:var(--font-sans);font-size:15px;font-weight:600;color:var(--skra-djup);cursor:pointer;font-variant-numeric:tabular-nums}

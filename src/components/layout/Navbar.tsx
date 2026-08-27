@@ -54,7 +54,17 @@ const isActive = (pathname: string | null, href: string) => {
     return pathname === href || pathname.startsWith(href + '/');
 };
 
-export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
+export default function Navbar({
+    styrkjaHref,
+    tone = 'dark',
+}: { styrkjaHref?: string; tone?: 'dark' | 'light' } = {}) {
+    // Light tone is for cream pages (the /studio campaign). The bar carries ink
+    // instead of light text, and its scrolled backdrop is vellum rather than
+    // warm-dark, so it belongs to the page instead of floating over it.
+    const lt = tone === 'light';
+    const cText = lt ? 'var(--skra-djup)' : 'var(--ljos)';
+    const cMuted = lt ? 'var(--skra-mjuk)' : 'var(--moskva)';
+    const cMark = lt ? 'var(--gull)' : 'var(--nordurljos)';
     // Campaign pages (e.g. /studio) keep the Styrkja link inside the
     // campaign (#styrkja) instead of leaving for /give.
     const links = styrkjaHref
@@ -103,10 +113,12 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                         backdropFilter: scrolled ? 'blur(20px) saturate(1.2)' : 'none',
                         WebkitBackdropFilter: scrolled ? 'blur(20px) saturate(1.2)' : 'none',
                         background: scrolled
-                            ? 'rgba(27, 24, 20, 0.85)'  // --mold at 85% when scrolled
-                            : 'linear-gradient(to bottom, rgba(20,18,15,0.55) 0%, transparent 100%)',
+                            ? (lt ? 'rgba(243,237,224,0.88)' : 'rgba(27, 24, 20, 0.85)')
+                            : (lt
+                                ? 'linear-gradient(to bottom, rgba(243,237,224,0.92) 0%, rgba(243,237,224,0) 100%)'
+                                : 'linear-gradient(to bottom, rgba(20,18,15,0.55) 0%, transparent 100%)'),
                         borderBottom: scrolled
-                            ? '1px solid var(--border)'
+                            ? (lt ? '1px solid rgba(27,24,20,0.10)' : '1px solid var(--border)')
                             : '1px solid transparent',
                     }}
                 />
@@ -133,7 +145,7 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                             display: 'inline-flex',
                             alignItems: 'center',
                             textDecoration: 'none',
-                            color: 'var(--ljos)',
+                            color: cText,
                         }}
                     >
                         <OmegaWordmark height={26} uid="nav" />
@@ -151,15 +163,15 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                                     style={{
                                         position: 'relative',
                                         padding: '24px 2px',
-                                        color: active ? 'var(--ljos)' : 'var(--moskva)',
+                                        color: active ? cText : cMuted,
                                         textDecoration: 'none',
                                         transition: 'color 300ms ease',
                                         letterSpacing: '0.18em',
                                         fontSize: '0.7rem',
                                         whiteSpace: 'nowrap',
                                     }}
-                                    onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
-                                    onMouseOut={(e) => { e.currentTarget.style.color = active ? 'var(--ljos)' : 'var(--moskva)'; }}
+                                    onMouseOver={(e) => { e.currentTarget.style.color = cText; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.color = active ? cText : cMuted; }}
                                 >
                                     {link.label}
                                     {active && (
@@ -169,7 +181,7 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                                                 position: 'absolute',
                                                 left: 0, right: 0, bottom: '18px',
                                                 height: '2px',
-                                                background: 'var(--nordurljos)',
+                                                background: cMark,
                                             }}
                                         />
                                     )}
@@ -188,15 +200,15 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                             style={{
                                 alignItems: 'center',
                                 gap: '8px',
-                                color: 'var(--moskva)',
+                                color: cMuted,
                                 textDecoration: 'none',
                                 letterSpacing: '0.18em',
                                 fontSize: '0.7rem',
                                 transition: 'color 300ms ease',
                                 whiteSpace: 'nowrap',
                             }}
-                            onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
-                            onMouseOut={(e) => { e.currentTarget.style.color = 'var(--moskva)'; }}
+                            onMouseOver={(e) => { e.currentTarget.style.color = cText; }}
+                            onMouseOut={(e) => { e.currentTarget.style.color = cMuted; }}
                         >
                             <span
                                 aria-hidden="true"
@@ -204,7 +216,7 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                                     width: '6px',
                                     height: '6px',
                                     borderRadius: '50%',
-                                    background: 'var(--nordurljos)',
+                                    background: cMark,
                                     display: 'inline-block',
                                 }}
                             />
@@ -218,11 +230,11 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 padding: '8px',
-                                color: 'var(--moskva)',
+                                color: cMuted,
                                 transition: 'color 300ms ease',
                             }}
-                            onMouseOver={(e) => { e.currentTarget.style.color = 'var(--ljos)'; }}
-                            onMouseOut={(e) => { e.currentTarget.style.color = 'var(--moskva)'; }}
+                            onMouseOver={(e) => { e.currentTarget.style.color = cText; }}
+                            onMouseOut={(e) => { e.currentTarget.style.color = cMuted; }}
                         >
                             <SearchIcon />
                         </Link>
@@ -234,7 +246,7 @@ export default function Navbar({ styrkjaHref }: { styrkjaHref?: string } = {}) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 padding: '8px',
-                                color: 'var(--ljos)',
+                                color: cText,
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
