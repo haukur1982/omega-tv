@@ -1,72 +1,54 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import StudioHero from '@/components/studio/StudioHero';
-import HeroProgressStrip from '@/components/studio/HeroProgressStrip';
-import StudioVision from '@/components/studio/StudioVision';
-import GearGrid from '@/components/studio/GearGrid';
-import ProgressBoard from '@/components/studio/ProgressBoard';
+import CamerasSection from '@/components/studio/CamerasSection';
 import GivingSection from '@/components/studio/GivingSection';
 import { getProjectProgress } from '@/lib/fundraising-db';
 
 /**
- * /studio — the vision fundraising page. First project: Ljósið, Omega's
- * new studio (cameras, lights, audio → daily programs + podcasts).
+ * /studio — the camera campaign landing page.
  *
- * Blackmagic-release energy inside the Omega system: cinematic warm-black
- * imagery, huge Fraunces numerals, a living progress board fed by
- * fundraising_gifts (bank transfers entered in /admin/styrkir today; the
- * Rapyd webhook writes into the same table when the gateway lands).
+ * Built to receive paid traffic, so it is deliberately short: the occasion,
+ * the ask and the live total in the hero; what the money buys; how to give;
+ * one closing line. Four sections, one decision.
  *
- * LAUNCH STATE: public but unlinked + noindex (Heimakirkja precedent)
- * until Hawk confirms the real budget numbers. Data renders fresh on
- * every request — a gift entered in admin shows here immediately.
+ * Everything on it is real — the total comes from gifts actually entered in
+ * /admin/styrkir, so an empty campaign honestly reads as empty.
  */
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-    title: 'Ljósið, nýja stúdíó Omega',
+    title: 'Þrjár myndavélar fyrir Omega',
     description:
-        'Ljósið er nýja stúdíó Omega fyrir daglega dagskrá, viðtöl og hlaðvörp. Hér sérðu hvað þarf, hvað er komið inn og hvernig þú getur tekið þátt.',
+        'Omega er 34 ára. Afmælisgjöfin er þrjár stúdíómyndavélar, svo stöðin geti sent út daglega dagskrá, viðtöl og hlaðvörp.',
     robots: { index: false, follow: false },
 };
 
 export default async function StudioPage() {
     const data = await getProjectProgress('nytt-studio');
+    const raised = data?.raised_isk ?? 0;
+    const goal = data?.project.goal_isk ?? 0;
 
     return (
         <main style={{ minHeight: '100vh', backgroundColor: 'var(--mold)', color: 'var(--ljos)' }}>
-            <Navbar styrkjaHref="#styrkja" />
-            <StudioHero />
-            {data && <HeroProgressStrip raised={data.raised_isk} goal={data.project.goal_isk} />}
-            <StudioVision />
+            <Navbar styrkjaHref="#gefa" />
+
+            <StudioHero raised={raised} goal={goal} />
+
+            {data && <CamerasSection items={data.project.items} raised={raised} />}
+
             {data && (
                 <GivingSection
-                    raised={data.raised_isk}
-                    goal={data.project.goal_isk}
-                    items={data.project.items}
-                />
-            )}
-            {data && (
-                <GearGrid
-                    items={data.project.items}
-                    goal={data.project.goal_isk}
-                    raised={data.raised_isk}
-                />
-            )}
-            {data && (
-                <ProgressBoard
-                    goal={data.project.goal_isk}
-                    raised={data.raised_isk}
+                    raised={raised}
+                    goal={goal}
                     giftCount={data.gift_count}
-                    items={data.project.items}
                     gifts={data.recent_gifts}
-                    updates={data.updates}
                 />
             )}
 
-            {/* Closing — quiet, institutional, honest */}
-            <section style={{ background: 'var(--mold)', padding: 'clamp(56px, 8vw, 96px) 0' }}>
+            {/* Closing — the reason behind the equipment */}
+            <section style={{ background: 'var(--mold)', padding: 'clamp(56px, 8vw, 92px) 0' }}>
                 <div
                     style={{
                         maxWidth: '80rem',
@@ -78,20 +60,20 @@ export default async function StudioPage() {
                     <p
                         style={{
                             margin: '0 auto',
-                            maxWidth: '44ch',
+                            maxWidth: '42ch',
                             fontFamily: 'var(--font-display)',
                             fontWeight: 300,
-                            fontSize: 'clamp(24px, 3vw, 36px)',
-                            lineHeight: 1.25,
+                            fontSize: 'clamp(23px, 2.9vw, 34px)',
+                            lineHeight: 1.28,
                             color: 'var(--ljos)',
                         }}
                     >
-                        Ljósið er ekki markmiðið. Þjóð sem heyrir fagnaðarerindið á hverjum
-                        degi, það er markmiðið.
+                        Myndavélar eru ekki markmiðið. Þjóð sem heyrir fagnaðarerindið á
+                        hverjum degi, það er markmiðið.
                     </p>
                     <p
                         style={{
-                            margin: '24px auto 0',
+                            margin: '26px auto 0',
                             fontFamily: 'var(--font-sans)',
                             fontSize: '12px',
                             letterSpacing: '0.14em',
@@ -99,10 +81,11 @@ export default async function StudioPage() {
                             color: 'var(--steinn)',
                         }}
                     >
-                        Sjónvarpsstöðin Omega · kt. 630890-1019 · Framvindan birt hér jafnóðum
+                        Sjónvarpsstöðin Omega · kt. 630890-1019 · síðan 1992
                     </p>
                 </div>
             </section>
+
             <Footer />
         </main>
     );
