@@ -3,155 +3,113 @@
 import Reveal from './Reveal';
 import { computeItemStates, formatIsk, type ProjectItem } from '@/lib/fundraising-shared';
 
-/**
- * What the gift actually buys — three cameras, each one a named thing with a
- * job, a price and a funding state. Gifts fill them in order, so a donor can
- * see which camera their gift is finishing.
- *
- * Light register. A camera that hasn't been started yet is *faded*, not
- * darkened — desaturated toward the paper. Dimming things was what made the
- * first version feel heavy, and "not there yet" should read as waiting rather
- * than as gloom. The camera currently being funded keeps its full colour, so
- * there is always one live thing in the row even at zero.
- */
-
 const IMAGES: Record<string, string> = {
-    adalvel: '/studio/light-cam-main.jpg',
-    naermyndavel: '/studio/light-cam-close.jpg',
-    hlidarvel: '/studio/light-cam-side.jpg',
+    adalvel: '/studio/cam-main.jpg',
+    naermyndavel: '/studio/cam-close.jpg',
+    hlidarvel: '/studio/cam-side.jpg',
 };
 
-export default function CamerasSection({
-    items,
-    raised,
-}: {
-    items: ProjectItem[];
-    raised: number;
-}) {
+export default function CamerasSection({ items, raised }: { items: ProjectItem[]; raised: number }) {
     const states = computeItemStates(items, raised);
+    const currentIndex = states.findIndex((item) => !item.funded);
+    const current = states[currentIndex >= 0 ? currentIndex : states.length - 1];
 
     return (
-        <section id="velarnar" className="cams">
+        <section id="myndavelar" className="camera-stage">
             <style>{CSS}</style>
-            <div className="cams-wrap">
-                <Reveal>
-                    <div className="cams-kick">Hvað fer gjöfin í</div>
-                </Reveal>
-                <Reveal delay={0.08}>
-                    <h2 className="cams-h2">Þrjár vélar, þrjú hlutverk.</h2>
-                </Reveal>
-                <Reveal delay={0.14}>
-                    <p className="cams-lead">
-                        Engin óljós upphæð. Þetta er tækjalisti, og þegar síðasta vélin er
-                        komin er stúdíóið tilbúið til daglegra útsendinga.
-                    </p>
-                </Reveal>
+            <div className="camera-stage-inner">
+                <header className="camera-stage-head">
+                    <Reveal>
+                        <p>Skýrt og afmarkað verkefni</p>
+                        <h2>Hér byrjar nýja stúdíóið.</h2>
+                    </Reveal>
+                    <Reveal delay={0.08}>
+                        <p className="camera-stage-intro">
+                            Fyrsti áfanginn er þrjár myndavélar. Hver þeirra hefur sitt
+                            hlutverk og hver króna færist inn á þá vél sem er næst í röðinni.
+                        </p>
+                    </Reveal>
+                </header>
 
-                <div className="cams-grid">
-                    {states.map((cam, i) => {
-                        const spentBefore = states
-                            .slice(0, i)
-                            .reduce((s, c) => s + c.amount_isk, 0);
-                        const fill = Math.max(
-                            0,
-                            Math.min(
-                                1,
-                                cam.funded
-                                    ? 1
-                                    : cam.active
-                                      ? (raised - spentBefore) / cam.amount_isk
-                                      : 0,
-                            ),
-                        );
-                        return (
-                            <Reveal key={cam.key} delay={0.1 * i}>
-                                <article className={cam.active ? 'cam on' : 'cam'}>
-                                    <div className="cam-img">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={IMAGES[cam.key] ?? '/studio/light-cam-main.jpg'}
-                                            alt=""
-                                            aria-hidden
-                                            style={{
-                                                filter:
-                                                    cam.funded || cam.active
-                                                        ? 'none'
-                                                        : 'saturate(0.5) contrast(0.94) opacity(0.68)',
-                                            }}
-                                        />
-                                        {cam.funded && <span className="cam-badge">Fjármögnuð</span>}
-                                    </div>
+                <div className="camera-stage-grid">
+                    <Reveal>
+                        <figure className="camera-feature">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={IMAGES[current?.key] ?? '/studio/cam-main.jpg'} alt="Ný stúdíómyndavél fyrir Omega" />
+                            <figcaption>
+                                <span>Næsta í röðinni</span>
+                                <b>{current?.label ?? 'Myndavél'}</b>
+                            </figcaption>
+                        </figure>
+                    </Reveal>
 
-                                    <div className="cam-body">
-                                        <h3 className="cam-name">{cam.label}</h3>
-                                        {cam.note && <p className="cam-note">{cam.note}</p>}
+                    <div className="camera-list">
+                        {states.map((camera, index) => {
+                            const spentBefore = states.slice(0, index).reduce((sum, item) => sum + item.amount_isk, 0);
+                            const fill = camera.funded
+                                ? 100
+                                : index === currentIndex
+                                    ? Math.max(0, Math.min(100, ((raised - spentBefore) / camera.amount_isk) * 100))
+                                    : 0;
+                            const isCurrent = index === currentIndex;
 
-                                        <div className="cam-foot">
-                                            <div className="cam-bar">
-                                                <div
-                                                    className="cam-fill"
-                                                    style={{ width: `${fill * 100}%` }}
-                                                />
+                            return (
+                                <Reveal key={camera.key} delay={index * 0.07}>
+                                    <article className={`camera-row${isCurrent ? ' is-current' : ''}${camera.funded ? ' is-funded' : ''}`}>
+                                        <div className="camera-index">0{index + 1}</div>
+                                        <div className="camera-row-copy">
+                                            <div className="camera-row-title">
+                                                <h3>{camera.label}</h3>
+                                                <span>{camera.funded ? 'Fjármögnuð' : formatIsk(camera.amount_isk)}</span>
                                             </div>
-                                            <div className={cam.funded ? 'cam-price done' : 'cam-price'}>
-                                                {cam.funded
-                                                    ? 'Fjármögnuð að fullu'
-                                                    : formatIsk(cam.amount_isk)}
-                                            </div>
+                                            {camera.note && <p>{camera.note}</p>}
+                                            <div className="camera-row-track"><div style={{ width: `${fill}%` }} /></div>
                                         </div>
-                                    </div>
-                                </article>
-                            </Reveal>
-                        );
-                    })}
+                                    </article>
+                                </Reveal>
+                            );
+                        })}
+                    </div>
                 </div>
+
+                <Reveal>
+                    <div className="camera-stage-cta">
+                        <p>Þegar þriðja vélin er komin er fyrsti áfangi stúdíósins fjármagnaður.</p>
+                        <a href="#gefa">Hjálpaðu okkur að ná þangað</a>
+                    </div>
+                </Reveal>
             </div>
         </section>
     );
 }
 
 const CSS = `
-.cams{background:var(--skra-warm);color:var(--skra-djup);
-      padding:clamp(72px,10vw,116px) 0;scroll-margin-top:80px}
-.cams-wrap{max-width:80rem;margin:0 auto;padding:0 var(--rail-padding)}
-.cams-kick{font-family:var(--font-sans);font-size:11px;font-weight:700;
-    letter-spacing:0.22em;text-transform:uppercase;color:#8A5A22;margin-bottom:16px}
-.cams-h2{margin:0 0 14px;font-family:var(--font-display);font-weight:300;
-    font-size:clamp(30px,3.6vw,46px);line-height:1.12;color:var(--skra-djup);max-width:20ch}
-.cams-lead{margin:0 0 46px;font-family:var(--font-serif);font-size:17px;line-height:1.6;
-    color:var(--skra-mjuk);max-width:54ch}
-
-.cams-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
-    gap:clamp(16px,2vw,26px)}
-
-.cam{display:flex;flex-direction:column;height:100%;border-radius:10px;overflow:hidden;
-    background:var(--skra);border:1px solid rgba(27,24,20,0.09);
-    box-shadow:0 18px 40px -28px rgba(27,24,20,0.45)}
-.cam.on{border-color:rgba(200,138,62,0.55);
-    box-shadow:0 18px 44px -26px rgba(138,90,34,0.5)}
-
-.cam-img{position:relative;aspect-ratio:4 / 3;overflow:hidden;background:var(--skra-warm)}
-.cam-img img{width:100%;height:100%;object-fit:cover;display:block}
-.cam-badge{position:absolute;top:13px;right:13px;display:inline-flex;align-items:center;
-    background:var(--gull);color:var(--skra);font-family:var(--font-sans);font-size:10px;
-    font-weight:700;letter-spacing:0.14em;text-transform:uppercase;padding:5px 10px;
-    border-radius:3px}
-
-.cam-body{padding:22px 24px 24px;display:flex;flex-direction:column;flex:1;
-    border-top:1px solid rgba(27,24,20,0.07)}
-.cam-name{margin:0;font-family:var(--font-display);font-weight:400;font-size:23px;
-    color:var(--skra-djup)}
-.cam-note{margin:9px 0 0;font-family:var(--font-serif);font-size:15px;line-height:1.6;
-    color:var(--skra-mjuk);flex:1}
-.cam-foot{margin-top:20px}
-.cam-bar{height:6px;border-radius:100px;background:rgba(27,24,20,0.10);overflow:hidden}
-.cam-fill{height:100%;border-radius:100px;
-    background:linear-gradient(90deg,#8A5A22 0%,var(--gull) 100%)}
-.cam-price{margin-top:11px;font-family:var(--font-sans);font-variant-numeric:tabular-nums;
-    font-size:14px;font-weight:600;letter-spacing:0.04em;color:#8A5A22}
-.cam-price.done{color:var(--skra-mjuk)}
-
-@media (max-width:700px){
-  .cam-body{padding:20px 20px 22px}
-}
+.camera-stage{background:#E7DCC7;color:#191611;padding:clamp(82px,10vw,132px) 0;scroll-margin-top:40px}
+.camera-stage-inner{max-width:80rem;margin:0 auto;padding:0 var(--rail-padding)}
+.camera-stage-head{display:grid;grid-template-columns:1fr minmax(300px,.72fr);gap:50px;align-items:end;margin-bottom:48px}
+.camera-stage-head>div:first-child p{margin:0 0 17px;color:#8A5A22;font:700 12px/1 var(--font-sans);letter-spacing:.19em;text-transform:uppercase}
+.camera-stage-head h2{max-width:11ch;margin:0;font:400 clamp(42px,5.6vw,70px)/.98 var(--font-display);letter-spacing:-.035em}
+.camera-stage-intro{max-width:49ch;margin:0;color:#554C40;font:400 18px/1.65 var(--font-serif)}
+.camera-stage-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(340px,.9fr);gap:clamp(36px,5vw,68px);align-items:stretch}
+.camera-feature{position:relative;height:100%;min-height:560px;margin:0;overflow:hidden;background:#12100E}
+.camera-feature:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(11,9,8,.82) 100%)}
+.camera-feature img{display:block;width:100%;height:100%;object-fit:cover}
+.camera-feature figcaption{position:absolute;z-index:1;left:28px;right:28px;bottom:25px;display:flex;align-items:end;justify-content:space-between;gap:20px;color:#F7F1E8}
+.camera-feature figcaption span{font:700 10px/1 var(--font-sans);letter-spacing:.15em;text-transform:uppercase;color:rgba(247,241,232,.58)}
+.camera-feature figcaption b{font:400 24px/1 var(--font-display)}
+.camera-list{border-top:1px solid rgba(25,22,17,.18)}
+.camera-row{display:grid;grid-template-columns:48px 1fr;gap:14px;padding:26px 0;border-bottom:1px solid rgba(25,22,17,.18)}
+.camera-index{padding-top:4px;color:#8A5A22;font:700 11px/1 var(--font-sans);letter-spacing:.14em}
+.camera-row-title{display:flex;align-items:baseline;justify-content:space-between;gap:20px}
+.camera-row h3{margin:0;font:500 clamp(24px,2.5vw,31px)/1 var(--font-display)}
+.camera-row-title span{color:#8A5A22;font:700 12px/1 var(--font-sans);white-space:nowrap}
+.camera-row p{margin:10px 0 0;color:#5D5346;font:400 15.5px/1.55 var(--font-serif)}
+.camera-row-track{height:4px;margin-top:18px;background:rgba(25,22,17,.1);overflow:hidden}
+.camera-row-track div{height:100%;background:#8A5A22}
+.camera-row.is-current h3{color:#8A5A22}.camera-row.is-funded{opacity:.68}
+.camera-stage-cta{display:flex;align-items:center;justify-content:space-between;gap:32px;margin-top:36px;padding-top:28px;border-top:1px solid rgba(25,22,17,.18)}
+.camera-stage-cta p{max-width:48ch;margin:0;color:#554C40;font:400 16px/1.55 var(--font-serif)}
+.camera-stage-cta a{flex:none;color:#17130F;text-decoration:none;border-bottom:1px solid #8A5A22;padding:7px 0;font:700 14px/1 var(--font-sans)}
+@media(max-width:880px){.camera-stage-head{grid-template-columns:1fr}.camera-stage-grid{grid-template-columns:1fr}.camera-feature{min-height:0;aspect-ratio:16/10}}
+@media(max-width:600px){.camera-stage-head{gap:22px}.camera-stage-cta{align-items:flex-start;flex-direction:column}.camera-row{grid-template-columns:34px 1fr}.camera-row-title{align-items:flex-start;flex-direction:column;gap:8px}}
 `;

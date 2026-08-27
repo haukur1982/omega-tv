@@ -1,5 +1,26 @@
 # STATUS.md — Omega TV
 
+## 2026-08-27 — `/studio` camera campaign landing page rebuilt (Codex)
+
+Rebuilt the camera fundraiser around one clear story: the three cameras are the
+first stage of the new studio, while the purpose is to keep carrying the Gospel
+into Icelandic homes.
+
+- Replaced the normal site navigation with a campaign header and one action.
+- Rebuilt the hero in the dark Omega register with the live total, 5m goal and
+  a direct jump to giving.
+- Added a short 34-year trust section using a real 1992 Omega photograph.
+- Reworked the three-camera budget into one compact, sequential funding view.
+- Rebuilt giving around honest Aur and bank-transfer instructions. Removed the
+  unused transaction-fee option, fake video treatment and card-payment feel.
+- Kept all totals connected to the existing fundraising data. No database,
+  dependency or payment-system changes.
+- Local only. Nothing was deployed or published.
+
+**Verification:** `pnpm build` PASS; targeted ESLint PASS; `git diff --check`
+PASS. The build still logs the existing missing `public.news_items` warning,
+unrelated to `/studio`.
+
 ## 2026-08-21 — Hugleiðingar: BookForge intake + the reading room (Claude Code)
 
 **LIVE on omega.is** (admin only, public side not built yet).
@@ -1259,6 +1280,12 @@ Never use the Supabase SQL editor clipboard paste for seed data containing Icela
 The SQL editor clipboard paste is the ONE unsafe path and also the one I kept defaulting to because it's "easy." It's not easy — it's silently corrupting data.
 
 ## Session Log
+
+- **2026-08-27:** Rebuilt `/studio` as a focused three-camera landing page with
+  a campaign-only header, strong first-stage framing, real 1992 Omega proof,
+  compact camera funding sequence, live progress and honest Aur/bank giving
+  instructions. `pnpm build`, targeted ESLint and `git diff --check` pass. No
+  schema changes, new dependencies or deployment.
 
 - **2026-05-16:** Launch polish pass on `localhost:3010` for desktop, widescreen laptop, and mobile. Fixed the Sunday featured CTA dead-end by adding a mock sermon detail fallback for `mock-sunday-latest`; changed schedule links away from missing `/dagskra` to `/live#dagskra`; fixed mobile FeaturedSunday stacking; fixed PrayerInvitationRow mobile overflow; added global `box-sizing: border-box`; removed mobile horizontal scroll on `/give`, `/baenatorg`, and `/sermons`; replaced client/server-sensitive Icelandic date/number formatting in prayer cards and Styrkja flow. Verified with in-app browser at 390x844 and 1728x1000. `pnpm build` passes with network access for Google fonts. Build still logs existing Supabase warning: `public.news_items` table missing, likely unrelated to this visual pass.
 - **2026-05-16:** Added `docs/poster-system.md` and linked it from `docs/design-system.md`. This locks the Omega image/poster direction: article posters, show posters, sermon thumbnails, course posters, and Israel/documentary banners all get the same warm charcoal/vellum finish instead of raw stock/Bunny imagery. Next practical step: build `src/lib/poster-renderer.ts` on top of the existing Sharp thumbnail generator, then add admin buttons for each content type.
