@@ -10,8 +10,9 @@ into Icelandic homes.
 - Rebuilt the hero in the dark Omega register with the live total, 5m goal and
   a direct jump to giving.
 - Added a short 34-year trust section using a real Omega archive photograph;
-  after Hawk's review, replaced the static 1992 desk portrait with a stronger
-  1996 equipment-room image that connects the station's history to the upgrade.
+  after Hawk clarified that people in one candidate image were visitors from
+  another ministry, replaced it with an equipment-only satellite image and
+  made no claims about identities or date.
 - Reworked the three-camera budget into one compact, sequential funding view.
 - Rebuilt giving around honest Aur and bank-transfer instructions. Removed the
   unused transaction-fee option, fake video treatment and card-payment feel.

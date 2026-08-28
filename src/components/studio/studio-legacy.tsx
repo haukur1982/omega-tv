@@ -25,10 +25,10 @@ export default function StudioLegacy() {
                 <Reveal delay={0.12}>
                     <figure className="legacy-photo">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src="/history/founders-racks.jpg" alt="Fólk við útsendingarbúnað Omega árið 1996" />
+                        <img src="/history/satellite-dish.jpg" alt="Gervihnattabúnaður Omega" />
                         <figcaption>
-                            <span>Við útsendingarbúnað Omega</span>
-                            <span>1996</span>
+                            <span>Gervihnattabúnaður Omega</span>
+                            <span>Úr safni Omega</span>
                         </figcaption>
                     </figure>
                 </Reveal>
