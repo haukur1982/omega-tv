@@ -20,7 +20,8 @@ into Icelandic homes.
   unused transaction-fee option, fake video treatment and card-payment feel.
 - Kept all totals connected to the existing fundraising data. No database,
   dependency or payment-system changes.
-- Local only. Nothing was deployed or published.
+- Deployed to production at `omega.is/studio` on 2026-08-27 after Hawk's
+  approval. Verified the public route returns HTTP 200 through Vercel.
 
 **Verification:** `pnpm build` PASS; targeted ESLint PASS; `git diff --check`
 PASS. The build still logs the existing missing `public.news_items` warning,
