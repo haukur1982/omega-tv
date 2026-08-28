@@ -133,6 +133,7 @@ const CSS = `
 .campaign-count{position:absolute;z-index:2;right:var(--rail-padding);bottom:58px;display:flex;align-items:flex-end;gap:13px;color:#F7F1E8}
 .campaign-count strong{font:300 clamp(62px,7vw,104px)/.7 var(--font-display);color:#E9A860}
 .campaign-count span{font:700 10px/1.35 var(--font-sans);letter-spacing:.13em;text-transform:uppercase;color:rgba(247,241,232,.64)}
+@media(min-width:861px){.campaign-hero-image{left:20vw;right:-20vw}}
 @media(max-width:860px){.campaign-hero-image{background-position:61% center}.campaign-hero-image:after{background:linear-gradient(90deg,rgba(13,11,9,.96),rgba(13,11,9,.68))}.campaign-count{display:none}}
 @media(max-width:600px){
   .campaign-hero{min-height:900px}.campaign-hero-image{background-position:62% center;opacity:.72}

@@ -22,6 +22,9 @@ into Icelandic homes.
   dependency or payment-system changes.
 - Deployed to production at `omega.is/studio` on 2026-08-27 after Hawk's
   approval. Verified the public route returns HTTP 200 through Vercel.
+- Corrected the wide-screen hero crop after live review: the camera and light
+  now sit on the right instead of colliding with the headline; phone framing
+  is unchanged.
 
 **Verification:** `pnpm build` PASS; targeted ESLint PASS; `git diff --check`
 PASS. The build still logs the existing missing `public.news_items` warning,
