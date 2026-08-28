@@ -1,10 +1,20 @@
 'use client';
 
 import Reveal from './Reveal';
-import { formatNumberIs } from '@/lib/fundraising-shared';
+import {
+    formatNumberIs,
+    milestoneBoundaries,
+    type ProjectItem,
+} from '@/lib/fundraising-shared';
 
-export default function StudioHero({ raised, goal }: { raised: number; goal: number }) {
+export default function StudioHero({ raised, goal, items }: {
+    raised: number;
+    goal: number;
+    items: ProjectItem[];
+}) {
     const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
+    const remaining = Math.max(0, goal - raised);
+    const milestones = milestoneBoundaries(items, goal);
 
     return (
         <section className="campaign-hero">
@@ -37,16 +47,38 @@ export default function StudioHero({ raised, goal }: { raised: number; goal: num
                 </Reveal>
 
                 <Reveal delay={0.32}>
-                    <div className="campaign-progress">
-                        <div className="campaign-progress-copy">
-                            <span><b>{formatNumberIs(raised)} kr.</b> hafa safnast</span>
-                            <span>{pct}% af {formatNumberIs(goal)} kr.</span>
+                    <div className="campaign-progress" aria-labelledby="campaign-progress-title">
+                        <div className="campaign-progress-head">
+                            <div>
+                                <span className="campaign-progress-label" id="campaign-progress-title">
+                                    <i aria-hidden /> Staða söfnunar
+                                </span>
+                                <strong>{formatNumberIs(raised)} <small>kr.</small></strong>
+                                <span className="campaign-progress-raised">hafa safnast</span>
+                            </div>
+                            <div className="campaign-progress-total">
+                                <b>{pct}%</b>
+                                <span>af {formatNumberIs(goal)} kr. markmiði</span>
+                            </div>
                         </div>
                         <div className="campaign-track" role="progressbar" aria-label="Framvinda söfnunar"
                             aria-valuemin={0} aria-valuemax={goal} aria-valuenow={raised}>
-                            <div style={{ width: `${Math.max(pct, raised > 0 ? 1 : 0)}%` }} />
+                            <div className="campaign-track-fill" style={{ width: `${Math.max(pct, raised > 0 ? 1 : 0)}%` }} />
+                            {milestones.map((boundary, index) => (
+                                <span
+                                    className={`campaign-milestone${raised >= boundary * goal ? ' is-reached' : ''}`}
+                                    style={{ left: `${Math.min(99, boundary * 100)}%` }}
+                                    key={items[index]?.key ?? index}
+                                    aria-hidden
+                                >
+                                    0{index + 1}
+                                </span>
+                            ))}
                         </div>
-                        <small>{raised === 0 ? 'Söfnunin er nýhafin.' : 'Gjafir eru skráðar jafnóðum.'}</small>
+                        <div className="campaign-progress-foot">
+                            <span>{remaining > 0 ? `${formatNumberIs(remaining)} kr. eftir` : 'Markmiðinu náð'}</span>
+                            <span>{raised === 0 ? 'Söfnunin er nýhafin' : 'Gjafir skráðar jafnóðum'}</span>
+                        </div>
                     </div>
                 </Reveal>
             </div>
@@ -75,20 +107,38 @@ const CSS = `
 .campaign-actions a{text-decoration:none;font:700 15px/1 var(--font-sans)}
 .campaign-primary{display:inline-flex;padding:17px 25px;border-radius:999px;background:#E9A860;color:#17130F;box-shadow:0 16px 44px rgba(0,0,0,.28)}
 .campaign-secondary{color:#F7F1E8;border-bottom:1px solid rgba(247,241,232,.38);padding:8px 0}
-.campaign-progress{margin-top:48px;width:min(100%,570px);padding-top:20px;border-top:1px solid rgba(247,241,232,.18)}
-.campaign-progress-copy{display:flex;justify-content:space-between;align-items:baseline;gap:18px;color:rgba(247,241,232,.62);font:500 13px/1.4 var(--font-sans)}
-.campaign-progress-copy b{color:#F7F1E8;font:500 24px/1 var(--font-display)}
-.campaign-track{height:7px;margin-top:13px;border-radius:999px;background:rgba(247,241,232,.15);overflow:hidden}
-.campaign-track div{height:100%;border-radius:inherit;background:#E9A860}
-.campaign-progress small{display:block;margin-top:10px;color:rgba(247,241,232,.48);font:500 12px/1.4 var(--font-sans)}
+.campaign-progress{margin-top:44px;width:min(100%,620px);padding:24px 25px 20px;border:1px solid rgba(233,168,96,.32);border-radius:4px;
+    background:linear-gradient(135deg,rgba(25,20,15,.86),rgba(18,16,14,.68));box-shadow:0 24px 64px rgba(0,0,0,.2);backdrop-filter:blur(10px)}
+.campaign-progress-head{display:flex;align-items:flex-end;justify-content:space-between;gap:26px}
+.campaign-progress-head>div:first-child{display:grid;grid-template-columns:auto 1fr;align-items:end;column-gap:9px}
+.campaign-progress-label{grid-column:1/-1;display:flex;align-items:center;gap:8px;margin-bottom:11px;color:#E9A860;
+    font:700 10px/1 var(--font-sans);letter-spacing:.17em;text-transform:uppercase}
+.campaign-progress-label i{width:6px;height:6px;border-radius:50%;background:#E9A860;box-shadow:0 0 0 4px rgba(233,168,96,.12)}
+.campaign-progress strong{color:#F7F1E8;font:400 clamp(34px,4vw,48px)/.85 var(--font-display);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.campaign-progress strong small{font:600 12px/1 var(--font-sans);letter-spacing:.06em;color:rgba(247,241,232,.58)}
+.campaign-progress-raised{padding-bottom:2px;color:rgba(247,241,232,.55);font:500 11px/1 var(--font-sans)}
+.campaign-progress-total{display:flex;flex-direction:column;align-items:flex-end;gap:7px;text-align:right;padding-bottom:2px}
+.campaign-progress-total b{color:#E9A860;font:400 30px/.85 var(--font-display);font-variant-numeric:tabular-nums}
+.campaign-progress-total span{color:rgba(247,241,232,.58);font:600 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase}
+.campaign-track{position:relative;height:12px;margin:26px 0 0;border-radius:999px;background:rgba(247,241,232,.13);box-shadow:inset 0 1px 3px rgba(0,0,0,.38)}
+.campaign-track-fill{position:absolute;z-index:1;inset:0 auto 0 0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#D98B3A,#F0B874);
+    box-shadow:0 0 20px rgba(233,168,96,.28);transition:width .7s ease}
+.campaign-milestone{position:absolute;z-index:2;top:50%;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+    transform:translate(-50%,-50%);color:#E9A860;background:#201A15;border:2px solid #A97137;box-shadow:0 3px 12px rgba(0,0,0,.35);
+    font:800 8px/1 var(--font-sans);letter-spacing:.05em}
+.campaign-milestone.is-reached{color:#17130F;background:#E9A860;border-color:#201A15}
+.campaign-progress-foot{display:flex;justify-content:space-between;gap:20px;margin-top:16px;color:rgba(247,241,232,.52);
+    font:600 10px/1.3 var(--font-sans);letter-spacing:.08em;text-transform:uppercase}
+.campaign-progress-foot span:first-child{color:rgba(247,241,232,.78)}
 .campaign-count{position:absolute;z-index:2;right:var(--rail-padding);bottom:58px;display:flex;align-items:flex-end;gap:13px;color:#F7F1E8}
 .campaign-count strong{font:300 clamp(62px,7vw,104px)/.7 var(--font-display);color:#E9A860}
 .campaign-count span{font:700 10px/1.35 var(--font-sans);letter-spacing:.13em;text-transform:uppercase;color:rgba(247,241,232,.64)}
 @media(max-width:860px){.campaign-hero-image{background-position:61% center}.campaign-hero-image:after{background:linear-gradient(90deg,rgba(13,11,9,.96),rgba(13,11,9,.68))}.campaign-count{display:none}}
 @media(max-width:600px){
-  .campaign-hero{min-height:820px}.campaign-hero-image{background-position:62% center;opacity:.72}
+  .campaign-hero{min-height:900px}.campaign-hero-image{background-position:62% center;opacity:.72}
   .campaign-hero-image:after{background:linear-gradient(180deg,rgba(13,11,9,.55) 0%,rgba(13,11,9,.9) 48%,#0D0B09 100%)}
   .campaign-hero-inner{padding-top:128px}.campaign-hero h1{font-size:clamp(45px,13vw,62px)}
-  .campaign-intro{font-size:18px}.campaign-progress-copy{align-items:flex-start;flex-direction:column;gap:6px}
+  .campaign-intro{font-size:18px}.campaign-progress{padding:21px 18px 18px}.campaign-progress-head{align-items:flex-start;flex-direction:column;gap:18px}
+  .campaign-progress-total{align-items:flex-start;text-align:left}.campaign-progress-total b{font-size:27px}.campaign-track{margin-top:24px}
 }
 `;

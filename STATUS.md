@@ -8,7 +8,9 @@ into Icelandic homes.
 
 - Replaced the normal site navigation with a campaign header and one action.
 - Rebuilt the hero in the dark Omega register with the live total, 5m goal and
-  a direct jump to giving.
+  a direct jump to giving. Strengthened the fundraising status into a prominent
+  campaign block with the exact amount raised, percentage, amount remaining,
+  and three data-backed camera checkpoints that turn gold only when funded.
 - Added a short 34-year trust section using a real Omega archive photograph;
   after Hawk clarified that people in one candidate image were visitors from
   another ministry, replaced it with an equipment-only satellite image and

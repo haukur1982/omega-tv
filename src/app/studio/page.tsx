@@ -32,7 +32,7 @@ export default async function StudioPage() {
                 <a href="#gefa" className="studio-nav-cta">Taka þátt</a>
             </header>
 
-            <StudioHero raised={raised} goal={goal} />
+            <StudioHero raised={raised} goal={goal} items={data?.project.items ?? []} />
             <StudioLegacy />
 
             {data && <CamerasSection items={data.project.items} raised={raised} />}
