@@ -219,4 +219,15 @@ const SHEET_CSS = `
 .lg-todo{ background:rgba(27,24,20,.07); border:1px solid rgba(27,24,20,.12); }
 .lg-read{ background:var(--kerti); }
 .lg-live{ background:var(--ink); }
+
+/* The phone: the layout's padding halves below md, so the bleed does too, and
+   "Halda áfram" — the only button that matters here — goes full width. */
+@media (max-width:768px){
+  .hug-sheet{ margin:-1rem; padding:1.5rem 1rem 3rem; }
+  .hug-stats{ gap:1.25rem; margin:1.6rem 0 1.8rem; }
+  .hug-month{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+  .hug-solid{ width:100%; justify-content:center; min-height:46px; }
+  .hug-slot{ width:34px; height:34px; }
+  .hug-legend{ margin-left:0; }
+}
 `;

@@ -29,6 +29,7 @@ import {
     ScrollText,
     HandCoins,
     BookMarked,
+    Menu,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { OmegaMark } from '@/components/brand/OmegaMark';
@@ -111,6 +112,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const pathname = usePathname();
     const [isAuthed, setIsAuthed] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    /**
+     * The sidebar is 260px of fixed chrome. On a phone that left ~130px for the
+     * page itself, so below `md` it goes off-canvas and comes back on request.
+     */
+    const [navOpen, setNavOpen] = useState(false);
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -146,6 +152,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setNavOpen(false)}
                 className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
                     transition-all duration-150 group relative
@@ -166,8 +173,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     return (
         <div className="min-h-screen bg-[var(--admin-bg)] flex">
+            {/* Backdrop — phone only, and only while the nav is out */}
+            {navOpen && (
+                <div
+                    className="md:hidden fixed inset-0 z-40 bg-black/40"
+                    onClick={() => setNavOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className="fixed left-0 top-0 bottom-0 w-[var(--admin-sidebar-width)] bg-[var(--admin-surface)] border-r border-[var(--admin-border)] flex flex-col z-40">
+            <aside
+                className={`fixed left-0 top-0 bottom-0 w-[var(--admin-sidebar-width)] bg-[var(--admin-surface)] border-r border-[var(--admin-border)] flex flex-col z-50 transition-transform duration-200 md:translate-x-0 ${navOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            >
                 {/* Logo */}
                 <div className="h-16 flex items-center px-6 border-b border-[var(--admin-border)]">
                     <Link href="/" className="flex items-center gap-3 group">
@@ -199,6 +217,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <div className="px-3 py-4 border-t border-[var(--admin-border)] space-y-1">
                     <Link
                         href="/admin/settings"
+                        onClick={() => setNavOpen(false)}
                         className={`
                             flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
                             transition-all duration-150
@@ -222,8 +241,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 ml-[var(--admin-sidebar-width)]">
-                <div className="min-h-screen p-8">
+            <main className="flex-1 min-w-0 ml-0 md:ml-[var(--admin-sidebar-width)]">
+                {/* Phone header — scrolls away, so a page's own sticky bar still owns the top */}
+                <div className="md:hidden flex items-center gap-3 h-14 px-4 border-b border-[var(--admin-border)] bg-[var(--admin-surface)]">
+                    <button
+                        onClick={() => setNavOpen(true)}
+                        className="p-2 -ml-2 text-[var(--admin-text-secondary)]"
+                        aria-label="Opna valmynd"
+                    >
+                        <Menu size={20} />
+                    </button>
+                    <div className="w-7 h-7 flex items-center justify-center text-[var(--admin-accent)]">
+                        <OmegaMark size={28} title="Omega" />
+                    </div>
+                    <span className="text-[var(--admin-text)] font-semibold text-sm">Stjórnborð</span>
+                </div>
+                <div className="min-h-screen p-4 md:p-8">
                     {children}
                 </div>
             </main>

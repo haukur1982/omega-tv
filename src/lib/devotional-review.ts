@@ -210,3 +210,87 @@ export function diffWords(before: string, after: string): DiffPart[] {
 export function isDifferent(a: string, b: string): boolean {
     return a.replace(/\s+/g, ' ').trim() !== b.replace(/\s+/g, ' ').trim();
 }
+
+/* ── a suggestion, cut into the small edits it actually proposes ────────── */
+
+/**
+ * One small change: a run of words to lift out, a run to put in their place,
+ * anchored to where the removed run starts in the CURRENT text.
+ *
+ * A suggestion is not one paragraph-sized decision — it is five to ten little
+ * ones, and the reviewer wants them one at a time, mixed freely across
+ * registers. Hence an edit, not an option, is the unit that gets a button.
+ */
+export interface Edit {
+    /** Word index in the current text where the removed run starts. */
+    at: number;
+    /** The words this edit expects to still find there — the anchor. */
+    removed: string[];
+    /** The words that take their place. */
+    added: string[];
+}
+
+/** The word array every `Edit.at` is indexed against. */
+function wordsOf(text: string): string[] {
+    return text.split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Cut a suggestion into its individual edits.
+ *
+ * Whitespace-only stretches of agreement must NOT close an edit: the diff
+ * walker can emit `removed "orð"`, `same " "`, `added "orðið"`, and treating
+ * that as two edits would offer the reviewer a deletion and an insertion where
+ * he is really being offered one substitution.
+ */
+export function groupEdits(current: string, suggestion: string): Edit[] {
+    const parts = diffWords(current, suggestion);
+    const edits: Edit[] = [];
+    let at = 0;
+    let open: Edit | null = null;
+
+    for (const part of parts) {
+        const w = wordsOf(part.text);
+        if (part.added) {
+            if (!open) open = { at, removed: [], added: [] };
+            open.added.push(...w);
+        } else if (part.removed) {
+            if (!open) open = { at, removed: [], added: [] };
+            open.removed.push(...w);
+            at += w.length;
+        } else {
+            if (w.length === 0) continue;
+            if (open) { edits.push(open); open = null; }
+            at += w.length;
+        }
+    }
+    if (open) edits.push(open);
+
+    return edits.filter((e) => e.removed.length > 0 || e.added.length > 0);
+}
+
+/**
+ * Apply one edit to the current text, or refuse.
+ *
+ * The anchor is checked before anything is written: if the removed run is no
+ * longer sitting at that word position — he typed in the paragraph, or took a
+ * chip that overlapped this one — the edit is stale and `null` comes back, so
+ * the caller can drop the chip instead of corrupting the paragraph.
+ *
+ * Words are rejoined with single spaces. The corpus is plain Icelandic prose
+ * and „gæsalappir“ are already part of the word tokens, so nothing here needs
+ * to be clever about punctuation.
+ */
+export function applyEdit(current: string, edit: Edit): string | null {
+    const words = wordsOf(current);
+    const { at, removed, added } = edit;
+    if (at < 0 || at + removed.length > words.length) return null;
+    for (let k = 0; k < removed.length; k++) {
+        if (words[at + k] !== removed[k]) return null;
+    }
+    return [
+        ...words.slice(0, at),
+        ...added,
+        ...words.slice(at + removed.length),
+    ].join(' ');
+}
