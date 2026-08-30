@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Newsreader, Fraunces } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import PageViewTracker from "@/components/PageViewTracker";
+import AuthLinkCatcher from "@/components/auth/AuthLinkCatcher";
 import JsonLd from "@/components/JsonLd";
 import { SITE, organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 import "./globals.css";
@@ -100,6 +101,7 @@ export default function RootLayout({
       <body className={`min-h-screen flex flex-col antialiased selection:bg-[var(--kerti)] selection:text-black ${inter.variable} ${newsreader.variable} ${fraunces.variable} font-sans`}>
         <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <main className="flex-grow">
+          <AuthLinkCatcher />
           {children}
         </main>
         <Analytics />

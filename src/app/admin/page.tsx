@@ -12,6 +12,7 @@ export default function AdminLoginPage() {
     const [notice, setNotice] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [linkLoading, setLinkLoading] = useState(false);
+    const [resetLoading, setResetLoading] = useState(false);
     const router = useRouter();
 
     // If a session already exists — including arriving via a magic link that just
@@ -67,6 +68,27 @@ export default function AdminLoginPage() {
             setNotice('Innskráningarhlekkur sendur. Athugaðu tölvupóstinn þinn (og ruslpóst).');
         }
         setLinkLoading(false);
+    };
+
+    // Forgot password: email a link to /admin/nytt-lykilord, which is the page
+    // that can actually consume a recovery token and set a new password.
+    const sendReset = async () => {
+        setError('');
+        setNotice('');
+        if (!email) {
+            setError('Sláðu inn netfangið þitt fyrst');
+            return;
+        }
+        setResetLoading(true);
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/admin/nytt-lykilord`,
+        });
+        if (resetError) {
+            setError('Tókst ekki að senda hlekk núna. Reyndu aftur eftir smástund.');
+        } else {
+            setNotice('Hlekkur til að velja nýtt lykilorð er sendur í tölvupósti.');
+        }
+        setResetLoading(false);
     };
 
     return (
@@ -142,6 +164,15 @@ export default function AdminLoginPage() {
                     <p className="text-center text-[var(--text-muted)] text-xs mt-3">
                         Manstu ekki lykilorðið? Fáðu hlekk sendan í tölvupósti.
                     </p>
+
+                    <button
+                        type="button"
+                        onClick={sendReset}
+                        disabled={resetLoading}
+                        className="w-full mt-4 text-center text-[var(--text-muted)] text-sm hover:text-white transition-colors disabled:opacity-50"
+                    >
+                        {resetLoading ? 'Sendi...' : 'Velja nýtt lykilorð'}
+                    </button>
                 </form>
 
                 <p className="text-center text-[var(--text-muted)] text-sm mt-6">
