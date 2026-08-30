@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { BookMarked, ArrowRight, RefreshCw } from 'lucide-react';
+import { BookMarked, ArrowRight, RefreshCw, Flag } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { authedFetch } from '@/lib/admin-fetch';
 
@@ -26,7 +26,11 @@ interface Row {
     reviewed: boolean;
     status: 'draft' | 'published';
     paragraphs: number;
+    /** Flagged paragraphs, counted server-side with the shared flagPiece. */
+    flagged: number;
 }
+
+type Order = 'calendar' | 'flags';
 
 export default function AdminHugleidingarPage() {
     const router = useRouter();
@@ -34,6 +38,7 @@ export default function AdminHugleidingarPage() {
     const [progress, setProgress] = useState({ total: 0, reviewed: 0, published: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [order, setOrder] = useState<Order>('calendar');
 
     const load = useCallback(async () => {
         setIsLoading(true);
@@ -70,7 +75,35 @@ export default function AdminHugleidingarPage() {
     }, [rows]);
 
     const pct = progress.total > 0 ? Math.round((progress.reviewed / progress.total) * 100) : 0;
-    const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+    /**
+     * Flags that still belong to someone: a piece already marked yfirlesin has
+     * had its second look, so its flags are decisions, not work.
+     */
+    const flagsByDay = useMemo(() => {
+        const m = new Map<number, number>();
+        for (const r of rows) {
+            if (r.reviewed) continue;
+            m.set(r.day, (m.get(r.day) ?? 0) + (r.flagged ?? 0));
+        }
+        return m;
+    }, [rows]);
+
+    const flagsLeft = useMemo(
+        () => [...flagsByDay.values()].reduce((n, v) => n + v, 0),
+        [flagsByDay],
+    );
+
+    /**
+     * Calendar order is the default because the month is how he holds the
+     * collection in his head. "Mest flöggað" is the same month, re-laid so the
+     * heaviest days come first — the seed of the article queue, not a new page.
+     */
+    const days = useMemo(() => {
+        const all = Array.from({ length: 31 }, (_, i) => i + 1);
+        if (order === 'calendar') return all;
+        return [...all].sort((a, b) => (flagsByDay.get(b) ?? 0) - (flagsByDay.get(a) ?? 0) || a - b);
+    }, [order, flagsByDay]);
 
     return (
         <AdminLayout>
@@ -118,6 +151,31 @@ export default function AdminHugleidingarPage() {
 
                 {error && <div className="hug-error">{error}</div>}
 
+                <div className="hug-order">
+                    <span className="hug-order-label">Röð</span>
+                    <div className="hug-order-seg">
+                        <button
+                            type="button"
+                            className={`hug-order-btn${order === 'calendar' ? ' is-on' : ''}`}
+                            onClick={() => setOrder('calendar')}
+                        >
+                            dagatal
+                        </button>
+                        <button
+                            type="button"
+                            className={`hug-order-btn${order === 'flags' ? ' is-on' : ''}`}
+                            onClick={() => setOrder('flags')}
+                        >
+                            mest flöggað
+                        </button>
+                    </div>
+                    {flagsLeft > 0 && (
+                        <span className="hug-order-note">
+                            <Flag size={12} /> {flagsLeft} flögg í óyfirlesnum hugleiðingum
+                        </span>
+                    )}
+                </div>
+
                 <div className="hug-month">
                     {days.map((day) => {
                         const e = byDay.get(day);
@@ -125,9 +183,15 @@ export default function AdminHugleidingarPage() {
                         const both = [e.morning, e.evening].filter(Boolean) as Row[];
                         const doneCount = both.filter((r) => r.reviewed).length;
                         const state = doneCount === both.length ? 'is-done' : doneCount > 0 ? 'is-part' : '';
+                        const dayFlags = flagsByDay.get(day) ?? 0;
                         return (
                             <div key={day} className={`hug-day ${state}`}>
                                 <span className="hug-daynum">{day}</span>
+                                {dayFlags > 0 && (
+                                    <span className="hug-flagchip" title={`${dayFlags} flöggaðar málsgreinar bíða yfirlestrar`}>
+                                        <Flag size={10} /> {dayFlags}
+                                    </span>
+                                )}
                                 <div className="hug-slots">
                                     {(['morning', 'evening'] as const).map((slot) => {
                                         const r = e[slot];
@@ -191,8 +255,22 @@ const SHEET_CSS = `
 .hug-done-all{ font-family:var(--font-sans),sans-serif; font-size:.85rem; color:var(--gold); font-weight:600; }
 .hug-error{ margin-bottom:1.5rem; padding:.8rem 1rem; border-radius:8px; background:rgba(216,75,58,.1); border:1px solid rgba(216,75,58,.3); font-family:var(--font-sans),sans-serif; font-size:.85rem; }
 
+/* One toggle, no filter bar: the month is either a month or a worklist. */
+.hug-order{ display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; margin:0 0 1.1rem;
+  font-family:var(--font-sans),sans-serif; font-size:.78rem; color:var(--ink-faint); }
+.hug-order-label{ letter-spacing:.14em; text-transform:uppercase; font-size:.7rem; font-weight:600; }
+.hug-order-seg{ display:inline-flex; gap:2px; padding:2px; border-radius:7px; background:rgba(27,24,20,.055); border:1px solid rgba(27,24,20,.1); }
+.hug-order-btn{ background:transparent; border:none; border-radius:5px; cursor:pointer; padding:.3rem .65rem;
+  font-family:inherit; font-size:.75rem; font-weight:600; color:var(--ink-faint); transition:all .15s ease; }
+.hug-order-btn:hover{ color:var(--ink); }
+.hug-order-btn.is-on{ background:var(--paper); color:var(--ink); box-shadow:0 1px 2px rgba(27,24,20,.12); }
+.hug-order-note{ display:inline-flex; align-items:center; gap:.35rem; color:#8A5A22; }
+
 .hug-month{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.75rem; max-width:70rem; }
 .hug-day{ position:relative; padding:.7rem .8rem .8rem; border-radius:9px; background:rgba(27,24,20,.028); border:1px solid rgba(27,24,20,.08); transition:all .2s ease; }
+.hug-flagchip{ position:absolute; top:.55rem; right:.6rem; display:inline-flex; align-items:center; gap:.2rem;
+  padding:.1rem .34rem; border-radius:4px; background:rgba(200,138,62,.22); color:#8A5A22;
+  font-family:var(--font-sans),sans-serif; font-size:.66rem; font-weight:700; font-variant-numeric:tabular-nums; }
 .hug-day.is-part{ background:rgba(200,138,62,.07); border-color:rgba(200,138,62,.25); }
 .hug-day.is-done{ background:rgba(200,138,62,.13); border-color:rgba(200,138,62,.4); }
 .hug-day.is-empty{ opacity:.35; }

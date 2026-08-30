@@ -9,6 +9,7 @@ import {
     getNeighbours,
     listGlossary,
 } from '@/lib/devotional-db';
+import { flagPiece } from '@/lib/devotional-review';
 
 /**
  * Admin API for Hugleiðingar (BookForge devotionals).
@@ -37,8 +38,16 @@ export async function GET(request: Request) {
         return NextResponse.json({ success: true, item, nav, glossary });
     }
 
-    const [items, progress] = await Promise.all([listAllDevotionals(), getDevotionalProgress()]);
-    // Keep the list light: the workspace fetches full bodies per piece.
+    const [items, progress, glossary] = await Promise.all([
+        listAllDevotionals(),
+        getDevotionalProgress(),
+        listGlossary(),
+    ]);
+    // Keep the list light: the workspace fetches full bodies per piece. The
+    // flag COUNT travels with it though — reviewing 1,851 paragraphs has to
+    // start where the problems are, and the month is where that is decided.
+    // flagPiece is pure and client-safe; running it here means the grid never
+    // downloads a body it is not going to show.
     return NextResponse.json({
         success: true,
         progress,
@@ -46,6 +55,7 @@ export async function GET(request: Request) {
             id: i.id, day: i.day, slot: i.slot, slug: i.slug,
             title_is: i.title_is, reviewed: i.reviewed, status: i.status,
             paragraphs: i.body_is.length,
+            flagged: flagPiece(i.body_is, i.body_en ?? [], glossary).filter((f) => f.length > 0).length,
         })),
     });
 }

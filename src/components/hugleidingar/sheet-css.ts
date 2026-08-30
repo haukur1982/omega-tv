@@ -32,6 +32,11 @@ export const SHEET_CSS = `
 .devo-solid{ background:var(--ink); border:1px solid var(--ink); color:var(--paper); }
 .devo-solid:hover{ background:#000; }
 .devo-ghost:disabled,.devo-solid:disabled{ opacity:.5; cursor:default; }
+/* The one button that is about the work rather than the piece: it carries the
+   flag tint so it reads as "here is what is left", and it is absent when the
+   piece is clean. */
+.devo-flagjump{ border-color:rgba(200,138,62,.45); color:#8A5A22; font-variant-numeric:tabular-nums; }
+.devo-flagjump:hover{ border-color:var(--gold); color:var(--gold); background:rgba(200,138,62,.08); }
 
 .devo-notice{
   max-width:42rem; margin:1rem auto 0; padding:.7rem 1rem; border-radius:8px;
@@ -165,6 +170,9 @@ export const SHEET_CSS = `
 }
 .devo-rpara:active{ background:rgba(200,138,62,.14); }
 .devo-rpara.is-open{ background:rgba(200,138,62,.16); }
+/* Jumped to, not opened: the phone has no cursor, so the landing has to be
+   visible or the jump feels like the page moved on its own. */
+.devo-rpara.is-focus{ background:rgba(200,138,62,.09); box-shadow:inset 0 0 0 1px rgba(200,138,62,.3); }
 .devo-rpara.is-changed{ box-shadow:inset 2px 0 0 var(--gold); }
 .devo-rpara p{ margin:0; font-size:1.14rem; line-height:1.75; }
 .devo-rmark{ flex:0 0 10px; padding-top:.62rem; }

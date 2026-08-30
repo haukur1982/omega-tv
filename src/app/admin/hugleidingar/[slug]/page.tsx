@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
     ArrowLeft, ArrowRight, ExternalLink, Check, Sparkles, Volume2, Square,
-    Undo2, BookMarked, Languages, Maximize2, Minimize2,
+    Undo2, BookMarked, Languages, Maximize2, Minimize2, Flag as FlagIcon,
 } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { authedFetch } from '@/lib/admin-fetch';
@@ -258,25 +258,54 @@ export default function ReviewDevotionalPage() {
         ? 'Vistað — smelltu á „Yfirlesin“ þegar hún er tilbúin.'
         : 'Vistað.');
 
+    /**
+     * Jumping, and there are two jumps because he has two moves: read on to
+     * the next paragraph, or go straight to the next thing that is wrong.
+     *
+     * 1,851 paragraphs and about a hundred flags — reviewing has to be able to
+     * start where the problems are, so the flagged jump wraps: the last flag
+     * takes you back to the first, and when the piece is clean there is
+     * nothing to jump to and the button is gone.
+     *
+     * The cursor is the paragraph he is ON, not what is on screen. Stepping
+     * from the viewport alone stalls: the target lands mid-screen, is still
+     * "the first one below the bar", and the second press picks it again.
+     * Only the first jump, before anything is chosen, reads the viewport.
+     */
+    const paraCount = paras.length;
+    const jump = useCallback((dir: 1 | -1, flaggedOnly: boolean) => {
+        const pool = flaggedOnly ? flaggedIdx : Array.from({ length: paraCount }, (_, i) => i);
+        if (pool.length === 0) return;
+
+        let target: number;
+        if (active === null) {
+            const tops = pool.map((i) => ({ i, top: rowRefs.current[i]?.getBoundingClientRect().top ?? 0 }));
+            target = dir === 1
+                ? (tops.find((t) => t.top > 120) ?? tops[0]).i
+                : ([...tops].reverse().find((t) => t.top < -20) ?? tops[tops.length - 1]).i;
+        } else {
+            target = dir === 1
+                ? pool.find((i) => i > active) ?? pool[0]
+                : [...pool].reverse().find((i) => i < active) ?? pool[pool.length - 1];
+        }
+
+        rowRefs.current[target]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setActive(target);
+    }, [flaggedIdx, paraCount, active]);
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
                 e.preventDefault(); if (!saving) save(); return;
             }
             if (e.altKey && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
-                if (flaggedIdx.length === 0) return;
                 e.preventDefault();
-                const tops = flaggedIdx.map((i) => ({ i, top: rowRefs.current[i]?.getBoundingClientRect().top ?? 0 }));
-                const target = e.key === 'ArrowDown'
-                    ? tops.find((t) => t.top > 120) ?? tops[0]
-                    : [...tops].reverse().find((t) => t.top < -20) ?? tops[tops.length - 1];
-                rowRefs.current[target.i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setActive(target.i);
+                jump(e.key === 'ArrowDown' ? 1 : -1, e.shiftKey);
             }
         };
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
-    }, [save, saving, flaggedIdx]);
+    }, [save, saving, jump]);
 
     const askSuggestion = async (i: number) => {
         if (!item) return;
@@ -284,7 +313,12 @@ export default function ReviewDevotionalPage() {
         try {
             const res = await authedFetch('/api/admin/devotionals/suggest', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ en: item.body_en?.[i] ?? '', is: paras[i], instruction: instr[i] ?? '' }),
+                // The id and the index are what let the route answer from the
+                // pre-warmed cache — and write the row when it has to generate.
+                body: JSON.stringify({
+                    en: item.body_en?.[i] ?? '', is: paras[i], instruction: instr[i] ?? '',
+                    devotionalId: item.id, index: i,
+                }),
             });
             const d = await res.json();
             if (!res.ok) throw new Error(d.error || `Villa ${res.status}`);
@@ -334,6 +368,16 @@ export default function ReviewDevotionalPage() {
                 <span className="devo-count">{nav.position} af {nav.total}</span>
                 <div style={{ flex: 1 }} />
                 {dirty && <span className="devo-dirty">óvistað</span>}
+                {flaggedIdx.length > 0 && (
+                    <button
+                        onClick={() => jump(1, true)}
+                        className="devo-ghost devo-flagjump"
+                        title="Næsta flöggaða málsgrein (⌥⇧↓)"
+                    >
+                        <FlagIcon size={13} />
+                        {isPhone ? flaggedIdx.length : `Næsta flagg ↓ (${flaggedIdx.length})`}
+                    </button>
+                )}
                 {!isPhone && (
                     <>
                         <button onClick={() => setAllEn((v) => !v)} className="devo-ghost" title="Sýna enska frumtextann alls staðar">
@@ -396,9 +440,10 @@ export default function ReviewDevotionalPage() {
                                 return (
                                     <div
                                         key={i}
+                                        ref={(el) => { rowRefs.current[i] = el; }}
                                         role="button"
                                         tabIndex={0}
-                                        className={`devo-rpara${sheetIdx === i ? ' is-open' : ''}${changed ? ' is-changed' : ''}`}
+                                        className={`devo-rpara${sheetIdx === i ? ' is-open' : ''}${changed ? ' is-changed' : ''}${active === i && sheetIdx === null ? ' is-focus' : ''}`}
                                         onClick={() => setSheetIdx(i)}
                                         onKeyDown={(e) => {
                                             if (e.key !== 'Enter' && e.key !== ' ') return;
@@ -497,7 +542,9 @@ export default function ReviewDevotionalPage() {
                             {item.source_url && (
                                 <a href={item.source_url} target="_blank" rel="noreferrer"><ExternalLink size={13} /> Frumtexti á vefnum</a>
                             )}
-                            {!isPhone && <span className="devo-hint">⌘S vistar · ⌥↓ næsta merking</span>}
+                            {!isPhone && (
+                                <span className="devo-hint">⌘S vistar · ⌥↓ næsta málsgrein · ⌥⇧↓ næsta flagg</span>
+                            )}
                         </div>
                     </footer>
 

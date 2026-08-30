@@ -1,4 +1,6 @@
+import { createHash } from 'node:crypto';
 import { supabaseAdmin } from '@/lib/supabase';
+import type { SuggestPayload } from '@/lib/devotional-suggest';
 
 /**
  * Hugleiðingar — BookForge-translated devotionals.
@@ -179,6 +181,41 @@ export async function getCorrectionCount(): Promise<number> {
     return count ?? 0;
 }
 
+export interface CorrectionRow {
+    id: string;
+    devotional_id: string;
+    paragraph_index: number;
+    source_en: string | null;
+    before_is: string;
+    after_is: string;
+    instruction: string | null;
+    created_at: string;
+}
+
+/** The newest pairs, shown to the suggester as examples of the house voice. */
+export async function recentCorrections(limit = 12): Promise<CorrectionRow[]> {
+    const { data } = await sb
+        .from('devotional_corrections')
+        .select('id, devotional_id, paragraph_index, source_en, before_is, after_is, instruction, created_at')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+    return (data ?? []) as CorrectionRow[];
+}
+
+/**
+ * Everything ever corrected — the ore scripts/mine-corrections.ts works.
+ * Capped because this is read into memory whole; the collection would have to
+ * grow by two orders of magnitude before that matters.
+ */
+export async function listCorrections(limit = 5000): Promise<CorrectionRow[]> {
+    const { data } = await sb
+        .from('devotional_corrections')
+        .select('id, devotional_id, paragraph_index, source_en, before_is, after_is, instruction, created_at')
+        .order('created_at', { ascending: true })
+        .limit(limit);
+    return (data ?? []) as CorrectionRow[];
+}
+
 /* ── glossary ──────────────────────────────────────────────────────────── */
 
 export interface GlossaryRow {
@@ -216,6 +253,96 @@ export async function upsertGlossaryTerm(
 export async function deleteGlossaryTerm(id: string): Promise<boolean> {
     const { error } = await sb.from('devotional_glossary').delete().eq('id', id);
     return !error;
+}
+
+/* ── pre-warmed suggestions ────────────────────────────────────────────── */
+
+/**
+ * The wording assistant costs a Gemini call and about ten seconds, and the
+ * reviewer pays both in the middle of reading. `scripts/warm-suggestions.ts`
+ * pays them beforehand for the flagged paragraphs and parks the answer here.
+ *
+ * The hash is what makes the cache safe: it is taken over the exact Icelandic
+ * paragraph the suggestions were computed for, so the moment he edits that
+ * paragraph the row stops matching and the next ask regenerates.
+ */
+export interface SuggestionCacheRow {
+    devotional_id: string;
+    paragraph_index: number;
+    body_hash: string;
+    suggestions: SuggestPayload;
+    created_at: string;
+}
+
+const CACHE_COLS = 'devotional_id, paragraph_index, body_hash, suggestions, created_at';
+
+/** Whitespace is not a change; anything else is. */
+export function paragraphHash(text: string): string {
+    return createHash('sha256')
+        .update((text ?? '').replace(/\s+/g, ' ').trim())
+        .digest('hex')
+        .slice(0, 32);
+}
+
+/**
+ * A usable cached payload, or null. A row whose generation failed is stored
+ * with no options on purpose (it is a record that we tried), and counts as a
+ * miss here so the editor still gets an answer.
+ */
+export async function getCachedSuggestion(
+    hash: string,
+    devotionalId?: string,
+    paragraphIndex?: number,
+): Promise<SuggestPayload | null> {
+    try {
+        let q = sb.from('devotional_suggestions').select(CACHE_COLS);
+        q = devotionalId
+            ? q.eq('devotional_id', devotionalId).eq('paragraph_index', paragraphIndex ?? 0)
+            : q.eq('body_hash', hash);
+        const { data } = await q.limit(1).maybeSingle();
+        const row = data as SuggestionCacheRow | null;
+        if (!row || row.body_hash !== hash) return null;
+        const payload = row.suggestions;
+        if (!payload || !Array.isArray(payload.options) || payload.options.length === 0) return null;
+        return payload;
+    } catch {
+        return null;
+    }
+}
+
+/** Store one payload. Failures are recorded too — see SuggestPayload.failed. */
+export async function putCachedSuggestion(
+    devotionalId: string,
+    paragraphIndex: number,
+    hash: string,
+    payload: SuggestPayload,
+): Promise<boolean> {
+    try {
+        const { error } = await sb.from('devotional_suggestions').upsert(
+            {
+                devotional_id: devotionalId,
+                paragraph_index: paragraphIndex,
+                body_hash: hash,
+                suggestions: payload,
+                created_at: new Date().toISOString(),
+            },
+            { onConflict: 'devotional_id,paragraph_index' },
+        );
+        return !error;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Every cached row — the warm script reads this once and works from a map.
+ * Unlike the read path above this one THROWS, because a script that cannot
+ * see the cache would otherwise happily regenerate the whole collection.
+ */
+export async function listSuggestionCache(limit = 5000): Promise<SuggestionCacheRow[]> {
+    const { data, error } = await sb.from('devotional_suggestions').select(CACHE_COLS).limit(limit);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as SuggestionCacheRow[];
 }
 
 /**
