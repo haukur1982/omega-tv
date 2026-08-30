@@ -1,5 +1,66 @@
 # STATUS.md — Omega TV
 
+## 2026-08-30 — Hugleiðingar: chips, phone review, and the article-scale flywheel (Claude Code)
+
+Hawk's feedback after a week of morning use: the suggestion cards ate the laptop
+screen, he couldn't mix words from different suggestions, and he wanted to review
+on his phone. Two builds landed (specs in `docs/plans/06-*` and `07-*`, design
+borrowed from book-system's "one sheet, one sentence" review pattern):
+
+**Build 1 — `a92bfb0` (chips + phone sheet):**
+- Every suggestion is now split into small tappable edits ("chips", `old → new`);
+  tapping applies just that edit. Mixing registers = tap chips from different tabs.
+- Three stacked suggestion cards → one card with Nákvæmt/Eðlilegt/Prédikun tabs
+  (measured: ~537px → 198–267px).
+- Phone (≤768px): the piece renders as a reading page; tap a paragraph → bottom
+  sheet with the paragraph, English source, Tillögur chips, Vista. iOS keyboard
+  mic gives dictation for free.
+- AdminLayout got an off-canvas mobile sidebar (the 260px fixed sidebar covered
+  2/3 of a phone screen on every admin page).
+
+**Build 2 — `f3bce33` (flywheel + flag-nav + cache):**
+- `scripts/mine-corrections.ts`: mines `devotional_corrections` into glossary
+  candidates + `src/lib/translation-rules/mined.ts` (≥2 repeats across paragraphs
+  to qualify; currently 8 corrections → 0 candidates, honest empty output).
+  Glossary + mined rules now feed the suggest prompt as binding constraints.
+- Flag-first nav: ⌥⇧↓ / "Næsta flagg ↓" jumps between flagged paragraphs (⌥↓ is
+  plain next-paragraph again); month grid shows gold flag-count chips + a
+  "mest flöggað" sort. Current corpus: 100 flagged paragraphs in 61 unreviewed.
+- `scripts/warm-suggestions.ts`: pre-computes suggestions for flagged paragraphs
+  into a `devotional_suggestions` cache (hash-invalidated) so morning review has
+  no Gemini wait. Cost guards: --limit 80 default, skip-if-cached, one retry max,
+  spend summary. Zero Gemini calls made during build; $0 spent.
+
+### ✅ OBSERVED
+- Both builds: `npm run build` exit 0, touched files lint-clean, tsc clean.
+- Chip mechanics proven with 17 assertions on the real diff code + in-browser on
+  the real components (fixture harness, archived in scratchpad, never committed):
+  single-edit apply, cross-register mixing, taken-state, recompute, wrap-around
+  flag jump, real keypresses ⌥↓/⌥⇧↓/⌥⇧↑, month-grid sort reorder, phone sheet at
+  390px with no overflow and ≥44px targets.
+- Mining dry-run against the real table: 8 corrections → 21 substitutions → 0 at
+  threshold (needs more history — by design).
+- Warm dry-run: 100 flagged paragraphs need cache, 0 cached, no calls made.
+
+### ⚠️ ASSUMED / NOT DONE
+- **`supabase/migrations/20260830_devotional_suggestions.sql` is WRITTEN but NOT
+  APPLIED** — no DB password exists on this machine (memory note corrected; only
+  the service key is local, which can't run DDL). Until Hawk pastes it into the
+  Supabase SQL editor, the cache degrades silently to today's live-fetch
+  behaviour (verified: routes still 401/load fine with the table absent).
+  After applying: `npx tsx scripts/warm-suggestions.ts --limit 5` is the check.
+- Real logged-in admin pages never exercised by agents (auth wall, correctly not
+  bypassed): ⌘S, Hlusta, Yfirlesin flow, draft-restore, live suggest response
+  through the refactored path — code preserved verbatim, Hawk is first to run it.
+- No real iPhone touch test (drag-to-dismiss, keyboard lift).
+- NOT deployed. Waiting on Hawk: `a92bfb0`, `f3bce33`, `ea49e60` (docs).
+- Behaviour changes to know: Nota keeps the card open now; ⌥↓ reverted to plain
+  next-paragraph (⌥⇧↓ is the flag jump).
+
+**Next:** Hawk applies the migration + one phone morning as the real test; then
+deploy on his word. When the article library lands: generalize the reading room
+to generic pieces (decision recorded in spec 07, deliberately not built).
+
 ## 2026-08-27 — `/studio` camera campaign landing page rebuilt (Codex)
 
 Rebuilt the camera fundraiser around one clear story: the three cameras are the
