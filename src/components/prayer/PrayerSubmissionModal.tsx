@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react';
 import { submitPrayerAction } from '@/actions/prayer';
+import { PRAYER_TAG_OPTIONS } from '@/lib/prayer-categories';
 import { IcoClose, IcoFeather } from './PrayerIcons';
 
 /**
@@ -21,16 +22,18 @@ interface Props {
     onClose: () => void;
 }
 
-const TAG_OPTIONS: Array<{ id: string; label: string; categoryType: string }> = [
-    { id: 'almennt', label: 'Almenn bæn', categoryType: 'personal' },
-    { id: 'heilsa', label: 'Heilsa', categoryType: 'personal' },
-    { id: 'fjolskylda', label: 'Fjölskylda', categoryType: 'personal' },
-    { id: 'tru', label: 'Trú og þjónusta', categoryType: 'personal' },
-    { id: 'thakklaeti', label: 'Þakklæti', categoryType: 'personal' },
-];
+// Shared with the volunteer's phone-intake form — see prayer-categories.ts.
+const TAG_OPTIONS = PRAYER_TAG_OPTIONS;
 
 export default function PrayerSubmissionModal({ open, onClose }: Props) {
     const [anonymous, setAnonymous] = useState(true);
+    /**
+     * On-air consent. NEVER pre-ticked, never inferred from anything else —
+     * a prayer is read out on national television only because the person
+     * said it could be. Leaving it alone blocks nothing: the prayer is borne
+     * either way, it simply stays off the broadcast stack.
+     */
+    const [airConsent, setAirConsent] = useState(false);
     const [tagId, setTagId] = useState('almennt');
     const [content, setContent] = useState('');
     const [name, setName] = useState('');
@@ -75,6 +78,7 @@ export default function PrayerSubmissionModal({ open, onClose }: Props) {
         fd.append('topic', selectedTag.label);
         fd.append('content', content);
         fd.append('categoryType', selectedTag.categoryType);
+        if (airConsent) fd.append('airConsent', 'true');
 
         startTransition(async () => {
             const result = await submitPrayerAction(fd);
@@ -83,6 +87,7 @@ export default function PrayerSubmissionModal({ open, onClose }: Props) {
                 setContent('');
                 setName('');
                 setEmail('');
+                setAirConsent(false);
             } else {
                 setStatus('error');
                 setErrorMsg(result.error ?? 'Villa kom upp.');
@@ -358,6 +363,65 @@ export default function PrayerSubmissionModal({ open, onClose }: Props) {
                                         }}
                                     >
                                         Birt sem „Nafnlaust systkin". Aðeins Omega-teymið sér netfang þitt, og aðeins ef þú kýst að láta það fylgja.
+                                    </div>
+                                </div>
+                            </label>
+
+                            {/* On-air consent — separate, unticked, independent of
+                                the anonymous choice. Its own box because it is its
+                                own decision. */}
+                            <label
+                                style={{
+                                    marginTop: '12px',
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
+                                    gap: '14px',
+                                    padding: '16px',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: 'var(--radius-xs)',
+                                    cursor: 'pointer',
+                                    background: airConsent
+                                        ? 'color-mix(in oklab, var(--kerti) 5%, transparent)'
+                                        : 'transparent',
+                                    transition: 'background 180ms ease',
+                                }}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={airConsent}
+                                    onChange={(e) => setAirConsent(e.target.checked)}
+                                    style={{
+                                        marginTop: '3px',
+                                        accentColor: 'var(--kerti)',
+                                        width: '16px',
+                                        height: '16px',
+                                        flexShrink: 0,
+                                        cursor: 'pointer',
+                                    }}
+                                />
+                                <div>
+                                    <div
+                                        style={{
+                                            fontFamily: 'var(--font-sans)',
+                                            fontSize: '14px',
+                                            fontWeight: 600,
+                                            color: 'var(--ljos)',
+                                        }}
+                                    >
+                                        Það má biðja fyrir þessari bæn í útsendingu.
+                                    </div>
+                                    <div
+                                        style={{
+                                            fontFamily: 'var(--font-serif)',
+                                            fontStyle: 'italic',
+                                            fontSize: '13.5px',
+                                            color: 'var(--moskva)',
+                                            marginTop: '3px',
+                                            lineHeight: 1.5,
+                                        }}
+                                    >
+                                        Valkvætt. Bænin þín er borin fram hvort sem er — þetta leyfir
+                                        okkur að biðja fyrir henni líka í bænastund á Omega.
                                     </div>
                                 </div>
                             </label>

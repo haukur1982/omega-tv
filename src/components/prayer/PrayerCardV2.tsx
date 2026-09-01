@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { IcoHands, IcoShare, IcoHeartCheck } from './PrayerIcons';
 import type { Prayer } from '@/lib/prayer-db';
+import { formatIcelandicDayMonth, prayedCountLabel, relativeIs } from '@/lib/prayer-format';
 
 /**
  * PrayerCardV2 — single prayer in the Bænatorg feed.
@@ -18,14 +19,19 @@ import type { Prayer } from '@/lib/prayer-db';
  *     thin --gull gold rule below it, generous breath. Reads like
  *     pages in a book of voices, not like a Pinterest grid.
  *
- *     The "Bið með þér" action becomes a quiet inline gold link
- *     (with the count) instead of a hard button. Still functional
- *     and legible — the action stays available without competing
- *     with the prayer body.
- *
  * Body is the star in both. Italic Newsreader, large, generous
- * line-height. The meta row is quiet. Amber stays reserved for the
- * invitation row's primary CTA above the feed.
+ * line-height. The meta row is quiet.
+ *
+ * De-gamified (docs/plans/09-prayer-ministry.md): the pray-along count is
+ * quiet prose — "43 hafa beðið" — not a number badge welded to a button. The
+ * tap-to-pray action stays available but subordinate; Biðja-mode above the
+ * feed is where a visitor is meant to actually hold these.
+ *
+ * Two marks can appear, and only these two: "barst símleiðis" when the prayer
+ * came down the phone line (never a mark for the web — that is the default and
+ * marking it would be noise), and a gold "borin fram í útsendingu" once it has
+ * actually been prayed on air. The second is the whole point of the ministry
+ * having one memory: the wall can show that the broadcast kept its promise.
  */
 
 type Register = 'dark' | 'light';
@@ -40,7 +46,6 @@ interface Props {
 
 export default function PrayerCardV2({ prayer, density = 'comfortable', register = 'dark', onPray, onShare }: Props) {
     const [prayed, setPrayed] = useState(false);
-    const [count, setCount] = useState(prayer.prayCount);
     const [hovered, setHovered] = useState(false);
 
     const isAnswer = prayer.isAnswered;
@@ -48,11 +53,16 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', register
     const padY = density === 'compact' ? 24 : 36;
     const bodySize = density === 'compact' ? 20 : 22;
 
+    /**
+     * The count itself is NOT held here. BaenatorgClient owns the list and
+     * increments it optimistically, so a card shows the same number whether
+     * the Amen was said here or in Biðja-mode. A private copy would have gone
+     * stale the moment the same prayer was held in the other place.
+     */
     const handlePray = async (e: React.MouseEvent) => {
         e.stopPropagation();
         if (prayed) return;
         setPrayed(true);
-        setCount((c) => c + 1);
         onPray?.(prayer.id);
     };
 
@@ -72,16 +82,17 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', register
     };
 
     const when = relativeIs(prayer.timestamp);
+    const countLabel = prayedCountLabel(prayer.prayCount);
 
     if (isLight) {
         return <FlowVariant
             prayer={prayer} bodySize={bodySize} padY={padY}
-            isAnswer={isAnswer} prayed={prayed} count={count} when={when}
+            isAnswer={isAnswer} prayed={prayed} countLabel={countLabel} when={when}
             onPray={handlePray} onShare={handleShare}
         />;
     }
 
-    // Dark register — original card pattern, kept as-is
+    // Dark register — original card pattern
     const HALO_X = 28;
     return (
         <article
@@ -123,6 +134,8 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', register
                 </div>
             )}
 
+            <AiredMark prayer={prayer} tone="dark" />
+
             <p
                 style={{
                     margin: 0,
@@ -154,6 +167,7 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', register
                         display: 'flex',
                         alignItems: 'center',
                         gap: '14px',
+                        flexWrap: 'wrap',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '12px',
                         color: 'var(--moskva)',
@@ -171,9 +185,27 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', register
                             </span>
                         </>
                     )}
+                    {prayer.source === 'simi' && (
+                        <>
+                            <span style={{ color: 'var(--steinn)' }}>·</span>
+                            <span style={{ color: 'var(--steinn)' }}>barst símleiðis</span>
+                        </>
+                    )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                    {countLabel && (
+                        <span
+                            style={{
+                                fontFamily: 'var(--font-serif)',
+                                fontStyle: 'italic',
+                                fontSize: '13.5px',
+                                color: 'var(--steinn)',
+                            }}
+                        >
+                            {countLabel}
+                        </span>
+                    )}
                     <button type="button" onClick={handleShare} aria-label="Deila" style={{
                         background: 'transparent', border: 0, color: 'var(--moskva)',
                         padding: '8px', cursor: 'pointer', borderRadius: 'var(--radius-xs)', display: 'inline-flex',
@@ -182,23 +214,17 @@ export default function PrayerCardV2({ prayer, density = 'comfortable', register
                     </button>
                     <button type="button" onClick={handlePray} disabled={prayed} style={{
                         padding: '9px 16px',
-                        background: prayed ? 'color-mix(in oklab, var(--kerti) 12%, transparent)' : 'transparent',
-                        border: `1px solid ${prayed ? 'var(--kerti)' : 'var(--border)'}`,
+                        background: 'transparent',
+                        border: 0,
                         color: prayed ? 'var(--kerti)' : 'var(--moskva)',
                         fontFamily: 'var(--font-sans)', fontSize: '12px', fontWeight: 600,
                         letterSpacing: '0.1em', textTransform: 'uppercase',
-                        borderRadius: 'var(--radius-xs)', cursor: prayed ? 'default' : 'pointer',
+                        cursor: prayed ? 'default' : 'pointer',
                         display: 'inline-flex', alignItems: 'center', gap: '8px',
-                        transition: 'all 220ms ease',
+                        transition: 'color 220ms ease',
                     }}>
                         <IcoHands size={14} />
                         {prayed ? 'Bað með þér' : 'Bið með þér'}
-                        <span style={{
-                            marginLeft: '4px', paddingLeft: '10px',
-                            borderLeft: '1px solid currentColor', opacity: 0.8,
-                            fontFamily: 'var(--font-serif)', fontStyle: 'italic',
-                            fontSize: '13px', textTransform: 'none', letterSpacing: 0, fontWeight: 400,
-                        }}>{count}</span>
                     </button>
                 </div>
             </div>
@@ -216,13 +242,13 @@ interface FlowProps {
     padY: number;
     isAnswer: boolean;
     prayed: boolean;
-    count: number;
+    countLabel: string | null;
     when: string;
     onPray: (e: React.MouseEvent) => void;
     onShare: (e: React.MouseEvent) => void;
 }
 
-function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, onPray, onShare }: FlowProps) {
+function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, countLabel, when, onPray, onShare }: FlowProps) {
     return (
         <article
             style={{
@@ -238,8 +264,8 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                         alignItems: 'center',
                         gap: '8px',
                         padding: '5px 11px',
-                        border: '1px solid rgba(111,165,216,0.45)',
-                        color: 'var(--nordurljos)',
+                        border: '1px solid rgba(200,138,62,0.55)',
+                        color: 'var(--gull)',
                         borderRadius: '999px',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11px',
@@ -253,6 +279,8 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                     Bænasvar
                 </div>
             )}
+
+            <AiredMark prayer={prayer} tone="light" />
 
             <p
                 style={{
@@ -276,7 +304,7 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    gap: '20px',
+                    gap: '18px',
                     flexWrap: 'wrap',
                 }}
             >
@@ -285,6 +313,7 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                         display: 'flex',
                         alignItems: 'center',
                         gap: '12px',
+                        flexWrap: 'wrap',
                         fontFamily: 'var(--font-sans)',
                         fontSize: '11.5px',
                         color: 'var(--skra-mjuk)',
@@ -313,9 +342,42 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                             </span>
                         </>
                     )}
+                    {prayer.source === 'simi' && (
+                        <>
+                            <span style={{ opacity: 0.4 }}>·</span>
+                            <span
+                                style={{
+                                    fontStyle: 'italic',
+                                    fontFamily: 'var(--font-serif)',
+                                    fontSize: '13.5px',
+                                    letterSpacing: 0,
+                                    textTransform: 'none',
+                                    fontWeight: 400,
+                                    opacity: 0.85,
+                                }}
+                            >
+                                barst símleiðis
+                            </span>
+                        </>
+                    )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+                    {/* Quiet count — company, not a score. Never a badge on a button. */}
+                    {countLabel && (
+                        <span
+                            style={{
+                                fontFamily: 'var(--font-serif)',
+                                fontStyle: 'italic',
+                                fontSize: '13.5px',
+                                color: 'var(--skra-mjuk)',
+                                opacity: 0.8,
+                            }}
+                        >
+                            {countLabel}
+                        </span>
+                    )}
+
                     {/* Share — small icon, ink-on-cream, no chrome */}
                     <button
                         type="button"
@@ -334,7 +396,7 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                         <IcoShare size={15} />
                     </button>
 
-                    {/* Bið með þér — inline gold link, with count. Quiet but present. */}
+                    {/* Tap-to-pray — subordinate to Biðja-mode: ink, not gold, no count. */}
                     <button
                         type="button"
                         onClick={onPray}
@@ -343,37 +405,24 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
                             background: 'transparent',
                             border: 0,
                             padding: 0,
-                            color: prayed ? 'var(--gull)' : 'var(--gull)',
+                            color: 'var(--skra-mjuk)',
                             fontFamily: 'var(--font-sans)',
-                            fontSize: '12px',
+                            fontSize: '11.5px',
                             fontWeight: 700,
                             letterSpacing: '0.16em',
                             textTransform: 'uppercase',
                             cursor: prayed ? 'default' : 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '10px',
-                            opacity: prayed ? 1 : 0.85,
+                            gap: '9px',
+                            opacity: prayed ? 1 : 0.75,
                             transition: 'opacity 200ms ease',
                         }}
                         onMouseOver={(e) => { if (!prayed) e.currentTarget.style.opacity = '1'; }}
-                        onMouseOut={(e) => { if (!prayed) e.currentTarget.style.opacity = '0.85'; }}
+                        onMouseOut={(e) => { if (!prayed) e.currentTarget.style.opacity = '0.75'; }}
                     >
                         <IcoHands size={14} />
                         {prayed ? 'Bað með þér' : 'Bið með þér'}
-                        <span
-                            style={{
-                                fontFamily: 'var(--font-serif)',
-                                fontStyle: 'italic',
-                                fontSize: '13.5px',
-                                letterSpacing: 0,
-                                textTransform: 'none',
-                                fontWeight: 400,
-                                opacity: 0.85,
-                            }}
-                        >
-                            ({count})
-                        </span>
                     </button>
                 </div>
             </div>
@@ -381,39 +430,43 @@ function FlowVariant({ prayer, bodySize, padY, isAnswer, prayed, count, when, on
     );
 }
 
-function relativeIs(timestamp: number): string {
-    const diffMs = Date.now() - timestamp;
-    const mins = Math.floor(diffMs / 60000);
-    const hours = Math.floor(mins / 60);
-    const days = Math.floor(hours / 24);
+/**
+ * "Borin fram í útsendingu 3. september" — a tiny gold diamond and a date.
+ * Only ever rendered from a real aired_at, so it can never claim something the
+ * broadcast did not actually do.
+ */
+function AiredMark({ prayer, tone }: { prayer: Prayer; tone: 'dark' | 'light' }) {
+    if (!prayer.airedAt) return null;
+    const aired = new Date(prayer.airedAt).getTime();
+    if (Number.isNaN(aired)) return null;
 
-    if (mins < 2) return 'rétt í þessu';
-    if (mins < 60) return `fyrir ${mins} mín`;
-    if (hours < 24) return `fyrir ${hours} klst`;
-    if (days === 1) return 'í gær';
-    if (days < 7) return `fyrir ${days} dögum`;
-    const weeks = Math.floor(days / 7);
-    if (weeks === 1) return 'fyrir 1 viku';
-    if (weeks < 4) return `fyrir ${weeks} vikum`;
-    return formatIcelandicDayMonth(timestamp);
-}
-
-const ICELANDIC_MONTHS = [
-    'janúar',
-    'febrúar',
-    'mars',
-    'apríl',
-    'maí',
-    'júní',
-    'júlí',
-    'ágúst',
-    'september',
-    'október',
-    'nóvember',
-    'desember',
-];
-
-function formatIcelandicDayMonth(timestamp: number): string {
-    const date = new Date(timestamp);
-    return `${date.getUTCDate()}. ${ICELANDIC_MONTHS[date.getUTCMonth()]}`;
+    return (
+        <div
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '9px',
+                marginBottom: '14px',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '10.5px',
+                fontWeight: 700,
+                letterSpacing: '0.18em',
+                textTransform: 'uppercase',
+                color: tone === 'light' ? 'var(--gull)' : 'var(--kerti)',
+            }}
+        >
+            <span
+                aria-hidden
+                style={{
+                    width: '6px',
+                    height: '6px',
+                    background: 'var(--gull)',
+                    transform: 'rotate(45deg)',
+                    display: 'inline-block',
+                    flexShrink: 0,
+                }}
+            />
+            Borin fram í útsendingu {formatIcelandicDayMonth(aired)}
+        </div>
+    );
 }

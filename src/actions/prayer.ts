@@ -9,6 +9,8 @@ export async function submitPrayerAction(formData: FormData) {
     const topic = formData.get('topic') as string;
     const content = formData.get('content') as string;
     const categoryType = formData.get('categoryType') as string || 'personal';
+    // Only ever true when the never-pre-ticked box was actually ticked.
+    const airConsent = formData.get('airConsent') === 'true';
 
     if (!topic || !content) {
         return { success: false, error: 'Vinsamlegast fylltu út efni og bæn.' };
@@ -24,6 +26,8 @@ export async function submitPrayerAction(formData: FormData) {
         topic,
         content,
         categoryType,
+        source: 'vefur',
+        airConsent,
     });
 
     if (!created) {

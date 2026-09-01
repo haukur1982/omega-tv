@@ -60,6 +60,20 @@ export const TOPIC_SCRIPTURES: Record<string, { verse: string; reference: string
   },
 };
 
+/**
+ * The topic chips both intake doors offer — the wall's submission modal and
+ * the volunteer's phone-intake form. Shared on purpose: phone and web land in
+ * the same basket, so they must speak the same topic vocabulary or the wall's
+ * filter quietly splits into two.
+ */
+export const PRAYER_TAG_OPTIONS: Array<{ id: string; label: string; categoryType: CategoryType }> = [
+    { id: 'almennt', label: 'Almenn bæn', categoryType: 'personal' },
+    { id: 'heilsa', label: 'Heilsa', categoryType: 'personal' },
+    { id: 'fjolskylda', label: 'Fjölskylda', categoryType: 'personal' },
+    { id: 'tru', label: 'Trú og þjónusta', categoryType: 'personal' },
+    { id: 'thakklaeti', label: 'Þakklæti', categoryType: 'personal' },
+];
+
 export const ALL_TOPICS = [
   ...PRAYER_CATEGORIES.personal.topics,
   ...PRAYER_CATEGORIES.national.topics,

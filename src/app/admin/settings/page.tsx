@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Check, X, AlertCircle, Shield } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import MinistrySettingsCard from '@/components/admin/MinistrySettingsCard';
 
 interface EnvStatus {
     label: string;
@@ -63,6 +64,9 @@ export default function AdminSettingsPage() {
                     <h1 className="admin-h1">Stillingar</h1>
                     <p className="admin-body mt-1">Yfirlit yfir tengingar og uppsetningu</p>
                 </div>
+
+                {/* Bænaþjónustan — the one card here anybody actually edits */}
+                <MinistrySettingsCard />
 
                 {/* Connection Status */}
                 <div className="admin-card mb-6">

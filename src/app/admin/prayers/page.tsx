@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, Clock, Heart, Mail, RefreshCw, Search, Filter } from 'lucide-react';
+import { Check, X, Clock, Heart, Mail, Phone, RefreshCw, Search, Tv } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import PhoneIntakeForm from '@/components/admin/PhoneIntakeForm';
 import { authedFetch } from '@/lib/admin-fetch';
 
 interface Prayer {
@@ -16,6 +18,7 @@ interface Prayer {
     prayCount: number;
     isAnswered: boolean;
     isApproved: boolean;
+    source?: 'vefur' | 'simi' | 'utsending';
 }
 
 type FilterType = 'all' | 'pending' | 'approved';
@@ -25,6 +28,10 @@ export default function AdminPrayersPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [filter, setFilter] = useState<FilterType>('pending');
     const [searchQuery, setSearchQuery] = useState('');
+    /** The phone door. Open while a volunteer is on a call. */
+    const [intakeOpen, setIntakeOpen] = useState(false);
+    /** null = not asked yet; false = the ministry migration is not applied. */
+    const [ministryReady, setMinistryReady] = useState<boolean | null>(null);
 
     const loadData = async () => {
         setIsLoading(true);
@@ -42,6 +49,14 @@ export default function AdminPrayersPage() {
 
     useEffect(() => {
         loadData();
+        // Ask once, before the volunteer starts typing rather than after.
+        authedFetch('/api/admin/prayers?ready=1')
+            .then(async (res) => {
+                if (!res.ok) return;
+                const d = await res.json();
+                setMinistryReady(!!d.ready);
+            })
+            .catch(() => { /* leave null — the form asks the server anyway */ });
     }, []);
 
     const handleApprove = async (id: string) => {
@@ -86,19 +101,46 @@ export default function AdminPrayersPage() {
     return (
         <AdminLayout>
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
                 <div>
                     <h1 className="admin-h1">Bænabeiðnir</h1>
                     <p className="admin-body mt-1">{pendingCount} bíða samþykkis</p>
                 </div>
-                <button
-                    onClick={loadData}
-                    className="admin-btn admin-btn-secondary admin-btn-icon"
-                    disabled={isLoading}
-                >
-                    <RefreshCw size={18} className={isLoading ? 'admin-spinner' : ''} />
-                </button>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={() => setIntakeOpen((v) => !v)}
+                        className="admin-btn admin-btn-primary"
+                        style={{ minHeight: '44px' }}
+                    >
+                        <Phone size={16} />
+                        Skrá bæn úr síma
+                    </button>
+                    <Link
+                        href="/admin/prayers/utsending"
+                        className="admin-btn admin-btn-secondary"
+                        style={{ minHeight: '44px' }}
+                    >
+                        <Tv size={16} />
+                        Útsending
+                    </Link>
+                    <button
+                        onClick={loadData}
+                        className="admin-btn admin-btn-secondary admin-btn-icon"
+                        disabled={isLoading}
+                        aria-label="Endurhlaða"
+                    >
+                        <RefreshCw size={18} className={isLoading ? 'admin-spinner' : ''} />
+                    </button>
+                </div>
             </div>
+
+            {intakeOpen && (
+                <PhoneIntakeForm
+                    ministryReady={ministryReady}
+                    onSaved={() => { setIntakeOpen(false); loadData(); }}
+                    onCancel={() => setIntakeOpen(false)}
+                />
+            )}
 
             {/* Filters */}
             <div className="flex flex-wrap items-center gap-4 mb-6">
@@ -181,9 +223,15 @@ export default function AdminPrayersPage() {
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
+                                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                                             <h3 className="admin-h3">{prayer.name}</h3>
                                             <span className="admin-badge admin-badge-neutral">{prayer.topic}</span>
+                                            {prayer.source === 'simi' && (
+                                                <span className="admin-badge admin-badge-info flex items-center gap-1">
+                                                    <Phone size={11} />
+                                                    Sími
+                                                </span>
+                                            )}
                                         </div>
                                         <p className="admin-body mb-3">{prayer.content}</p>
                                         <div className="flex items-center gap-4">

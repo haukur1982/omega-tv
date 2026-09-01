@@ -2,7 +2,11 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BaenatorgClient from "@/components/prayer/BaenatorgClient";
 import PrayerCampaignBanner from "@/components/prayer/PrayerCampaignBanner";
+import PrayerPhonePanel from "@/components/prayer/PrayerPhonePanel";
+import AnsweredRegister from "@/components/prayer/AnsweredRegister";
 import { getPrayers, getTotalPrayCount, getActiveCampaigns } from "@/lib/prayer-db";
+import { getMinistrySettings } from "@/lib/ministry-settings";
+import { groupDigitsIs } from "@/lib/prayer-format";
 
 /**
  * /baenatorg — the prayer wall.
@@ -26,10 +30,13 @@ import { getPrayers, getTotalPrayCount, getActiveCampaigns } from "@/lib/prayer-
 export const dynamic = 'force-dynamic';
 
 export default async function BaenatorgPage() {
-    const [prayers, totalCount, campaigns] = await Promise.all([
+    const [prayers, totalCount, campaigns, ministry] = await Promise.all([
         getPrayers(),
         getTotalPrayCount(),
         getActiveCampaigns(),
+        // The phone door. Absent table (migration not applied) or an unfilled
+        // number both come back empty, and the panel hides itself either way.
+        getMinistrySettings(),
     ]);
 
     const activeCampaign = campaigns[0] ?? null;
@@ -144,7 +151,7 @@ export default async function BaenatorgPage() {
                                     fontFeatureSettings: '"lnum", "tnum"',
                                 }}
                             >
-                                {displayCount.toLocaleString('is-IS')} bænir
+                                {groupDigitsIs(displayCount)} bænir
                             </span>
                             <span style={{ opacity: 0.5 }}>·</span>
                             <span>bornar fram á þessu torgi</span>
@@ -208,12 +215,20 @@ export default async function BaenatorgPage() {
                         padding: 'clamp(24px, 4vw, 48px) var(--rail-padding) clamp(72px, 10vw, 112px)',
                     }}
                 >
+                    {/* 1. The phone door, first — it is the one the anchor
+                        audience uses, and the number is spoken on air. */}
+                    <PrayerPhonePanel settings={ministry.settings} />
+
                     {activeCampaign && (
-                        <div style={{ marginTop: '8px' }}>
+                        <div style={{ marginTop: '28px' }}>
                             <PrayerCampaignBanner campaign={activeCampaign} />
                         </div>
                     )}
 
+                    {/* 2. Answers before requests. */}
+                    <AnsweredRegister prayers={prayers} />
+
+                    {/* 3. Biðja-mode, the filter, the feed. */}
                     <BaenatorgClient initialPrayers={prayers} register="light" />
                 </div>
             </section>

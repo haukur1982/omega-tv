@@ -1,23 +1,28 @@
 'use client';
 
-export type PrayerFilter = 'allar' | 'mest' | 'svor';
+export type PrayerFilter = 'allar' | 'svor';
 
 type Register = 'dark' | 'light';
 
 interface Props {
     active: PrayerFilter;
     onChange: (filter: PrayerFilter) => void;
-    counts: { allar: number; mest: number; svor: number };
+    counts: { allar: number; svor: number };
     register?: Register;
 }
 
 /**
- * FilterStrip — Allar / Mest beðnar / Bænasvör tabs.
+ * FilterStrip — Allar / Bænasvör tabs.
  *
  * Tab-strip with a slate underline for the active item — matches
  * the corrected nav pattern from the Beint redesign. Wayfinding
  * (filter = what you're viewing), not a form control, so slate is
  * the right color in both registers.
+ *
+ * "Mest beðnar" was removed on purpose (docs/plans/09-prayer-ministry.md):
+ * sorting prayers by popularity turns a wall into a leaderboard, and the
+ * prayers that most need holding are exactly the ones at the bottom of it.
+ * Biðja-mode is where every prayer now gets reached.
  */
 
 export default function PrayerFilterStrip({ active, onChange, counts, register = 'dark' }: Props) {
@@ -41,7 +46,6 @@ export default function PrayerFilterStrip({ active, onChange, counts, register =
 
     const tabs: Array<{ id: PrayerFilter; label: string; count: number }> = [
         { id: 'allar', label: 'Allar', count: counts.allar },
-        { id: 'mest', label: 'Mest beðnar', count: counts.mest },
         { id: 'svor', label: 'Bænasvör', count: counts.svor },
     ];
 

@@ -5,6 +5,19 @@ const nextConfig: NextConfig = {
   // @resvg/resvg-js-darwin-arm64) that the bundler can't trace.
   // Externalize the package so Node resolves it at runtime.
   serverExternalPackages: ['@resvg/resvg-js'],
+  async redirects() {
+    return [
+      {
+        // The short URL spoken on air and printed on screen during prayer
+        // programs. Permanent so it is cached by the browser after the first
+        // hit — the number and the address are said together, and the address
+        // has to survive being half-remembered.
+        source: '/baen',
+        destination: '/baenatorg',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
