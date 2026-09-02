@@ -1,4 +1,5 @@
 import { MINED_RULES, type MinedRule } from '@/lib/translation-rules/mined';
+import { alignSentences, joinSentences, splitSentences } from '@/lib/devotional-review';
 
 /**
  * The wording assistant: its prompt, and its one call to Gemini.
@@ -27,7 +28,14 @@ export const STYLE_EXAMPLES = 12;
 export const GLOSSARY_MAX = 40;
 export const RULES_MAX = 12;
 
-export interface SuggestOption { label: string; text: string }
+/**
+ * `sentences` is additive and optional ON PURPOSE: rows cached before the
+ * composer shipped carry only `text`, and they must keep rendering. When it is
+ * there it is one sentence per sentence of the reviewer's paragraph, same
+ * order — which is what lets him take sentence 1 from one register and
+ * sentence 3 from another.
+ */
+export interface SuggestOption { label: string; text: string; sentences?: string[] }
 export interface SuggestPayload {
     options: SuggestOption[];
     note: string;
@@ -123,14 +131,32 @@ Reglur sem gilda um allar útgáfur:
 - Aldrei stofnanamál, aldrei uppskrúfað sölumál.
 - Ef íslenski textinn er þegar góður má skila honum nær óbreyttum og segja það í athugasemdinni.${constraintBlock(voice)}${exampleBlock(voice.examples)}
 
+SETNINGASKIPTING — yfirlesarinn velur eina setningu í einu:
+- Íslenska málsgreinin fylgir með tölusettum lista yfir setningar hennar.
+- Hver útgáfa skal skila "sentences": fylki með NÁKVÆMLEGA jafn mörgum setningum og eru í listanum, í sömu röð.
+- Setning númer 3 í svarinu svarar til setningar númer 3 í listanum. Ekki sameina tvær setningar í eina og ekki kljúfa eina setningu í tvær.
+- Setning má standa alveg óbreytt ef hún er þegar góð.
+- "text" er sama efni og "sentences", sett saman í samfellt mál.
+
 Svaraðu ALLTAF með gildu JSON og engu öðru:
-{"options":[{"label":"nakvaemt","text":"..."},{"label":"eðlilegt","text":"..."},{"label":"predikun","text":"..."}],"note":"<stutt athugasemd á íslensku um það sem helst mátti laga>"}`;
+{"options":[{"label":"nakvaemt","text":"...","sentences":["...","..."]},{"label":"eðlilegt","text":"...","sentences":["...","..."]},{"label":"predikun","text":"...","sentences":["...","..."]}],"note":"<stutt athugasemd á íslensku um það sem helst mátti laga>"}`;
 }
 
-export function buildUserPrompt(en: string, is: string, instruction: string): string {
+export function buildUserPrompt(
+    en: string,
+    is: string,
+    instruction: string,
+    sentences: string[] = [],
+): string {
+    const numbered = sentences.length > 0
+        ? `SETNINGAR ÍSLENSKU MÁLSGREINARINNAR (${sentences.length} talsins — skilaðu jafn mörgum):\n${
+            sentences.map((s, i) => `${i + 1}. ${s}`).join('\n')
+        }`
+        : '';
     return [
         `ENSKUR FRUMTEXTI:\n"""${en}"""`,
         `NÚVERANDI ÍSLENSK ÞÝÐING:\n"""${is}"""`,
+        numbered,
         instruction ? `ÓSK YFIRLESARANS: ${instruction}` : '',
     ]
         .filter(Boolean)
@@ -151,6 +177,8 @@ export async function generateSuggestion(opts: {
 }): Promise<SuggestPayload> {
     const voice = opts.voice ?? EMPTY_VOICE;
     const instruction = (opts.instruction ?? '').trim().slice(0, 500);
+    /** The reviewer's own sentences — the rows the composer will offer. */
+    const base = splitSentences(opts.is);
 
     const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${SUGGEST_MODEL}:generateContent?key=${encodeURIComponent(opts.apiKey)}`,
@@ -159,7 +187,10 @@ export async function generateSuggestion(opts: {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 system_instruction: { parts: [{ text: buildSystemPrompt(voice) }] },
-                contents: [{ role: 'user', parts: [{ text: buildUserPrompt(opts.en, opts.is, instruction) }] }],
+                contents: [{
+                    role: 'user',
+                    parts: [{ text: buildUserPrompt(opts.en, opts.is, instruction, base.sentences) }],
+                }],
                 generationConfig: {
                     temperature: instruction ? 0.5 : 0.35,
                     responseMimeType: 'application/json',
@@ -182,14 +213,31 @@ export async function generateSuggestion(opts: {
         parsed = JSON.parse(m[0]);
     }
 
+    /**
+     * Alignment is checked, never trusted, and never fatal. A model that
+     * ignored the sentence contract still gives usable prose: the splitter
+     * gets a second try at its `text`, and if THAT does not line up either the
+     * option ships without `sentences` and the card offers it whole.
+     */
     const options: SuggestOption[] = (Array.isArray(parsed.options) ? parsed.options : [])
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .filter((o: any) => o && typeof o.text === 'string' && o.text.trim())
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((o: any) => ({
-            label: LABELS[String(o.label)] ?? String(o.label ?? 'Tillaga'),
-            text: String(o.text).trim(),
-        }))
+        .map((o: any) => {
+            const text = String(o.text).trim();
+            const lines = alignSentences(
+                text,
+                base.sentences.length,
+                Array.isArray(o.sentences) ? o.sentences.map((s: unknown) => String(s ?? '')) : null,
+            );
+            return {
+                label: LABELS[String(o.label)] ?? String(o.label ?? 'Tillaga'),
+                // Joined from the sentences when they aligned, so the whole-option
+                // text and the per-sentence rows can never disagree.
+                text: lines ? joinSentences(lines, base.separators) : text,
+                ...(lines ? { sentences: lines } : {}),
+            };
+        })
         .slice(0, 3);
 
     if (options.length === 0) throw new Error('Engar tillögur bárust');

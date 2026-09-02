@@ -39,8 +39,6 @@ import {
 
 const SLOT_IS: Record<string, string> = { morning: 'Morgunn', evening: 'Kvöld' };
 const draftKey = (slug: string) => `omega:devo-draft:${slug}`;
-/** The register he was last working in — the same one nearly every morning. */
-const TAB_KEY = 'omega:devo-tab';
 /** Read-aloud keys for suggestions, kept clear of the paragraph indices. */
 const optKey = (i: number, k: number) => 1000 + i * 10 + k;
 
@@ -70,7 +68,6 @@ export default function ReviewDevotionalPage() {
     const [busyIdx, setBusyIdx] = useState<number | null>(null);
     const [sugg, setSugg] = useState<Record<number, Suggestion>>({});
     const [taken, setTaken] = useState<Record<number, TakenEdit[]>>({});
-    const [tab, setTab] = useState('');
     const [instr, setInstr] = useState<Record<number, string>>({});
     const [openInstr, setOpenInstr] = useState<Record<number, boolean>>({});
     const [showEn, setShowEn] = useState<Record<number, boolean>>({});
@@ -95,15 +92,6 @@ export default function ReviewDevotionalPage() {
         return () => mq.removeEventListener('change', sync);
     }, []);
     useEffect(() => { if (!isPhone) setSheetIdx(null); }, [isPhone]);
-
-    useEffect(() => {
-        try { const t = localStorage.getItem(TAB_KEY); if (t) setTab(t); }
-        catch { /* storage unavailable — first option wins */ }
-    }, []);
-    const chooseTab = useCallback((t: string) => {
-        setTab(t);
-        try { localStorage.setItem(TAB_KEY, t); } catch { /* ignore */ }
-    }, []);
 
     useEffect(() => {
         if (typeof window === 'undefined' || !window.speechSynthesis) return;
@@ -331,7 +319,7 @@ export default function ReviewDevotionalPage() {
     };
 
     /** The suggestion card, wired to one paragraph. Shared by both shapes. */
-    const cardFor = (i: number, chipChars: number) => {
+    const cardFor = (i: number) => {
         const s = sugg[i];
         if (!s) return null;
         const base = optKey(i, 0);
@@ -339,10 +327,7 @@ export default function ReviewDevotionalPage() {
             <SuggestionCard
                 current={paras[i]}
                 suggestion={s}
-                tab={tab}
                 taken={taken[i] ?? []}
-                chipChars={chipChars}
-                onTab={chooseTab}
                 onTakeEdit={(edit, label) => takeEdit(i, edit, label)}
                 onUseAll={(text) => takeWholeOption(i, text)}
                 onClose={() => dropSuggestion(i)}
@@ -522,7 +507,7 @@ export default function ReviewDevotionalPage() {
                                                 />
                                             )}
 
-                                            {cardFor(i, 26)}
+                                            {cardFor(i)}
                                         </div>
                                     </div>
                                 );
@@ -598,7 +583,7 @@ export default function ReviewDevotionalPage() {
                     onSave={() => save({}, saveMsg())}
                     onClose={() => setSheetIdx(null)}
                 >
-                    {cardFor(sheetIdx, 20)}
+                    {cardFor(sheetIdx)}
                 </ParagraphSheet>
             )}
 

@@ -107,31 +107,78 @@ export const SHEET_CSS = `
 }
 
 /* ── one card, three registers, and the edits as chips ─────────────────
-   The old stack showed three paragraph-sized rewrites at once and ate the
-   screen. This is one card: a segmented control at the top, the full diff
-   for the open register, and every small edit in it as its own button. ── */
+   He thinks in sentences, so the card is rows of sentences: the paragraph as
+   it is being composed on top, then one row per sentence, and inside the open
+   row the same sentence in each register as CLEAN PROSE.
+
+   Nothing here is struck through. His own words are in the field above the
+   card, unstruck and readable; repeating them in red under a line is half the
+   ink saying nothing. What an option would ADD gets a gull underline; what it
+   drops is simply absent. ── */
+/* minmax(0,1fr), not auto: a collapsed row's line does not wrap, and an auto
+   grid column sizes itself to that whole unwrapped sentence — invisible on a
+   laptop, and it pushes the card off the side of a phone. */
 .devo-sugg{
-  margin:.2rem .5rem 1rem; display:grid; gap:.45rem; padding:.62rem .8rem; border-radius:8px;
+  margin:.2rem .5rem 1rem; display:grid; grid-template-columns:minmax(0,1fr);
+  gap:.45rem; padding:.62rem .8rem; border-radius:8px;
   background:var(--paper-warm); border:1px solid rgba(200,138,62,.28);
 }
 .devo-sugg-note{ margin:0; font-family:var(--font-sans),sans-serif; font-size:.8rem; color:var(--ink-faint); }
 .devo-sugg-top{ display:flex; align-items:center; gap:.4rem; flex-wrap:wrap; }
-.devo-seg{ display:inline-flex; gap:2px; padding:2px; border-radius:7px; background:rgba(27,24,20,.055); border:1px solid rgba(27,24,20,.1); }
-.devo-seg-btn{
-  display:inline-flex; align-items:center; gap:.35rem; background:transparent; border:none; border-radius:5px;
-  cursor:pointer; padding:.3rem .6rem; transition:all .15s ease;
-  font-family:var(--font-sans),sans-serif; font-size:.72rem; font-weight:600; letter-spacing:.03em; color:var(--ink-faint);
-}
-.devo-seg-btn:hover{ color:var(--ink); }
-.devo-seg-btn.is-on{ background:var(--paper); color:var(--ink); box-shadow:0 1px 2px rgba(27,24,20,.12); }
-.devo-seg-n{ font-variant-numeric:tabular-nums; font-size:.64rem; line-height:1.5; padding:0 .32rem; border-radius:99px; background:rgba(200,138,62,.25); color:#8A5A22; }
-.devo-seg-btn.is-on .devo-seg-n{ background:var(--gold); color:var(--paper); }
 
-/* The preview is a preview, not the reading text — the paragraph itself is set
-   at 1.19rem above it. Smaller here is what keeps the card off the screen. */
-.devo-opt-text{ margin:0; font-size:.98rem; line-height:1.55; color:var(--ink); }
-.devo-opt-text .ins{ background:rgba(90,150,100,.22); border-radius:3px; }
-.devo-opt-text .del{ background:rgba(190,70,55,.14); text-decoration:line-through; opacity:.65; border-radius:3px; }
+.devo-rows{ display:grid; grid-template-columns:minmax(0,1fr); }
+.devo-row{ min-width:0; border-top:1px solid rgba(27,24,20,.09); }
+.devo-row-head{
+  display:flex; align-items:baseline; gap:.45rem; width:100%; text-align:left; cursor:pointer;
+  background:none; border:none; padding:.24rem .1rem; min-width:0; color:var(--ink-soft);
+  font-family:var(--font-serif),Georgia,serif; font-size:.92rem; line-height:1.4;
+}
+.devo-row-tag{
+  flex:none; font-family:var(--font-sans),sans-serif; font-size:.58rem; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:#8A5A22;
+}
+.devo-row-head:hover{ color:var(--ink); }
+.devo-row.is-open > .devo-row-head{ color:var(--ink); }
+.devo-row-n{
+  flex:none; font-family:var(--font-sans),sans-serif; font-size:.62rem; font-weight:600;
+  letter-spacing:.08em; color:var(--ink-faint); font-variant-numeric:tabular-nums;
+}
+/* A collapsed row loses its TAIL, never its middle: the opening words are what
+   he recognises the sentence by. */
+.devo-row-line{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.devo-row-dot{ flex:none; width:6px; height:6px; border-radius:50%; background:var(--kerti); }
+
+.devo-opts{ display:grid; grid-template-columns:minmax(0,1fr); gap:.26rem; padding:.05rem 0 .45rem .95rem; }
+.devo-opt{
+  display:block; width:100%; text-align:left; cursor:pointer; border-radius:7px;
+  background:var(--paper); border:1px solid rgba(27,24,20,.12); padding:.3rem .5rem;
+  font-family:var(--font-serif),Georgia,serif; font-size:.95rem; line-height:1.5; color:var(--ink);
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.devo-opt:hover{ border-color:var(--gold); box-shadow:0 1px 3px rgba(27,24,20,.1); }
+.devo-opt.is-on{ border-color:rgba(200,138,62,.55); background:rgba(200,138,62,.1); }
+/* The register's name rides IN the first line, not above it: a label on its own
+   line costs a row of height per option and says no more. */
+.devo-opt-tag{
+  font-family:var(--font-sans),sans-serif; font-size:.58rem; font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin-right:.45rem;
+}
+.devo-opt.is-on .devo-opt-tag{ color:#8A5A22; }
+/* The only mark on an option: what it brings that the line does not have. */
+.devo-new{
+  text-decoration:underline; text-decoration-color:rgba(200,138,62,.8);
+  text-decoration-thickness:2px; text-underline-offset:3px;
+}
+.devo-same{ margin:.05rem 0 0; font-family:var(--font-sans),sans-serif; font-size:.72rem; color:var(--ink-faint); }
+
+.devo-take{
+  display:flex; align-items:center; gap:.35rem; flex-wrap:wrap;
+  border-top:1px solid rgba(27,24,20,.09); padding-top:.42rem;
+}
+.devo-take-label{
+  font-family:var(--font-sans),sans-serif; font-size:.68rem; font-weight:600;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint);
+}
 
 .devo-chips{ display:flex; flex-wrap:wrap; gap:.35rem; }
 .devo-chip{
@@ -141,14 +188,19 @@ export const SHEET_CSS = `
   font-family:var(--font-sans),sans-serif; font-size:.76rem; color:var(--ink-soft);
 }
 .devo-chip:hover{ border-color:var(--gold); box-shadow:0 1px 3px rgba(27,24,20,.1); color:var(--ink); }
-.devo-chip-del{ background:rgba(190,70,55,.14); text-decoration:line-through; opacity:.8; border-radius:3px; padding:0 .2rem; }
-.devo-chip-ins{ background:rgba(90,150,100,.22); border-radius:3px; padding:0 .2rem; color:var(--ink); }
+/* A chip only exists for edits of three words or fewer, so nothing here is
+   truncated and the old word needs no strikethrough to be understood: the
+   arrow already says which way it goes. */
+.devo-chip-old{ opacity:.7; }
+.devo-chip-new{
+  color:var(--ink); text-decoration:underline; text-decoration-color:rgba(200,138,62,.8);
+  text-decoration-thickness:2px; text-underline-offset:2px;
+}
 .devo-chip-arrow{ opacity:.45; }
 .devo-chip-gone{ font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; opacity:.6; }
 .devo-chip.is-taken{ cursor:default; background:transparent; border-color:rgba(200,138,62,.45); color:var(--gold); opacity:.8; }
 .devo-chip.is-taken:hover{ box-shadow:none; border-color:rgba(200,138,62,.45); color:var(--gold); }
-.devo-chip.is-taken .devo-chip-ins{ background:transparent; color:var(--gold); }
-.devo-chip.is-taken .devo-chip-del{ background:transparent; }
+.devo-chip.is-taken .devo-chip-new{ color:var(--gold); text-decoration-color:rgba(200,138,62,.5); }
 
 .devo-foot{ margin-top:3rem; padding-top:1.5rem; border-top:1px solid rgba(27,24,20,.12); }
 .devo-note{
@@ -221,7 +273,9 @@ export const SHEET_CSS = `
 /* Everything you tap in the sheet is a thumb target. */
 .devo-sheet-up .devo-tool{ min-height:44px; padding:.45rem .75rem; font-size:.82rem; }
 .devo-sheet-up .devo-chip{ min-height:44px; padding:.45rem .6rem; font-size:.82rem; }
-.devo-sheet-up .devo-seg-btn{ min-height:44px; padding:.45rem .7rem; font-size:.76rem; }
+.devo-sheet-up .devo-row-head{ min-height:44px; align-items:center; padding:.5rem .1rem; }
+.devo-sheet-up .devo-opt{ min-height:44px; padding:.5rem .6rem; }
+.devo-sheet-up .devo-opts{ padding-left:.6rem; }
 .devo-sheet-up .devo-sugg{ margin:0; }
 .devo-sheet-up .devo-en{ margin:0; }
 .devo-sheet-up .devo-instr{ width:100%; margin:0; min-height:44px; }

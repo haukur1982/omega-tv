@@ -211,6 +211,140 @@ export function isDifferent(a: string, b: string): boolean {
     return a.replace(/\s+/g, ' ').trim() !== b.replace(/\s+/g, ' ').trim();
 }
 
+/* ── sentences ─────────────────────────────────────────────────────────── */
+
+/**
+ * A paragraph cut into sentences, and the whitespace that held them apart.
+ *
+ * `separators[k]` is what stood between `sentences[k]` and `sentences[k+1]`,
+ * so `joinSentences` puts the paragraph back byte for byte. That matters: the
+ * composer swaps ONE sentence and rejoins, and the reviewer must not find that
+ * a double space or a line break went missing somewhere he wasn't looking.
+ */
+export interface SentenceSplit {
+    /** Each sentence with its own punctuation and closing quote. */
+    sentences: string[];
+    /** `sentences.length - 1` whitespace runs. */
+    separators: string[];
+}
+
+/** Ends a sentence — or ends an abbreviation, which is the whole problem. */
+const TERMINATOR = /[.!?…]/;
+/** Marks that still belong to the sentence that just ended. */
+const CLOSER = /[”“"»'’)\]]/;
+/** What a new sentence may start with: a capital, or an opening quote. */
+const OPENER = /[\p{Lu}„“"«]/u;
+
+/**
+ * Abbreviations that end in a period without ending a sentence. Icelandic
+ * devotional prose is full of them, and every false split here becomes a
+ * half-sentence the reviewer is asked to choose between.
+ */
+const ABBREVIATIONS = new Set([
+    't.d.', 'þ.e.', 'þ.e.a.s.', 'o.s.frv.', 'o.fl.', 'm.a.', 'm.ö.o.', 'sbr.',
+    'kap.', 'v.', 'nr.', 'bls.', 'sk.', 'ca.',
+    // scripture books, as they are abbreviated in Icelandic references
+    'matt.', 'mark.', 'lúk.', 'jóh.', 'post.', 'róm.', 'kor.', 'gal.', 'ef.',
+    'fil.', 'kól.', 'þess.', 'tím.', 'tít.', 'heb.', 'jak.', 'pét.', 'opb.',
+    'sálm.', 'orðskv.', 'jes.', 'jer.', 'mós.', 'sam.', 'kon.', 'kron.',
+]);
+
+/**
+ * The books that come numbered — „1. Kor. 13“. The ordinal's period is not a
+ * sentence end, but only in front of one of these: „árið 1998. Þá“ is.
+ */
+const NUMBERED_BOOK =
+    /^(mós|móse|sam|samúel|kon|konunga|kron|kroníku|kor|korintu|þess|þessalon|tím|tímóteus|pét|péturs|jóh|jóhannes|opb)/;
+
+/** The whitespace-delimited token that ends at `end` (exclusive). */
+function tokenBefore(text: string, from: number, end: number): string {
+    const slice = text.slice(from, end);
+    const ws = slice.search(/\S+$/);
+    return ws < 0 ? slice : slice.slice(ws);
+}
+
+/** The whitespace-delimited token that starts at `from`. */
+function tokenAt(text: string, from: number): string {
+    const m = text.slice(from).match(/^\S+/);
+    return m ? m[0] : '';
+}
+
+/**
+ * Split a paragraph into sentences — conservatively, because a wrong split is
+ * worse than a missed one. A missed split gives the reviewer one long row; a
+ * wrong one gives him two rows of nonsense and a rewrite that will not rejoin.
+ *
+ * The rule: a run of `.!?…` plus any closing quotes, then whitespace, then a
+ * capital or an opening quote — unless the word in front of it is a known
+ * abbreviation or a numbered scripture book.
+ */
+export function splitSentences(text: string): SentenceSplit {
+    const src = text ?? '';
+    const sentences: string[] = [];
+    const separators: string[] = [];
+    let start = 0;
+    let i = 0;
+
+    while (i < src.length) {
+        if (!TERMINATOR.test(src[i])) { i++; continue; }
+
+        let end = i;
+        while (end < src.length && TERMINATOR.test(src[end])) end++;
+        const stop = end;                       // where the punctuation itself ends
+        while (end < src.length && CLOSER.test(src[end])) end++;
+
+        let gap = end;
+        while (gap < src.length && /\s/.test(src[gap])) gap++;
+
+        // No space after it, or nothing but space left, or the next thing does
+        // not look like the start of a sentence: keep reading.
+        if (gap === end || gap >= src.length || !OPENER.test(src[gap])) { i = end; continue; }
+
+        const before = tokenBefore(src, start, stop).toLowerCase();
+        const after = tokenAt(src, gap).toLowerCase();
+        const isAbbrev = ABBREVIATIONS.has(before);
+        const isNumberedBook = /^\d{1,2}\.$/.test(before) && NUMBERED_BOOK.test(after);
+        if (isAbbrev || isNumberedBook) { i = end; continue; }
+
+        sentences.push(src.slice(start, end));
+        separators.push(src.slice(end, gap));
+        start = gap;
+        i = gap;
+    }
+
+    sentences.push(src.slice(start));
+    return { sentences, separators };
+}
+
+/** The inverse of `splitSentences` — exact when the separators are its own. */
+export function joinSentences(sentences: string[], separators: string[]): string {
+    return sentences
+        .map((s, i) => (i === 0 ? s : (separators[i - 1] ?? ' ') + s))
+        .join('');
+}
+
+/**
+ * The sentences of one suggestion, lined up one-to-one with the reviewer's —
+ * or `null` when they cannot be, in which case the option is only offerable
+ * whole.
+ *
+ * Three sources, in order of trust: what the model returned (new cache rows),
+ * what the splitter finds in its prose (old cache rows, and models that
+ * ignored the instruction), and nothing.
+ */
+export function alignSentences(
+    text: string,
+    count: number,
+    provided?: string[] | null,
+): string[] | null {
+    if (Array.isArray(provided)) {
+        const given = provided.map((s) => String(s ?? '').trim()).filter(Boolean);
+        if (given.length === count) return given;
+    }
+    const split = splitSentences(text).sentences.map((s) => s.trim()).filter(Boolean);
+    return split.length === count ? split : null;
+}
+
 /* ── a suggestion, cut into the small edits it actually proposes ────────── */
 
 /**
