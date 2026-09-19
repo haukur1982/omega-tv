@@ -46,7 +46,16 @@ branch `codex/devotional-signup` at `/tmp/omega-devotional-release` starts there
 not at this checkout's newer branch. This keeps pending staff/prayer/composer
 changes out of the devotional release. This session's same source edits remain
 in the original checkout; pre-existing CLAUDE.md/untracked work is untouched.
-Deployment verification is recorded below once complete.
+**LIVE:** deployed and promoted to `https://omega.is/hugleidingar` from release
+commit `583808a`, Vercel deployment `dpl_13NWjmTEU585NWRppRSCuUXRtMfN`
+(`omega-hc1lozoza-haukur1982-1838s-projects.vercel.app`). Release branch pushed
+to origin. Public `/hugleiding` redirects to the working signup (HTTP 200).
+Production browser signup PASS; database segment + consent verified and test
+entry removed. Homepage invitation verified. Draft URL remains HTTP 404.
+No emails sent and no devotionals published. Rollback deployment, if needed:
+`dpl_21MKKWdcfCGvdvrprN2TvXeb78Cs` (the previously live `f9cee175` release).
+Do not deploy the original branch wholesale without reviewing its older,
+unrelated pending staff/prayer/composer work.
 
 **For Cowork:** recommend open public readings + optional email convenience;
 start collecting now while human review continues. Never auto-publish the
