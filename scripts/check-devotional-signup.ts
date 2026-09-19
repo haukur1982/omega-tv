@@ -5,7 +5,8 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
-import { subscribeAction } from '../src/actions/subscribe';
+import { addSubscriber } from '../src/lib/subscriber-db';
+import { parseSubscription } from '../src/lib/subscription-input';
 import { DEVOTIONAL_CONSENT } from '../src/lib/subscription-input';
 
 async function main() {
@@ -16,7 +17,11 @@ async function main() {
         form.set('email', email.toUpperCase());
         form.set('segment', segment);
         form.set('consent', consent);
-        return subscribeAction(form);
+        const input = parseSubscription(form);
+        if ('error' in input) return Promise.resolve({ success: false });
+        return addSubscriber(input.email, input.name, [input.segment], {
+            textVersion: input.consentText, source: input.segment,
+        });
     };
     try {
         assert.equal((await submit('devotionals', 'false')).success, false);

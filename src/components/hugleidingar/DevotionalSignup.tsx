@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, useTransition } from 'react';
+import { useId, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Check, Mail } from 'lucide-react';
 import { subscribeAction } from '@/actions/subscribe';
@@ -11,8 +11,11 @@ export default function DevotionalSignup() {
     const [pending, startTransition] = useTransition();
     const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const [error, setError] = useState('');
+    const [confirmation, setConfirmation] = useState<'sent' | 'already_sent' | 'failed'>('failed');
+    const submittedForm = useRef<FormData | null>(null);
 
     function submit(form: FormData) {
+        submittedForm.current = form;
         startTransition(async () => {
             try {
                 const result = await subscribeAction(form);
@@ -21,6 +24,7 @@ export default function DevotionalSignup() {
                     setStatus('error');
                     return;
                 }
+                setConfirmation(result.confirmation ?? 'failed');
                 setStatus('success');
             } catch {
                 setError('Samband rofnaði. Athugaðu nettenginguna og reyndu aftur.');
@@ -40,7 +44,18 @@ export default function DevotionalSignup() {
                 <div role="status" className="rounded-lg border border-[#416b97]/30 bg-white/60 p-5">
                     <Check aria-hidden="true" className="mb-3 text-[#416b97]" />
                     <p className="font-semibold">Takk fyrir skráninguna!</p>
-                    <p className="mt-2 leading-relaxed">Netfangið þitt er komið á listann. Við látum þig vita þegar sendingar hefjast.</p>
+                    <p className="mt-2 leading-relaxed">Netfangið þitt er komið á listann. Við látum þig vita þegar daglegar sendingar hefjast.</p>
+                    <p className="mt-3 leading-relaxed">
+                        {confirmation === 'sent' ? 'Við höfum sent þér staðfestingu í tölvupósti. Ef hún birtist ekki skaltu athuga ruslpóstinn.'
+                            : confirmation === 'already_sent' ? 'Staðfesting hefur þegar verið send á netfangið þitt. Athugaðu einnig ruslpóstinn.'
+                            : 'Skráningin tókst, en ekki tókst að senda staðfestingarpóstinn. Þú getur reynt sendinguna aftur.'}
+                    </p>
+                    {confirmation === 'failed' && (
+                        <button type="button" disabled={pending} onClick={() => { if (submittedForm.current) submit(submittedForm.current); }}
+                            className="mt-4 min-h-12 rounded-lg bg-[#416b97] px-5 py-3 font-semibold text-white disabled:opacity-60">
+                            {pending ? 'Sendi…' : 'Reyna staðfestingarpóst aftur'}
+                        </button>
+                    )}
                     <Link href="/hugleidingar#lesa" className="mt-4 inline-flex min-h-11 items-center text-[#31577f] underline underline-offset-4">Skoða hugleiðingar</Link>
                 </div>
             ) : (

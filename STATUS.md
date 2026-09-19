@@ -1,5 +1,43 @@
 # STATUS.md — Omega TV
 
+## 2026-09-19 — Immediate devotional confirmation emails (Codex)
+
+- Fixed the gap Hawk reported: signup previously saved the address but sent no
+  receipt. Devotional signups now send a welcome confirmation through Resend,
+  including for an existing subscriber who has never received one.
+- Added a restrained cream/blue, table-based HTML template plus plain-text
+  alternative, open-reading link and personal unsubscribe link. This confirms
+  the saved signup; it is NOT a double-opt-in verification request.
+- Records accepted mail in existing `system_events` (`devotional.welcome.sent`,
+  subscriber id + provider email id; no email address or unsubscribe token).
+  Successful receipt history suppresses later duplicate signups; Resend's
+  stable idempotency key protects concurrent/retried sends for 24 hours.
+  If the history read fails, sending fails safely. If recording fails AFTER
+  acceptance, UI still correctly says sent, with a console error; provider
+  idempotency protects immediate retries (no durable guarantee beyond 24 hours
+  if that event write repeatedly fails). No schema/dependency changes.
+- UI distinguishes sent, already sent, and saved-but-email-failed. The failure
+  state offers a retry; a saved subscription is never described as lost.
+- Confirmed `mail.omega.is` verified; sender `Omega <postur@mail.omega.is>`.
+  Sent the missing receipt to `haukur1982@gmail.com` at Hawk's request; Resend
+  reports **delivered** (this does not prove primary-inbox placement).
+- Daily devotional sending remains off. No bulk/backfill email to other users.
+  Existing list-only integration script updated to avoid sending to .invalid
+  addresses. New email integration test uses Resend's official delivery simulator.
+
+**Verification:** builds PASS in working/release checkouts; changed-file ESLint
+PASS; TypeScript PASS; 9 tests PASS covering receipt/repeat/failure/retry/template
+and input validation. Live integration PASS: new signup accepted by provider,
+repeat returns already_sent, one event persisted; simulator test rows removed.
+Email preview checked at desktop and 390px (no overflow), but not a full inbox
+client-matrix test. Full release `npm run lint` remains FAIL: same pre-existing
+95 errors/61 warnings outside this change. No claim of repository-wide green.
+
+**Release:** prepared on `codex/devotional-signup` from the current production
+release, preserving isolation from pending staff/prayer/composer work. Live
+rollout verification follows below.
+
+
 ## 2026-09-19 — First morning devotional published (Codex)
 
 - Hawk explicitly requested publishing day 1 / morning, confirming he had
