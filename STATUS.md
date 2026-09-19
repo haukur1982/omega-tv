@@ -1,5 +1,23 @@
 # STATUS.md — Omega TV
 
+## 2026-09-19 — First morning devotional published (Codex)
+
+- Hawk explicitly requested publishing day 1 / morning, confirming he had
+  reviewed it. Published only `dagur-01-morgunn`, **Að leita hærra**
+  (id `40793c1b-779a-4882-8259-3da2d09d1f0b`), preserving the reviewed text.
+- Update required the matching id/slug, `reviewed=true` and draft status.
+  Live database now contains exactly one published devotional. All others
+  remain drafts; daily email sending remains off. No emails sent.
+- Verified HTTP 200 + title/body on the public reading page and its listing
+  on `/hugleidingar`; visually checked the live reading layout.
+- No code/schema change or deployment needed. Build not rerun for this
+  content-only publication. Existing code verification is recorded below.
+- This explicit approval settles publication of this specific reading.
+  It is not a recorded blanket confirmation of email/distribution rights.
+- Next: design the sample devotional email discussed with Hawk, then settle
+  delivery cadence and implement/test sending before activating daily emails.
+
+
 ## 2026-09-19 — Devotional interview signup (Codex)
 
 **Focus:** Let interview viewers subscribe now; keep published readings open to everyone.
