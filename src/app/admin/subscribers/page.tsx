@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Download, Search, Mail, Calendar, Tag, RefreshCw } from 'lucide-react';
+import { Download, Search, Mail, RefreshCw } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { authedFetch } from '@/lib/admin-fetch';
 
@@ -17,42 +17,58 @@ export default function AdminSubscribersPage() {
     const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [segmentFilter, setSegmentFilter] = useState('all');
+    const [loadError, setLoadError] = useState('');
 
     const loadData = async () => {
-        setIsLoading(true);
         try {
             const res = await authedFetch('/api/admin/subscribers');
             if (res.ok) {
                 const data = await res.json();
                 setSubscribers(data);
+                setLoadError('');
+            } else {
+                setLoadError('Ekki tókst að sækja áskrifendur. Reyndu aftur.');
             }
         } catch (e) {
             console.error('Failed to load subscribers:', e);
+            setLoadError('Ekki tókst að sækja áskrifendur. Reyndu aftur.');
         }
         setIsLoading(false);
     };
 
     useEffect(() => {
-        loadData();
+        let active = true;
+        authedFetch('/api/admin/subscribers').then(async res => {
+            if (!res.ok) throw new Error('Could not load subscribers');
+            const data: Subscriber[] = await res.json();
+            if (active) setSubscribers(data);
+        }).catch(() => {
+            if (active) setLoadError('Ekki tókst að sækja áskrifendur. Reyndu aftur.');
+        }).finally(() => {
+            if (active) setIsLoading(false);
+        });
+        return () => { active = false; };
     }, []);
 
     const filteredSubscribers = subscribers.filter(s =>
-        s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (s.name && s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+        (segmentFilter === 'all' || s.segments.includes(segmentFilter)) &&
+        (s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.name && s.name.toLowerCase().includes(searchQuery.toLowerCase())))
     );
 
     const handleExport = () => {
-        const csvContent = "data:text/csv;charset=utf-8,"
-            + "Email,Nafn,Flokkar,Skráður\n"
-            + subscribers.map(s => `${s.email},${s.name || ''},"${s.segments.join(',')}",${s.createdAt}`).join("\n");
-
-        const encodedUri = encodeURI(csvContent);
+        const cell = (value: string) => '"' + (/^[=+@-]/.test(value) ? "'" : '') + value.replace(/"/g, '""') + '"';
+        const csvContent = '\uFEFF' + 'Email,Nafn,Flokkar,Skráður\n'
+            + filteredSubscribers.map(s => [s.email, s.name || '', s.segments.join(','), s.createdAt].map(cell).join(',')).join('\n');
+        const url = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }));
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `omega_subscribers_${new Date().toISOString().split('T')[0]}.csv`);
+        link.href = url;
+        link.download = `omega_${segmentFilter}_${new Date().toISOString().split('T')[0]}.csv`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
     return (
@@ -64,7 +80,7 @@ export default function AdminSubscribersPage() {
                 </div>
                 <div className="flex gap-3">
                     <button
-                        onClick={loadData}
+                        onClick={() => { setIsLoading(true); void loadData(); }}
                         className="admin-btn admin-btn-secondary admin-btn-icon"
                         disabled={isLoading}
                     >
@@ -73,15 +89,24 @@ export default function AdminSubscribersPage() {
                     <button
                         onClick={handleExport}
                         className="admin-btn admin-btn-primary"
-                        disabled={subscribers.length === 0}
+                        disabled={filteredSubscribers.length === 0}
                     >
                         <Download size={18} />
-                        <span>Sækja CSV</span>
+                        <span>Sækja valinn lista</span>
                     </button>
                 </div>
             </div>
 
+            {loadError && <p role="alert" className="mb-4 text-red-500">{loadError}</p>}
             <div className="admin-card mb-6">
+                <label htmlFor="subscriber-list" className="mb-2 block admin-body">Póstlisti</label>
+                <select id="subscriber-list" value={segmentFilter} onChange={event => setSegmentFilter(event.target.value)} className="admin-input mb-4">
+                    <option value="all">Allir ({subscribers.length})</option>
+                    <option value="devotionals">Hugleiðingar ({subscribers.filter(s => s.segments.includes('devotionals')).length})</option>
+                    <option value="newsletter">Fréttabréf</option>
+                    <option value="tv">Sjónvarp</option>
+                    <option value="vision">Framtíðin</option>
+                </select>
                 <div className="relative">
                     <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--admin-text-muted)]" />
                     <input
@@ -139,8 +164,8 @@ export default function AdminSubscribersPage() {
                                         <td>
                                             <div className="flex gap-1">
                                                 {sub.segments.map(seg => (
-                                                    <span key={seg} className="admin-badge admin-badge-info">
-                                                        {seg}
+                                                    <span key={({ devotionals: 'Hugleiðingar', newsletter: 'Fréttabréf', tv: 'Sjónvarp', vision: 'Framtíðin' } as Record<string, string>)[seg] ?? seg} className="admin-badge admin-badge-info">
+                                                        {({ devotionals: 'Hugleiðingar', newsletter: 'Fréttabréf', tv: 'Sjónvarp', vision: 'Framtíðin' } as Record<string, string>)[seg] ?? seg}
                                                     </span>
                                                 ))}
                                             </div>

@@ -51,6 +51,7 @@ export async function POST(
     const { data: subs, error: sErr } = await sb
         .from('subscribers')
         .select('email, unsubscribe_token')
+        .overlaps('segments', ['newsletter', 'tv'])
         .not('verified_at', 'is', null)
         .not('unsubscribe_token', 'is', null);
     if (sErr) {

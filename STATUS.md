@@ -1,5 +1,58 @@
 # STATUS.md — Omega TV
 
+## 2026-09-19 — Devotional interview signup (Codex)
+
+**Focus:** Let interview viewers subscribe now; keep published readings open to everyone.
+
+- Built `/hugleidingar` with Icelandic consent-based email signup, an honest
+  pre-launch message, published-reading cards and a useful empty state.
+  `/hugleiding` is a permanent short-address redirect for on-air use.
+- Added free `/hugleidingar/[slug]` reading pages, author/scripture attribution,
+  translation explanation, draft 404s and error handling. Only rows with BOTH
+  `reviewed=true` and `status=published` can appear. No content was published.
+- Added homepage invitation, navigation/footer links and sitemap entries.
+- Fixed signup for existing subscribers: append the selected segment without
+  replacing earlier subscriptions; retry concurrent updates/duplicate inserts.
+  Added server validation and canonical devotional consent. Collect-mode is
+  retained (form opt-in, no mailbox verification email); no email is sent.
+- Devotional subscribers use `devotionals`. General newsletter sending now
+  explicitly selects `newsletter`/`tv`, so devotional-only users are excluded.
+  Admin subscribers can filter/export the devotional list; CSV cells are quoted
+  and formula-prefixed input escaped. No schema change or new dependencies.
+- Live DB read: 62 pieces, 4 reviewed, 0 published. Reviewed slugs:
+  `dagur-01-morgunn`, `dagur-01-kvold`, `dagur-02-morgunn`, `dagur-03-morgunn`.
+- Publication permission remains pending Hawk's answer: BookForge's consumer
+  handover says translation is permitted but web publication must be confirmed.
+  Signups can launch independently. Daily delivery is NOT implemented/enabled;
+  page explicitly says subscribers will hear when sending begins. Before mail
+  launch: confirm web/email rights, choose cadence/sequence, implement a sender
+  with durable delivery tracking/retries and unsubscribe, test a real delivery.
+
+**Verification:** production build PASS; TypeScript PASS; ESLint for all changed
+code PASS; 4 input tests PASS (`node --import tsx --test tests/subscription-input.test.ts`).
+Live disposable-record test PASS (consent, normalization, duplicates, concurrent
+list merging, newsletter exclusion, existing-member opt-in); mobile browser form
+saved correct segment/consent, then test records removed. No emails sent.
+390px page has no horizontal overflow; desktop visually checked. Reviewed but
+unpublished direct URL returns 404; short address returns 308.
+
+**Green-command limitation:** `npm run build` PASS; full `npm run lint` FAIL due
+to pre-existing errors outside this change. Isolated production-based checkout:
+95 errors/61 warnings; original workspace: 244 errors/3815 warnings, including
+nested `.claude/worktrees`. Do not report the full repository lint as green.
+
+**Release isolation:** live Vercel commit was verified as `f9cee175`. Release
+branch `codex/devotional-signup` at `/tmp/omega-devotional-release` starts there,
+not at this checkout's newer branch. This keeps pending staff/prayer/composer
+changes out of the devotional release. This session's same source edits remain
+in the original checkout; pre-existing CLAUDE.md/untracked work is untouched.
+Deployment verification is recorded below once complete.
+
+**For Cowork:** recommend open public readings + optional email convenience;
+start collecting now while human review continues. Never auto-publish the
+remaining translations to fill a daily schedule.
+
+
 ## 2026-08-30 — Hugleiðingar: chips, phone review, and the article-scale flywheel (Claude Code)
 
 Hawk's feedback after a week of morning use: the suggestion cards ate the laptop

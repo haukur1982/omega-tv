@@ -1,3 +1,4 @@
+import DevotionalInvitation from "@/components/home/DevotionalInvitation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroV2 from "@/components/home/HeroV2";
@@ -123,6 +124,7 @@ export default async function Home() {
             {/* ─── Dark masthead + chrome ──────────────────────────── */}
             <HeroV2 />
             <OnAirRibbon />
+            <DevotionalInvitation />
 
             {/* ─── Daily front door: "Í dag á Omega" ───────────────── */}
             <TodayOnOmega prayer={dailyPrayer} word={dailyWord} episode={episodes[0]} article={leadArticle} />

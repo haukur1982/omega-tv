@@ -1,48 +1,27 @@
 'use server';
 
 import { addSubscriber } from '@/lib/subscriber-db';
+import { parseSubscription } from '@/lib/subscription-input';
 
-/**
- * Public subscribe action — invoked from EmailSignupForm.
- *
- * List-building phase: the email is added to the list directly (the web form
- * is the opt-in). No double-opt-in email yet — the sending domain isn't set up.
- * When it is, re-enable verification + reinstate sendVerificationEmail here.
- */
-export async function subscribeAction(formData: FormData) {
-    const email = formData.get('email') as string;
-    const name = formData.get('name') as string | undefined;
-    const segment = formData.get('segment') as string | undefined;
-
-    if (!email || !email.includes('@')) {
-        return { success: false, error: 'Vinsamlegast sláðu inn gilt netfang.' };
-    }
-
-    // Consent: when a form renders a consent box (e.g. /tv), it sends `consent`
-    // + the exact `consent_text` shown. If that box is present it MUST be
-    // affirmative — never store an email when the box was rendered but not ticked.
-    // Legacy forms that don't render a box are unaffected (collect-mode opt-in).
-    const consentRaw = formData.get('consent');
-    const consentText = (formData.get('consent_text') as string) || undefined;
-    if (consentRaw !== null && consentRaw !== 'true' && consentRaw !== 'on') {
-        return { success: false, error: 'Vinsamlegast samþykktu til að halda áfram.' };
-    }
-
-    const segments = segment ? [segment] : ['newsletter'];
-    const result = await addSubscriber(email, name, segments, {
-        textVersion: consentText,
-        source: segment,
-    });
-
-    if (result.success) {
+/** Collects explicit opt-ins. No email is sent by this action. */
+export async function subscribeAction(formData: FormData): Promise<{ success: boolean; error?: string; message?: string }> {
+    const input = parseSubscription(formData);
+    if ('error' in input) return { success: false, error: input.error };
+    if (formData.get('website')) return { success: false, error: 'Ekki tókst að skrá netfangið.' };
+    try {
+        const result = await addSubscriber(input.email, input.name, [input.segment], {
+            textVersion: input.consentText,
+            source: input.segment,
+        });
+        if (!result.success) return result;
         return {
             success: true,
-            error: undefined,
-            message: result.alreadyOnList
-                ? 'Þú ert nú þegar á póstlistanum okkar — takk!'
-                : 'Takk! Þú ert komin á póstlistann. Við sendum þér fréttir af Omega.',
+            message: input.segment === 'devotionals'
+                ? 'Takk fyrir skráninguna! Við látum þig vita þegar sendingar hefjast.'
+                : 'Takk fyrir skráninguna á póstlista Omega.',
         };
+    } catch (error) {
+        console.error('Subscription failed:', error);
+        return { success: false, error: 'Ekki tókst að skrá netfangið. Reyndu aftur.' };
     }
-
-    return result;
 }

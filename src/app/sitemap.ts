@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: base, changeFrequency: 'daily', priority: 1 },
         { url: `${base}/live`, changeFrequency: 'always', priority: 0.9 },
         { url: `${base}/sermons`, changeFrequency: 'daily', priority: 0.9 },
+        { url: `${base}/hugleidingar`, changeFrequency: 'daily', priority: 0.8 },
         { url: `${base}/greinar`, changeFrequency: 'daily', priority: 0.8 },
         { url: `${base}/baenatorg`, changeFrequency: 'daily', priority: 0.7 },
         { url: `${base}/vitnisburdur`, changeFrequency: 'weekly', priority: 0.6 },
@@ -26,13 +27,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const dynamic: MetadataRoute.Sitemap = [];
     try {
         const db = supabaseAdmin as unknown as SupabaseClient;
-        const [eps, series, arts] = await Promise.all([
+        const [eps, series, arts, devotionals] = await Promise.all([
             db.from('episodes').select('bunny_video_id, published_at')
                 .not('published_at', 'is', null).order('published_at', { ascending: false }).limit(2000),
             db.from('series').select('slug'),
             db.from('articles').select('slug, published_at').not('published_at', 'is', null),
+            db.from('devotionals').select('slug').eq('reviewed', true).eq('status', 'published'),
         ]);
 
+        for (const piece of devotionals.data ?? []) {
+            dynamic.push({ url: `${base}/hugleidingar/${piece.slug}`, changeFrequency: 'monthly', priority: 0.6 });
+        }
         for (const e of (eps.data ?? []) as { bunny_video_id: string | null; published_at: string | null }[]) {
             if (e.bunny_video_id) dynamic.push({
                 url: `${base}/sermons/${e.bunny_video_id}`,

@@ -43,6 +43,7 @@ const navLinks = [
     { href: '/live', label: 'Beint' },
     { href: '/sermons', label: 'Þáttasafn' },
     { href: '/greinar', label: 'Greinar' },
+    { href: '/hugleidingar', label: 'Hugleiðingar' },
     { href: '/baenatorg', label: 'Bænatorg' },
     { href: '/about', label: 'Um okkur' },
     { href: '/give', label: 'Styrkja' },

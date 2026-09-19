@@ -17,6 +17,7 @@ const NAV_COLUMNS = [
     links: [
       // { label: 'Námskeið', href: '/namskeid' }, // Hidden until courses are ready
       { label: 'Greinar', href: '/greinar' },
+      { label: 'Hugleiðingar', href: '/hugleidingar' },
       { label: 'Ísrael', href: '/israel' },
       { label: 'Bækur', href: '/baekur' },
       { label: 'Vitnisburdur', href: '/vitnisburdur' },
@@ -153,10 +154,10 @@ export default function Footer() {
                         textDecoration: 'none',
                         transition: 'color 0.2s ease',
                       }}
-                      onMouseOver={(e: any) => {
+                      onMouseOver={(e) => {
                         e.currentTarget.style.color = 'var(--text-primary)';
                       }}
-                      onMouseOut={(e: any) => {
+                      onMouseOut={(e) => {
                         e.currentTarget.style.color = 'var(--text-muted)';
                       }}
                     >
