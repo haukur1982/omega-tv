@@ -35,7 +35,21 @@ client-matrix test. Full release `npm run lint` remains FAIL: same pre-existing
 
 **Release:** prepared on `codex/devotional-signup` from the current production
 release, preserving isolation from pending staff/prayer/composer work. Live
-rollout verification follows below.
+rollout complete: `c7360ac` deployed/promoted to omega.is as
+`dpl_BmUzvDW8wDaB5dFpbM4dHJs6AWxi`
+(`omega-k24oqm3vc-haukur1982-1838s-projects.vercel.app`). Live browser signup
+accepted the simulator email and persisted the provider id; test records
+removed. Saved-but-email-failed UI verified with a local production server
+whose mail configuration was deliberately disabled; subscription was preserved,
+retry button visible, and test row removed afterward.
+
+**Interview notes requested during rollout:** added
+`docs/vidtal-omega-hugleidingar-2026-09-19.md`, Icelandic speaking prompts based
+on the reviewed first morning, third morning and first evening devotionals.
+Checked against stored English/Icelandic source. Examples/application are
+identified as suggested speaking language, not direct Wade Taylor quotations.
+Includes correct on-air invitation: first reading open, signup now, daily sends
+still in preparation.
 
 
 ## 2026-09-19 — First morning devotional published (Codex)
