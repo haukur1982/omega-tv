@@ -1,5 +1,29 @@
 # STATUS.md — Omega TV
 
+## 2026-09-20 — Real Kirkjufell hero and daily programme selection LIVE (Codex)
+
+- Hawk requires real Icelandic photography. Hero now uses Josh Levey's actual
+  Kirkjufell photograph with verified Unsplash License and visible credit;
+  provenance in docs/social/homepage-hero-photo.md. Discarded generated concept
+  never entered this checkout. New headline: “Nær Jesú. Mitt í lífinu.”
+- Homepage previously selected only Sunday/Vonarljós series and kept showing a
+  June episode while newer programmes lacked series assignments. New public
+  query and pure selector include those published entries, rotate up to 14
+  recent unique videos daily in Iceland time, and retain publication dates.
+  Query bounded to 40 candidates; no schema/cron/Bunny configuration changes.
+- Source `b12be00`, deployment `dpl_3gcJdCmyTdTS1tADzRcVttLnAjJ2`,
+  https://omega-3w30jgq9c-haukur1982-1838s-projects.vercel.app, staged/verified/
+  promoted to omega.is. Rollback `dpl_CfAhjDQ8ufnfxWeuKbQKSDv1jEVH` /
+  https://omega-czcn3gpqs-haukur1982-1838s-projects.vercel.app.
+- Builds and focused checks PASS; 24 Node tests PASS, including midnight,
+  eligibility, deduplication and empty/single-item rotation. Desktop/tablet/phone
+  browser QA PASS; live hero and featured programme verified, photo bytes match.
+  Full lint remains RED: existing 95 errors/61 warnings; existing missing-news-
+  table build warning remains. No unrelated working-branch changes copied.
+- Main working checkout retains the social growth plan. Its six-post board and
+  daily devotional delivery are unfinished; news storage/recurring review await
+  earlier approvals. No new content was published or emails/messages sent.
+
 ## 2026-09-20 — Article-specific devotional sharing LIVE (Codex)
 
 - Fixed the devotional detail route inheriting generic homepage social metadata.
