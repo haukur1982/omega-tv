@@ -1,5 +1,29 @@
 # STATUS.md — Omega TV
 
+## 2026-09-19 — Refined reading and email design LIVE (Codex)
+
+- Final source `34efaaa`, deployment `dpl_3ytjCQVTNdB2SHKvSQtJpDwiHoqN`
+  (`omega-4mi8eewz0-haukur1982-1838s-projects.vercel.app`) promoted to omega.is.
+  Initial rollout `dpl_4fn2TThSs4FTft3ZJCVzjwqpmnci` followed by a one-class
+  tablet navigation alignment correction. Prior stable rollback deployment:
+  `dpl_BmUzvDW8wDaB5dFpbM4dHJs6AWxi`.
+- Final public page preserves all 25 reviewed paragraphs verbatim and in order;
+  logo bytes match the reviewed PNG; unpublished first-evening reading is 404.
+  Desktop, phone (390px), and final live 759px layout verified. Text enlarged to
+  28px without horizontal overflow. All changes remain restricted to devotionals.
+- Live unsubscribe integration PASS using one disposable unverified .invalid
+  record: GET preserves it, topic-only removal preserves newsletter membership,
+  repeat safe, final-topic and explicit all-list removal work. Fixture cleaned.
+  Preview endpoints required Vercel authentication; used the existing CLI login
+  for read-only staged checks, without weakening deployment protection.
+- Builds and TypeScript PASS, 18 tests PASS, focused lint and diff check PASS.
+  Full release lint remains FAIL: 95 pre-existing errors / 61 warnings; working
+  branch has 241 errors / 3815 warnings including unrelated/nested worktrees.
+  Existing missing `news_items` build warning remains.
+- No email sent, campaign enabled, additional reading published, dependency or
+  schema changed. Daily delivery remains OFF; next service gates in the review
+  document. Email logo/format changes have browser checks, not an inbox matrix.
+
 ## 2026-09-19 — Email and public reading refinement, release prepared (Codex)
 
 - Hawk approved the devotional email and asked to make the web reading equally
