@@ -19,4 +19,3 @@ export const DEVOTIONAL_ATTRIBUTION = {
     moreHref: '/hugleidingar/thydingin',
     moreLabel: 'Um þýðinguna',
 } as const;
-
