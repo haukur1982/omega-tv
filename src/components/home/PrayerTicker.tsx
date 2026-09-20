@@ -1,46 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
-/**
- * PrayerTicker — single rotating line under the OnAirRibbon.
- *
- * "Á Bænatorgi núna" kicker with a quiet pulsing amber dot (the
- * "single candle" motion rule — prayer is alive on this site).
- * Rotates through recent broadcast prayers every 4.2s. Reads as
- * "the place is alive" without being a full content shelf.
- *
- * Data comes from /api/broadcast-prayers or is passed in from the
- * server; this component just handles rotation. Falls back to a
- * handful of placeholder strings if empty so the section doesn't
- * show blank when the DB has no recent prayers.
- */
+/** Public prayer excerpts only; an empty list becomes an invitation, never sample activity. */
 
 interface Props {
     lines: string[];
     register?: 'dark' | 'cream';
 }
 
-const FALLBACK: string[] = [
-    'Systir í Hafnarfirði biður fyrir föður sínum.',
-    'Einhver biður fyrir ungu fólki á Íslandi.',
-    'Nafnlaus biður um frið á heimili sínu.',
-    'Bróðir biður fyrir vinnufélaga sem missti móður sína.',
-    'Nafnlaus þakkar fyrir bænasvar — „drottinn heyrði".',
-    'Systir í Reykjavík biður fyrir Ísrael.',
-    'Einhver biður fyrir heilsu móður sinnar.',
-];
-
 export default function PrayerTicker({ lines, register = 'dark' }: Props) {
-    const items = lines.length > 0 ? lines : FALLBACK;
+    const items = lines.filter(line => line.trim());
     const [i, setI] = useState(0);
-
-    useEffect(() => {
-        if (items.length <= 1) return;
-        const id = setInterval(() => setI((x) => (x + 1) % items.length), 4200);
-        return () => clearInterval(id);
-    }, [items.length]);
+    const line = items.length ? items[i % items.length] : 'Hvað liggur þér á hjarta? Við viljum biðja með þér.';
 
     const isCream = register === 'cream';
     const tokens = isCream
@@ -73,7 +46,8 @@ export default function PrayerTicker({ lines, register = 'dark' }: Props) {
                     padding: '22px var(--rail-padding)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '28px',
+                    gap: '16px 28px',
+                    flexWrap: 'wrap',
                 }}
             >
                 <div
@@ -85,7 +59,6 @@ export default function PrayerTicker({ lines, register = 'dark' }: Props) {
                     }}
                 >
                     <span
-                        className="candle-breathe"
                         aria-hidden
                         style={{
                             width: '6px',
@@ -105,21 +78,20 @@ export default function PrayerTicker({ lines, register = 'dark' }: Props) {
                             color: tokens.kickerColor,
                         }}
                     >
-                        Á Bænatorgi núna
+                        {items.length ? 'Af bænatorginu' : 'Bænatorg'}
                     </span>
                 </div>
                 <div
                     style={{
-                        flex: 1,
+                        flex: '1 1 260px',
                         minWidth: 0,
                         overflow: 'hidden',
-                        borderLeft: `1px solid ${tokens.border}`,
-                        paddingLeft: '28px',
+                        minHeight: '26px',
                     }}
                 >
                     <div
                         key={i}
-                        className="ticker-in"
+                        aria-live="polite"
                         style={{
                             fontFamily: 'var(--font-serif)',
                             fontStyle: 'italic',
@@ -127,17 +99,22 @@ export default function PrayerTicker({ lines, register = 'dark' }: Props) {
                             color: tokens.lineColor,
                             lineHeight: 1.4,
                             letterSpacing: '-0.005em',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
+                            overflowWrap: 'anywhere',
                         }}
                     >
-                        {items[i]}
+                        {line}
                     </div>
                 </div>
+                {items.length > 1 && (
+                    <button type="button" onClick={() => setI(x => (x + 1) % items.length)}
+                        className="min-h-11 text-sm underline underline-offset-4" style={{ color: tokens.ctaColor }}>
+                        Næsta bæn
+                    </button>
+                )}
                 <Link
                     href="/baenatorg"
                     style={{
+                        minHeight: '44px',
                         color: tokens.ctaColor,
                         textDecoration: 'none',
                         fontFamily: 'var(--font-sans)',
@@ -154,15 +131,6 @@ export default function PrayerTicker({ lines, register = 'dark' }: Props) {
                     Bæn á torgið →
                 </Link>
             </div>
-            <style jsx>{`
-                .ticker-in {
-                    animation: ticker-in 420ms ease;
-                }
-                @keyframes ticker-in {
-                    from { opacity: 0; transform: translateY(6px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-            `}</style>
         </section>
     );
 }

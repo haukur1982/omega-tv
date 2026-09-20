@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { featuredPrayerLabel } from '@/lib/home-content';
 
 /**
  * BaenDagsins — "Prayer of the day" — the contemplative center of
@@ -13,11 +14,11 @@ import Link from "next/link";
  * keeps everything as one moment. Drop cap is smaller and integrated
  * into the body as a textural marker, not a logo.
  *
- * TODO: wire to a `featured_prayers` table so this rotates daily.
  */
 
 export interface DailyPrayer {
     date: string;
+    featureDate?: string;
     body: string;
     scripture: string | null;
     author: string;
@@ -70,9 +71,6 @@ export default function BaenDagsins({ register = 'dark', prayer }: Props) {
             divider: 'var(--border)',
         };
 
-    const firstLetter = p.body.charAt(0);
-    const restOfBody = p.body.slice(1);
-
     return (
         <section
             style={{
@@ -121,7 +119,7 @@ export default function BaenDagsins({ register = 'dark', prayer }: Props) {
                         marginBottom: 'clamp(28px, 4vw, 40px)',
                     }}
                 >
-                    Bæn dagsins
+                    {featuredPrayerLabel(p.featureDate)}
                     {p.date && (
                         <>
                             <span style={{ color: tokens.metaSecondaryColor, opacity: 0.6, padding: '0 10px' }}>·</span>
@@ -137,6 +135,7 @@ export default function BaenDagsins({ register = 'dark', prayer }: Props) {
                     line-heights so it integrates into the paragraph flow
                     rather than dominating it. */}
                 <p
+                    className="home-prayer-body"
                     style={{
                         margin: 0,
                         fontFamily: 'var(--font-serif)',
@@ -149,25 +148,7 @@ export default function BaenDagsins({ register = 'dark', prayer }: Props) {
                         textAlign: 'left',
                     }}
                 >
-                    <span
-                        aria-hidden
-                        style={{
-                            float: 'left',
-                            fontFamily: 'var(--font-serif)',
-                            fontStyle: 'normal',
-                            fontSize: 'clamp(46px, 5vw, 62px)',
-                            lineHeight: 0.85,
-                            fontWeight: 400,
-                            color: tokens.dropCapColor,
-                            opacity: 0.85,
-                            marginRight: '12px',
-                            marginTop: '4px',
-                            letterSpacing: '-0.02em',
-                        }}
-                    >
-                        {firstLetter}
-                    </span>
-                    {restOfBody}
+                    {p.body}
                 </p>
 
                 {/* Hairline divider before the meta line */}
@@ -243,6 +224,18 @@ export default function BaenDagsins({ register = 'dark', prayer }: Props) {
                     </Link>
                 </div>
             </div>
+            <style>{`
+                .home-prayer-body::first-letter {
+                    float: left;
+                    font-style: normal;
+                    font-size: clamp(46px, 5vw, 62px);
+                    line-height: 0.85;
+                    font-weight: 400;
+                    color: ${tokens.dropCapColor};
+                    margin: 4px 12px 0 0;
+                    letter-spacing: -0.02em;
+                }
+            `}</style>
         </section>
     );
 }

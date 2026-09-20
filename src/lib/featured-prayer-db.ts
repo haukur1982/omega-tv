@@ -19,6 +19,7 @@ const sba = supabaseAdmin as any;
 
 export interface FeaturedPrayer {
     date: string;        // formatted Icelandic, e.g. "27. júní 2026"
+    featureDate: string; // UTC publication date for truthful homepage labels
     body: string;
     scripture: string | null;
     author: string;
@@ -51,28 +52,22 @@ function formatIsDate(ymd: string): string {
 
 const SELECT = 'feature_date, body, scripture, author';
 
-/** Today's prayer for the homepage. Falls back to the most recent past one,
- *  then the earliest future one, so the slot always has something to show. */
+/** Latest prayer due for publication. Never expose a future scheduled prayer. */
 export async function getFeaturedPrayer(): Promise<FeaturedPrayer | null> {
     const today = todayISO();
 
-    const exact = await sb.from('featured_prayers').select(SELECT).eq('feature_date', today).maybeSingle();
-    let row = exact.data as FeaturedPrayerRow | null;
-
-    if (!row) {
-        const past = await sb.from('featured_prayers').select(SELECT)
-            .lte('feature_date', today).order('feature_date', { ascending: false }).limit(1).maybeSingle();
-        row = past.data as FeaturedPrayerRow | null;
+    const { data, error } = await sb.from('featured_prayers').select(SELECT)
+        .lte('feature_date', today).order('feature_date', { ascending: false }).limit(1).maybeSingle();
+    if (error) {
+        console.error('Failed to fetch featured prayer:', error);
+        return null;
     }
-    if (!row) {
-        const future = await sb.from('featured_prayers').select(SELECT)
-            .order('feature_date', { ascending: true }).limit(1).maybeSingle();
-        row = future.data as FeaturedPrayerRow | null;
-    }
+    const row = data as FeaturedPrayerRow | null;
     if (!row) return null;
 
     return {
         date: formatIsDate(row.feature_date),
+        featureDate: row.feature_date,
         body: row.body,
         scripture: row.scripture,
         author: row.author,

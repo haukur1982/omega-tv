@@ -1,11 +1,10 @@
-import DevotionalInvitation from "@/components/home/DevotionalInvitation";
+import HomeDevotional from "@/components/home/HomeDevotional";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import HeroV2 from "@/components/home/HeroV2";
 import OnAirRibbon from "@/components/home/OnAirRibbon";
 import PrayerTicker from "@/components/home/PrayerTicker";
 import BaenDagsins from "@/components/home/BaenDagsins";
-import TodayOnOmega from "@/components/home/TodayOnOmega";
 import UrDagskranni from "@/components/home/UrDagskranni";
 import PullQuote from "@/components/home/PullQuote";
 import IsraelTeaser from "@/components/home/IsraelTeaser";
@@ -16,10 +15,10 @@ import FeaturedSunday from "@/components/sermon/FeaturedSunday";
 import { getAllArticles } from "@/lib/articles-db";
 import { getRecentBroadcastPrayers } from "@/lib/sanctuary-db";
 import { getFeaturedPrayer } from "@/lib/featured-prayer-db";
-import { getDailyWord } from "@/lib/daily-word-db";
+import { listPublishedDevotionals } from "@/lib/devotional-db";
+import { selectHomeDevotional } from "@/lib/home-content";
 import { getLatestEpisodeBySeriesSlug, getNewestEpisodes } from "@/lib/vod-db";
 import { resolvePoster } from "@/lib/poster";
-import { MOCK_SUNDAY_FEATURED } from "@/lib/mock-series";
 
 /**
  * Heim — homepage.
@@ -32,9 +31,9 @@ import { MOCK_SUNDAY_FEATURED } from "@/lib/mock-series";
  *   1. HeroV2        — full-bleed broadcast grandeur, static Omega
  *                      brand headline "Við biðjum fyrir Íslandi…"
  *   2. OnAirRibbon   — quiet row showing current or next broadcast
- *   3. PrayerTicker  — single rotating line from recent prayers
- *   4. BaenDagsins   — pastor-authored prayer of the day
- *   5. UrDagskranni  — three recent episodes
+ *   3. HomeDevotional — a published reading and optional email signup
+ *   4. PrayerTicker / FeaturedSunday / UrDagskranni — real community and TV content
+ *   5. BaenDagsins   — the latest available prayer, dated honestly
  *   6. PullQuote     — single editorial moment from the newest article
  *   7. StyrkjaBand   — the donation ask, once, on its own terms
  *   8. Legacy34Years — "since 1992" anchor (the audience that's been
@@ -48,13 +47,6 @@ import { MOCK_SUNDAY_FEATURED } from "@/lib/mock-series";
 
 export const revalidate = 60;
 
-// Mock fallback so the page is never empty in dev before real data lands.
-const MOCK_VIDEOS = [
-    { id: 'v1', title: 'Trúin sem sigrar', speaker: 'Í Snertingu', duration: '28', thumbnail: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=960&h=600&fit=crop' },
-    { id: 'v2', title: 'Kraftur bænarinnar', speaker: 'Bænakvöld', duration: '25', thumbnail: 'https://images.unsplash.com/photo-1507692049790-de58290a4334?w=960&h=600&fit=crop' },
-    { id: 'v3', title: 'Framtíð miðlunar', speaker: 'Sunnudagssamkoma', duration: '65', thumbnail: 'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=960&h=600&fit=crop' },
-];
-
 type LatestArticle = {
     slug?: string;
     title: string;
@@ -67,7 +59,7 @@ type LatestArticle = {
 
 export default async function Home() {
     // Parallel data fetch
-    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal, dailyPrayer, dailyWord] = await Promise.all([
+    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal, dailyPrayer, devotionals] = await Promise.all([
         getNewestEpisodes(3).catch(() => []),
         getAllArticles().catch(() => [] as LatestArticle[]),
         getRecentBroadcastPrayers(7).catch(() => []),
@@ -75,35 +67,28 @@ export default async function Home() {
         // No real Sunday service yet → feature Omega's own flagship teaching.
         getLatestEpisodeBySeriesSlug('vonarljos').catch(() => null),
         getFeaturedPrayer().catch(() => null),
-        getDailyWord().catch(() => null),
+        listPublishedDevotionals().then(pieces => ({ pieces, unavailable: false })).catch(error => {
+            console.error('Homepage devotional unavailable:', error);
+            return { pieces: [], unavailable: true };
+        }),
     ]);
 
-    // Prefer a real Sunnudagssamkoma; else feature the real Vonarljós teaching;
-    // only fall back to mock if NO real content exists at all.
+    // Feature real programmes without implying that an archive episode is new this week.
     const featured = sundayReal ?? omegaFeatureReal;
-    const sundayFeatured = featured ?? MOCK_SUNDAY_FEATURED;
-    const featuredKicker = sundayReal ? 'Sunnudagssamkoma vikunnar' : 'Þáttur vikunnar';
+    const featuredKicker = sundayReal ? 'Sunnudagssamkoma' : 'Úr safni Omega';
+    const devotional = selectHomeDevotional(devotionals.pieces);
 
     // Pull from the curated episode catalog (real titles, series, scripture,
     // descriptions — the Azotus-generated metadata), NOT the raw Bunny library
     // whose "titles" are just filenames like "Omega TV 22". resolvePoster gives
     // clean key art (branded variant → thumbnail_custom → caption-cropped frame).
-    const episodes = latestEpisodes.length > 0
-        ? latestEpisodes.slice(0, 3).map((e) => ({
+    const episodes = latestEpisodes.slice(0, 3).map((e) => ({
             id: e.bunny_video_id,
             title: e.title,
             description: e.description,
             speaker: e.series_title,
             durationMin: e.duration ? Math.floor(e.duration / 60).toString() : '',
             thumbnail: resolvePoster(e, 'portrait_4x5') ?? `/api/bunny/thumbnail/${e.bunny_video_id}`,
-        }))
-        : MOCK_VIDEOS.map((v) => ({
-            id: v.id,
-            title: v.title,
-            description: null,
-            speaker: v.speaker,
-            durationMin: v.duration,
-            thumbnail: v.thumbnail,
         }));
 
     const latestArticles = (latestArticlesRaw as LatestArticle[]) ?? [];
@@ -122,23 +107,21 @@ export default async function Home() {
             <Navbar />
 
             {/* ─── Dark masthead + chrome ──────────────────────────── */}
-            <HeroV2 />
+            <HeroV2 readingHref={devotional ? `/hugleidingar/${devotional.slug}` : '/hugleidingar#lesa'} />
             <OnAirRibbon />
-            <DevotionalInvitation />
-
-            {/* ─── Daily front door: "Í dag á Omega" ───────────────── */}
-            <TodayOnOmega prayer={dailyPrayer} word={dailyWord} episode={episodes[0]} article={leadArticle} />
+            <HomeDevotional piece={devotional} unavailable={devotionals.unavailable} />
 
             {/* ─── Cream sanctuary ─────────────────────────────────── */}
             <PrayerTicker lines={tickerLines} register="cream" />
-            <FeaturedSunday
-                series={sundayFeatured.series}
-                episode={sundayFeatured.episode}
+            {featured && <FeaturedSunday
+                series={featured.series}
+                episode={featured.episode}
                 kicker={featuredKicker}
                 ctaAccent="ghost"
-            />
+                compactDescription
+            />}
             <UrDagskranni episodes={episodes} register="cream" />
-            <BaenDagsins register="cream" prayer={dailyPrayer ?? undefined} />
+            {dailyPrayer && <BaenDagsins register="cream" prayer={dailyPrayer} />}
             {leadArticle && <PullQuote article={leadArticle} register="pergament" />}
 
             {/* ─── Dark closing anchor ─────────────────────────────── */}

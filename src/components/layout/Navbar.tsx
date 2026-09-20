@@ -12,8 +12,7 @@ import { OmegaWordmark } from '@/components/brand/OmegaWordmark';
    Design notes (see plans/twinkling-mapping-pizza.md §3.5, §6):
    - Transparent over hero; warm-dark on scroll.
    - No pill CTA button that duplicates the hero's action.
-   - Right-hand slot is reserved for state-aware live status:
-     off-air = muted "Næsta sending" link; on-air = warm Live Badge.
+   - Right-hand slot links to the schedule; the homepage ribbon shows live status.
    - Wordmark only in cream; Ω as typographic mark, not a blue disc.
    - Active route underline in nordurljos (wayfinding only — amber is
      reserved for primary CTAs per the Altingi palette rules).
@@ -88,6 +87,18 @@ export default function Navbar({
         return () => { document.body.style.overflow = ''; };
     }, [isMobileMenuOpen]);
 
+    useEffect(() => {
+        const desktop = window.matchMedia('(min-width: 1280px)');
+        const closeOnDesktop = () => { if (desktop.matches) setIsMobileMenuOpen(false); };
+        const closeOnEscape = (event: KeyboardEvent) => { if (event.key === 'Escape') setIsMobileMenuOpen(false); };
+        desktop.addEventListener('change', closeOnDesktop);
+        window.addEventListener('keydown', closeOnEscape);
+        return () => {
+            desktop.removeEventListener('change', closeOnDesktop);
+            window.removeEventListener('keydown', closeOnEscape);
+        };
+    }, []);
+
     return (
         <>
             <motion.nav
@@ -153,7 +164,7 @@ export default function Navbar({
                     </Link>
 
                     {/* ── Desktop nav ───────────────────────────────────── */}
-                    <div className="hidden md:flex" style={{ alignItems: 'center', gap: 'clamp(1rem, 1.8vw, 1.75rem)' }}>
+                    <div className="hidden xl:flex" style={{ alignItems: 'center', gap: 'clamp(1rem, 1.8vw, 1.75rem)' }}>
                         {links.map(link => {
                             const active = isActive(pathname, link.href);
                             return (
@@ -193,11 +204,10 @@ export default function Navbar({
 
                     {/* ── Right: live status + search (+ mobile menu) ───── */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        {/* Off-air schedule teaser (desktop only).
-                            Phase 4 will swap this for a stateful Live Badge when on-air. */}
+                        {/* Schedule link; do not imply off-air status without schedule data. */}
                         <Link
                             href="/live"
-                            className="hidden md:inline-flex type-merki"
+                            className="hidden xl:inline-flex type-merki"
                             style={{
                                 alignItems: 'center',
                                 gap: '8px',
@@ -221,7 +231,7 @@ export default function Navbar({
                                     display: 'inline-block',
                                 }}
                             />
-                            Næsta sending
+                            Dagskrá og beint
                         </Link>
 
                         <Link
@@ -241,10 +251,9 @@ export default function Navbar({
                         </Link>
 
                         <button
-                            className="md:hidden"
+                            className="flex xl:hidden"
                             onClick={() => setIsMobileMenuOpen(true)}
                             style={{
-                                display: 'flex',
                                 alignItems: 'center',
                                 padding: '8px',
                                 color: cText,
@@ -270,13 +279,12 @@ export default function Navbar({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.25 }}
-                        className="md:hidden"
+                        className="flex xl:hidden"
                         style={{
                             position: 'fixed',
                             inset: 0,
                             zIndex: 60,
                             background: 'var(--nott)',
-                            display: 'flex',
                             flexDirection: 'column',
                             padding: 'clamp(1.5rem, 4vw, 2rem)',
                         }}

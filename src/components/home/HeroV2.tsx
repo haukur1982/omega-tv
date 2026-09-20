@@ -16,16 +16,16 @@ import Link from "next/link";
  *   - Fraunces display headline with italic Newsreader color-swap
  *     on "á hverjum degi." — the one amber typographic moment
  *   - Italic subtitle in Newsreader
- *   - Two CTAs: amber "Horfa beint" + ghost "Sjá dagskrá"
+ *   - Two CTAs: live television and an open devotional
  */
 
-export default function HeroV2() {
+export default function HeroV2({ readingHref = '/hugleidingar#lesa' }: { readingHref?: string }) {
     return (
         <section
             style={{
                 position: 'relative',
                 width: '100%',
-                minHeight: 'min(94vh, 880px)',
+                minHeight: 'min(82svh, 760px)',
                 overflow: 'hidden',
                 background: 'var(--nott)',
             }}
@@ -79,8 +79,8 @@ export default function HeroV2() {
                     zIndex: 2,
                     maxWidth: '80rem',
                     margin: '0 auto',
-                    padding: 'clamp(160px, 18vw, 200px) var(--rail-padding) clamp(80px, 10vw, 120px)',
-                    minHeight: 'min(94vh, 880px)',
+                    padding: 'clamp(132px, 14vw, 176px) var(--rail-padding) clamp(56px, 7vw, 88px)',
+                    minHeight: 'min(82svh, 760px)',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'flex-end',
@@ -189,7 +189,7 @@ export default function HeroV2() {
                         Horfa í beinni
                     </Link>
                     <Link
-                        href="#dagskra"
+                        href={readingHref}
                         className="ghost-btn"
                         style={{
                             padding: '18px 26px',
@@ -205,7 +205,7 @@ export default function HeroV2() {
                             textDecoration: 'none',
                         }}
                     >
-                        Sjá dagskrá
+                        Lesa hugleiðingu
                     </Link>
                 </div>
             </div>

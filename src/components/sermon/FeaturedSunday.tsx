@@ -31,9 +31,10 @@ interface Props {
     ctaAccent?: 'primary' | 'ghost';
     /** Eyebrow label above the title. Defaults to the Sunday-service label. */
     kicker?: string;
+    compactDescription?: boolean;
 }
 
-export default function FeaturedSunday({ series, episode, ctaAccent = 'primary', kicker = 'Sunnudagssamkoma vikunnar' }: Props) {
+export default function FeaturedSunday({ series, episode, ctaAccent = 'primary', kicker = 'Sunnudagssamkoma vikunnar', compactDescription = false }: Props) {
     const date = episode.published_at
         ? new Date(episode.published_at).toLocaleDateString('is-IS', {
             weekday: 'long',
@@ -155,6 +156,7 @@ export default function FeaturedSunday({ series, episode, ctaAccent = 'primary',
 
                         {episode.description && (
                             <p
+                                className={compactDescription ? 'line-clamp-4' : undefined}
                                 style={{
                                     margin: '20px 0 0',
                                     fontFamily: 'var(--font-serif)',
