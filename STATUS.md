@@ -1,5 +1,62 @@
 # STATUS.md — Omega TV
 
+## 2026-09-19 — Homepage reading invitation and honest freshness LIVE (Codex)
+
+- Hawk asked for a homepage review/improvements and ideas for repeat visits,
+  including Israel and Christian news. Kept the warm Icelandic visual identity.
+  Replaced the generic devotional promotion and five equal cards with a real
+  published reading preview and the existing optional devotional signup form.
+  First reading is still `dagur-01-morgunn` / “Að leita hærra”; reviewed wording
+  unchanged. Header CTA opens the reading directly; hero is less tall.
+- Homepage selection only accepts reviewed, published, nonempty pieces. It
+  prefers the current Icelandic calendar day (morning first), then the closest
+  published day in the monthly cycle. This does not publish or send anything.
+- Removed invented prayer activity and mock video fallback links. Empty prayer
+  lists invite participation; real excerpts advance only on a reader's click.
+  Old prayer uses “Sameinumst í bæn” with its original date; only today's dated
+  prayer says “Bæn dagsins.” Future scheduled prayers are never a fallback.
+  Archive teaching says “Úr safni Omega”; description is shortened visually.
+- Fixed the prayer's screen-reader text by moving the drop cap into CSS.
+  Tablet QA found the full navigation clipped at 768px; desktop navigation now
+  begins at 1280px. Menu remains available below that, closes with Escape or
+  on desktop resize, and no longer appears redundantly on desktop. Replaced
+  the static “Næsta sending” status claim with the utility “Dagskrá og beint.”
+- Wrote `docs/homepage-and-news-review.md`: recommend an achievable devotional
+  rhythm, weekly “Vikan með Omega,” roughly three reviewed news briefs a week,
+  and Icelandic testimonies alongside Israel and wider Christian coverage.
+  Sources checked: CBN Israel, ALL ISRAEL NEWS, Latin Patriarchate of Jerusalem.
+  Optional scope question unanswered; wider mix remains a recommendation.
+- Working-branch source commit `1e96bd5`; isolated release source `b6cc644`
+  on `codex/devotional-signup` in `/tmp/omega-devotional-release`. Deployed
+  `dpl_asepmBDQtqo9bTsM4Q7eNqvEVcgK` / `omega-m3zsyujm4-haukur1982-1838s-projects.vercel.app`
+  and promoted to omega.is. Rollback: `dpl_3ytjCQVTNdB2SHKvSQtJpDwiHoqN`.
+  Only selected files copied into the production-based checkout. Unrelated
+  staff/prayer/composer work and existing CLAUDE.md changes left untouched.
+
+**Verification:** working and isolated production builds PASS (network access
+needed for Google Fonts); final Vercel build PASS; TypeScript and changed-file
+ESLint PASS; 21 tests PASS including three homepage publication/date cases;
+diff check PASS. Local browser QA at 1280/768/390px, including menu open/resize,
+required email/consent validation and actual reading navigation. No horizontal
+overflow. Authenticated staged HTTP checks: homepage 200, published reading
+200, unpublished first-evening reading 404. Staged and final public HTML checks
+PASS for real reading, consent requirements, honest labels, complete prayer
+text and absence of mock links. Final public desktop/390px visual checks PASS.
+Full lint remains RED, unchanged baselines: root 241 errors/3815 warnings;
+release 95 errors/61 warnings. Existing missing `news_items` build warning.
+
+**Remaining:** news pages/admin exist but their production table is missing;
+news publishing needs a separately authorized schema change and review of
+publication/scheduling controls. No news or automation launched. Daily
+newsletter delivery/retries and reviewed buffer remain unfinished (see prior
+entry and newsletter review). No email sent or subscriber data changed here.
+Production-based branch is substantially ahead of origin/main from earlier
+work; do not merge that unrelated history as part of this homepage task.
+
+**Architect note:** use truthful invitations for empty community sections;
+never fill production with invented prayers, answered prayers or viewers.
+This pattern is worth carrying across the ministry sites.
+
 ## 2026-09-19 — Refined reading and email design LIVE (Codex)
 
 - Final source `34efaaa`, deployment `dpl_3ytjCQVTNdB2SHKvSQtJpDwiHoqN`
