@@ -29,7 +29,7 @@ export default async function DevotionalPage({ params }: { params: Promise<{ slu
     return (
         <main className="min-h-screen bg-[#eeeae3] pt-24 text-[#302b25] sm:pt-28">
             <Navbar tone="light" />
-            <div className="mx-auto max-w-[760px] px-6 pb-4 sm:px-0">
+            <div className="mx-auto max-w-[760px] px-6 pb-4 sm:px-16">
                 <Link href="/hugleidingar#lesa" className="inline-flex min-h-11 items-center text-sm text-[#31577f] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#416b97]">← Allar hugleiðingar</Link>
             </div>
             <article aria-labelledby="devotional-title" className="mx-auto max-w-[760px] border-t-[3px] border-[#416b97] bg-[#fffdf8] px-6 py-10 sm:px-16 sm:py-14">
