@@ -15,10 +15,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const { slug } = await params;
     const piece = await getPiece(slug);
     if (!piece) return { title: 'Hugleiðing fannst ekki', robots: { index: false } };
+    const description = piece.body_is.find(p => p.trim())?.slice(0, 160);
+    const url = `https://omega.is/hugleidingar/${piece.slug}`;
+    const image = piece.slug === 'dagur-01-morgunn'
+        ? '/social/hugleiding-dagur-01-morgunn.png'
+        : '/og-default.png';
     return {
         title: piece.title_is,
-        description: piece.body_is.find(p => p.trim())?.slice(0, 160),
+        description,
         alternates: { canonical: `/hugleidingar/${piece.slug}` },
+        openGraph: {
+            title: `${piece.title_is} · Omega`, description, url,
+            siteName: 'Omega', locale: 'is_IS', type: 'article',
+            images: [{ url: image, width: 1200, height: 630, alt: piece.slug === 'dagur-01-morgunn' ? 'Að leita hærra · Wade E. Taylor · Hugleiðing á íslensku' : 'Omega' }],
+        },
+        twitter: { card: 'summary_large_image', title: piece.title_is, description, images: [image] },
     };
 }
 
