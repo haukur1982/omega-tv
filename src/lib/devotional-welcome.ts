@@ -45,7 +45,11 @@ export async function sendDevotionalWelcome(email: string): Promise<WelcomeStatu
                 const key = process.env.RESEND_API_KEY;
                 const from = process.env.RESEND_FROM_EMAIL;
                 if (!key || !from) throw new Error('Welcome email sender is not configured');
-                const { subject, html, text, unsubscribeUrl } = devotionalWelcomeTemplate(subscriber.unsubscribe_token);
+                const first = await db.from('devotionals').select('slug,title_is,body_is')
+                    .eq('reviewed', true).eq('status', 'published').order('day').order('slot', { ascending: false }).limit(1).maybeSingle();
+                // A temporary content failure must not prevent the signup receipt.
+                if (first.error) console.error('Welcome reading unavailable:', first.error.code);
+                const { subject, html, text, unsubscribeUrl } = devotionalWelcomeTemplate(subscriber.unsubscribe_token, first.data ?? undefined);
                 const result = await new Resend(key).emails.send({
                     from, to: subscriber.email, replyTo: process.env.EMAIL_REPLY_TO || undefined,
                     subject, html, text,

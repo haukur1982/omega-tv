@@ -1,5 +1,27 @@
 # STATUS.md — Omega TV
 
+## 2026-09-19 — Email and public reading refinement, release prepared (Codex)
+
+- Hawk approved the devotional email and asked to make the web reading equally
+  good. Cream reading paper, Georgia type, generous paragraph spacing, distinct
+  Scripture quotations/references, 18-28px text controls (22px default), sharing,
+  and a clearly separate Omega reflection invitation. Light navigation retains
+  contrast; site footer retains its dark surface. All 25 reviewed paragraphs
+  render verbatim and in order; no devotional content or publication changed.
+- Official Omega email wordmark uses a crisp PNG; the tagline is now readable
+  14px live text. Asset and both templates ship together. Welcome optionally
+  offers the first published reading; existing subscribers are not resent mail.
+- Includes the previously tested unsubscribe correction required by scoped
+  devotional links: read-only GET, confirmation/one-click POST, preserve other
+  subscriptions under concurrent updates. No schema changes or new dependencies.
+- Selected files only, based on the confirmed live deployment
+  `dpl_BmUzvDW8wDaB5dFpbM4dHJs6AWxi`. Unrelated staff/prayer/composer work excluded.
+- Verification: local and isolated production builds PASS (known missing
+  `news_items` warning); 18 tests PASS in both checkouts, changed-file lint PASS.
+  Local desktop + 390px reading and email checked; 28px font has no overflow.
+  TypeScript and full lint results are recorded with final deployment below.
+- Daily devotional sending remains OFF. No campaign, backfill or new test email.
+
 ## 2026-09-19 — Immediate devotional confirmation emails (Codex)
 
 - Fixed the gap Hawk reported: signup previously saved the address but sent no
