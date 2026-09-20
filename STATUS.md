@@ -1,5 +1,28 @@
 # STATUS.md — Omega TV
 
+## 2026-09-20 — Article-specific devotional sharing LIVE (Codex)
+
+- Fixed the devotional detail route inheriting generic homepage social metadata.
+  Open Graph/Twitter now identify the actual published reading and canonical URL.
+  Added `public/social/hugleiding-dagur-01-morgunn.png`: official Omega wordmark,
+  first reading title, paper/blue typography, 1200×630. No article-body changes.
+- Source `960e7d8`, deployment `dpl_CfAhjDQ8ufnfxWeuKbQKSDv1jEVH`,
+  https://omega-czcn3gpqs-haukur1982-1838s-projects.vercel.app. Staged with no
+  custom-domain move, checked, then promoted and verified at omega.is.
+  Rollback: `dpl_asepmBDQtqo9bTsM4Q7eNqvEVcgK` /
+  https://omega-m3zsyujm4-haukur1982-1838s-projects.vercel.app.
+- Builds PASS locally and on Vercel; changed-file ESLint PASS. Stage and live
+  crawler-UA HTTP checks PASS: article/image 200, unpublished evening 404,
+  expected OG/Twitter/canonical values, 25 paragraphs unchanged, image hash and
+  1200×630 dimensions correct. Facebook's actual cached composer not tested.
+- Full release lint remains RED at the existing 95 errors/61 warnings; existing
+  missing-news-table build warning remains. No dependencies or schema changes.
+- Main working checkout contains unposted Icelandic campaign copy, a recording
+  script, feed/Story images and source shortlist in docs/social/first-reading.
+  No Facebook posts, emails or outreach sent. News storage and recurring-review
+  approvals remain pending; no local news changes copied into this release.
+  Daily devotional delivery is still OFF.
+
 ## 2026-09-19 — Homepage reading invitation and honest freshness LIVE (Codex)
 
 - Hawk asked for a homepage review/improvements and ideas for repeat visits,
