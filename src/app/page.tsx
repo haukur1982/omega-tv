@@ -17,7 +17,9 @@ import { getRecentBroadcastPrayers } from "@/lib/sanctuary-db";
 import { getFeaturedPrayer } from "@/lib/featured-prayer-db";
 import { listPublishedDevotionals } from "@/lib/devotional-db";
 import { selectHomeDevotional } from "@/lib/home-content";
-import { getLatestEpisodeBySeriesSlug, getNewestEpisodes } from "@/lib/vod-db";
+import { getNewestEpisodes } from "@/lib/vod-db";
+import { getHomeFeatureCandidates } from "@/lib/home-feature-db";
+import { selectHomeFeature } from "@/lib/home-feature";
 import { resolvePoster } from "@/lib/poster";
 
 /**
@@ -28,8 +30,7 @@ import { resolvePoster } from "@/lib/poster";
  * with one purpose. The old Netflix-rail home is retired.
  *
  * Composition (top to bottom):
- *   1. HeroV2        — full-bleed broadcast grandeur, static Omega
- *                      brand headline "Við biðjum fyrir Íslandi…"
+ *   1. HeroV2        — an open invitation to faith in everyday life
  *   2. OnAirRibbon   — quiet row showing current or next broadcast
  *   3. HomeDevotional — a published reading and optional email signup
  *   4. PrayerTicker / FeaturedSunday / UrDagskranni — real community and TV content
@@ -59,13 +60,14 @@ type LatestArticle = {
 
 export default async function Home() {
     // Parallel data fetch
-    const [latestEpisodes, latestArticlesRaw, recentPrayers, sundayReal, omegaFeatureReal, dailyPrayer, devotionals] = await Promise.all([
+    const [latestEpisodes, latestArticlesRaw, recentPrayers, featureCandidates, dailyPrayer, devotionals] = await Promise.all([
         getNewestEpisodes(3).catch(() => []),
         getAllArticles().catch(() => [] as LatestArticle[]),
         getRecentBroadcastPrayers(7).catch(() => []),
-        getLatestEpisodeBySeriesSlug('sunnudagssamkoma').catch(() => null),
-        // No real Sunday service yet → feature Omega's own flagship teaching.
-        getLatestEpisodeBySeriesSlug('vonarljos').catch(() => null),
+        getHomeFeatureCandidates().catch(error => {
+            console.error('Homepage feature unavailable:', error);
+            return [];
+        }),
         getFeaturedPrayer().catch(() => null),
         listPublishedDevotionals().then(pieces => ({ pieces, unavailable: false })).catch(error => {
             console.error('Homepage devotional unavailable:', error);
@@ -73,9 +75,7 @@ export default async function Home() {
         }),
     ]);
 
-    // Feature real programmes without implying that an archive episode is new this week.
-    const featured = sundayReal ?? omegaFeatureReal;
-    const featuredKicker = sundayReal ? 'Sunnudagssamkoma' : 'Úr safni Omega';
+    const featured = selectHomeFeature(featureCandidates);
     const devotional = selectHomeDevotional(devotionals.pieces);
 
     // Pull from the curated episode catalog (real titles, series, scripture,
@@ -114,9 +114,9 @@ export default async function Home() {
             {/* ─── Cream sanctuary ─────────────────────────────────── */}
             <PrayerTicker lines={tickerLines} register="cream" />
             {featured && <FeaturedSunday
-                series={featured.series}
-                episode={featured.episode}
-                kicker={featuredKicker}
+                series={featured.series ?? { title: 'Omega', slug: '', host: null, description: null }}
+                episode={featured}
+                kicker="Úr safni Omega · til áhorfs í dag"
                 ctaAccent="ghost"
                 compactDescription
             />}
