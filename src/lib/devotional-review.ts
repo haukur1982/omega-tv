@@ -30,7 +30,17 @@ export interface GlossaryTerm {
     variants_is?: string[];
 }
 
-/** English Bible-version names that leaked through untranslated. */
+/**
+ * English Bible-version names appearing in the Icelandic text.
+ *
+ * This used to be treated as leakage to delete. It is usually the opposite: the
+ * author quotes a named English version because his teaching hangs on that
+ * version's wording, and naming it is honest attribution a reader deserves. But
+ * most standing verses here were re-translated from the originals, so a bare
+ * "Weymouth" after Icelandic that no longer comes from Weymouth is a label that
+ * has stopped describing the words under it. The flag now asks for a decision,
+ * not a deletion.
+ */
 const VERSION_NAMES =
     /\b(Weymouth|King James|KJV|NIV|NASB|Amplified|ESV|RSV|Young'?s|Darby|Wuest|Moffatt|Phillips|Message)\b/i;
 
@@ -83,8 +93,8 @@ export function flagParagraph(
     if (version) {
         flags.push({
             kind: 'foreign',
-            label: `Enskt heiti: ${version[0]}`,
-            hint: 'Heiti enskrar biblíuþýðingar skilaði sér óþýtt.',
+            label: `Þýðing nefnd: ${version[0]}`,
+            hint: `Höfundurinn vitnar í ${version[0]}. Ef íslenski textinn er þýddur úr frummálinu lýsir heitið ekki lengur orðunum. Skrifaðu þá „(höfundur vitnar í ${version[0]})“ eða slepptu heitinu. Standi þýðingin óbreytt úr ensku má heitið standa.`,
         });
     }
 
