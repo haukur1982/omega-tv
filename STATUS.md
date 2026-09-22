@@ -1,5 +1,28 @@
 # STATUS.md — Omega TV
 
+## 2026-09-22 — Sentence composer + flag rewording LIVE (Claude Code)
+
+Hawk asked to move the sentence composer to the live site. Carried into this
+release branch from `feat/omega-web-bridge`, nothing else:
+
+- `baebd56` sentence composer (cherry-picked; all 5 files in this branch were
+  identical to the composer's parent, so it applied without conflict).
+- Flag rewording from `80e83e2` ("Enskt heiti" → "Þýðing nefnd", hint asks for a
+  decision). The rest of that commit was already live.
+
+**Verification (observed):** Codex's 24 tests PASS (`npx tsx --test tests/*.test.ts`);
+`tsc --noEmit` PASS; ESLint on the 5 changed files PASS; production build PASS.
+Four composer files byte-identical to the verified `baebd56`. Deployed
+`dpl_G9ZPMcZPZNFXSpuYYQLXtb59mg98` to omega.is. Live checks: /, /hugleidingar,
+/hugleidingar/dagur-01-morgunn, /hugleidingar/thydingin, /admin,
+/admin/nytt-lykilord, /admin/hugleidingar/dagur-01-morgunn all 200; "Nær Jesú"
+hero and signup form present; live editor bundle contains the composer ("Taka
+allt") and the new flag label; old "Enskt heiti" label absent.
+
+**Not checked:** the composer driven in a logged-in session on production (admin
+auth; verified by bundle contents + the Sept 2 harness ledger instead). Full
+repository lint still red from existing debt. Rollback: `dpl_3gcJdCmyTdTS1tADzRcVttLnAjJ2`.
+
 ## 2026-09-20 — Real Kirkjufell hero and daily programme selection LIVE (Codex)
 
 - Hawk requires real Icelandic photography. Hero now uses Josh Levey's actual
