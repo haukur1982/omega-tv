@@ -28,7 +28,16 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'haukur1982@gmail.com')
  * ```
  */
 export async function verifyAdminSession(
-    request: Request
+    request: Request,
+    /**
+     * Which admin area the route belongs to ('samskipti', 'kerfi', ...).
+     * ACCEPTED BUT NOT ENFORCED in this release: access here is still the
+     * ADMIN_EMAILS allowlist above, so every admin route is allowlist-only
+     * regardless of section. The prayer-ministry routes already pass it so they
+     * need no edit when staff roles (feat/omega-web-bridge 7ec3351) are carried
+     * in; that change is what makes the section actually gate anything.
+     */
+    _opts?: { section?: string }
 ): Promise<{ user: any; error?: never } | { user?: never; error: NextResponse }> {
     try {
         // Extract the Authorization header (Bearer token)
