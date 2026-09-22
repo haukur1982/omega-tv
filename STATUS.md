@@ -1,5 +1,30 @@
 # STATUS.md — Omega TV
 
+## 2026-09-22 — Prayer wall (prayer ministry) LIVE (Claude Code)
+
+On Hawk's "make the prayer wall live": cherry-picked `220e2e3` (clean: every
+pre-existing file identical to its parent; 13 new files). One adaptation:
+`verifyAdminSession` now ACCEPTS a `section` argument but does not enforce it;
+admin access in this release is still the ADMIN_EMAILS allowlist. Staff roles
+(`7ec3351`) are what will make sections gate anything; not carried in.
+
+**Verification (observed):** 24/24 tests, `tsc`, production build PASS; lint on all
+changed files: 11 errors before and 11 after (pre-existing, none new). Ran the
+release build against the REAL database (migration applied 09-02, so the
+post-migration query path ran for the first time): `/baenatorg` 200, no query
+errors. Deployed `dpl_BZVPGqpNTsByM3RooeuAmyA433Ht`. On omega.is: `/baenatorg`,
+`/admin/prayers`, `/admin/prayers/utsending`, `/admin/settings` 200; `/baen` 308 →
+`/baenatorg`; popularity sort gone; Bænasvör filter present; new admin APIs 401
+without login; homepage hero, devotionals, editor still 200.
+
+**Content state:** zero approved prayers in the DB, so the wall shows its empty
+state and the "Biðja með" button (renders only when prayers exist) is not visible
+yet. Phone panel hidden until a number is saved in Stillingar.
+
+**Not checked:** Biðja-mode, producer stack and phone intake on production (need
+approved prayers / admin login); verified on the branch by harness 09-01.
+Rollback: `dpl_G9ZPMcZPZNFXSpuYYQLXtb59mg98` (composer release).
+
 ## 2026-09-22 — Sentence composer + flag rewording LIVE (Claude Code)
 
 Hawk asked to move the sentence composer to the live site. Carried into this
